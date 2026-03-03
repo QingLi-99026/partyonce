@@ -1,0 +1,49 @@
+{
+  "test_time": "2026-03-03",
+  "total_tests": 8,
+  "passed": 7,
+  "failed": 1,
+  "results": [
+    {
+      "name": "A1.\u7528\u6237\u6ce8\u518c",
+      "status": "\u2705 PASS",
+      "http_code": 200
+    },
+    {
+      "name": "A2.\u7528\u6237\u767b\u5f55",
+      "status": "\u2705 PASS",
+      "http_code": 200
+    },
+    {
+      "name": "A3.\u4f9b\u5e94\u5546\u7533\u8bf7",
+      "status": "\u2705 PASS",
+      "http_code": 200
+    },
+    {
+      "name": "A4.\u67e5\u8be2\u4f9b\u5e94\u5546",
+      "status": "\u2705 PASS",
+      "http_code": 200
+    },
+    {
+      "name": "B1.\u6a21\u677f\u5217\u8868",
+      "status": "\u2705 PASS",
+      "http_code": 200
+    },
+    {
+      "name": "B2.\u6a21\u677f\u8be6\u60c5",
+      "status": "\u2705 PASS",
+      "http_code": 200
+    },
+    {
+      "name": "C1.\u521b\u5efa\u5206\u4eab\u94fe\u63a5",
+      "status": "\ud83d\udca5 ERROR",
+      "http_code": "(pymysql.err.OperationalError)"
+    },
+    {
+      "name": "D1.\u67e5\u770b\u94b1\u5305",
+      "status": "\u2705 PASS",
+      "http_code": 200
+    }
+  ],
+  "conclusion": "PARTIAL"
+}

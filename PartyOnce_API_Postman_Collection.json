@@ -1,0 +1,364 @@
+{
+  "info": {
+    "name": "PartyOnce API - Phase 1-4",
+    "description": "PartyOnce 四个闭环验收测试集合",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔄 基础接口",
+      "item": [
+        {
+          "name": "健康检查",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            }
+          }
+        },
+        {
+          "name": "用户注册",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test{{$timestamp}}@example.com\",\n  \"password\": \"Test12\",\n  \"full_name\": \"测试用户\",\n  \"user_type\": \"business\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "用户登录",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/x-www-form-urlencoded"}],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {"key": "username", "value": "test@example.com"},
+                {"key": "password", "value": "Test12"}
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 闭环A: 供应商入驻",
+      "item": [
+        {
+          "name": "1. 提交供应商申请",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_name\": \"测试摄影工作室\",\n  \"category\": \"photo\",\n  \"contact_name\": \"张三\",\n  \"contact_phone\": \"+61 400 000 001\",\n  \"email\": \"test@example.com\",\n  \"service_area\": \"悉尼CBD, 北区\",\n  \"abn_optional\": \"12345678901\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/partners/apply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "partners", "apply"]
+            }
+          }
+        },
+        {
+          "name": "2. 获取我的供应商信息",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/partners/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "partners", "me"]
+            }
+          }
+        },
+        {
+          "name": "3. 查看合同列表",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/partner/contracts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "partner", "contracts"]
+            }
+          }
+        },
+        {
+          "name": "4. 确认签署合同",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"agree\": true}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/partner/contracts/1/accept",
+              "host": ["{{base_url}}"],
+              "path": ["api", "partner", "contracts", "1", "accept"]
+            }
+          }
+        },
+        {
+          "name": "5. 获取上传Presign URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"filename\": \"test.jpg\",\n  \"mime_type\": \"image/jpeg\",\n  \"size_bytes\": 345678,\n  \"owner_type\": \"supplier\",\n  \"visibility\": \"private\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/media/presign",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media", "presign"]
+            }
+          }
+        },
+        {
+          "name": "6. 确认上传完成",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage_key\": \"media/supplier/1/test.jpg\",\n  \"url\": \"https://cdn.partyonce.au/media/supplier/1/test.jpg\",\n  \"media_type\": \"image\",\n  \"width\": 1920,\n  \"height\": 1080,\n  \"size_bytes\": 345678\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/media/confirm",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media", "confirm"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 闭环B: 模板库与活动",
+      "item": [
+        {
+          "name": "1. 获取模板列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/templates?scene_type=wedding",
+              "host": ["{{base_url}}"],
+              "path": ["api", "templates"],
+              "query": [{"key": "scene_type", "value": "wedding"}]
+            }
+          }
+        },
+        {
+          "name": "2. 获取模板详情",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/templates/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "templates", "1"]
+            }
+          }
+        },
+        {
+          "name": "3. 获取我的活动",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/my/events",
+              "host": ["{{base_url}}"],
+              "path": ["api", "my", "events"]
+            }
+          }
+        },
+        {
+          "name": "4. 获取活动详情",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/my/events/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "my", "events", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔗 闭环C: 分享归因",
+      "item": [
+        {
+          "name": "1. 创建分享链接",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object_type\": \"template\",\n  \"object_id\": 1,\n  \"channel\": \"test\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shares",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shares"]
+            }
+          }
+        },
+        {
+          "name": "2. 访问分享落地页（自动记录click）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/s/ABC123",
+              "host": ["{{base_url}}"],
+              "path": ["s", "ABC123"]
+            }
+          }
+        },
+        {
+          "name": "3. 追踪注册事件",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_type\": \"signup\",\n  \"user_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shares/ABC123/track",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shares", "ABC123", "track"]
+            }
+          }
+        },
+        {
+          "name": "4. 追踪成交事件",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_type\": \"deposit\",\n  \"user_id\": 2,\n  \"order_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/shares/ABC123/track",
+              "host": ["{{base_url}}"],
+              "path": ["api", "shares", "ABC123", "track"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💰 闭环D: 钱包返利",
+      "item": [
+        {
+          "name": "1. 查看钱包余额",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/wallet",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wallet"]
+            }
+          }
+        },
+        {
+          "name": "2. 查看钱包流水",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/wallet/ledger",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wallet", "ledger"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👨‍💼 Admin接口",
+      "item": [
+        {
+          "name": "审核供应商列表",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/admin/partners?status=pending",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "partners"],
+              "query": [{"key": "status", "value": "pending"}]
+            }
+          }
+        },
+        {
+          "name": "审核通过",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/admin/partners/1/approve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "partners", "1", "approve"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "your-jwt-token-here",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "admin-jwt-token-here",
+      "type": "string"
+    }
+  ]
+}

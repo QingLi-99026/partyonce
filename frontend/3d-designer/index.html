@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PartyOnce - 3D 活动设计器</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Axios for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>🎉 PartyOnce</h1>
+                <span>3D 活动设计器</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="app.clearScene()">清空场景</button>
+                <button class="btn btn-primary" onclick="app.saveDesign()">保存设计</button>
+                <button class="btn btn-secondary" onclick="app.loadDesign()">加载设计</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-container">
+            <!-- Left Sidebar - Venue Selection -->
+            <aside class="sidebar sidebar-left">
+                <div class="panel">
+                    <h3>🏢 选择场地</h3>
+                    <div class="venue-selector">
+                        <label>场地类型</label>
+                        <select id="venueType" onchange="app.changeVenueType(this.value)">
+                            <option value="indoor_hall">室内宴会厅</option>
+                            <option value="outdoor_garden">户外花园</option>
+                            <option value="beach">海滩场地</option>
+                            <option value="rooftop">屋顶露台</option>
+                            <option value="warehouse">工业仓库</option>
+                        </select>
+                    </div>
+                    <div class="venue-info" id="venueInfo">
+                        <div class="info-item">
+                            <span class="label">尺寸:</span>
+                            <span class="value" id="venueSize">20m × 15m</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">容量:</span>
+                            <span class="value" id="venueCapacity">200人</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">层高:</span>
+                            <span class="value" id="venueHeight">6m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>🎨 场景设置</h3>
+                    <div class="setting-item">
+                        <label>主题颜色</label>
+                        <input type="color" id="themeColor" value="#ff6b6b" onchange="app.updateTheme(this.value)">
+                    </div>
+                    <div class="setting-item">
+                        <label>灯光强度</label>
+                        <input type="range" id="lightIntensity" min="0" max="2" step="0.1" value="1" onchange="app.updateLighting(this.value)">
+                    </div>
+                    <div class="setting-item">
+                        <label>显示网格</label>
+                        <input type="checkbox" id="showGrid" checked onchange="app.toggleGrid(this.checked)">
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 3D Canvas Area -->
+            <main class="canvas-container">
+                <div id="canvas-wrapper">
+                    <canvas id="three-canvas"></canvas>
+                    <div class="canvas-overlay">
+                        <div class="controls-hint">
+                            <span>🖱️ 左键旋转</span>
+                            <span>🖱️ 右键平移</span>
+                            <span>🖱️ 滚轮缩放</span>
+                            <span>👆 点击选择</span>
+                        </div>
+                        <div class="selection-info" id="selectionInfo" style="display: none;">
+                            <span id="selectedObjectName">未选择</span>
+                            <button onclick="app.deleteSelected()">删除</button>
+                            <button onclick="app.duplicateSelected()">复制</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar - Decorations -->
+            <aside class="sidebar sidebar-right">
+                <div class="panel">
+                    <h3>🛋️ 家具布置</h3>
+                    <div class="item-grid">
+                        <div class="item-card" draggable="true" data-type="round_table" data-category="furniture">
+                            <div class="item-icon">🪑</div>
+                            <span>圆桌</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="rect_table" data-category="furniture">
+                            <div class="item-icon">🪑</div>
+                            <span>长桌</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="chair" data-category="furniture">
+                            <div class="item-icon">💺</div>
+                            <span>椅子</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="sofa" data-category="furniture">
+                            <div class="item-icon">🛋️</div>
+                            <span>沙发</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>💡 灯光效果</h3>
+                    <div class="item-grid">
+                        <div class="item-card" draggable="true" data-type="chandelier" data-category="lighting">
+                            <div class="item-icon">💡</div>
+                            <span>吊灯</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="spotlight" data-category="lighting">
+                            <div class="item-icon">🔦</div>
+                            <span>射灯</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="led_strip" data-category="lighting">
+                            <div class="item-icon">✨</div>
+                            <span>LED灯带</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="fairy_lights" data-category="lighting">
+                            <div class="item-icon">🌟</div>
+                            <span>串灯</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>🌸 花艺装饰</h3>
+                    <div class="item-grid">
+                        <div class="item-card" draggable="true" data-type="flower_centerpiece" data-category="floral">
+                            <div class="item-icon">🌺</div>
+                            <span>桌花</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="flower_arch" data-category="floral">
+                            <div class="item-icon">🌹</div>
+                            <span>花拱门</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="potted_plant" data-category="floral">
+                            <div class="item-icon">🪴</div>
+                            <span>绿植</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="flower_wall" data-category="floral">
+                            <div class="item-icon">🌷</div>
+                            <span>花墙</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>🎭 舞台布置</h3>
+                    <div class="item-grid">
+                        <div class="item-card" draggable="true" data-type="stage" data-category="stage">
+                            <div class="item-icon">🎪</div>
+                            <span>舞台</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="backdrop" data-category="stage">
+                            <div class="item-icon">🎬</div>
+                            <span>背景板</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="screen" data-category="stage">
+                            <div class="item-icon">📺</div>
+                            <span>LED屏</span>
+                        </div>
+                        <div class="item-card" draggable="true" data-type="podium" data-category="stage">
+                            <div class="item-icon">🎤</div>
+                            <span>演讲台</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <div class="status-left">
+                <span id="objectCount">对象: 0</span>
+                <span id="budgetEstimate">预估: $0</span>
+            </div>
+            <div class="status-right">
+                <span id="connectionStatus">🟢 已连接</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Save Design Modal -->
+    <div id="saveModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>保存设计方案</h3>
+            <input type="text" id="designName" placeholder="设计名称">
+            <textarea id="designDescription" placeholder="设计描述（可选）"></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="app.closeModal('saveModal')">取消</button>
+                <button class="btn btn-primary" onclick="app.confirmSave()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Design Modal -->
+    <div id="loadModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>加载设计方案</h3>
+            <div id="designList" class="design-list">
+                <!-- Design list will be populated here -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="app.closeModal('loadModal')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
