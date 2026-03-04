@@ -19,3 +19,4 @@ bcrypt==4.0.1
 # Cloudflare R2 对象存储
 boto3>=1.34.0
 botocore>=1.34.0
+mysqlclient
