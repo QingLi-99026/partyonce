@@ -1,0 +1,18 @@
+======================================================================
+监理验收：/track API 四用例测试
+======================================================================
+
+分享者ID: 12
+分享码: 98VD5ZGC
+
+【用例A-1】匿名 click 第一次
+响应: {'message': 'Click tracked', 'event_id': 6, 'event_type': 'click', 'deduplicated': False, 'reward_amount': 0.05}
+
+【用例A-2】匿名 click 第二次（应去重）
+响应: {'message': 'Event deduplicated', 'event_type': 'click', 'deduplicated': True, 'reward_amount': 0}
+
+【用例B】匿名 signup（应401）
+HTTP: 401
+Traceback (most recent call last):
+  File "<stdin>", line 39, in <module>
+KeyError: 'id'

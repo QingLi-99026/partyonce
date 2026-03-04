@@ -8,7 +8,7 @@
       <template v-else>
         <!-- 页面头部 -->
         <div class="detail-header">
-          <el-breadcrumb separator="/>"
+          <el-breadcrumb separator="/">
             <el-breadcrumb-item :to="{ path: '/my/events' }">我的活动</el-breadcrumb-item>
             <el-breadcrumb-item>{{ event.name }}</el-breadcrumb-item>
           </el-breadcrumb>

@@ -8,7 +8,7 @@
       <template v-else>
         <!-- 头部信息 -->
         <div class="detail-header">
-          <el-breadcrumb separator="/>"
+          <el-breadcrumb separator="/">
             <el-breadcrumb-item :to="{ path: '/templates' }">模板库</el-breadcrumb-item>
             <el-breadcrumb-item>{{ template.name }}</el-breadcrumb-item>
           </el-breadcrumb>

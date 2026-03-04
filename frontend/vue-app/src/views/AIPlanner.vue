@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="page-header">
       <div class="header-content">
-        <div class="header-icon"><el-icon><Magic /></el-icon></div>
+        <div class="header-icon"><el-icon><MagicStick /></el-icon></div>
         <h1>AI 智能派对策划</h1>
         <p>告诉AI您的需求，让智能算法为您生成专属派对方案</p>
       </div>
@@ -211,7 +211,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Magic } from '@element-plus/icons-vue'
+import { MagicStick } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { aiAPI } from '@/api/modules'
 import { usePlanStore } from '@/store'

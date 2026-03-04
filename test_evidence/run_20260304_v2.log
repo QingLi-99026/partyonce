@@ -1,0 +1,28 @@
+=== 四闭环复测 v2 ===
+JWT: OK
+
+=== A: 供应商入驻闭环 ===
+响应: Internal Server Error
+状态: 
+
+=== B: 模板→活动闭环 ===
+响应: [{"id":1,"template_code":"TPL001","name":"ä¸­å¼å©šç¤¼ç»å…¸æ–¹æ¡ˆ","description":null,"category":"wedding","subcategory":null,"style_tags":null,"base_price":0.0,"cover_image_url":null,"is_recommended
+状态: PASS
+
+=== C: 分享归因闭环 ===
+分享: {"id":2,"share_code":"EUHPLLVG","share_type":"template","target_id":1,"title":null,"description":null,"cover_image_url":null,"share_url":"/s/EUHPLLVG","expires_at":"2026-04-03T10:11:08","is_active":true,"view_count":0,"click_count":0,"created_at":"2026-03-04T10:11:08"}
+归因: {"message":"Click tracked","event_id":2,"event_type":"click","deduplicated":false,"reward_amount":0.05}
+状态: PASS
+
+=== D: 钱包返利闭环 ===
+钱包: {"id":1,"available_balance":0.1,"frozen_balance":0.0,"total_earned":0.1,"total_withdrawn":0.0,"currency":"USD","status":"active"}
+状态: PASS
+
+=== 表记录数 ===
+t	c
+users	1
+partners	0
+shares	2
+share_events	2
+wallets	1
+wallet_ledger	2

@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # MySQL数据库
+  db:
+    image: mysql:8.0
+    container_name: partyonce_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-partyonce}
+      MYSQL_USER: ${DB_USER:-partyonce}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-partyonce123}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../database/final_schema_v2.0.0.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # 后端API
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: partyonce_backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=mysql+pymysql://${DB_USER:-partyonce}:${DB_PASSWORD:-partyonce123}@db:3306/${DB_NAME:-partyonce}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+      - R2_ENDPOINT_URL=${R2_ENDPOINT_URL}
+      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - R2_BUCKET_NAME=${R2_BUCKET_NAME:-partyonce}
+      - R2_PUBLIC_URL=${R2_PUBLIC_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ENVIRONMENT=staging
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ../backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # 前端
+  frontend:
+    build:
+      context: ../frontend/vue-app
+      dockerfile: Dockerfile
+    container_name: partyonce_frontend
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

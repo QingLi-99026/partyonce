@@ -49,7 +49,7 @@
                 <span>个人信息</span>
               </el-menu-item>
               <el-menu-item index="plans">
-                <el-icon><Magic /></el-icon>
+                <el-icon><MagicStick /></el-icon>
                 <span>我的策划方案</span>
               </el-menu-item>
               <el-menu-item index="designs">
@@ -283,7 +283,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { User, UserFilled, Medal, Magic, View, Document } from '@element-plus/icons-vue'
+import { User, UserFilled, Medal, MagicStick, View, Document } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { userAPI, aiAPI, quotationAPI } from '@/api/modules'
 import { useUserStore, usePlanStore } from '@/store'

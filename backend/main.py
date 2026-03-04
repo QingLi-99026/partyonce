@@ -1,6 +1,7 @@
 # PartyOnce Backend - Phase 1-4 Complete Version
 # FastAPI + MySQL with Supplier System, Media, Templates, Events, Sharing & Wallet
 
+from decimal import Decimal
 from fastapi import FastAPI, HTTPException, Depends, Query, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
@@ -118,7 +119,10 @@ openai_client = openai.OpenAI(api_key=openai_api_key) if openai_api_key else Non
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # OAuth2 Scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/login", auto_error=False)
+
+# Optional OAuth2 scheme for endpoints that don't require authentication
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/users/login", auto_error=False)
 
 # FastAPI App
 app = FastAPI(
@@ -552,6 +556,16 @@ class Share(Base):
     reward_rule_id = Column(Integer, ForeignKey("reward_rules.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# 10.5 User Referrals Model (for signup attribution)
+class UserReferral(Base):
+    __tablename__ = "user_referrals"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
+    share_id = Column(Integer, ForeignKey("shares.id"), nullable=False)
+    referrer_user_id = Column(Integer, ForeignKey("users.id"))
+    referred_at = Column(DateTime, default=datetime.utcnow)
 
 # 11. Share Events Model
 class ShareEvent(Base):
@@ -1043,9 +1057,9 @@ class PartnerApplyRequest(BaseModel):
     business_registration_number: Optional[str] = None
     tax_id: Optional[str] = None
     contact_name: str
-    contact_email: EmailStr
+    contact_email: Optional[EmailStr] = None
     contact_phone: str
-    business_type: str
+    business_type: Optional[str] = "other"
     service_categories: List[str] = []
     service_areas: List[str] = []
 
@@ -1288,8 +1302,14 @@ class ShareResponse(BaseModel):
         from_attributes = True
 
 class ShareTrackRequest(BaseModel):
-    event_type: str
+    event_type: str  # click, signup, deposit
+    user_id: Optional[int] = None  # 用于signup/deposit
+    order_id: Optional[int] = None  # 用于deposit
+    event_value: Optional[float] = None  # 用于deposit金额
+    visitor_ip: Optional[str] = None
     visitor_fingerprint: Optional[str] = None
+    visitor_user_agent: Optional[str] = None
+    device_type: Optional[str] = None
     referrer_url: Optional[str] = None
     utm_source: Optional[str] = None
     utm_medium: Optional[str] = None
@@ -1335,7 +1355,11 @@ class WalletLedgerResponse(BaseModel):
 # ==================== UTILITIES ====================
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # bcrypt限制密码长度72字节
+    return pwd_context.hash(password[:72])
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password[:72], hashed_password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
@@ -1367,6 +1391,20 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+
+def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme_optional), db: Session = Depends(get_db)) -> Optional[User]:
+    """可选的当前用户获取，无token时返回None而不是抛出异常"""
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        user = db.query(User).filter(User.email == email).first()
+        return user
+    except JWTError:
+        return None
 
 def require_admin(current_user: User = Depends(get_current_user)):
     if current_user.role not in ["admin", "manager"]:
@@ -1527,6 +1565,59 @@ def process_share_event_reward(db: Session, share_event: ShareEvent):
         share.click_count += 1
     
     db.commit()
+
+# ==================== 分享奖励发放函数 (新规范) ====================
+
+def apply_share_reward(db: Session, share: Share, event_type: str, user_id: int = None, order_id: int = None) -> Decimal:
+    """
+    发放分享奖励，同时写ledger并同步更新钱包余额
+    - click: $0.05
+    - signup: $1.00
+    - deposit: $20.00
+    """
+    # 确定奖励金额
+    reward_map = {
+        "click": Decimal("0.05"),
+        "signup": Decimal("1.00"),
+        "deposit": Decimal("20.00")
+    }
+    reward_amount = reward_map.get(event_type, Decimal("0"))
+    
+    if reward_amount <= 0:
+        return Decimal("0")
+    
+    # 获取分享者的钱包 (shares.created_by 是分享者)
+    wallet = get_or_create_wallet(db, share.created_by, share.created_by_type or "user")
+    
+    # 记录奖励前的余额
+    balance_before = wallet.available_balance
+    balance_after = balance_before + reward_amount
+    
+    # 1. 写 wallet_ledger
+    ledger = WalletLedger(
+        wallet_id=wallet.id,
+        transaction_type="reward",
+        direction="credit",
+        amount=reward_amount,
+        currency=wallet.currency,
+        balance_before=balance_before,
+        balance_after=balance_after,
+        source_type="share_event",
+        source_id=share.id,
+        description=f"{event_type.capitalize()}奖励",
+        reference_number=f"SHARE-{share.share_code}-{event_type.upper()}",
+        status="completed"
+    )
+    db.add(ledger)
+    
+    # 2. 同步更新 wallets 余额
+    wallet.available_balance = balance_after
+    wallet.total_earned += reward_amount
+    wallet.last_activity_at = datetime.utcnow()
+    
+    db.commit()
+    
+    return reward_amount
 
 # ==================== AI 策划辅助函数 ====================
 
@@ -2862,11 +2953,11 @@ def list_templates(
             category=t.category,
             subcategory=t.subcategory,
             style_tags=t.style_tags,
-            base_price=float(t.base_price),
+            base_price=float(t.base_price) if t.base_price is not None else 0.0,
             cover_image_url=cover_url,
             is_recommended=t.is_recommended,
             is_featured=t.is_featured,
-            rating_average=float(t.rating_average),
+            rating_average=float(t.rating_average) if t.rating_average is not None else 0.0,
             rating_count=t.rating_count
         ))
     
@@ -3227,46 +3318,181 @@ def get_share_landing_page(
 def track_share_event(
     share_code: str,
     request: ShareTrackRequest,
-    background_tasks: None,  # Would use BackgroundTasks in production
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
-    """Track events from share links (click, signup, etc.)"""
+    """
+    Track events from share links
+    - click: 匿名可用，10分钟去重(device_id > visitor_ip)
+    - signup/deposit: 必须JWT认证
+    """
     share = db.query(Share).filter(Share.share_code == share_code).first()
     if not share:
         raise HTTPException(status_code=404, detail="Share not found")
     
-    # Generate visitor fingerprint
-    fingerprint = request.visitor_fingerprint or str(uuid.uuid4())
+    event_type = request.event_type
     
-    # Create share event
-    event = ShareEvent(
-        share_id=share.id,
-        share_code=share_code,
-        event_type=request.event_type,
-        visitor_ip="0.0.0.0",  # Would get from request in production
-        visitor_fingerprint=fingerprint,
-        referrer_url=request.referrer_url,
-        utm_source=request.utm_source,
-        utm_medium=request.utm_medium,
-        utm_campaign=request.utm_campaign,
-        user_id=current_user.id if current_user else None
-    )
+    # ==================== CLICK 事件 ====================
+    if event_type == "click":
+        # 10分钟去重检查
+        dedup_key = request.visitor_fingerprint or request.visitor_ip or "unknown"
+        
+        # 检查10分钟内是否有相同去重键的记录
+        ten_mins_ago = datetime.utcnow() - timedelta(minutes=10)
+        existing = db.query(ShareEvent).filter(
+            ShareEvent.share_id == share.id,
+            ShareEvent.event_type == "click",
+            ShareEvent.created_at >= ten_mins_ago
+        ).filter(
+            (ShareEvent.visitor_fingerprint == dedup_key) | 
+            (ShareEvent.visitor_ip == request.visitor_ip)
+        ).first()
+        
+        if existing:
+            # 去重命中，不记录事件，不发奖励
+            return {
+                "message": "Event deduplicated",
+                "event_type": "click",
+                "deduplicated": True,
+                "reward_amount": 0
+            }
+        
+        # 记录click事件
+        event = ShareEvent(
+            share_id=share.id,
+            share_code=share_code,
+            event_type="click",
+            visitor_ip=request.visitor_ip or "0.0.0.0",
+            visitor_fingerprint=request.visitor_fingerprint,
+            visitor_user_agent=request.visitor_user_agent,
+            device_type=request.device_type,
+            referrer_url=request.referrer_url,
+            utm_source=request.utm_source,
+            utm_medium=request.utm_medium,
+            utm_campaign=request.utm_campaign
+        )
+        db.add(event)
+        db.commit()
+        
+        # 触发click奖励($0.05)
+        if share.reward_enabled:
+            reward_amount = apply_share_reward(db, share, "click")
+            return {
+                "message": "Click tracked",
+                "event_id": event.id,
+                "event_type": "click",
+                "deduplicated": False,
+                "reward_amount": float(reward_amount)
+            }
+        
+        return {
+            "message": "Click tracked",
+            "event_id": event.id,
+            "event_type": "click",
+            "deduplicated": False,
+            "reward_amount": 0
+        }
     
-    db.add(event)
-    db.commit()
-    db.refresh(event)
+    # ==================== SIGNUP/DEPOSIT 事件 ====================
+    # 必须JWT认证
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Authentication required for signup/deposit tracking")
     
-    # Process reward if enabled
-    if share.reward_enabled and request.event_type in ["click", "signup", "deposit"]:
-        process_share_event_reward(db, event)
+    user_id = current_user.id
     
-    return {
-        "message": "Event tracked",
-        "event_id": event.id,
-        "event_type": request.event_type,
-        "reward_amount": float(event.reward_amount) if event.reward_amount else 0
-    }
+    if event_type == "signup":
+        # 幂等检查：同一 share_id + user_id 只奖励一次
+        existing = db.query(ShareEvent).filter(
+            ShareEvent.share_id == share.id,
+            ShareEvent.event_type == "signup",
+            ShareEvent.user_id == user_id
+        ).first()
+        
+        if existing:
+            return {
+                "message": "Signup already tracked",
+                "event_type": "signup",
+                "deduplicated": True,
+                "reward_amount": 0
+            }
+        
+        # 写 user_referrals
+        referral = UserReferral(
+            user_id=user_id,
+            share_id=share.id,
+            referrer_user_id=share.created_by
+        )
+        db.add(referral)
+        
+        # 记录signup事件
+        event = ShareEvent(
+            share_id=share.id,
+            share_code=share_code,
+            event_type="signup",
+            user_id=user_id,
+            visitor_ip=request.visitor_ip or "0.0.0.0"
+        )
+        db.add(event)
+        db.commit()
+        
+        # 触发signup奖励($1)
+        reward_amount = 0
+        if share.reward_enabled:
+            reward_amount = apply_share_reward(db, share, "signup", user_id=user_id)
+        
+        return {
+            "message": "Signup tracked",
+            "event_id": event.id,
+            "event_type": "signup",
+            "deduplicated": False,
+            "reward_amount": float(reward_amount)
+        }
+    
+    elif event_type == "deposit":
+        # 幂等检查：同一 share_id + user_id 只奖励一次
+        existing = db.query(ShareEvent).filter(
+            ShareEvent.share_id == share.id,
+            ShareEvent.event_type == "deposit",
+            ShareEvent.user_id == user_id
+        ).first()
+        
+        if existing:
+            return {
+                "message": "Deposit already tracked",
+                "event_type": "deposit",
+                "deduplicated": True,
+                "reward_amount": 0
+            }
+        
+        # 记录deposit事件，包含order_id
+        event = ShareEvent(
+            share_id=share.id,
+            share_code=share_code,
+            event_type="deposit",
+            user_id=user_id,
+            order_id=request.order_id,
+            event_value=request.event_value,
+            visitor_ip=request.visitor_ip or "0.0.0.0"
+        )
+        db.add(event)
+        db.commit()
+        
+        # 触发deposit奖励($20)
+        reward_amount = 0
+        if share.reward_enabled:
+            reward_amount = apply_share_reward(db, share, "deposit", user_id=user_id, order_id=request.order_id)
+        
+        return {
+            "message": "Deposit tracked",
+            "event_id": event.id,
+            "event_type": "deposit",
+            "order_id": request.order_id,
+            "deduplicated": False,
+            "reward_amount": float(reward_amount)
+        }
+    
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported event type: {event_type}")
 
 # Wallet Endpoints
 

@@ -12,7 +12,7 @@
           />
         </el-select>
         <el-button type="primary" @click="saveDesign" :loading="saving">
-          <el-icon><Save /></el-icon> 保存设计
+          <el-icon><Download /></el-icon> 保存设计
         </el-button>
         <el-button @click="clearScene">
           <el-icon><Delete /></el-icon> 清空
@@ -118,7 +118,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { Save, Delete, OfficeBuilding, View, Grid } from '@element-plus/icons-vue'
+import { Download, Delete, OfficeBuilding, View, Grid } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'

@@ -1,0 +1,27 @@
+=== 四闭环复测 v3 ===
+
+=== A: 供应商入驻闭环 ===
+响应: {"id":1,"user_id":1,"company_name":"测试摄影","company_legal_name":null,"business_registration_number":null,"contact_name":"张三","contact_email":"partner@test.com","contact_phone":"0412345678","business_type":"other","service_categories":[],"service_areas":[],"status":"pending","rejection_reason":null,"commission_rate":0.1,"settlement_cycle":"monthly","created_at":"2026-03-04T10:13:15","updated_at":"2026-03-04T10:13:15"}
+A: PASS
+
+=== B: 模板→活动闭环 ===
+响应: [{"id":1,"template_code":"TPL001","name":"ä¸­å¼å©šç¤¼ç»å…¸æ–¹æ¡ˆ","description":null,"category":"wedding","subcategory":null,"style_tags":null,"base_price":0.0,"cover_image_url":null,"is_recommended...
+B: PASS
+
+=== C: 分享归因闭环 ===
+分享: {"id":3,"share_code":"ECRFZAFH","share_type":"template","target_id":1,"title":null,"description":null,"cover_image_url":null,"share_url":"/s/ECRFZAFH","expires_at":"2026-04-03T10:13:15","is_active":true,"view_count":0,"click_count":0,"created_at":"2026-03-04T10:13:15"}
+归因: {"message":"Click tracked","event_id":3,"event_type":"click","deduplicated":false,"reward_amount":0.05}
+C: PASS
+
+=== D: 钱包返利闭环 ===
+钱包: {"id":1,"available_balance":0.15,"frozen_balance":0.0,"total_earned":0.15,"total_withdrawn":0.0,"currency":"USD","status":"active"}
+D: PASS
+
+=== 表记录数 ===
+t	c
+users	1
+partners	1
+shares	3
+share_events	3
+wallets	1
+wallet_ledger	3

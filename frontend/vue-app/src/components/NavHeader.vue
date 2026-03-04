@@ -2,7 +2,7 @@
   <el-header class="nav-header">
     <div class="header-content">
       <div class="logo" @click="$router.push('/')">
-        <el-icon><Party-</el-icon>
+        <el-icon><Party /></el-icon>
         <span>PartyOnce</span>
       </div>
       

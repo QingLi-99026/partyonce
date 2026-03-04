@@ -98,7 +98,7 @@
           </div>
 
           <div class="order-content">
-            <div class="venue-info"
+            <div class="venue-info">
               <img :src="order.venue_image || '/placeholder-venue.jpg'" class="venue-image" />
               <div class="venue-details">
                 <h4>{{ order.venue_name }}</h4>
