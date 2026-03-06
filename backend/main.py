@@ -1254,6 +1254,17 @@ class MyEventDetailResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class EventCreateRequest(BaseModel):
+    """Request model for creating a new event"""
+    event_name: Optional[str] = None
+    event_type: str = "other"
+    event_date: Optional[datetime] = None
+    guest_count: Optional[int] = 0
+    city: Optional[str] = None
+    budget_range: Optional[str] = None
+    style_preferences: Optional[List[str]] = None
+    status: Optional[str] = "draft"
+
 class AlbumUploadRequest(BaseModel):
     media_ids: List[int]
     album_type: str = "general"
@@ -3063,6 +3074,63 @@ def bind_template_to_order(
     return {"message": "Template bound to order successfully", "event_id": event.id}
 
 # My Events Endpoints
+
+@app.post("/api/events", response_model=MyEventDetailResponse)
+def create_event(
+    request: EventCreateRequest,
+    current_user: User = Depends(get_current_user_optional),
+    db: Session = Depends(get_db)
+):
+    """Create a new event (draft)"""
+    # Create event with provided data
+    event_data = {
+        "event_name": request.event_name or f"{request.city or 'New'}派对方案",
+        "event_type": request.event_type or "other",
+        "event_date": request.event_date or (datetime.utcnow() + timedelta(days=7)),
+        "guest_count": request.guest_count or 0,
+        "city": request.city,
+        "status": request.status or "draft",
+        "customizations": {
+            "budget_range": request.budget_range,
+            "style_preferences": request.style_preferences or []
+        }
+    }
+    
+    # Add user_id if authenticated, otherwise use a temporary/guest approach
+    if current_user:
+        event_data["user_id"] = current_user.id
+    else:
+        # For unauthenticated users, we still create the event but it won't be linked
+        # In production, you might want to require authentication
+        # For now, we'll use a special user_id (1) or handle this differently
+        event_data["user_id"] = 1  # Default/guest user
+    
+    new_event = Event(**event_data)
+    db.add(new_event)
+    db.commit()
+    db.refresh(new_event)
+    
+    # Build response
+    return MyEventDetailResponse(
+        id=new_event.id,
+        event_name=new_event.event_name,
+        event_type=new_event.event_type,
+        event_date=new_event.event_date,
+        event_duration_hours=new_event.event_duration_hours or 4,
+        guest_count=new_event.guest_count or 0,
+        event_notes=new_event.event_notes,
+        venue_id=new_event.venue_id,
+        venue_name=None,
+        template_id=new_event.template_id,
+        template_name=None,
+        customizations=new_event.customizations,
+        status=new_event.status,
+        estimated_budget=float(new_event.estimated_budget) if new_event.estimated_budget else None,
+        final_price=float(new_event.final_price) if new_event.final_price else None,
+        address=new_event.address,
+        city=new_event.city,
+        created_at=new_event.created_at
+    )
 
 @app.get("/api/my/events", response_model=List[MyEventListResponse])
 def list_my_events(
