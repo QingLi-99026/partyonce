@@ -3132,6 +3132,42 @@ def create_event(
         created_at=new_event.created_at
     )
 
+@app.get("/api/events", response_model=List[MyEventListResponse])
+def list_events(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """List all events (public endpoint for testing)"""
+    events = db.query(Event).offset(skip).limit(limit).all()
+    
+    result = []
+    for e in events:
+        venue_name = None
+        if e.venue_id:
+            venue = db.query(Venue).filter(Venue.id == e.venue_id).first()
+            venue_name = venue.name if venue else None
+        
+        template_name = None
+        if e.template_id:
+            template = db.query(Template).filter(Template.id == e.template_id).first()
+            template_name = template.name if template else None
+        
+        result.append(MyEventListResponse(
+            id=e.id,
+            event_name=e.event_name,
+            event_type=e.event_type,
+            event_date=e.event_date,
+            guest_count=e.guest_count,
+            status=e.status,
+            venue_name=venue_name,
+            template_name=template_name,
+            final_price=float(e.final_price) if e.final_price else None,
+            created_at=e.created_at
+        ))
+    
+    return result
+
 @app.get("/api/my/events", response_model=List[MyEventListResponse])
 def list_my_events(
     status: Optional[str] = None,
