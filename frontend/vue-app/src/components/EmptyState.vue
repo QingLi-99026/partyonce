@@ -1,5 +1,5 @@
 <template>
-  <div class="empty-state">
+  <div class="empty-state" data-testid="empty-state">
     <div class="empty-illustration">
       <slot name="icon">
         <div class="default-icon">📦</div>
@@ -29,12 +29,12 @@
     <!-- 操作按钮 -->
     <div class="empty-actions">
       <slot name="actions">
-        <el-button v-if="primaryAction" type="primary" size="large" @click="$emit('primary')">
+        <el-button v-if="primaryAction" type="primary" size="large" @click="$emit('primary')" data-testid="empty-primary-btn">
           <el-icon v-if="primaryIcon"><component :is="primaryIcon" /></el-icon>
           {{ primaryText }}
         </el-button>
         
-        <el-button v-if="secondaryAction" size="large" @click="$emit('secondary')">
+        <el-button v-if="secondaryAction" size="large" @click="$emit('secondary')" data-testid="empty-secondary-btn">
           {{ secondaryText }}
         </el-button>
       </slot>

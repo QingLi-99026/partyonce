@@ -7,7 +7,7 @@
     
     <div class="entry-cards">
       <!-- 快速开始 - 模板最短路径 -->
-      <div class="entry-card entry-card--quick" @click="$router.push('/templates')">
+      <div class="entry-card entry-card--quick" @click="$router.push('/templates')" data-testid="entry-quick">
         <div class="entry-badge">最快</div>
         <div class="entry-icon">
           <el-icon><Timer /></el-icon>
@@ -19,7 +19,7 @@
       </div>
       
       <!-- AI策划 - 问答式 -->
-      <div class="entry-card entry-card--ai" @click="startWizard">
+      <div class="entry-card entry-card--ai" @click="startWizard" data-testid="entry-ai">
         <div class="entry-badge entry-badge--hot">推荐</div>
         <div class="entry-icon">
           <el-icon><Magic /></el-icon>
@@ -31,7 +31,7 @@
       </div>
       
       <!-- 3D设计 - 高级入口 -->
-      <div class="entry-card entry-card--3d" @click="$router.push('/3d-designer')">
+      <div class="entry-card entry-card--3d" @click="$router.push('/3d-designer')" data-testid="entry-3d">
         <div class="entry-icon">
           <el-icon><View /></el-icon>
         </div>

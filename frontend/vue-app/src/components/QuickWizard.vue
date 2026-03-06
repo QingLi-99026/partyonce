@@ -14,99 +14,104 @@
             </div>
             <button class="wizard-close" @click="close">×</button>
           </div>
-          
+
           <!-- 内容区 -->
           <div class="wizard-content">
             <!-- 步骤1: 城市 -->
-            <div v-if="currentStep === 1" class="wizard-step">
+            <div v-if="currentStep === 1" class="wizard-step" data-testid="wizard-step-1">
               <div class="step-icon">🏙️</div>
               <h3>您想在哪个城市举办派对？</h3>
               <p class="step-desc">我们将为您推荐当地的优质场地</p>
-              
+
               <div class="options-grid">
                 <button
                   v-for="city in cities"
                   :key="city"
                   :class="['option-btn', { selected: form.city === city }]"
                   @click="form.city = city"
+                  :data-testid="`city-${city}`"
                 >
                   {{ city }}
                 </button>
               </div>
             </div>
-            
+
             <!-- 步骤2: 人数 -->
-            <div v-if="currentStep === 2" class="wizard-step">
+            <div v-if="currentStep === 2" class="wizard-step" data-testid="wizard-step-2">
               <div class="step-icon">👥</div>
               <h3>预计多少人参加？</h3>
               <p class="step-desc">帮助我们筛选合适容量的场地</p>
-              
+
               <div class="options-grid">
                 <button
                   v-for="range in guestRanges"
                   :key="range.value"
                   :class="['option-btn', { selected: form.guestCount === range.value }]"
                   @click="form.guestCount = range.value"
+                  :data-testid="`guest-${range.value}`"
                 >
                   {{ range.label }}
                 </button>
               </div>
             </div>
-            
+
             <!-- 步骤3: 预算 -->
-            <div v-if="currentStep === 3" class="wizard-step">
+            <div v-if="currentStep === 3" class="wizard-step" data-testid="wizard-step-3">
               <div class="step-icon">💰</div>
               <h3>您的预算范围？</h3>
               <p class="step-desc">我们将推荐符合预算的方案</p>
-              
+
               <div class="options-grid">
                 <button
                   v-for="budget in budgets"
                   :key="budget.value"
                   :class="['option-btn', { selected: form.budget === budget.value }]"
                   @click="form.budget = budget.value"
+                  :data-testid="`budget-${budget.value}`"
                 >
                   {{ budget.label }}
                 </button>
               </div>
             </div>
-            
+
             <!-- 步骤4: 风格 -->
-            <div v-if="currentStep === 4" class="wizard-step">
+            <div v-if="currentStep === 4" class="wizard-step" data-testid="wizard-step-4">
               <div class="step-icon">🎨</div>
               <h3>您喜欢的派对风格？</h3>
               <p class="step-desc">可多选，AI会结合您的喜好推荐</p>
-              
+
               <div class="options-grid options-grid--multi">
                 <button
                   v-for="style in styles"
                   :key="style"
                   :class="['option-btn', { selected: form.styles.includes(style) }]"
                   @click="toggleStyle(style)"
+                  :data-testid="`style-${style}`"
                 >
                   {{ style }}
                 </button>
               </div>
             </div>
-            
+
             <!-- 步骤5: 日期 (可选) -->
-            <div v-if="currentStep === 5" class="wizard-step">
+            <div v-if="currentStep === 5" class="wizard-step" data-testid="wizard-step-5">
               <div class="step-icon">📅</div>
               <h3>希望的派对日期？</h3>
               <p class="step-desc">可选，方便我们检查场地档期</p>
-              
+
               <div class="date-input-wrapper">
                 <input
                   v-model="form.date"
                   type="date"
                   class="date-input"
                   :min="minDate"
+                  data-testid="date-input"
                 />
               </div>
-              
-              <button class="skip-btn" @click="skipDate">跳过，稍后决定</button>
+
+              <button class="skip-btn" @click="skipDate" data-testid="skip-date">跳过，稍后决定</button>
             </div>
-            
+
             <!-- 完成 -->
             <div v-if="currentStep === 6" class="wizard-step wizard-step--complete">
               <div v-if="isCreating" class="creating-state">
@@ -118,7 +123,7 @@
                 <div class="complete-icon">✨</div>
                 <h3>方案已生成！</h3>
                 <p class="step-desc">AI为您创建了专属派对方案</p>
-                
+
                 <div class="summary">
                   <div class="summary-item"><span>📍</span> {{ form.city }}</div>
                   <div class="summary-item"><span>👥</span> {{ getGuestLabel() }}</div>
@@ -128,38 +133,42 @@
               </div>
             </div>
           </div>
-          
+
           <!-- 底部按钮 -->
           <div class="wizard-footer">
             <button
               v-if="currentStep > 1 && currentStep < 6"
               class="btn btn--secondary"
               @click="prev"
+              data-testid="btn-prev"
             >
               上一步
             </button>
-            
+
             <button
               v-if="currentStep < 5"
               class="btn btn--primary"
               :disabled="!canNext"
               @click="next"
+              data-testid="btn-next"
             >
               下一步
             </button>
-            
+
             <button
               v-if="currentStep === 5"
               class="btn btn--primary"
               @click="submit"
+              data-testid="btn-submit"
             >
               生成方案
             </button>
-            
+
             <button
               v-if="currentStep === 6"
               class="btn btn--primary"
               @click="finish"
+              data-testid="btn-finish"
             >
               查看方案
             </button>
@@ -248,35 +257,49 @@ const skipDate = () => {
 const submit = async () => {
   isCreating.value = true
   currentStep.value = 6
-  
-  // 创建事件草稿
+
+  // 创建事件草稿 - 支持 mock 模式
+  const eventData = {
+    event_name: `${form.value.city}派对方案`,
+    event_type: 'other',
+    event_date: form.value.date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    guest_count: parseInt(form.value.guestCount) || 20,
+    city: form.value.city,
+    budget_range: form.value.budget,
+    style_preferences: form.value.styles,
+    status: 'draft',
+    created_at: new Date().toISOString()
+  }
+
   try {
     const token = localStorage.getItem('token')
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
-    
-    const eventData = {
-      event_name: `${form.value.city}派对方案`,
-      event_type: 'other',
-      event_date: form.value.date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      guest_count: parseInt(form.value.guestCount) || 20,
-      city: form.value.city,
-      budget_range: form.value.budget,
-      style_preferences: form.value.styles,
-      status: 'draft'
-    }
-    
+
     const response = await axios.post('/api/events', eventData, { headers })
     createdEvent.value = response.data
+    console.log('✅ API 创建事件成功:', response.data)
   } catch (err) {
-    console.log('创建草稿失败，使用本地数据:', err)
-    // 失败时使用本地数据
-    createdEvent.value = {
-      id: 'temp-' + Date.now(),
-      event_name: `${form.value.city}派对方案`,
-      city: form.value.city,
-      guest_count: form.value.guestCount,
-      budget_range: form.value.budget,
-      status: 'draft'
+    if (err.response?.status === 404) {
+      // API 未部署，使用 mock 模式
+      console.log('⚠️ API 404，使用 mock 模式创建本地事件')
+      const mockEvent = {
+        id: 'mock-' + Date.now(),
+        ...eventData,
+        is_mock: true
+      }
+      // 保存到 localStorage
+      const existing = JSON.parse(localStorage.getItem('mock_events') || '[]')
+      existing.push(mockEvent)
+      localStorage.setItem('mock_events', JSON.stringify(existing))
+      createdEvent.value = mockEvent
+      console.log('✅ Mock 事件已创建:', mockEvent)
+    } else {
+      console.error('❌ 创建事件失败:', err)
+      // 即使失败也显示完成页
+      createdEvent.value = {
+        id: 'temp-' + Date.now(),
+        ...eventData
+      }
     }
   } finally {
     isCreating.value = false
@@ -570,7 +593,7 @@ const getBudgetLabel = () => {
   .options-grid--multi {
     grid-template-columns: 1fr;
   }
-  
+
   .wizard-content {
     padding: 24px 20px;
   }
