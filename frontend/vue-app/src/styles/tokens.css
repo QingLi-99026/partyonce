@@ -1,0 +1,168 @@
+/* PartyOnce Design Tokens */
+/* 任务包 1: 视觉系统统一 */
+
+:root {
+  /* ========================================
+     字体体系 Typography
+     ======================================== */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  
+  /* 字号阶梯 (12/14/16/20/28) */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 28px;
+  --font-size-2xl: 36px;
+  --font-size-3xl: 48px;
+  
+  /* 字重 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* 行高 */
+  --line-height-tight: 1.25;   /* 标题 */
+  --line-height-normal: 1.6;   /* 正文 */
+  --line-height-relaxed: 1.75; /* 宽松 */
+  
+  /* ========================================
+     灰阶体系 Gray Scale
+     ======================================== */
+  --gray-0: #ffffff;
+  --gray-50: #f8f9fa;
+  --gray-100: #f1f3f5;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-400: #ced4da;
+  --gray-500: #adb5bd;
+  --gray-600: #868e96;
+  --gray-700: #495057;
+  --gray-800: #343a40;
+  --gray-900: #212529;
+  
+  /* ========================================
+     主色体系 Primary Colors
+     ======================================== */
+  /* 主品牌色 - 紫罗兰 */
+  --primary-50: #f3f0ff;
+  --primary-100: #e5dbff;
+  --primary-200: #d0bfff;
+  --primary-300: #b197fc;
+  --primary-400: #9775fa;
+  --primary-500: #845ef7;  /* 主色 */
+  --primary-600: #7950f2;
+  --primary-700: #7048e8;
+  --primary-800: #6741d9;
+  --primary-900: #5f3dc4;
+  
+  /* 功能色 */
+  --success-500: #51cf66;
+  --warning-500: #ffd43b;
+  --error-500: #ff6b6b;
+  --info-500: #339af0;
+  
+  /* ========================================
+     语义色 Semantic Colors
+     ======================================== */
+  /* 背景 */
+  --bg-body: var(--gray-50);
+  --bg-card: var(--gray-0);
+  --bg-hover: var(--gray-100);
+  --bg-active: var(--primary-50);
+  
+  /* 边框 */
+  --border-light: var(--gray-200);
+  --border-base: var(--gray-300);
+  --border-focus: var(--primary-500);
+  
+  /* 文字 */
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-tertiary: var(--gray-500);
+  --text-disabled: var(--gray-400);
+  --text-link: var(--primary-600);
+  --text-inverse: var(--gray-0);
+  
+  /* 按钮 */
+  --btn-primary-bg: var(--primary-500);
+  --btn-primary-hover: var(--primary-600);
+  --btn-primary-text: var(--gray-0);
+  --btn-secondary-bg: var(--gray-0);
+  --btn-secondary-border: var(--gray-300);
+  --btn-secondary-hover: var(--gray-50);
+  
+  /* ========================================
+     间距体系 Spacing
+     ======================================== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  
+  /* ========================================
+     圆角体系 Border Radius
+     ======================================== */
+  --radius-sm: 4px;
+  --radius-base: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  
+  /* ========================================
+     阴影体系 Shadows
+     ======================================== */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  
+  /* ========================================
+     过渡动画 Transitions
+     ======================================== */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+  
+  /* ========================================
+     Z-Index 层级
+     ======================================== */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* ========================================
+   全局样式覆盖
+   ======================================== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 禁止散落 hex 色值，强制使用 tokens */
+/* 开发规范：任何硬编码颜色都应该被警告 */

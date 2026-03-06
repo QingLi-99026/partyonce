@@ -5,6 +5,9 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 
+// Design Tokens
+import './styles/tokens.css'
+
 import App from './App.vue'
 import router from './router'
 
