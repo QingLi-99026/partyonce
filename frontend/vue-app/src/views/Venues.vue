@@ -94,9 +94,30 @@
           <el-skeleton :rows="6" animated />
         </div>
 
-        <div v-else-if="filteredVenues.length === 0" class="empty-state">
-          <el-empty description="没有找到符合条件的场地" />
-        </div>
+        <EmptyState
+          v-else-if="filteredVenues.length === 0"
+          title="没有找到场地"
+          description="当前筛选条件下暂无场地，试试调整筛选条件或浏览全部场地"
+          :show-example="true"
+          primary-text="查看全部场地"
+          secondary-text="加载示例场地"
+          tip="💡 提示：可以先查看全部场地，再逐步缩小范围"
+          @primary="clearAllFilters"
+          @secondary="loadDemoVenues"
+        >
+          <template #icon>
+            <div style="font-size: 64px">🏢</div>
+          </template>
+          <template #example>
+            <div class="venue-preview-example">
+              <div class="venue-image-placeholder"></div>
+              <div class="venue-info-placeholder">
+                <div class="venue-name">云端宴会厅</div>
+                <div class="venue-meta">悉尼 · 200人</div>
+              </div>
+            </div>
+          </template>
+        </EmptyState>
 
         <div v-else class="venues-list">
           <div
@@ -157,6 +178,7 @@ import { ref, computed, onMounted } from 'vue'
 import { Search, Location } from '@element-plus/icons-vue'
 import { venueAPI } from '@/api/modules'
 import { ElMessage } from 'element-plus'
+import EmptyState from '../components/EmptyState.vue'
 
 const loading = ref(false)
 const searchQuery = ref('')
@@ -249,6 +271,22 @@ const handleSearch = () => {
 const applyFilters = () => {
   currentPage.value = 1
   fetchVenues()
+}
+
+const clearAllFilters = () => {
+  filters.value.city = ''
+  filters.value.venueType = ''
+  filters.value.capacity = [0, 500]
+  filters.value.partnerOnly = false
+  filters.value.amenities = []
+  searchQuery.value = ''
+  currentPage.value = 1
+  fetchVenues()
+}
+
+const loadDemoVenues = () => {
+  venues.value = getMockVenues()
+  ElMessage.success('已加载示例场地')
 }
 
 const handleSort = () => {
@@ -479,6 +517,35 @@ onMounted(() => {
   margin-top: 30px;
   display: flex;
   justify-content: center;
+}
+
+/* Empty State 示例样式 */
+.venue-preview-example {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.venue-image-placeholder {
+  width: 80px;
+  height: 60px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+  border-radius: 8px;
+}
+
+.venue-info-placeholder {
+  flex: 1;
+}
+
+.venue-info-placeholder .venue-name {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.venue-info-placeholder .venue-meta {
+  font-size: 12px;
+  color: #6b7280;
 }
 
 @media (max-width: 1024px) {

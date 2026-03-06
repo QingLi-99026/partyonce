@@ -47,7 +47,30 @@
       <el-skeleton :rows="3" animated />
     </div>
 
-    <el-empty v-else-if="templates.length === 0" description="暂无模板" />
+    <EmptyState
+      v-else-if="templates.length === 0"
+      title="暂无模板"
+      description="还没有符合您筛选条件的模板，试试其他条件或浏览全部模板"
+      :show-example="true"
+      primary-text="查看全部模板"
+      secondary-text="使用Demo模板"
+      tip="💡 建议：先浏览全部模板，找到喜欢的风格后再筛选"
+      @primary="resetFilters"
+      @secondary="loadDemoTemplate"
+    >
+      <template #icon>
+        <div style="font-size: 64px">📋</div>
+      </template>
+      <template #example>
+        <div class="template-preview-example">
+          <div class="preview-image"></div>
+          <div class="preview-title">浪漫婚礼模板</div>
+          <div class="preview-tags">
+            <span>婚礼</span><span>优雅</span>
+          </div>
+        </div>
+      </template>
+    </EmptyState>
 
     <el-row v-else :gutter="20" class="template-list">
       <el-col :span="8" v-for="template in templates" :key="template.id">
@@ -87,6 +110,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import EmptyState from '../components/EmptyState.vue'
 
 const router = useRouter()
 const loading = ref(false)
@@ -141,6 +165,21 @@ const resetFilters = () => {
   filters.budget_range = ''
   filters.style = ''
   fetchTemplates()
+}
+
+const loadDemoTemplate = () => {
+  // 加载一个演示模板数据
+  templates.value = [{
+    id: 'demo-1',
+    name: '浪漫花园婚礼',
+    scene_type: 'wedding',
+    description: '户外花园婚礼模板，包含花艺布置、灯光效果、座位安排等完整方案',
+    budget_min: 5000,
+    budget_max: 8000,
+    is_free: true,
+    cover_url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400'
+  }]
+  ElMessage.success('已加载演示模板')
 }
 
 const viewDetail = (template) => {
@@ -258,5 +297,36 @@ onMounted(() => {
 
 .loading {
   padding: 60px 0;
+}
+
+.template-preview-example {
+  text-align: left;
+}
+
+.template-preview-example .preview-image {
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.template-preview-example .preview-title {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.template-preview-example .preview-tags {
+  display: flex;
+  gap: 8px;
+}
+
+.template-preview-example .preview-tags span {
+  padding: 4px 10px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #6b7280;
 }
 </style>

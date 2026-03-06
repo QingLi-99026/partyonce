@@ -1,5 +1,8 @@
 <template>
   <div class="home-page">
+    <!-- Quick Start Section - 3 Entry Cards -->
+    <QuickStartCards />
+    
     <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-content">
@@ -117,6 +120,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import QuickStartCards from '../components/QuickStartCards.vue'
 
 const popularVenues = ref([
   { id: 1, name: '云端宴会厅', city: '悉尼', capacity: 200, price: '2,500', image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400', isPartner: true },
