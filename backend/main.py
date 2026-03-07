@@ -111,6 +111,21 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# Print database connection info (sanitized) on startup
+import re
+def sanitize_db_url(url):
+    """Remove password from database URL for logging"""
+    if not url:
+        return "Not set"
+    # Replace password with ***
+    sanitized = re.sub(r'://[^:]+:[^@]+@', '://***:***@', url)
+    return sanitized
+
+print("=" * 60)
+print("PartyOnce API Starting...")
+print(f"Database URL: {sanitize_db_url(DATABASE_URL)}")
+print("=" * 60)
+
 # OpenAI Client
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_client = openai.OpenAI(api_key=openai_api_key) if openai_api_key else None
