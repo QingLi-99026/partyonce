@@ -5,7 +5,7 @@ from decimal import Decimal
 from fastapi import FastAPI, HTTPException, Depends, Query, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, Text, DateTime, JSON, DECIMAL, ForeignKey, Enum as SQLEnum, Index
+from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, Text, DateTime, JSON, DECIMAL, ForeignKey, Enum as SQLEnum, Index, inspect as sa_inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from pydantic import BaseModel, EmailStr, Field, validator
@@ -124,6 +124,12 @@ def sanitize_db_url(url):
 print("=" * 60)
 print("PartyOnce API Starting...")
 print(f"Database URL: {sanitize_db_url(DATABASE_URL)}")
+print(f"Database target: host={engine.url.host}, port={engine.url.port}, name={engine.url.database}")
+print(
+    "DB env aliases: "
+    f"DB_HOST={os.getenv('DB_HOST')}, DB_PORT={os.getenv('DB_PORT')}, DB_NAME={os.getenv('DB_NAME')}, "
+    f"MYSQL_HOST={os.getenv('MYSQL_HOST')}, MYSQL_PORT={os.getenv('MYSQL_PORT')}, MYSQL_DATABASE={os.getenv('MYSQL_DATABASE')}"
+)
 print("=" * 60)
 
 # OpenAI Client
@@ -3643,29 +3649,66 @@ def get_wallet_ledger(
 ):
     """Get wallet transaction history"""
     wallet = get_or_create_wallet(db, current_user.id, "user")
-    
-    query = db.query(WalletLedger).filter(WalletLedger.wallet_id == wallet.id)
-    
-    if transaction_type:
-        query = query.filter(WalletLedger.transaction_type == transaction_type)
-    
-    entries = query.order_by(WalletLedger.created_at.desc()).offset(skip).limit(limit).all()
-    
-    return [
-        WalletLedgerResponse(
-            id=e.id,
-            transaction_type=e.transaction_type,
-            direction=e.direction,
-            amount=float(e.amount),
-            balance_before=float(e.balance_before),
-            balance_after=float(e.balance_after),
-            description=e.description,
-            reference_number=e.reference_number,
-            status=e.status,
-            created_at=e.created_at
-        )
-        for e in entries
-    ]
+
+    # Backward-compatible fallback for legacy schemas that use user_id instead of wallet_id
+    ledger_columns = {column["name"] for column in sa_inspect(engine).get_columns("wallet_ledger")}
+    if "wallet_id" in ledger_columns:
+        query = db.query(WalletLedger).filter(WalletLedger.wallet_id == wallet.id)
+
+        if transaction_type:
+            query = query.filter(WalletLedger.transaction_type == transaction_type)
+
+        entries = query.order_by(WalletLedger.created_at.desc()).offset(skip).limit(limit).all()
+
+        return [
+            WalletLedgerResponse(
+                id=e.id,
+                transaction_type=e.transaction_type,
+                direction=e.direction,
+                amount=float(e.amount),
+                balance_before=float(e.balance_before),
+                balance_after=float(e.balance_after),
+                description=e.description,
+                reference_number=e.reference_number,
+                status=e.status,
+                created_at=e.created_at
+            )
+            for e in entries
+        ]
+
+    if "user_id" in ledger_columns:
+        sql = """
+            SELECT id, type, amount, reason, reference_id, status, created_at
+            FROM wallet_ledger
+            WHERE user_id = :user_id
+        """
+        params = {"user_id": current_user.id, "limit": limit, "offset": skip}
+
+        if transaction_type:
+            sql += " AND type = :transaction_type"
+            params["transaction_type"] = transaction_type
+
+        sql += " ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+        legacy_entries = db.execute(text(sql), params).mappings().all()
+
+        return [
+            WalletLedgerResponse(
+                id=e["id"],
+                transaction_type=e["type"],
+                direction="in" if float(e["amount"]) >= 0 else "out",
+                amount=abs(float(e["amount"])),
+                balance_before=0.0,
+                balance_after=0.0,
+                description=e.get("reason"),
+                reference_number=str(e["reference_id"]) if e.get("reference_id") is not None else None,
+                status=e["status"],
+                created_at=e["created_at"]
+            )
+            for e in legacy_entries
+        ]
+
+    raise HTTPException(status_code=409, detail="wallet_ledger schema missing wallet_id/user_id")
+
 
 # ==================== MAIN ====================
 
