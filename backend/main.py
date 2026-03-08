@@ -3693,6 +3693,236 @@ def get_wallet_ledger(
         return []
 
 
+# ==================== SUPPLIER APIs (Phase 2) ====================
+
+class SupplierListItem(BaseModel):
+    supplier_id: int
+    name: str
+    category_level_1: str
+    category_level_2: Optional[str]
+    suburb: str
+    lat: Optional[float]
+    lng: Optional[float]
+    price_level: Optional[str]
+    max_capacity: Optional[int]
+    rating: float
+    review_count: int
+    cover_image_url: Optional[str]
+    service_tags: Optional[List[str]]
+    distance_km: Optional[float] = None
+    
+    class Config:
+        from_attributes = True
+
+@app.get("/api/suppliers/nearby", response_model=Dict[str, Any])
+def get_nearby_suppliers(
+    lat: float = Query(..., description="用户位置纬度"),
+    lng: float = Query(..., description="用户位置经度"),
+    radius_km: float = Query(10.0, description="搜索半径（公里）"),
+    category: Optional[str] = Query(None, description="分类过滤"),
+    price_levels: Optional[str] = Query(None, description="价格档位（逗号分隔）"),
+    tags: Optional[str] = Query(None, description="标签过滤（逗号分隔）"),
+    weekend_only: bool = Query(False, description="仅周末可服务"),
+    limit: int = Query(20, description="返回数量限制"),
+    db: Session = Depends(get_db)
+):
+    """获取附近供应商（地图核心接口）"""
+    
+    # Haversine 公式计算距离
+    # 简化为先查询范围内大致数据，再计算精确距离
+    # 1度纬度 ≈ 111km
+    lat_range = radius_km / 111.0
+    lng_range = radius_km / (111.0 * abs(cos(radians(lat))))
+    
+    query = db.query(Supplier).filter(
+        Supplier.lat.between(lat - lat_range, lat + lat_range),
+        Supplier.lng.between(lng - lat_range, lat + lat_range),
+        Supplier.is_active == True
+    )
+    
+    if category:
+        query = query.filter(Supplier.category_level_1 == category)
+    
+    if price_levels:
+        levels = price_levels.split(',')
+        query = query.filter(Supplier.price_level.in_(levels))
+    
+    if weekend_only:
+        query = query.filter(Supplier.weekend_available == True)
+    
+    suppliers = query.all()
+    
+    # 计算精确距离并过滤
+    from math import radians, cos, sin, asin, sqrt
+    
+    def haversine(lat1, lng1, lat2, lng2):
+        """计算两点间距离（公里）"""
+        lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
+        dlat = lat2 - lat1
+        dlng = lng2 - lng1
+        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlng/2)**2
+        c = 2 * asin(sqrt(a))
+        r = 6371  # 地球半径（公里）
+        return c * r
+    
+    results = []
+    for s in suppliers:
+        if s.lat and s.lng:
+            distance = haversine(lat, lng, float(s.lat), float(s.lng))
+            if distance <= radius_km:
+                results.append({
+                    "supplier_id": s.supplier_id,
+                    "name": s.name,
+                    "category_level_1": s.category_level_1,
+                    "category_level_2": s.category_level_2,
+                    "suburb": s.suburb,
+                    "lat": float(s.lat) if s.lat else None,
+                    "lng": float(s.lng) if s.lng else None,
+                    "price_level": s.price_level,
+                    "max_capacity": s.max_capacity,
+                    "rating": float(s.rating) if s.rating else 5.0,
+                    "review_count": s.review_count,
+                    "cover_image_url": s.cover_image_url,
+                    "service_tags": s.service_tags,
+                    "distance_km": round(distance, 1)
+                })
+    
+    # 按距离排序
+    results.sort(key=lambda x: x["distance_km"])
+    
+    return {
+        "suppliers": results[:limit],
+        "center_lat": lat,
+        "center_lng": lng,
+        "radius_km": radius_km,
+        "total_count": len(results)
+    }
+
+@app.get("/api/suppliers", response_model=List[SupplierListItem])
+def list_suppliers(
+    category: Optional[str] = Query(None),
+    suburb: Optional[str] = Query(None),
+    price_level: Optional[str] = Query(None),
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db)
+):
+    """列表查询供应商"""
+    query = db.query(Supplier).filter(Supplier.is_active == True)
+    
+    if category:
+        query = query.filter(Supplier.category_level_1 == category)
+    if suburb:
+        query = query.filter(Supplier.suburb.ilike(f"%{suburb}%"))
+    if price_level:
+        query = query.filter(Supplier.price_level == price_level)
+    
+    suppliers = query.offset(skip).limit(limit).all()
+    
+    return [
+        SupplierListItem(
+            supplier_id=s.supplier_id,
+            name=s.name,
+            category_level_1=s.category_level_1,
+            category_level_2=s.category_level_2,
+            suburb=s.suburb,
+            lat=float(s.lat) if s.lat else None,
+            lng=float(s.lng) if s.lng else None,
+            price_level=s.price_level,
+            max_capacity=s.max_capacity,
+            rating=float(s.rating) if s.rating else 5.0,
+            review_count=s.review_count,
+            cover_image_url=s.cover_image_url,
+            service_tags=s.service_tags,
+            distance_km=None
+        )
+        for s in suppliers
+    ]
+
+@app.get("/api/suppliers/{supplier_id}", response_model=Dict[str, Any])
+def get_supplier_detail(
+    supplier_id: int,
+    db: Session = Depends(get_db)
+):
+    """获取供应商详情"""
+    supplier = db.query(Supplier).filter(
+        Supplier.supplier_id == supplier_id,
+        Supplier.is_active == True
+    ).first()
+    
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    
+    return {
+        "supplier_id": supplier.supplier_id,
+        "name": supplier.name,
+        "category_level_1": supplier.category_level_1,
+        "category_level_2": supplier.category_level_2,
+        "contact_name": supplier.contact_name,
+        "phone": supplier.phone,
+        "whatsapp": supplier.whatsapp,
+        "wechat": supplier.wechat,
+        "email": supplier.email,
+        "address": supplier.address,
+        "suburb": supplier.suburb,
+        "city": supplier.city,
+        "lat": float(supplier.lat) if supplier.lat else None,
+        "lng": float(supplier.lng) if supplier.lng else None,
+        "service_radius_km": supplier.service_radius_km,
+        "service_tags": supplier.service_tags,
+        "style_tags": supplier.style_tags,
+        "price_level": supplier.price_level,
+        "min_order_amount": float(supplier.min_order_amount) if supplier.min_order_amount else None,
+        "max_capacity": supplier.max_capacity,
+        "business_hours": supplier.business_hours,
+        "weekend_available": supplier.weekend_available,
+        "urgent_order_supported": supplier.urgent_order_supported,
+        "insurance_status": supplier.insurance_status,
+        "abn": supplier.abn,
+        "company_name": supplier.company_name,
+        "invoice_supported": supplier.invoice_supported,
+        "rating": float(supplier.rating) if supplier.rating else 5.0,
+        "review_count": supplier.review_count,
+        "cooperation_status": supplier.cooperation_status,
+        "cover_image_url": supplier.cover_image_url,
+        "gallery_images": supplier.gallery_images,
+        "notes": supplier.notes,
+        "created_at": supplier.created_at
+    }
+
+@app.post("/api/suppliers", response_model=Dict[str, Any])
+def create_supplier(
+    request: Dict[str, Any],
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """创建供应商（后台管理）"""
+    # 简化为直接插入
+    supplier = Supplier(
+        name=request.get("name"),
+        category_level_1=request.get("category_level_1", "场地类"),
+        category_level_2=request.get("category_level_2"),
+        contact_name=request.get("contact_name"),
+        phone=request.get("phone"),
+        email=request.get("email"),
+        address=request.get("address"),
+        suburb=request.get("suburb", "Sydney"),
+        lat=request.get("lat"),
+        lng=request.get("lng"),
+        price_level=request.get("price_level"),
+        max_capacity=request.get("max_capacity"),
+        cover_image_url=request.get("cover_image_url"),
+        service_tags=request.get("service_tags", []),
+        cooperation_status="待开发"
+    )
+    
+    db.add(supplier)
+    db.commit()
+    db.refresh(supplier)
+    
+    return {"supplier_id": supplier.supplier_id, "message": "Supplier created successfully"}
+
+
 # ==================== MAIN ====================
 
 if __name__ == "__main__":
