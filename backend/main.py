@@ -169,6 +169,16 @@ def get_db():
     finally:
         db.close()
 
+# Create tables on startup (for development/testing)
+# Note: In production, use Alembic migrations instead
+@app.on_event("startup")
+def create_tables():
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("✅ Database tables created/verified")
+    except Exception as e:
+        print(f"⚠️  Table creation skipped (may already exist): {e}")
+
 # ==================== DATABASE MODELS ====================
 
 class User(Base):
