@@ -152,10 +152,7 @@ const selectSupplier = (s) => {
   router.push(`/suppliers/${s.supplier_id}`)
 }
 
-const searchNearby = () => {
-  // 筛选逻辑
-}
-
+const searchNearby = () => {}
 const getCurrentLocation = () => {}
 const zoomIn = () => {}
 const zoomOut = () => {}
@@ -163,19 +160,22 @@ const resetMap = () => {}
 </script>
 
 <style scoped>
+/* ========== 全局背景：纯白，无灰色蒙版 ========== */
 .suppliers-page {
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
   background: #ffffff;
+  min-height: 100vh;
 }
 
+/* ========== 搜索栏：白底 + 深灰边框 ========== */
 .search-bar {
   background: #ffffff;
   padding: 20px;
   border-radius: 12px;
-  border: 2px solid #c0c0c0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 2px solid #333333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   margin-bottom: 20px;
 }
 
@@ -184,7 +184,7 @@ const resetMap = () => {}
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  border: 2px solid #a0a0a0;
+  border: 2px solid #333333;
   border-radius: 10px;
   margin-bottom: 16px;
   background: #ffffff;
@@ -195,8 +195,9 @@ const resetMap = () => {}
   border: none;
   font-size: 16px;
   outline: none;
-  color: #1a1a1a;
+  color: #000000;
   background: transparent;
+  font-weight: 500;
 }
 
 .location-input input::placeholder {
@@ -204,16 +205,17 @@ const resetMap = () => {}
 }
 
 .location-input button {
-  padding: 10px 18px;
+  padding: 12px 20px;
   background: #7c3aed;
   color: white;
-  border: none;
+  border: 2px solid #5b21b6;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
 }
 
+/* ========== 筛选器：深边框 + 黑字 ========== */
 .filters {
   display: flex;
   gap: 12px;
@@ -221,13 +223,13 @@ const resetMap = () => {}
 }
 
 .filters select {
-  padding: 10px 16px;
-  border: 2px solid #a0a0a0;
+  padding: 12px 16px;
+  border: 2px solid #333333;
   border-radius: 8px;
   font-size: 14px;
   background: #ffffff;
-  color: #1a1a1a;
-  font-weight: 500;
+  color: #000000;
+  font-weight: 600;
 }
 
 .checkbox {
@@ -235,14 +237,15 @@ const resetMap = () => {}
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  color: #1a1a1a;
-  font-weight: 600;
-  padding: 10px 16px;
+  color: #000000;
+  font-weight: 700;
+  padding: 12px 16px;
   background: #f0f0f0;
   border-radius: 8px;
-  border: 2px solid #a0a0a0;
+  border: 2px solid #333333;
 }
 
+/* ========== 主内容区：清晰分割 ========== */
 .content-split {
   display: grid;
   grid-template-columns: 1fr 420px;
@@ -250,19 +253,20 @@ const resetMap = () => {}
   height: calc(100vh - 200px);
 }
 
+/* ========== 地图区：深边框 + 明显阴影 ========== */
 .map-section {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid #c0c0c0;
-  background: #f5f5f5;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  border: 3px solid #333333;
+  background: #e0e0e0;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
 }
 
 .map-container {
   width: 100%;
   height: 100%;
-  background: #e0e0e0;
+  background: #d0d0d0;
 }
 
 .map-controls {
@@ -275,52 +279,56 @@ const resetMap = () => {}
 }
 
 .map-controls button {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   background: #ffffff;
-  border: 2px solid #a0a0a0;
+  border: 2px solid #333333;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   cursor: pointer;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
 }
 
+/* ========== 列表区：深边框 + 层次清晰 ========== */
 .list-section {
   display: flex;
   flex-direction: column;
   background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid #c0c0c0;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  border: 3px solid #333333;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
 }
 
+/* 列表头部：深灰底 + 黑字 */
 .results-header {
   padding: 16px 20px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 3px solid #333333;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f5f5f5;
+  background: #e8e8e8;
 }
 
 .results-header span {
-  font-weight: 700;
-  color: #1a1a1a;
-  font-size: 15px;
+  font-weight: 800;
+  color: #000000;
+  font-size: 16px;
 }
 
 .results-header select {
-  padding: 8px 14px;
-  border: 2px solid #a0a0a0;
+  padding: 10px 16px;
+  border: 2px solid #333333;
   border-radius: 6px;
   background: #ffffff;
-  color: #1a1a1a;
-  font-weight: 600;
+  color: #000000;
+  font-weight: 700;
+  font-size: 14px;
 }
 
+/* 列表内容区 */
 .suppliers-list {
   flex: 1;
   overflow-y: auto;
@@ -328,36 +336,38 @@ const resetMap = () => {}
   background: #ffffff;
 }
 
+/* ========== 供应商卡片：深边框 + 高对比度 ========== */
 .supplier-card {
   display: flex;
-  gap: 14px;
-  padding: 16px;
+  gap: 16px;
+  padding: 18px;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   background: #ffffff;
-  border: 2px solid #d0d0d0;
+  border: 3px solid #555555;
 }
 
 .supplier-card:hover {
   border-color: #7c3aed;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.25);
 }
 
 .supplier-card.active {
   background: #f3e8ff;
-  border: 2px solid #7c3aed;
+  border: 3px solid #7c3aed;
 }
 
+/* 图片区 */
 .card-image {
   position: relative;
-  width: 110px;
-  height: 110px;
+  width: 120px;
+  height: 120px;
   border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #333333;
 }
 
 .card-image img {
@@ -370,14 +380,16 @@ const resetMap = () => {}
   position: absolute;
   top: 6px;
   right: 6px;
-  background: rgba(0,0,0,0.9);
-  color: white;
-  padding: 4px 8px;
+  background: #000000;
+  color: #ffffff;
+  padding: 5px 10px;
   border-radius: 6px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid #ffffff;
 }
 
+/* 信息区：纯黑字 + 粗体 */
 .card-info {
   flex: 1;
   min-width: 0;
@@ -385,57 +397,59 @@ const resetMap = () => {}
 
 .category-tag {
   display: inline-block;
-  padding: 4px 10px;
-  background: #ede9fe;
-  color: #5b21b6;
+  padding: 5px 12px;
+  background: #7c3aed;
+  color: #ffffff;
   border-radius: 6px;
   font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 6px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  border: 1px solid #5b21b6;
 }
 
 .card-info h3 {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #1a1a1a;
-  line-height: 1.4;
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: #000000;
+  line-height: 1.3;
 }
 
 .rating {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #333;
-  margin-bottom: 6px;
-  font-weight: 600;
+  gap: 10px;
+  font-size: 14px;
+  color: #000000;
+  margin-bottom: 8px;
+  font-weight: 700;
 }
 
 .stars {
   color: #f59e0b;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 16px;
 }
 
 .location {
-  font-size: 13px;
-  color: #444;
-  margin-bottom: 8px;
-  font-weight: 600;
+  font-size: 14px;
+  color: #333333;
+  margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .footer {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
-  color: #333;
-  font-weight: 700;
+  font-size: 14px;
+  color: #000000;
+  font-weight: 800;
 }
 
 .price {
   color: #059669;
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 800;
+  font-size: 15px;
 }
 
 @media (max-width: 1024px) {
