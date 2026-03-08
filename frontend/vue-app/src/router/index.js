@@ -89,7 +89,27 @@ const routes = [
     meta: { title: '素材库', requiresAuth: true, requiresPartner: true }
   },
   
+  // ========== Suppliers 供应商库 ==========
+  {
+    path: '/suppliers',
+    name: 'SuppliersMap',
+    component: () => import('@/views/SuppliersMap.vue'),
+    meta: { title: '供应商地图' }
+  },
+  {
+    path: '/suppliers/:id',
+    name: 'SupplierDetail',
+    component: () => import('@/views/SupplierDetail.vue'),
+    meta: { title: '供应商详情' }
+  },
+  
   // ========== Admin 管理后台 ==========
+  {
+    path: '/admin/suppliers',
+    name: 'AdminSuppliers',
+    component: () => import('@/views/AdminSuppliers.vue'),
+    meta: { title: '供应商管理', requiresAuth: true, requiresAdmin: true }
+  },
   {
     path: '/admin/partners',
     name: 'AdminPartners',
