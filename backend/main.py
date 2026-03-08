@@ -686,6 +686,71 @@ class RewardRule(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+# ==================== SUPPLIER MODELS ====================
+
+class Supplier(Base):
+    __tablename__ = "suppliers"
+    
+    supplier_id = Column(Integer, primary_key=True, index=True)
+    
+    # 基础信息
+    name = Column(String(255), nullable=False)
+    category_level_1 = Column(String(50), nullable=False)
+    category_level_2 = Column(String(100))
+    
+    # 联系信息
+    contact_name = Column(String(100))
+    phone = Column(String(50))
+    whatsapp = Column(String(50))
+    wechat = Column(String(50))
+    email = Column(String(255))
+    
+    # 地址信息
+    address = Column(String(500))
+    suburb = Column(String(100), nullable=False)
+    city = Column(String(100), default="Sydney")
+    state = Column(String(50), default="NSW")
+    postcode = Column(String(20))
+    lat = Column(DECIMAL(10, 8))
+    lng = Column(DECIMAL(11, 8))
+    service_radius_km = Column(Integer, default=10)
+    
+    # 服务信息
+    service_tags = Column(JSON)
+    style_tags = Column(JSON)
+    price_level = Column(String(10))
+    min_order_amount = Column(DECIMAL(10, 2))
+    max_capacity = Column(Integer)
+    business_hours = Column(JSON)
+    weekend_available = Column(Boolean, default=True)
+    urgent_order_supported = Column(Boolean, default=False)
+    
+    # 资质信息
+    insurance_status = Column(String(10), default="待定")
+    abn = Column(String(50))
+    company_name = Column(String(255))
+    invoice_supported = Column(Boolean, default=False)
+    
+    # 评分与合作
+    rating = Column(DECIMAL(2, 1), default=5.0)
+    review_count = Column(Integer, default=0)
+    cooperation_status = Column(String(20), default="待开发")
+    priority_level = Column(String(5), default="C")
+    
+    # 数据类型标记
+    is_seed = Column(Boolean, default=False)
+    is_template = Column(Boolean, default=False)
+    is_real = Column(Boolean, default=False)
+    
+    # 图片
+    cover_image_url = Column(String(500))
+    gallery_images = Column(JSON)
+    
+    # 系统字段
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 # ==================== 3D DESIGN MODELS ====================
 
 class Design(Base):
@@ -3922,6 +3987,188 @@ def create_supplier(
     
     return {"supplier_id": supplier.supplier_id, "message": "Supplier created successfully"}
 
+
+@app.post("/api/admin/suppliers/init", response_model=Dict[str, Any])
+def init_suppliers(db: Session = Depends(get_db)):
+    """Initialize seed suppliers - idempotent operation"""
+    
+    # Check if seed data already exists
+    existing_count = db.query(Supplier).filter(Supplier.is_seed == True).count()
+    if existing_count > 0:
+        return {
+            "message": "Seed suppliers already initialized",
+            "existing_count": existing_count,
+            "skipped": True
+        }
+    
+    # Seed suppliers data - 5 core categories
+    seed_suppliers = [
+        {
+            "name": "Wannabees Family Play Town",
+            "category_level_1": "场地类",
+            "category_level_2": "室内儿童乐园",
+            "contact_name": "Manager",
+            "phone": "02 9873 7700",
+            "email": "info@wannabees.com.au",
+            "address": "C1/1-3 Rodborough Rd, Frenchs Forest",
+            "suburb": "Frenchs Forest",
+            "city": "Sydney",
+            "lat": -33.7448,
+            "lng": 151.2386,
+            "service_radius_km": 20,
+            "price_level": "中",
+            "max_capacity": 80,
+            "weekend_available": True,
+            "urgent_order_supported": True,
+            "insurance_status": "有",
+            "rating": 4.7,
+            "review_count": 156,
+            "cooperation_status": "正式合作",
+            "priority_level": "A",
+            "service_tags": ["生日派对", "室内游乐", "主题派对", "儿童友好"],
+            "cover_image_url": "https://images.unsplash.com/photo-1530103862676-de3c9a59aa38?w=800",
+            "is_seed": True
+        },
+        {
+            "name": "Balloons By Design",
+            "category_level_1": "物料类",
+            "category_level_2": "气球装饰",
+            "contact_name": "Lisa Chen",
+            "phone": "0412 345 678",
+            "email": "lisa@balloonsbydesign.com.au",
+            "address": "Mobile Service",
+            "suburb": "Sydney Wide",
+            "city": "Sydney",
+            "lat": -33.8688,
+            "lng": 151.2093,
+            "service_radius_km": 50,
+            "price_level": "中",
+            "max_capacity": None,
+            "weekend_available": True,
+            "urgent_order_supported": True,
+            "insurance_status": "有",
+            "rating": 4.9,
+            "review_count": 178,
+            "cooperation_status": "正式合作",
+            "priority_level": "A",
+            "service_tags": ["气球装饰", "送货上门", "主题定制", "现场布置"],
+            "cover_image_url": "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800",
+            "is_seed": True
+        },
+        {
+            "name": "Little Party Faces",
+            "category_level_1": "现场服务类",
+            "category_level_2": "派对主持",
+            "contact_name": "Emily Wang",
+            "phone": "0433 222 111",
+            "email": "emily@littlepartyfaces.com",
+            "address": "Mobile Service",
+            "suburb": "Sydney Metro",
+            "city": "Sydney",
+            "lat": -33.8500,
+            "lng": 151.2000,
+            "service_radius_km": 30,
+            "price_level": "中",
+            "max_capacity": None,
+            "weekend_available": True,
+            "urgent_order_supported": True,
+            "insurance_status": "有",
+            "rating": 5.0,
+            "review_count": 67,
+            "cooperation_status": "试合作",
+            "priority_level": "B",
+            "service_tags": ["儿童主持", "派对游戏", "脸部彩绘", "互动表演"],
+            "cover_image_url": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800",
+            "is_seed": True
+        },
+        {
+            "name": "Cake Mail Sydney",
+            "category_level_1": "餐饮类",
+            "category_level_2": "定制蛋糕",
+            "contact_name": "Chef David",
+            "phone": "02 1234 5678",
+            "email": "orders@cakemailsydney.com.au",
+            "address": "Shop 5/123 Queen St, Campbelltown",
+            "suburb": "Campbelltown",
+            "city": "Sydney",
+            "lat": -34.0639,
+            "lng": 150.8144,
+            "service_radius_km": 40,
+            "price_level": "中",
+            "max_capacity": None,
+            "weekend_available": True,
+            "urgent_order_supported": True,
+            "insurance_status": "有",
+            "rating": 4.8,
+            "review_count": 145,
+            "cooperation_status": "正式合作",
+            "priority_level": "A",
+            "service_tags": ["生日蛋糕", "主题蛋糕", "定制甜品", "配送服务"],
+            "cover_image_url": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800",
+            "is_seed": True
+        },
+        {
+            "name": "Sydney Party Decorators",
+            "category_level_1": "搭建类",
+            "category_level_2": "场地布置",
+            "contact_name": "Mike Johnson",
+            "phone": "0456 789 012",
+            "email": "mike@sydpartydecorators.com",
+            "address": "Mobile Service",
+            "suburb": "Greater Sydney",
+            "city": "Sydney",
+            "lat": -33.8700,
+            "lng": 151.2100,
+            "service_radius_km": 60,
+            "price_level": "高",
+            "max_capacity": None,
+            "weekend_available": True,
+            "urgent_order_supported": True,
+            "insurance_status": "有",
+            "rating": 4.7,
+            "review_count": 92,
+            "cooperation_status": "正式合作",
+            "priority_level": "A",
+            "service_tags": ["场地布置", "背景板", "桌椅租赁", "撤场服务"],
+            "cover_image_url": "https://images.unsplash.com/photo-1478146896981-b80c46346f93?w=800",
+            "is_seed": True
+        }
+    ]
+    
+    # Insert suppliers
+    inserted_count = 0
+    for data in seed_suppliers:
+        supplier = Supplier(**data)
+        db.add(supplier)
+        inserted_count += 1
+    
+    db.commit()
+    
+    return {
+        "message": "Seed suppliers initialized successfully",
+        "inserted": inserted_count,
+        "categories": list(set(s["category_level_1"] for s in seed_suppliers)),
+        "skipped": False
+    }
+
+@app.get("/api/admin/suppliers/stats", response_model=Dict[str, Any])
+def get_supplier_stats(db: Session = Depends(get_db)):
+    """Get supplier statistics"""
+    total = db.query(Supplier).filter(Supplier.is_active == True).count()
+    seed_count = db.query(Supplier).filter(Supplier.is_seed == True).count()
+    real_count = db.query(Supplier).filter(Supplier.is_real == True).count()
+    
+    category_stats = db.query(
+        Supplier.category_level_1,
+        db.func.count(Supplier.supplier_id).label('count')
+    ).filter(Supplier.is_active == True).group_by(Supplier.category_level_1).all()
+    
+    return {
+        "total": total,
+        "seed_count": seed_count,
+        "real_count": real_count,
+        "by_category": [{"category": cat, "count": cnt} for cat, cnt in category_stats]
+    }
 
 # ==================== MAIN ====================
 
