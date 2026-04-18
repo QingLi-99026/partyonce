@@ -25,6 +25,8 @@ import hashlib
 import hmac
 import secrets
 
+from desktop_executor import router as desktop_executor_router
+
 load_dotenv()
 
 # ==================== ENUMS ====================
@@ -160,6 +162,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Desktop executor phase-1 router
+app.include_router(desktop_executor_router)
 
 # Database Dependency
 def get_db():
