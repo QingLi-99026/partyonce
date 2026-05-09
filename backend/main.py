@@ -20,10 +20,12 @@ import openai
 import json
 import asyncio
 from enum import Enum as PyEnum
+from contextlib import closing
 import uuid
 import hashlib
 import hmac
 import secrets
+import sqlite3
 
 load_dotenv()
 
@@ -901,7 +903,7 @@ class LeadResponse(BaseModel):
     submitted_at: datetime
     created_at: datetime
     updated_at: datetime
-    skeleton_notice: str = "Lead API skeleton uses in-memory storage only; no quote/order/payment/external actions are triggered."
+    skeleton_notice: str = "Lead API skeleton/local persistence does not create quote/order/payment/external actions."
 
 class LeadListResponse(BaseModel):
     items: List[LeadResponse]
@@ -1596,9 +1598,355 @@ def require_admin(current_user: User = Depends(get_current_user)):
     return current_user
 
 LEAD_API_SKELETON_STORE: Dict[str, Dict[str, Any]] = {}
+LEAD_STORAGE_MODE = os.getenv("PARTYONCE_LEAD_STORAGE_MODE", "memory").strip().lower()
+LEAD_SQLITE_PATH = os.getenv("PARTYONCE_LEAD_SQLITE_PATH", "/tmp/partyonce_stage2_lead_storage.sqlite")
+
+def is_lead_sqlite_local_enabled() -> bool:
+    return LEAD_STORAGE_MODE == "sqlite_local"
+
+def get_safe_lead_sqlite_path() -> str:
+    sqlite_path = os.path.abspath(LEAD_SQLITE_PATH)
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    if sqlite_path.startswith(repo_root + os.sep):
+        raise HTTPException(status_code=500, detail="Lead SQLite path must be outside the repository")
+    if not (sqlite_path.startswith("/tmp/") or sqlite_path.startswith("/var/folders/")):
+        raise HTTPException(status_code=500, detail="Lead SQLite path must be an explicit local temp path")
+    return sqlite_path
+
+def get_lead_sqlite_connection() -> sqlite3.Connection:
+    sqlite_path = get_safe_lead_sqlite_path()
+    os.makedirs(os.path.dirname(sqlite_path), exist_ok=True)
+    conn = sqlite3.connect(sqlite_path)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
+
+def ensure_lead_sqlite_schema(conn: sqlite3.Connection):
+    migration_path = os.path.join(os.path.dirname(__file__), "migrations", "001_create_lead_storage.sql")
+    with open(migration_path, "r", encoding="utf-8") as migration_file:
+        conn.executescript(migration_file.read())
+    conn.commit()
 
 def build_lead_response(lead: Dict[str, Any]) -> LeadResponse:
     return LeadResponse(**lead)
+
+def parse_lead_contact(contact: str) -> Dict[str, Optional[str]]:
+    cleaned = contact.strip()
+    if "@" in cleaned:
+        return {"email": cleaned, "phone": None, "wechat_or_other_contact": None, "preferred_contact_method": "email"}
+
+    phone_chars = set("0123456789+()- .")
+    digit_count = sum(1 for char in cleaned if char.isdigit())
+    if digit_count >= 6 and all(char in phone_chars for char in cleaned):
+        return {"email": None, "phone": cleaned, "wechat_or_other_contact": None, "preferred_contact_method": "phone"}
+
+    return {"email": None, "phone": None, "wechat_or_other_contact": cleaned, "preferred_contact_method": "other"}
+
+def encode_lead_snapshot(value: Dict[str, Any]) -> str:
+    return json.dumps(value or {}, ensure_ascii=False)
+
+def decode_lead_snapshot(value: Optional[str]) -> Dict[str, Any]:
+    if not value:
+        return {}
+    try:
+        parsed = json.loads(value)
+        return parsed if isinstance(parsed, dict) else {}
+    except (TypeError, ValueError):
+        return {}
+
+def parse_sqlite_datetime(value: Any) -> datetime:
+    if isinstance(value, datetime):
+        return value
+    if not value:
+        return datetime.utcnow()
+    text_value = str(value).replace("Z", "+00:00")
+    try:
+        return datetime.fromisoformat(text_value)
+    except ValueError:
+        try:
+            return datetime.strptime(str(value), "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return datetime.utcnow()
+
+def find_or_create_lead_customer(conn: sqlite3.Connection, customer: LeadCustomerInput) -> sqlite3.Row:
+    contact_parts = parse_lead_contact(customer.contact)
+    if contact_parts["email"]:
+        existing = conn.execute("SELECT * FROM customers WHERE email = ?", (contact_parts["email"],)).fetchone()
+    elif contact_parts["phone"]:
+        existing = conn.execute("SELECT * FROM customers WHERE phone = ?", (contact_parts["phone"],)).fetchone()
+    else:
+        existing = conn.execute(
+            "SELECT * FROM customers WHERE name = ? AND wechat_or_other_contact = ?",
+            (customer.name, contact_parts["wechat_or_other_contact"])
+        ).fetchone()
+    if existing:
+        return existing
+
+    now = datetime.utcnow().isoformat()
+    cursor = conn.execute(
+        """
+        INSERT INTO customers (
+            name, email, phone, wechat_or_other_contact, preferred_contact_method, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            customer.name,
+            contact_parts["email"],
+            contact_parts["phone"],
+            contact_parts["wechat_or_other_contact"],
+            contact_parts["preferred_contact_method"],
+            now,
+            now
+        )
+    )
+    return conn.execute("SELECT * FROM customers WHERE id = ?", (cursor.lastrowid,)).fetchone()
+
+def get_lead_follow_up_summary(conn: sqlite3.Connection, lead_id: int) -> Dict[str, Any]:
+    latest = conn.execute(
+        """
+        SELECT note, next_action, updated_at, created_at
+        FROM follow_ups
+        WHERE lead_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+        """,
+        (lead_id,)
+    ).fetchone()
+    if not latest:
+        return {"latest_note": None, "next_action": None, "updated_at": None}
+
+    return {
+        "latest_note": latest["note"],
+        "next_action": latest["next_action"],
+        "updated_at": latest["updated_at"] or latest["created_at"]
+    }
+
+def get_latest_follow_up_note(conn: sqlite3.Connection, lead_id: int, note_type: str) -> Optional[str]:
+    row = conn.execute(
+        """
+        SELECT note
+        FROM follow_ups
+        WHERE lead_id = ? AND type = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+        """,
+        (lead_id, note_type)
+    ).fetchone()
+    return row["note"] if row else None
+
+def build_sqlite_lead_response(conn: sqlite3.Connection, row: sqlite3.Row) -> LeadResponse:
+    contact = row["email"] or row["phone"] or row["wechat_or_other_contact"] or ""
+    lead_id = int(row["id"])
+    return LeadResponse(
+        id=str(lead_id),
+        customer=LeadCustomerSummary(name=row["customer_name"], contact=contact),
+        source=row["source"],
+        status=row["status"],
+        priority=row["priority"],
+        owner_user_id=row["owner_user_id"],
+        preferred_event_date=row["preferred_event_date"],
+        intake_notes=row["intake_notes"],
+        selection_snapshot=decode_lead_snapshot(row["selection_snapshot_json"]),
+        pricing_snapshot=decode_lead_snapshot(row["pricing_snapshot_json"]),
+        follow_up_summary=get_lead_follow_up_summary(conn, lead_id),
+        qualified_reason=get_latest_follow_up_note(conn, lead_id, "qualified_reason"),
+        unqualified_reason=get_latest_follow_up_note(conn, lead_id, "unqualified_reason"),
+        submitted_at=parse_sqlite_datetime(row["submitted_at"]),
+        created_at=parse_sqlite_datetime(row["created_at"]),
+        updated_at=parse_sqlite_datetime(row["updated_at"])
+    )
+
+def create_sqlite_lead(request: LeadCreateRequest) -> LeadResponse:
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_lead_sqlite_schema(conn)
+        now = datetime.utcnow().isoformat()
+        try:
+            conn.execute("BEGIN")
+            customer = find_or_create_lead_customer(conn, request.customer)
+            cursor = conn.execute(
+                """
+                INSERT INTO leads (
+                    customer_id, source, status, priority, owner_user_id, preferred_event_date,
+                    intake_notes, selection_snapshot_json, pricing_snapshot_json,
+                    submitted_at, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    customer["id"],
+                    request.source or "web_quote",
+                    LeadStatus.NEW.value,
+                    LeadPriority.MEDIUM.value,
+                    None,
+                    request.preferred_event_date,
+                    request.intake_notes,
+                    encode_lead_snapshot(request.selection),
+                    encode_lead_snapshot(request.pricing_snapshot),
+                    now,
+                    now,
+                    now
+                )
+            )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+        return get_sqlite_lead_response(conn, str(cursor.lastrowid))
+
+def get_sqlite_lead_response(conn: sqlite3.Connection, lead_id: str) -> LeadResponse:
+    row = conn.execute(
+        """
+        SELECT
+            l.*,
+            c.name AS customer_name,
+            c.email,
+            c.phone,
+            c.wechat_or_other_contact
+        FROM leads l
+        JOIN customers c ON c.id = l.customer_id
+        WHERE l.id = ?
+        """,
+        (lead_id,)
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return build_sqlite_lead_response(conn, row)
+
+def list_sqlite_leads(
+    status: Optional[LeadStatus] = None,
+    owner_user_id: Optional[int] = None,
+    priority: Optional[LeadPriority] = None,
+    search: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0
+) -> LeadListResponse:
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_lead_sqlite_schema(conn)
+        where_clauses = []
+        params: List[Any] = []
+
+        if status:
+            where_clauses.append("l.status = ?")
+            params.append(status.value)
+        if owner_user_id is not None:
+            where_clauses.append("l.owner_user_id = ?")
+            params.append(owner_user_id)
+        if priority:
+            where_clauses.append("l.priority = ?")
+            params.append(priority.value)
+        if search:
+            query = f"%{search.strip().lower()}%"
+            where_clauses.append(
+                """
+                (
+                    lower(c.name) LIKE ?
+                    OR lower(coalesce(c.email, '')) LIKE ?
+                    OR lower(coalesce(c.phone, '')) LIKE ?
+                    OR lower(coalesce(c.wechat_or_other_contact, '')) LIKE ?
+                    OR lower(coalesce(l.intake_notes, '')) LIKE ?
+                    OR lower(coalesce(l.selection_snapshot_json, '')) LIKE ?
+                )
+                """
+            )
+            params.extend([query, query, query, query, query, query])
+
+        where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+        total = conn.execute(
+            f"""
+            SELECT COUNT(*) AS total
+            FROM leads l
+            JOIN customers c ON c.id = l.customer_id
+            {where_sql}
+            """,
+            params
+        ).fetchone()["total"]
+        rows = conn.execute(
+            f"""
+            SELECT
+                l.*,
+                c.name AS customer_name,
+                c.email,
+                c.phone,
+                c.wechat_or_other_contact
+            FROM leads l
+            JOIN customers c ON c.id = l.customer_id
+            {where_sql}
+            ORDER BY l.submitted_at DESC, l.id DESC
+            LIMIT ? OFFSET ?
+            """,
+            params + [limit, offset]
+        ).fetchall()
+        return LeadListResponse(
+            items=[build_sqlite_lead_response(conn, row) for row in rows],
+            total=total,
+            limit=limit,
+            offset=offset
+        )
+
+def update_sqlite_lead(lead_id: str, request: LeadPatchRequest) -> LeadResponse:
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_lead_sqlite_schema(conn)
+        existing = conn.execute("SELECT id FROM leads WHERE id = ?", (lead_id,)).fetchone()
+        if not existing:
+            raise HTTPException(status_code=404, detail="Lead not found")
+
+        patch = request.dict(exclude_unset=True)
+        update_fields = []
+        params: List[Any] = []
+        if "status" in patch and patch["status"] is not None:
+            update_fields.append("status = ?")
+            params.append(patch["status"].value)
+        if "priority" in patch and patch["priority"] is not None:
+            update_fields.append("priority = ?")
+            params.append(patch["priority"].value)
+        if "owner_user_id" in patch:
+            update_fields.append("owner_user_id = ?")
+            params.append(patch["owner_user_id"])
+        if "intake_notes" in patch:
+            update_fields.append("intake_notes = ?")
+            params.append(patch["intake_notes"])
+
+        now = datetime.utcnow().isoformat()
+        try:
+            conn.execute("BEGIN")
+            if update_fields:
+                update_fields.append("updated_at = ?")
+                params.append(now)
+                params.append(lead_id)
+                conn.execute(f"UPDATE leads SET {', '.join(update_fields)} WHERE id = ?", params)
+            elif patch:
+                conn.execute("UPDATE leads SET updated_at = ? WHERE id = ?", (now, lead_id))
+            if "next_action" in patch or "note" in patch:
+                conn.execute(
+                    """
+                    INSERT INTO follow_ups (lead_id, type, note, next_action, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        lead_id,
+                        "note",
+                        patch.get("note"),
+                        patch.get("next_action"),
+                        now,
+                        now
+                    )
+                )
+            if "qualified_reason" in patch and patch["qualified_reason"] is not None:
+                conn.execute(
+                    "INSERT INTO follow_ups (lead_id, type, note, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+                    (lead_id, "qualified_reason", patch["qualified_reason"], now, now)
+                )
+            if "unqualified_reason" in patch and patch["unqualified_reason"] is not None:
+                conn.execute(
+                    "INSERT INTO follow_ups (lead_id, type, note, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+                    (lead_id, "unqualified_reason", patch["unqualified_reason"], now, now)
+                )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+        return get_sqlite_lead_response(conn, lead_id)
 
 def filter_lead_store(
     status: Optional[LeadStatus] = None,
@@ -2351,9 +2699,13 @@ def create_lead_skeleton(request: LeadCreateRequest):
     """
     Public lead intake skeleton.
 
-    This endpoint validates the lead contract and stores the record in process memory only.
+    This endpoint validates the lead contract and stores the record in process memory by default.
+    Explicit local SQLite persistence can be enabled with PARTYONCE_LEAD_STORAGE_MODE=sqlite_local.
     It does not create quotes, orders, payments, external automation runs, or outbound messages.
     """
+    if is_lead_sqlite_local_enabled():
+        return create_sqlite_lead(request)
+
     now = datetime.utcnow()
     lead_id = str(uuid.uuid4())
     lead = {
@@ -2397,9 +2749,12 @@ def list_leads_skeleton(
     """
     Admin-only lead queue skeleton.
 
-    Uses the existing require_admin guard. Records are in process memory only until the
-    Customer/Lead schema and migration are approved.
+    Uses the existing require_admin guard. Records are in process memory by default, or
+    local SQLite when PARTYONCE_LEAD_STORAGE_MODE=sqlite_local is explicitly enabled.
     """
+    if is_lead_sqlite_local_enabled():
+        return list_sqlite_leads(status, owner_user_id, priority, search, limit, offset)
+
     filtered = filter_lead_store(status, owner_user_id, priority, search)
     page = filtered[offset:offset + limit]
     return LeadListResponse(
@@ -2415,6 +2770,11 @@ def get_lead_skeleton(
     current_user: User = Depends(require_admin)
 ):
     """Admin-only lead detail skeleton with customer, selection, pricing, and follow-up placeholders."""
+    if is_lead_sqlite_local_enabled():
+        with closing(get_lead_sqlite_connection()) as conn:
+            ensure_lead_sqlite_schema(conn)
+            return get_sqlite_lead_response(conn, lead_id)
+
     lead = LEAD_API_SKELETON_STORE.get(lead_id)
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
@@ -2432,6 +2792,9 @@ def update_lead_skeleton(
     Allowed updates are limited to Lead operations fields. This endpoint does not create
     Quote, Order, payment state, external automation, or outbound message records.
     """
+    if is_lead_sqlite_local_enabled():
+        return update_sqlite_lead(lead_id, request)
+
     lead = LEAD_API_SKELETON_STORE.get(lead_id)
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
