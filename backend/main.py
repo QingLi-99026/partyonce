@@ -835,6 +835,79 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+# ==================== LEAD API SKELETON SCHEMAS ====================
+
+class LeadStatus(str, PyEnum):
+    NEW = "new"
+    PENDING = "pending"
+    CONTACTED = "contacted"
+    QUALIFIED = "qualified"
+    UNQUALIFIED = "unqualified"
+    CONVERTED_TO_QUOTE = "converted_to_quote"
+    CLOSED = "closed"
+
+class LeadPriority(str, PyEnum):
+    HIGH = "High"
+    MEDIUM = "Medium"
+    LOW = "Low"
+
+class LeadCustomerInput(BaseModel):
+    name: str = Field(..., min_length=1, max_length=160)
+    contact: str = Field(..., min_length=1, max_length=255)
+
+    @validator("name", "contact")
+    def validate_required_text(cls, value):
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("required field cannot be blank")
+        return cleaned
+
+class LeadCreateRequest(BaseModel):
+    customer: LeadCustomerInput
+    preferred_event_date: Optional[str] = None
+    intake_notes: Optional[str] = None
+    selection: Dict[str, Any] = Field(default_factory=dict)
+    pricing_snapshot: Dict[str, Any] = Field(default_factory=dict)
+    source: str = Field(default="web_quote", max_length=80)
+
+class LeadPatchRequest(BaseModel):
+    status: Optional[LeadStatus] = None
+    priority: Optional[LeadPriority] = None
+    owner_user_id: Optional[int] = None
+    intake_notes: Optional[str] = None
+    qualified_reason: Optional[str] = None
+    unqualified_reason: Optional[str] = None
+
+class LeadCustomerSummary(BaseModel):
+    name: str
+    contact: str
+
+class LeadResponse(BaseModel):
+    id: str
+    customer: LeadCustomerSummary
+    source: str
+    status: LeadStatus
+    priority: LeadPriority
+    owner_user_id: Optional[int]
+    preferred_event_date: Optional[str]
+    intake_notes: Optional[str]
+    selection_snapshot: Dict[str, Any]
+    pricing_snapshot: Dict[str, Any]
+    follow_up_summary: Dict[str, Any]
+    qualified_reason: Optional[str] = None
+    unqualified_reason: Optional[str] = None
+    submitted_at: datetime
+    created_at: datetime
+    updated_at: datetime
+    skeleton_notice: str = "Lead API skeleton uses in-memory storage only; no quote/order/payment/external actions are triggered."
+
+class LeadListResponse(BaseModel):
+    items: List[LeadResponse]
+    total: int
+    limit: int
+    offset: int
+    admin_only: bool = True
+
 # ==================== QUOTE SCHEMAS ====================
 
 class QuoteItemBase(BaseModel):
@@ -1519,6 +1592,36 @@ def require_admin(current_user: User = Depends(get_current_user)):
     if current_user.role not in ["admin", "manager"]:
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
+
+LEAD_API_SKELETON_STORE: Dict[str, Dict[str, Any]] = {}
+
+def build_lead_response(lead: Dict[str, Any]) -> LeadResponse:
+    return LeadResponse(**lead)
+
+def filter_lead_store(
+    status: Optional[LeadStatus] = None,
+    owner_user_id: Optional[int] = None,
+    priority: Optional[LeadPriority] = None,
+    search: Optional[str] = None
+) -> List[Dict[str, Any]]:
+    leads = list(LEAD_API_SKELETON_STORE.values())
+
+    if status:
+        leads = [lead for lead in leads if lead["status"] == status.value]
+    if owner_user_id is not None:
+        leads = [lead for lead in leads if lead.get("owner_user_id") == owner_user_id]
+    if priority:
+        leads = [lead for lead in leads if lead["priority"] == priority.value]
+    if search:
+        query = search.strip().lower()
+        leads = [
+            lead for lead in leads
+            if query in lead["customer"]["name"].lower()
+            or query in lead["customer"]["contact"].lower()
+            or query in json.dumps(lead.get("selection_snapshot", {}), ensure_ascii=False).lower()
+        ]
+
+    return sorted(leads, key=lambda item: item["submitted_at"], reverse=True)
 
 def generate_share_code(length: int = 8) -> str:
     """Generate a random share code"""
@@ -2239,6 +2342,115 @@ def read_root():
 @app.get("/api/health")
 def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow()}
+
+# Lead API Skeleton
+@app.post("/api/leads", response_model=LeadResponse, status_code=201)
+def create_lead_skeleton(request: LeadCreateRequest):
+    """
+    Public lead intake skeleton.
+
+    This endpoint validates the lead contract and stores the record in process memory only.
+    It does not create quotes, orders, payments, external automation runs, or outbound messages.
+    """
+    now = datetime.utcnow()
+    lead_id = str(uuid.uuid4())
+    lead = {
+        "id": lead_id,
+        "customer": {
+            "name": request.customer.name,
+            "contact": request.customer.contact
+        },
+        "source": request.source or "web_quote",
+        "status": LeadStatus.NEW.value,
+        "priority": LeadPriority.MEDIUM.value,
+        "owner_user_id": None,
+        "preferred_event_date": request.preferred_event_date,
+        "intake_notes": request.intake_notes,
+        "selection_snapshot": request.selection or {},
+        "pricing_snapshot": request.pricing_snapshot or {},
+        "follow_up_summary": {
+            "latest_note": None,
+            "next_action": None,
+            "updated_at": None
+        },
+        "qualified_reason": None,
+        "unqualified_reason": None,
+        "submitted_at": now,
+        "created_at": now,
+        "updated_at": now
+    }
+    LEAD_API_SKELETON_STORE[lead_id] = lead
+    return build_lead_response(lead)
+
+@app.get("/api/leads", response_model=LeadListResponse)
+def list_leads_skeleton(
+    status: Optional[LeadStatus] = None,
+    owner_user_id: Optional[int] = None,
+    priority: Optional[LeadPriority] = None,
+    search: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    current_user: User = Depends(require_admin)
+):
+    """
+    Admin-only lead queue skeleton.
+
+    Uses the existing require_admin guard. Records are in process memory only until the
+    Customer/Lead schema and migration are approved.
+    """
+    filtered = filter_lead_store(status, owner_user_id, priority, search)
+    page = filtered[offset:offset + limit]
+    return LeadListResponse(
+        items=[build_lead_response(lead) for lead in page],
+        total=len(filtered),
+        limit=limit,
+        offset=offset
+    )
+
+@app.get("/api/leads/{lead_id}", response_model=LeadResponse)
+def get_lead_skeleton(
+    lead_id: str,
+    current_user: User = Depends(require_admin)
+):
+    """Admin-only lead detail skeleton with customer, selection, pricing, and follow-up placeholders."""
+    lead = LEAD_API_SKELETON_STORE.get(lead_id)
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return build_lead_response(lead)
+
+@app.patch("/api/leads/{lead_id}", response_model=LeadResponse)
+def update_lead_skeleton(
+    lead_id: str,
+    request: LeadPatchRequest,
+    current_user: User = Depends(require_admin)
+):
+    """
+    Admin-only lead update skeleton.
+
+    Allowed updates are limited to Lead operations fields. This endpoint does not create
+    Quote, Order, payment state, external automation, or outbound message records.
+    """
+    lead = LEAD_API_SKELETON_STORE.get(lead_id)
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    patch = request.dict(exclude_unset=True)
+    if "status" in patch and patch["status"] is not None:
+        lead["status"] = patch["status"].value
+    if "priority" in patch and patch["priority"] is not None:
+        lead["priority"] = patch["priority"].value
+    if "owner_user_id" in patch:
+        lead["owner_user_id"] = patch["owner_user_id"]
+    if "intake_notes" in patch:
+        lead["intake_notes"] = patch["intake_notes"]
+    if "qualified_reason" in patch:
+        lead["qualified_reason"] = patch["qualified_reason"]
+    if "unqualified_reason" in patch:
+        lead["unqualified_reason"] = patch["unqualified_reason"]
+
+    lead["updated_at"] = datetime.utcnow()
+    LEAD_API_SKELETON_STORE[lead_id] = lead
+    return build_lead_response(lead)
 
 # User Endpoints
 @app.post("/api/users/register", response_model=UserResponse)
