@@ -877,6 +877,8 @@ class LeadPatchRequest(BaseModel):
     intake_notes: Optional[str] = None
     qualified_reason: Optional[str] = None
     unqualified_reason: Optional[str] = None
+    next_action: Optional[str] = None
+    note: Optional[str] = None
 
 class LeadCustomerSummary(BaseModel):
     name: str
@@ -2447,6 +2449,18 @@ def update_lead_skeleton(
         lead["qualified_reason"] = patch["qualified_reason"]
     if "unqualified_reason" in patch:
         lead["unqualified_reason"] = patch["unqualified_reason"]
+    if "next_action" in patch or "note" in patch:
+        follow_up_summary = {
+            "latest_note": lead.get("follow_up_summary", {}).get("latest_note"),
+            "next_action": lead.get("follow_up_summary", {}).get("next_action"),
+            "updated_at": lead.get("follow_up_summary", {}).get("updated_at")
+        }
+        if "next_action" in patch:
+            follow_up_summary["next_action"] = patch["next_action"]
+        if "note" in patch:
+            follow_up_summary["latest_note"] = patch["note"]
+        follow_up_summary["updated_at"] = datetime.utcnow().isoformat()
+        lead["follow_up_summary"] = follow_up_summary
 
     lead["updated_at"] = datetime.utcnow()
     LEAD_API_SKELETON_STORE[lead_id] = lead

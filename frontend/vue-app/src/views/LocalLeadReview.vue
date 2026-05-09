@@ -5,12 +5,12 @@
         <p class="app-eyebrow">Local lead review</p>
         <h1 class="app-page-title">留资与跟进中心</h1>
         <p class="app-page-subtitle">
-          运营人员在本地查看报价页生成的咨询记录，完成状态筛选、负责人分配、优先级和下一步动作记录。
-          所有修改只写回浏览器 localStorage，不调用后端或任何外部系统。
+          运营人员查看报价页生成的咨询记录，完成状态筛选、负责人分配、优先级和下一步动作记录。
+          默认使用浏览器 localStorage；Backend Skeleton 模式只调用本地 /api/leads 骨架接口。
         </p>
       </div>
       <div class="header-actions">
-        <el-button @click="refreshLeads">刷新</el-button>
+        <el-button :loading="isLoading" @click="refreshLeads">刷新</el-button>
         <el-button type="primary" @click="router.push('/local-demo')">返回 Local Demo Hub</el-button>
       </div>
     </header>
@@ -20,7 +20,7 @@
       type="warning"
       :closable="false"
       show-icon
-      title="Local-only operations：本页不创建订单、不触发付款、不发送消息、不调用 webhook / n8n。"
+      :title="modeNotice"
     />
 
     <section class="lead-stats app-section">
@@ -32,6 +32,10 @@
     </section>
 
     <section class="lead-toolbar app-toolbar">
+      <el-radio-group v-model="leadMode" class="mode-toggle" @change="refreshLeads">
+        <el-radio-button label="local">LocalStorage</el-radio-button>
+        <el-radio-button label="backend">Backend Skeleton</el-radio-button>
+      </el-radio-group>
       <el-input
         v-model="searchQuery"
         class="search-input"
@@ -47,7 +51,26 @@
       <el-button @click="router.push('/quote?theme=forest&scene=clearing&package=standard')">
         打开本地报价页
       </el-button>
+      <el-button
+        v-if="isBackendMode"
+        type="success"
+        plain
+        :loading="isSyncing"
+        @click="syncLocalToBackend"
+      >
+        同步本地 Lead 到 Backend Skeleton
+      </el-button>
     </section>
+
+    <el-alert
+      v-if="backendMessage"
+      class="app-alert"
+      :type="backendMessageType"
+      :closable="true"
+      show-icon
+      :title="backendMessage"
+      @close="backendMessage = ''"
+    />
 
     <section class="app-data-card table-shell">
       <el-empty
@@ -87,7 +110,7 @@
                   maxlength="500"
                   show-word-limit
                   placeholder="记录沟通结果、预算确认、风险或客户偏好"
-                  @update:model-value="updateFollowUp(row._localIndex, { note: $event })"
+                  @update:model-value="updateFollowUp(row, { note: $event })"
                 />
               </label>
             </div>
@@ -125,10 +148,14 @@
             <el-select
               :model-value="row.status || 'pending'"
               size="small"
-              @change="updateLead(row._localIndex, { status: $event })"
+              @change="updateLead(row, { status: $event })"
             >
+              <el-option label="新线索" value="new" />
               <el-option label="待处理" value="pending" />
               <el-option label="已联系" value="contacted" />
+              <el-option label="已确认需求" value="qualified" />
+              <el-option label="无效线索" value="unqualified" />
+              <el-option label="已转报价" value="converted_to_quote" />
               <el-option label="已关闭" value="closed" />
             </el-select>
           </template>
@@ -139,7 +166,7 @@
             <el-select
               :model-value="getFollowUp(row).priority"
               size="small"
-              @change="updateFollowUp(row._localIndex, { priority: $event })"
+              @change="updateFollowUp(row, { priority: $event })"
             >
               <el-option label="High" value="High" />
               <el-option label="Medium" value="Medium" />
@@ -153,8 +180,8 @@
             <el-input
               :model-value="getFollowUp(row).owner"
               size="small"
-              placeholder="Owner"
-              @change="updateFollowUp(row._localIndex, { owner: $event })"
+              :placeholder="isBackendMode ? 'Owner user ID' : 'Owner'"
+              @change="updateFollowUp(row, { owner: $event })"
             />
           </template>
         </el-table-column>
@@ -165,7 +192,7 @@
               :model-value="getFollowUp(row).nextAction"
               size="small"
               placeholder="例如：电话确认预算"
-              @change="updateFollowUp(row._localIndex, { nextAction: $event })"
+              @change="updateFollowUp(row, { nextAction: $event })"
             />
           </template>
         </el-table-column>
@@ -173,7 +200,9 @@
         <el-table-column label="保存状态" width="130">
           <template #default="{ row }">
             <div class="save-cell">
-              <el-tag type="success" effect="plain">localStorage</el-tag>
+              <el-tag :type="isBackendMode ? 'warning' : 'success'" effect="plain">
+                {{ isBackendMode ? 'backend skeleton' : 'localStorage' }}
+              </el-tag>
               <small>{{ formatShortTime(getFollowUp(row).updatedAt) }}</small>
             </div>
           </template>
@@ -187,13 +216,20 @@
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/store'
 
 const router = useRouter()
+const userStore = useUserStore()
 const storageKey = 'inquirySubmissions'
 
 const leads = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
+const leadMode = ref('local')
+const isLoading = ref(false)
+const isSyncing = ref(false)
+const backendMessage = ref('')
+const backendMessageType = ref('info')
 
 const defaultFollowUp = {
   priority: 'Medium',
@@ -201,6 +237,44 @@ const defaultFollowUp = {
   nextAction: '',
   note: '',
   updatedAt: ''
+}
+
+const isBackendMode = computed(() => leadMode.value === 'backend')
+
+const modeNotice = computed(() => {
+  if (isBackendMode.value) {
+    return 'Backend Skeleton：本页只调用本地 /api/leads 骨架接口；不创建报价、不创建订单、不触发付款或外部自动化。'
+  }
+  return 'Local-only operations：本页只写浏览器 localStorage；不创建订单、不触发付款、不发送消息、不调用外部自动化。'
+})
+
+const setBackendMessage = (message, type = 'info') => {
+  backendMessage.value = message
+  backendMessageType.value = type
+}
+
+const getAuthHeaders = () => {
+  const headers = { 'Content-Type': 'application/json' }
+  if (userStore.token) {
+    headers.Authorization = `Bearer ${userStore.token}`
+  }
+  return headers
+}
+
+const requestLeadApi = async (path, options = {}) => {
+  const response = await fetch(path, {
+    ...options,
+    headers: {
+      ...getAuthHeaders(),
+      ...(options.headers || {})
+    }
+  })
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    const detail = payload?.detail || `Backend skeleton request failed (${response.status})`
+    throw new Error(Array.isArray(detail) ? detail.map((item) => item.msg).join('；') : detail)
+  }
+  return payload
 }
 
 const readStoredLeads = () => {
@@ -223,8 +297,60 @@ const normalizeLead = (lead, index) => ({
   }
 })
 
-const refreshLeads = () => {
+const normalizeBackendLead = (lead, index) => ({
+  _backendId: lead.id,
+  _localIndex: index,
+  customerInfo: {
+    name: lead.customer?.name || '',
+    contact: lead.customer?.contact || '',
+    preferredDate: lead.preferred_event_date || '',
+    notes: lead.intake_notes || ''
+  },
+  selection: lead.selection_snapshot || {},
+  pricing: lead.pricing_snapshot || {},
+  submitTime: lead.submitted_at,
+  status: lead.status || 'new',
+  followUp: {
+    ...defaultFollowUp,
+    priority: lead.priority || 'Medium',
+    owner: lead.owner_user_id ? String(lead.owner_user_id) : '',
+    nextAction: lead.follow_up_summary?.next_action || '',
+    note: lead.follow_up_summary?.latest_note || '',
+    updatedAt: lead.follow_up_summary?.updated_at || lead.updated_at || ''
+  }
+})
+
+const refreshLocalLeads = () => {
   leads.value = readStoredLeads().map(normalizeLead)
+}
+
+const refreshBackendLeads = async () => {
+  isLoading.value = true
+  try {
+    const params = new URLSearchParams()
+    if (statusFilter.value) params.set('status', statusFilter.value)
+    const query = searchQuery.value.trim()
+    if (query) params.set('search', query)
+    params.set('limit', '100')
+    params.set('offset', '0')
+
+    const payload = await requestLeadApi(`/api/leads?${params.toString()}`)
+    leads.value = Array.isArray(payload.items) ? payload.items.map(normalizeBackendLead) : []
+    setBackendMessage('Backend skeleton lead queue 已刷新。', 'success')
+  } catch (error) {
+    leads.value = []
+    setBackendMessage(`${error.message}。请确认已登录 admin / manager，并且本地 backend 正在运行。`, 'warning')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const refreshLeads = () => {
+  if (isBackendMode.value) {
+    refreshBackendLeads()
+    return
+  }
+  refreshLocalLeads()
 }
 
 const persistLeads = (nextLeads) => {
@@ -233,7 +359,44 @@ const persistLeads = (nextLeads) => {
   leads.value = clean.map(normalizeLead)
 }
 
-const updateLead = (localIndex, patch) => {
+const updateBackendLead = async (lead, patch) => {
+  if (!lead._backendId) return
+  const payload = { ...patch }
+  if ('owner' in payload) {
+    const owner = String(payload.owner || '').trim()
+    delete payload.owner
+    payload.owner_user_id = owner ? Number(owner) : null
+    if (owner && Number.isNaN(payload.owner_user_id)) {
+      ElMessage.warning('Backend Skeleton 的负责人需要填写数字 owner_user_id')
+      return
+    }
+  }
+  if ('nextAction' in payload) {
+    payload.next_action = payload.nextAction
+    delete payload.nextAction
+  }
+
+  try {
+    const updated = await requestLeadApi(`/api/leads/${lead._backendId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    })
+    const index = leads.value.findIndex((item) => item._backendId === lead._backendId)
+    if (index >= 0) {
+      leads.value[index] = normalizeBackendLead(updated, index)
+    }
+    setBackendMessage('Backend skeleton lead 已更新。', 'success')
+  } catch (error) {
+    setBackendMessage(`${error.message}。本次更新未保存到 backend skeleton。`, 'warning')
+  }
+}
+
+const updateLead = (leadOrIndex, patch) => {
+  if (isBackendMode.value) {
+    updateBackendLead(leadOrIndex, patch)
+    return
+  }
+  const localIndex = leadOrIndex?._localIndex ?? leadOrIndex
   const next = readStoredLeads()
   if (!next[localIndex]) return
   next[localIndex] = {
@@ -248,7 +411,12 @@ const updateLead = (localIndex, patch) => {
   persistLeads(next)
 }
 
-const updateFollowUp = (localIndex, patch) => {
+const updateFollowUp = (leadOrIndex, patch) => {
+  if (isBackendMode.value) {
+    updateBackendLead(leadOrIndex, patch)
+    return
+  }
+  const localIndex = leadOrIndex?._localIndex ?? leadOrIndex
   const next = readStoredLeads()
   if (!next[localIndex]) return
   next[localIndex] = {
@@ -267,6 +435,44 @@ const getFollowUp = (lead) => ({
   ...defaultFollowUp,
   ...(lead.followUp || {})
 })
+
+const mapLocalLeadToBackendPayload = (lead) => ({
+  customer: {
+    name: lead.customerInfo?.name || 'Unknown customer',
+    contact: lead.customerInfo?.contact || 'unknown'
+  },
+  preferred_event_date: lead.customerInfo?.preferredDate || '',
+  intake_notes: lead.customerInfo?.notes || '',
+  selection: lead.selection || {},
+  pricing_snapshot: lead.pricing || {},
+  source: 'local_demo'
+})
+
+const syncLocalToBackend = async () => {
+  const localLeads = readStoredLeads()
+  if (!localLeads.length) {
+    setBackendMessage('没有可同步的 localStorage Lead。', 'info')
+    return
+  }
+
+  isSyncing.value = true
+  let successCount = 0
+  try {
+    for (const localLead of localLeads) {
+      await requestLeadApi('/api/leads', {
+        method: 'POST',
+        body: JSON.stringify(mapLocalLeadToBackendPayload(localLead))
+      })
+      successCount += 1
+    }
+    setBackendMessage(`已同步 ${successCount} 条 localStorage Lead 到 backend skeleton。`, 'success')
+    await refreshBackendLeads()
+  } catch (error) {
+    setBackendMessage(`已同步 ${successCount} 条后停止：${error.message}`, 'warning')
+  } finally {
+    isSyncing.value = false
+  }
+}
 
 const filteredLeads = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -366,6 +572,10 @@ onMounted(refreshLeads)
 
 .status-filter {
   width: 180px;
+}
+
+.mode-toggle {
+  flex-shrink: 0;
 }
 
 .table-shell {
