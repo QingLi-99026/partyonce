@@ -18,6 +18,8 @@
         <el-menu-item index="/ai-planner"><el-icon><Magic /></el-icon>AI策划</el-menu-item>
         <el-menu-item index="/3d-designer"><el-icon><View /></el-icon>3D设计</el-menu-item>
         <el-menu-item index="/quotation"><el-icon><Document /></el-icon>报价</el-menu-item>
+        <el-menu-item index="/local-demo">Local Demo Hub</el-menu-item>
+        <el-menu-item index="/admin/local-leads">Lead Review</el-menu-item>
       </el-menu>
       
       <div class="user-actions">

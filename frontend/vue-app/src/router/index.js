@@ -9,6 +9,12 @@ const routes = [
     meta: { title: '首页' }
   },
   {
+    path: '/local-demo',
+    name: 'LocalDemoHub',
+    component: () => import('@/views/LocalDemoHub.vue'),
+    meta: { title: '本地演示流程' }
+  },
+  {
     path: '/venues',
     name: 'Venues',
     component: () => import('@/views/Venues.vue'),
@@ -104,6 +110,12 @@ const routes = [
   },
   
   // ========== Admin 管理后台 ==========
+  {
+    path: '/admin/local-leads',
+    name: 'LocalLeadReview',
+    component: () => import('@/views/LocalLeadReview.vue'),
+    meta: { title: '本地留资跟进中心' }
+  },
   {
     path: '/admin/suppliers',
     name: 'AdminSuppliers',
