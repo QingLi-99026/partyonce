@@ -100,9 +100,9 @@
         <div>
           <h3>已完成链路</h3>
           <ul>
-            <li>首页入口到 AI intake / 主题浏览的前台展示链路已存在。</li>
+            <li>首页入口到主题、场地、报价和留资的本地演示链路已存在。</li>
             <li>Legacy 报价页可本地保存方案和咨询记录。</li>
-            <li>V1 Quote 草稿页已接后端 Quote API，但需要登录和 AI Planner session。</li>
+            <li>V1 Quote 草稿页存在，但需要登录，后端接线仍受限。</li>
             <li>供应商申请、状态页、公开供应商展示和后台供应商审核入口已存在。</li>
           </ul>
         </div>
@@ -110,6 +110,7 @@
           <h3>仍是骨架或受限</h3>
           <ul>
             <li>真实订单跟进中心仍偏只读，留资到运营处理主要靠 localStorage demo。</li>
+            <li>目标仓库当前没有 /admin/dashboard 和 /admin/orders 可演示页面。</li>
             <li>支付入口保持 test / guard 状态，本轮没有启用真实付款。</li>
             <li>合同、素材库、外部通知、n8n、Google Sheet/Drive 等仍应保持阻断。</li>
             <li>供应商资料审核已有页面，但与真实经营数据和自动外联尚未闭环。</li>
@@ -162,7 +163,8 @@ const walkthrough = [
     description: '从视觉入口进入，让验收人确认 PartyOnce 的首屏和两个主要 CTA 是否清楚。',
     actions: [
       { label: '打开首页', path: '/', primary: true },
-      { label: 'AI Intake Demo', path: '/ai-party-planner-intake-demo?entry=voice' }
+      { label: '主题入口', path: '/themes' },
+      { label: '场地列表', path: '/venues' }
     ]
   },
   {
@@ -182,15 +184,15 @@ const walkthrough = [
     actions: [
       { label: '供应商展示', path: '/suppliers', primary: true },
       { label: '供应商申请', path: '/partner/apply' },
-      { label: 'Owner 决策 Demo', path: '/supplier-owner-decision-demo' }
+      { label: '申请状态', path: '/partner/status' }
     ]
   },
   {
     id: '04',
-    title: '看后台只读验收入口',
-    description: '登录管理员后可查看后台订单和供应商审核；未登录时会回到首页并弹出登录框。',
+    title: '看后台与运营跟进入口',
+    description: 'Lead Review 是本地免登录演示；供应商审核等真实后台入口仍需要 admin 账号。',
     actions: [
-      { label: '后台订单', path: '/admin/orders', primary: true },
+      { label: 'Lead Review', path: '/admin/local-leads', primary: true },
       { label: '后台供应商', path: '/admin/partners' }
     ]
   }
@@ -202,7 +204,7 @@ const routeGroups = [
     description: '第一屏、主题、场地、模板和 AI 引导入口。',
     status: 'customer-facing',
     routes: [
-      { label: 'Confirmed Hero Home', path: '/', note: '当前默认首页' },
+      { label: 'Public Home', path: '/', note: '当前默认首页' },
       { label: 'Themes & Packages', path: '/themes', note: '主题展示入口' },
       { label: 'Venues', path: '/venues', note: '场地列表' },
       { label: 'Templates', path: '/templates', note: '概念模板库' }
@@ -217,7 +219,7 @@ const routeGroups = [
       { label: 'Legacy Quote Preview', path: '/quote?theme=space&scene=command&package=standard', note: 'localStorage only' },
       { label: 'Inquiry Follow-up', path: '/my/inquiries', note: '本地咨询跟进' },
       { label: 'Lead Review Ops', path: '/admin/local-leads', note: '运营跟进中心' },
-      { label: 'V1 Quote Draft', path: '/quotation', note: '需登录和 AI Planner session' },
+      { label: 'V1 Quote Draft', path: '/quotation', note: '需登录，后端接线受限' },
       { label: 'My Orders', path: '/orders', note: '登录后查看订单' }
     ]
   },
@@ -229,17 +231,16 @@ const routeGroups = [
       { label: 'Supplier Showcase', path: '/suppliers', note: '公开供应商库' },
       { label: 'Become a Partner', path: '/partner/apply', note: '资料提交' },
       { label: 'Application Status', path: '/partner/status', note: '申请状态查询' },
-      { label: 'Three Series Review', path: '/supplier-three-series-review', note: '三类业务 review' }
+      { label: 'Partner Dashboard', path: '/partner/dashboard', note: '需登录和 partner 权限' }
     ]
   },
   {
     title: '后台验收',
-    description: '只读或受权限保护的运营后台入口。',
+    description: '本地 Lead Review 可直接演示；正式后台入口受权限保护，目标仓库暂未提供 admin dashboard / admin orders 页面。',
     status: 'protected',
     badgeClass: 'app-status-badge--warning',
     routes: [
-      { label: 'Admin Dashboard', path: '/admin/dashboard', note: '需 admin' },
-      { label: 'Admin Orders', path: '/admin/orders', note: '只读订单' },
+      { label: 'Local Lead Review', path: '/admin/local-leads', note: 'localStorage only' },
       { label: 'Admin Partners', path: '/admin/partners', note: '供应商审核' },
       { label: 'Admin Suppliers', path: '/admin/suppliers', note: '供应商管理' }
     ]

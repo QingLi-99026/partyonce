@@ -15,6 +15,12 @@ const routes = [
     meta: { title: '本地演示流程' }
   },
   {
+    path: '/themes',
+    name: 'Themes',
+    component: () => import('@/views/HomePage.vue'),
+    meta: { title: '选择主题' }
+  },
+  {
     path: '/venues',
     name: 'Venues',
     component: () => import('@/views/Venues.vue'),
@@ -55,6 +61,18 @@ const routes = [
     name: 'Orders',
     component: () => import('@/views/Orders.vue'),
     meta: { title: '我的订单', requiresAuth: true }
+  },
+  {
+    path: '/quote',
+    name: 'QuotePage',
+    component: () => import('@/views/QuotePage.vue'),
+    meta: { title: '报价汇总' }
+  },
+  {
+    path: '/my/inquiries',
+    name: 'InquiryList',
+    component: () => import('@/views/InquiryList.vue'),
+    meta: { title: '我的咨询记录' }
   },
   
   // ========== Partner Portal 供应商端 ==========
