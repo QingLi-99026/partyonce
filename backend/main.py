@@ -912,6 +912,87 @@ class LeadListResponse(BaseModel):
     offset: int
     admin_only: bool = True
 
+# ==================== STAGE 2 QUOTE API SKELETON SCHEMAS ====================
+
+class Stage2QuoteStatus(str, PyEnum):
+    DRAFT = "draft"
+    SENT = "sent"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+    CONVERTED_TO_ORDER = "converted_to_order"
+
+class Stage2QuoteCreateRequest(BaseModel):
+    lead_id: str = Field(..., min_length=1)
+    currency: str = Field(default="AUD", min_length=3, max_length=3)
+    line_items: List[Dict[str, Any]] = Field(default_factory=list)
+    selection_snapshot: Dict[str, Any] = Field(default_factory=dict)
+    valid_until: Optional[str] = None
+    subtotal: Optional[float] = None
+    discount_total: Optional[float] = None
+    tax_total: Optional[float] = None
+    final_total: Optional[float] = None
+
+    @validator("currency")
+    def validate_stage2_quote_currency(cls, value):
+        return value.strip().upper()
+
+class Stage2QuotePatchRequest(BaseModel):
+    status: Optional[Stage2QuoteStatus] = None
+    currency: Optional[str] = Field(default=None, min_length=3, max_length=3)
+    line_items: Optional[List[Dict[str, Any]]] = None
+    selection_snapshot: Optional[Dict[str, Any]] = None
+    valid_until: Optional[str] = None
+    subtotal: Optional[float] = None
+    discount_total: Optional[float] = None
+    tax_total: Optional[float] = None
+    final_total: Optional[float] = None
+
+    @validator("currency")
+    def validate_stage2_quote_patch_currency(cls, value):
+        return value.strip().upper() if value else value
+
+class Stage2QuoteLeadSummary(BaseModel):
+    id: str
+    status: str
+    source: str
+    preferred_event_date: Optional[str]
+
+class Stage2QuoteCustomerSummary(BaseModel):
+    id: str
+    name: str
+    contact: str
+
+class Stage2QuoteResponse(BaseModel):
+    id: str
+    lead_id: str
+    customer_id: str
+    quote_number: str
+    status: Stage2QuoteStatus
+    currency: str
+    subtotal: float
+    discount_total: float
+    tax_total: float
+    final_total: float
+    line_items: List[Dict[str, Any]]
+    selection_snapshot: Dict[str, Any]
+    valid_until: Optional[str]
+    sent_at: Optional[datetime]
+    accepted_at: Optional[datetime]
+    created_by_user_id: Optional[int]
+    created_at: datetime
+    updated_at: datetime
+    lead_summary: Stage2QuoteLeadSummary
+    customer_summary: Stage2QuoteCustomerSummary
+    skeleton_notice: str = "Stage 2 Quote skeleton does not create order/payment/external actions."
+
+class Stage2QuoteListResponse(BaseModel):
+    items: List[Stage2QuoteResponse]
+    total: int
+    limit: int
+    offset: int
+    admin_only: bool = True
+
 # ==================== QUOTE SCHEMAS ====================
 
 class QuoteItemBase(BaseModel):
@@ -1627,6 +1708,13 @@ def ensure_lead_sqlite_schema(conn: sqlite3.Connection):
         conn.executescript(migration_file.read())
     conn.commit()
 
+def ensure_stage2_quote_sqlite_schema(conn: sqlite3.Connection):
+    ensure_lead_sqlite_schema(conn)
+    migration_path = os.path.join(os.path.dirname(__file__), "migrations", "002_create_quote_storage.sql")
+    with open(migration_path, "r", encoding="utf-8") as migration_file:
+        conn.executescript(migration_file.read())
+    conn.commit()
+
 def build_lead_response(lead: Dict[str, Any]) -> LeadResponse:
     return LeadResponse(**lead)
 
@@ -1653,6 +1741,35 @@ def decode_lead_snapshot(value: Optional[str]) -> Dict[str, Any]:
         return parsed if isinstance(parsed, dict) else {}
     except (TypeError, ValueError):
         return {}
+
+def encode_stage2_quote_snapshot(value: Any) -> str:
+    return json.dumps(value if value is not None else {}, ensure_ascii=False)
+
+def decode_stage2_quote_dict(value: Optional[str]) -> Dict[str, Any]:
+    if not value:
+        return {}
+    try:
+        parsed = json.loads(value)
+        return parsed if isinstance(parsed, dict) else {}
+    except (TypeError, ValueError):
+        return {}
+
+def decode_stage2_quote_list(value: Optional[str]) -> List[Dict[str, Any]]:
+    if not value:
+        return []
+    try:
+        parsed = json.loads(value)
+        return parsed if isinstance(parsed, list) else []
+    except (TypeError, ValueError):
+        return []
+
+def coerce_stage2_quote_amount(value: Any, default: float = 0.0) -> float:
+    if value is None or value == "":
+        return default
+    try:
+        return round(float(value), 2)
+    except (TypeError, ValueError):
+        return default
 
 def parse_sqlite_datetime(value: Any) -> datetime:
     if isinstance(value, datetime):
@@ -1733,6 +1850,321 @@ def get_latest_follow_up_note(conn: sqlite3.Connection, lead_id: int, note_type:
         (lead_id, note_type)
     ).fetchone()
     return row["note"] if row else None
+
+def generate_stage2_quote_number(conn: sqlite3.Connection) -> str:
+    for _ in range(10):
+        quote_number = generate_quote_number()
+        existing = conn.execute("SELECT id FROM quotes WHERE quote_number = ?", (quote_number,)).fetchone()
+        if not existing:
+            return quote_number
+    raise HTTPException(status_code=500, detail="Unable to generate unique quote number")
+
+def get_stage2_persistent_lead_for_quote(conn: sqlite3.Connection, lead_id: str) -> sqlite3.Row:
+    row = conn.execute(
+        """
+        SELECT
+            l.*,
+            c.name AS customer_name,
+            c.email,
+            c.phone,
+            c.wechat_or_other_contact
+        FROM leads l
+        JOIN customers c ON c.id = l.customer_id
+        WHERE l.id = ?
+        """,
+        (lead_id,)
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return row
+
+def validate_stage2_lead_can_create_quote(lead: sqlite3.Row):
+    allowed_statuses = {
+        LeadStatus.QUALIFIED.value,
+        LeadStatus.CONTACTED.value
+    }
+    blocked_statuses = {
+        LeadStatus.UNQUALIFIED.value,
+        LeadStatus.CLOSED.value
+    }
+    if lead["status"] in blocked_statuses:
+        raise HTTPException(status_code=409, detail="Lead status cannot create quote")
+    if lead["status"] not in allowed_statuses:
+        raise HTTPException(status_code=409, detail="Lead must be contacted or qualified before quote creation")
+
+def get_stage2_quote_detail_row(conn: sqlite3.Connection, quote_id: str) -> sqlite3.Row:
+    row = conn.execute(
+        """
+        SELECT
+            q.*,
+            l.status AS lead_status,
+            l.source AS lead_source,
+            l.preferred_event_date AS lead_preferred_event_date,
+            c.name AS customer_name,
+            c.email,
+            c.phone,
+            c.wechat_or_other_contact
+        FROM quotes q
+        JOIN leads l ON l.id = q.lead_id
+        JOIN customers c ON c.id = q.customer_id
+        WHERE q.id = ?
+        """,
+        (quote_id,)
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Quote not found")
+    return row
+
+def build_stage2_quote_response(row: sqlite3.Row) -> Stage2QuoteResponse:
+    contact = row["email"] or row["phone"] or row["wechat_or_other_contact"] or ""
+    return Stage2QuoteResponse(
+        id=str(row["id"]),
+        lead_id=str(row["lead_id"]),
+        customer_id=str(row["customer_id"]),
+        quote_number=row["quote_number"],
+        status=row["status"],
+        currency=row["currency"],
+        subtotal=coerce_stage2_quote_amount(row["subtotal"]),
+        discount_total=coerce_stage2_quote_amount(row["discount_total"]),
+        tax_total=coerce_stage2_quote_amount(row["tax_total"]),
+        final_total=coerce_stage2_quote_amount(row["final_total"]),
+        line_items=decode_stage2_quote_list(row["line_items_json"]),
+        selection_snapshot=decode_stage2_quote_dict(row["selection_snapshot_json"]),
+        valid_until=row["valid_until"],
+        sent_at=parse_sqlite_datetime(row["sent_at"]) if row["sent_at"] else None,
+        accepted_at=parse_sqlite_datetime(row["accepted_at"]) if row["accepted_at"] else None,
+        created_by_user_id=row["created_by_user_id"],
+        created_at=parse_sqlite_datetime(row["created_at"]),
+        updated_at=parse_sqlite_datetime(row["updated_at"]),
+        lead_summary=Stage2QuoteLeadSummary(
+            id=str(row["lead_id"]),
+            status=row["lead_status"],
+            source=row["lead_source"],
+            preferred_event_date=row["lead_preferred_event_date"]
+        ),
+        customer_summary=Stage2QuoteCustomerSummary(
+            id=str(row["customer_id"]),
+            name=row["customer_name"],
+            contact=contact
+        )
+    )
+
+def derive_stage2_quote_totals(request: Stage2QuoteCreateRequest, lead: sqlite3.Row) -> Dict[str, float]:
+    pricing_snapshot = decode_lead_snapshot(lead["pricing_snapshot_json"])
+    final_total = coerce_stage2_quote_amount(
+        request.final_total,
+        coerce_stage2_quote_amount(
+            pricing_snapshot.get("finalTotal"),
+            coerce_stage2_quote_amount(pricing_snapshot.get("final_total"), 0.0)
+        )
+    )
+    subtotal = coerce_stage2_quote_amount(
+        request.subtotal,
+        coerce_stage2_quote_amount(pricing_snapshot.get("subtotal"), final_total)
+    )
+    discount_total = coerce_stage2_quote_amount(
+        request.discount_total,
+        coerce_stage2_quote_amount(pricing_snapshot.get("discountTotal"), 0.0)
+    )
+    tax_total = coerce_stage2_quote_amount(
+        request.tax_total,
+        coerce_stage2_quote_amount(pricing_snapshot.get("taxTotal"), max(final_total - subtotal + discount_total, 0.0))
+    )
+    return {
+        "subtotal": subtotal,
+        "discount_total": discount_total,
+        "tax_total": tax_total,
+        "final_total": final_total
+    }
+
+def create_stage2_quote_from_persistent_lead(
+    request: Stage2QuoteCreateRequest,
+    current_user: User
+) -> Stage2QuoteResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Quote skeleton requires sqlite_local lead storage")
+
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_quote_sqlite_schema(conn)
+        lead = get_stage2_persistent_lead_for_quote(conn, request.lead_id)
+        validate_stage2_lead_can_create_quote(lead)
+        totals = derive_stage2_quote_totals(request, lead)
+        selection_snapshot = request.selection_snapshot or decode_lead_snapshot(lead["selection_snapshot_json"])
+        line_items = request.line_items or [{
+            "type": "lead_pricing_snapshot",
+            "pricing_snapshot": decode_lead_snapshot(lead["pricing_snapshot_json"]),
+            "note": "Draft estimate copied from Lead pricing snapshot; server-side pricing validation still required."
+        }]
+        now = datetime.utcnow().isoformat()
+        try:
+            conn.execute("BEGIN")
+            quote_number = generate_stage2_quote_number(conn)
+            cursor = conn.execute(
+                """
+                INSERT INTO quotes (
+                    lead_id, customer_id, quote_number, status, currency, subtotal, discount_total,
+                    tax_total, final_total, line_items_json, selection_snapshot_json, valid_until,
+                    created_by_user_id, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    int(lead["id"]),
+                    int(lead["customer_id"]),
+                    quote_number,
+                    Stage2QuoteStatus.DRAFT.value,
+                    request.currency,
+                    totals["subtotal"],
+                    totals["discount_total"],
+                    totals["tax_total"],
+                    totals["final_total"],
+                    encode_stage2_quote_snapshot(line_items),
+                    encode_stage2_quote_snapshot(selection_snapshot),
+                    request.valid_until,
+                    current_user.id,
+                    now,
+                    now
+                )
+            )
+            conn.execute(
+                "UPDATE leads SET status = ?, updated_at = ? WHERE id = ?",
+                (LeadStatus.CONVERTED_TO_QUOTE.value, now, int(lead["id"]))
+            )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+        return build_stage2_quote_response(get_stage2_quote_detail_row(conn, str(cursor.lastrowid)))
+
+def list_stage2_quotes(
+    lead_id: Optional[str] = None,
+    customer_id: Optional[str] = None,
+    status: Optional[Stage2QuoteStatus] = None,
+    search: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0
+) -> Stage2QuoteListResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Quote skeleton requires sqlite_local lead storage")
+
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_quote_sqlite_schema(conn)
+        where_clauses = []
+        params: List[Any] = []
+        if lead_id:
+            where_clauses.append("q.lead_id = ?")
+            params.append(lead_id)
+        if customer_id:
+            where_clauses.append("q.customer_id = ?")
+            params.append(customer_id)
+        if status:
+            where_clauses.append("q.status = ?")
+            params.append(status.value)
+        if search:
+            query = f"%{search.strip().lower()}%"
+            where_clauses.append(
+                """
+                (
+                    lower(q.quote_number) LIKE ?
+                    OR lower(c.name) LIKE ?
+                    OR lower(coalesce(c.email, '')) LIKE ?
+                    OR lower(coalesce(c.phone, '')) LIKE ?
+                    OR lower(coalesce(q.selection_snapshot_json, '')) LIKE ?
+                )
+                """
+            )
+            params.extend([query, query, query, query, query])
+        where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+        total = conn.execute(
+            f"""
+            SELECT COUNT(*) AS total
+            FROM quotes q
+            JOIN leads l ON l.id = q.lead_id
+            JOIN customers c ON c.id = q.customer_id
+            {where_sql}
+            """,
+            params
+        ).fetchone()["total"]
+        rows = conn.execute(
+            f"""
+            SELECT
+                q.*,
+                l.status AS lead_status,
+                l.source AS lead_source,
+                l.preferred_event_date AS lead_preferred_event_date,
+                c.name AS customer_name,
+                c.email,
+                c.phone,
+                c.wechat_or_other_contact
+            FROM quotes q
+            JOIN leads l ON l.id = q.lead_id
+            JOIN customers c ON c.id = q.customer_id
+            {where_sql}
+            ORDER BY q.created_at DESC, q.id DESC
+            LIMIT ? OFFSET ?
+            """,
+            params + [limit, offset]
+        ).fetchall()
+        return Stage2QuoteListResponse(
+            items=[build_stage2_quote_response(row) for row in rows],
+            total=total,
+            limit=limit,
+            offset=offset
+        )
+
+def get_stage2_quote_response(quote_id: str) -> Stage2QuoteResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Quote skeleton requires sqlite_local lead storage")
+
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_quote_sqlite_schema(conn)
+        return build_stage2_quote_response(get_stage2_quote_detail_row(conn, quote_id))
+
+def update_stage2_quote(quote_id: str, request: Stage2QuotePatchRequest) -> Stage2QuoteResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Quote skeleton requires sqlite_local lead storage")
+
+    patch = request.dict(exclude_unset=True)
+    if "status" in patch and patch["status"] == Stage2QuoteStatus.CONVERTED_TO_ORDER:
+        raise HTTPException(status_code=409, detail="converted_to_order is blocked until Order API is approved")
+
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_quote_sqlite_schema(conn)
+        get_stage2_quote_detail_row(conn, quote_id)
+        update_fields = []
+        params: List[Any] = []
+        if "status" in patch and patch["status"] is not None:
+            update_fields.append("status = ?")
+            params.append(patch["status"].value)
+            if patch["status"] == Stage2QuoteStatus.SENT:
+                update_fields.append("sent_at = COALESCE(sent_at, ?)")
+                params.append(datetime.utcnow().isoformat())
+            if patch["status"] == Stage2QuoteStatus.ACCEPTED:
+                update_fields.append("accepted_at = COALESCE(accepted_at, ?)")
+                params.append(datetime.utcnow().isoformat())
+        if "currency" in patch and patch["currency"] is not None:
+            update_fields.append("currency = ?")
+            params.append(patch["currency"])
+        if "line_items" in patch and patch["line_items"] is not None:
+            update_fields.append("line_items_json = ?")
+            params.append(encode_stage2_quote_snapshot(patch["line_items"]))
+        if "selection_snapshot" in patch and patch["selection_snapshot"] is not None:
+            update_fields.append("selection_snapshot_json = ?")
+            params.append(encode_stage2_quote_snapshot(patch["selection_snapshot"]))
+        if "valid_until" in patch:
+            update_fields.append("valid_until = ?")
+            params.append(patch["valid_until"])
+        for field_name in ["subtotal", "discount_total", "tax_total", "final_total"]:
+            if field_name in patch and patch[field_name] is not None:
+                update_fields.append(f"{field_name} = ?")
+                params.append(coerce_stage2_quote_amount(patch[field_name]))
+        if update_fields:
+            update_fields.append("updated_at = ?")
+            params.append(datetime.utcnow().isoformat())
+            params.append(quote_id)
+            conn.execute(f"UPDATE quotes SET {', '.join(update_fields)} WHERE id = ?", params)
+            conn.commit()
+        return build_stage2_quote_response(get_stage2_quote_detail_row(conn, quote_id))
 
 def build_sqlite_lead_response(conn: sqlite3.Connection, row: sqlite3.Row) -> LeadResponse:
     contact = row["email"] or row["phone"] or row["wechat_or_other_contact"] or ""
@@ -2828,6 +3260,54 @@ def update_lead_skeleton(
     lead["updated_at"] = datetime.utcnow()
     LEAD_API_SKELETON_STORE[lead_id] = lead
     return build_lead_response(lead)
+
+# Stage 2 Quote API Skeleton
+@app.post("/api/quotes", response_model=Stage2QuoteResponse, status_code=201)
+def create_stage2_quote_skeleton(
+    request: Stage2QuoteCreateRequest,
+    current_user: User = Depends(require_admin)
+):
+    """
+    Admin-only Stage 2 Quote skeleton.
+
+    Creates a draft Quote from an existing persistent Lead in sqlite_local mode only.
+    It does not create orders, payments, external automation runs, or outbound messages.
+    """
+    return create_stage2_quote_from_persistent_lead(request, current_user)
+
+@app.get("/api/quotes", response_model=Stage2QuoteListResponse)
+def list_stage2_quotes_skeleton(
+    lead_id: Optional[str] = None,
+    customer_id: Optional[str] = None,
+    status: Optional[Stage2QuoteStatus] = None,
+    search: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    current_user: User = Depends(require_admin)
+):
+    """Admin-only Stage 2 Quote list skeleton."""
+    return list_stage2_quotes(lead_id, customer_id, status, search, limit, offset)
+
+@app.get("/api/quotes/{quote_id}", response_model=Stage2QuoteResponse)
+def get_stage2_quote_skeleton(
+    quote_id: str,
+    current_user: User = Depends(require_admin)
+):
+    """Admin-only Stage 2 Quote detail skeleton."""
+    return get_stage2_quote_response(quote_id)
+
+@app.patch("/api/quotes/{quote_id}", response_model=Stage2QuoteResponse)
+def update_stage2_quote_skeleton(
+    quote_id: str,
+    request: Stage2QuotePatchRequest,
+    current_user: User = Depends(require_admin)
+):
+    """
+    Admin-only Stage 2 Quote update skeleton.
+
+    Blocks converted_to_order and does not create Order/payment/external actions.
+    """
+    return update_stage2_quote(quote_id, request)
 
 # User Endpoints
 @app.post("/api/users/register", response_model=UserResponse)
