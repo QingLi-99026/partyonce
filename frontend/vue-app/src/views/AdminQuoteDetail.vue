@@ -6,7 +6,7 @@
         <h1>{{ quote?.quote_number || 'Quote Detail' }}</h1>
         <p>
           Admin-only local/staging detail view for a Quote created from a persistent Lead.
-          This page does not create Orders, collect payment, or trigger outbound messages.
+          Accepted Quotes can create a draft Order through the safe local Order API skeleton.
         </p>
       </div>
       <div class="header-actions">
@@ -20,7 +20,7 @@
       type="warning"
       :closable="false"
       show-icon
-      title="Local/staging skeleton only: converted_to_order, Order API, Stripe/payment, webhook/n8n, and outbound messages remain blocked."
+      title="Local/staging skeleton only: draft Order creation is allowed only for accepted Quotes; Stripe/payment, webhook/n8n, and outbound messages remain blocked."
     />
 
     <el-alert
@@ -96,7 +96,19 @@
               <el-option v-for="status in allowedStatuses" :key="status" :label="status" :value="status" />
             </el-select>
             <p class="control-note">
-              `converted_to_order` is intentionally unavailable until the Order skeleton phase.
+              `converted_to_order` is still unavailable in the status dropdown. Use Create Draft Order after the Quote is accepted.
+            </p>
+            <el-button
+              class="create-order-button"
+              type="success"
+              :disabled="!canCreateDraftOrder"
+              :loading="creatingOrder"
+              @click="createDraftOrder"
+            >
+              Create Draft Order
+            </el-button>
+            <p class="control-note">
+              Enabled only for accepted Quotes. This calls POST /api/orders and never opens payment or outbound automation.
             </p>
           </article>
         </section>
@@ -172,7 +184,7 @@
             <h2>Skeleton Notice</h2>
             <p>{{ quote.skeleton_notice || 'Stage 2 Quote skeleton only.' }}</p>
             <p class="control-note">
-              Customer-facing Quote view, public share links, Orders, and payment remain out of scope.
+              Customer-facing Quote view, public share links, payment, and outbound messages remain out of scope.
             </p>
           </article>
         </section>
@@ -186,6 +198,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import apiClient from '@/api'
+import { createDraftOrderFromQuote } from '@/services/adminOrderService'
 
 const route = useRoute()
 const router = useRouter()
@@ -195,8 +208,10 @@ const quote = ref(null)
 const loading = ref(false)
 const message = ref('')
 const messageType = ref('info')
+const creatingOrder = ref(false)
 
 const lineItems = computed(() => (Array.isArray(quote.value?.line_items) ? quote.value.line_items : []))
+const canCreateDraftOrder = computed(() => quote.value?.status === 'accepted')
 
 const loadQuote = async () => {
   loading.value = true
@@ -228,11 +243,41 @@ const updateQuoteStatus = async (status) => {
   }
 }
 
-const getErrorMessage = (error) => {
+const createDraftOrder = async () => {
+  if (!quote.value) return
+  if (!canCreateDraftOrder.value) {
+    message.value = 'Create Draft Order is available only after the Quote status is accepted.'
+    messageType.value = 'warning'
+    return
+  }
+
+  creatingOrder.value = true
+  message.value = ''
+  try {
+    const result = await createDraftOrderFromQuote(quote.value)
+    if (result.item) {
+      ElMessage.success(`Draft Order ${result.item.order_number || result.item.id} created. No payment or outbound action was triggered.`)
+      router.push(`/admin/orders/${result.item.id}`)
+      return
+    }
+
+    const errorMessage = getErrorMessage(result.error, 'Could not create a Draft Order from this Quote. Check the safe local backend profile and admin auth fixture.')
+    message.value = errorMessage
+    messageType.value = 'warning'
+    if (/already exists|already|exists|converted_to_order/i.test(errorMessage)) {
+      ElMessage.warning('An Order may already exist for this Quote. Opening Order Review.')
+      router.push('/admin/orders')
+    }
+  } finally {
+    creatingOrder.value = false
+  }
+}
+
+const getErrorMessage = (error, fallback = 'Could not load the local/staging Quote detail.') => {
   const detail = error?.response?.data?.detail
   if (typeof detail === 'string') return detail
   if (Array.isArray(detail)) return detail.map((item) => item.msg || item.type).join('; ')
-  return 'Could not load the local/staging Quote detail.'
+  return fallback
 }
 
 const formatMoney = (value, currency = 'AUD') => {
@@ -409,6 +454,10 @@ dd {
   margin: 12px 0 0;
   color: #868e96;
   font-size: 13px;
+}
+
+.create-order-button {
+  margin-top: 14px;
 }
 
 pre {
