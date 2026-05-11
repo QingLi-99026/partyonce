@@ -135,6 +135,12 @@ const routes = [
     meta: { title: '本地留资跟进中心' }
   },
   {
+    path: '/admin/quotes',
+    name: 'AdminQuotes',
+    component: () => import('@/views/AdminQuotes.vue'),
+    meta: { title: 'Quote Review', requiresAuth: true, requiresAdmin: true }
+  },
+  {
     path: '/admin/suppliers',
     name: 'AdminSuppliers',
     component: () => import('@/views/AdminSuppliers.vue'),
