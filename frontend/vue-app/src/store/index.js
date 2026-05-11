@@ -9,6 +9,8 @@ export const useUserStore = defineStore('user', () => {
   // Getters
   const isLoggedIn = computed(() => !!token.value)
   const userId = computed(() => userInfo.value?.id)
+  const isAdmin = computed(() => ['admin', 'manager'].includes(userInfo.value?.role))
+  const isPartner = computed(() => userInfo.value?.role === 'partner')
   
   // Actions
   function setToken(newToken) {
@@ -33,6 +35,8 @@ export const useUserStore = defineStore('user', () => {
     userInfo,
     isLoggedIn,
     userId,
+    isAdmin,
+    isPartner,
     setToken,
     setUserInfo,
     logout
