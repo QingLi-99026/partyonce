@@ -2,7 +2,7 @@
   <el-header class="nav-header">
     <div class="header-content">
       <div class="logo" @click="$router.push('/')">
-        <el-icon><Party /></el-icon>
+        <el-icon><Present /></el-icon>
         <span>PartyOnce</span>
       </div>
       
@@ -15,7 +15,7 @@
       >
         <el-menu-item index="/"><el-icon><HomeFilled /></el-icon>首页</el-menu-item>
         <el-menu-item index="/venues"><el-icon><OfficeBuilding /></el-icon>场地</el-menu-item>
-        <el-menu-item index="/ai-planner"><el-icon><Magic /></el-icon>AI策划</el-menu-item>
+        <el-menu-item index="/ai-planner"><el-icon><MagicStick /></el-icon>AI策划</el-menu-item>
         <el-menu-item index="/3d-designer"><el-icon><View /></el-icon>3D设计</el-menu-item>
         <el-menu-item index="/quotation"><el-icon><Document /></el-icon>报价</el-menu-item>
         <el-menu-item index="/local-demo">Local Demo Hub</el-menu-item>
@@ -54,6 +54,19 @@ import { inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import {
+  ArrowDown,
+  Document,
+  HomeFilled,
+  List,
+  MagicStick,
+  OfficeBuilding,
+  Present,
+  SwitchButton,
+  User,
+  UserFilled,
+  View
+} from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
