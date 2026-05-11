@@ -141,6 +141,12 @@ const routes = [
     meta: { title: 'Quote Review', requiresAuth: true, requiresAdmin: true }
   },
   {
+    path: '/admin/quotes/:quoteId',
+    name: 'AdminQuoteDetail',
+    component: () => import('@/views/AdminQuoteDetail.vue'),
+    meta: { title: 'Quote Detail', requiresAuth: true, requiresAdmin: true }
+  },
+  {
     path: '/admin/suppliers',
     name: 'AdminSuppliers',
     component: () => import('@/views/AdminSuppliers.vue'),

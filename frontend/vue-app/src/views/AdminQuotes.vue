@@ -144,6 +144,12 @@
             <span class="boundary-note">No order/payment/outbound action</span>
           </template>
         </el-table-column>
+
+        <el-table-column label="Action" width="110" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" @click="router.push(`/admin/quotes/${row.id}`)">View</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </section>
   </div>
