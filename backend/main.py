@@ -993,6 +993,81 @@ class Stage2QuoteListResponse(BaseModel):
     offset: int
     admin_only: bool = True
 
+# ==================== STAGE 2 ORDER API SKELETON SCHEMAS ====================
+
+class Stage2OrderStatus(str, PyEnum):
+    DRAFT = "draft"
+    PENDING_DEPOSIT = "pending_deposit"
+    CONFIRMED = "confirmed"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+class Stage2DepositStatus(str, PyEnum):
+    NOT_STARTED = "not_started"
+    PENDING = "pending"
+    PAID = "paid"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+    WAIVED = "waived"
+
+class Stage2OrderCreateRequest(BaseModel):
+    quote_id: str = Field(..., min_length=1)
+    event_date: Optional[str] = None
+    event_location: Optional[str] = None
+    internal_notes: Optional[str] = None
+
+class Stage2OrderPatchRequest(BaseModel):
+    status: Optional[Stage2OrderStatus] = None
+    event_date: Optional[str] = None
+    event_location: Optional[str] = None
+    internal_notes: Optional[str] = None
+    confirmed_at: Optional[str] = None
+
+class Stage2OrderQuoteSummary(BaseModel):
+    id: str
+    quote_number: str
+    status: str
+    final_total: float
+
+class Stage2OrderCustomerSummary(BaseModel):
+    id: str
+    name: str
+    contact: str
+
+class Stage2OrderResponse(BaseModel):
+    id: str
+    quote_id: str
+    quote_number: str
+    lead_id: str
+    customer_id: str
+    order_number: str
+    status: Stage2OrderStatus
+    event_date: Optional[str]
+    event_location: Optional[str]
+    currency: str
+    total_amount: float
+    deposit_amount: float
+    deposit_status: Stage2DepositStatus
+    payment_reference: Optional[str]
+    selection_snapshot: Dict[str, Any]
+    line_items: List[Dict[str, Any]]
+    customer_summary: Stage2OrderCustomerSummary
+    quote_summary: Stage2OrderQuoteSummary
+    internal_notes: Optional[str]
+    created_by_user_id: Optional[int]
+    confirmed_at: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+    skeleton_notice: str = "Stage 2 Order skeleton does not collect payment, create checkout sessions, trigger webhook/n8n, or send outbound messages."
+
+class Stage2OrderListResponse(BaseModel):
+    items: List[Stage2OrderResponse]
+    total: int
+    limit: int
+    offset: int
+    admin_only: bool = True
+
 # ==================== QUOTE SCHEMAS ====================
 
 class QuoteItemBase(BaseModel):
@@ -1715,6 +1790,13 @@ def ensure_stage2_quote_sqlite_schema(conn: sqlite3.Connection):
         conn.executescript(migration_file.read())
     conn.commit()
 
+def ensure_stage2_order_sqlite_schema(conn: sqlite3.Connection):
+    ensure_stage2_quote_sqlite_schema(conn)
+    migration_path = os.path.join(os.path.dirname(__file__), "migrations", "003_create_order_storage.sql")
+    with open(migration_path, "r", encoding="utf-8") as migration_file:
+        conn.executescript(migration_file.read())
+    conn.commit()
+
 def build_lead_response(lead: Dict[str, Any]) -> LeadResponse:
     return LeadResponse(**lead)
 
@@ -1755,6 +1837,27 @@ def decode_stage2_quote_dict(value: Optional[str]) -> Dict[str, Any]:
         return {}
 
 def decode_stage2_quote_list(value: Optional[str]) -> List[Dict[str, Any]]:
+    if not value:
+        return []
+    try:
+        parsed = json.loads(value)
+        return parsed if isinstance(parsed, list) else []
+    except (TypeError, ValueError):
+        return []
+
+def encode_stage2_order_snapshot(value: Any) -> str:
+    return json.dumps(value if value is not None else {}, ensure_ascii=False)
+
+def decode_stage2_order_dict(value: Optional[str]) -> Dict[str, Any]:
+    if not value:
+        return {}
+    try:
+        parsed = json.loads(value)
+        return parsed if isinstance(parsed, dict) else {}
+    except (TypeError, ValueError):
+        return {}
+
+def decode_stage2_order_list(value: Optional[str]) -> List[Dict[str, Any]]:
     if not value:
         return []
     try:
@@ -2165,6 +2268,270 @@ def update_stage2_quote(quote_id: str, request: Stage2QuotePatchRequest) -> Stag
             conn.execute(f"UPDATE quotes SET {', '.join(update_fields)} WHERE id = ?", params)
             conn.commit()
         return build_stage2_quote_response(get_stage2_quote_detail_row(conn, quote_id))
+
+def generate_stage2_order_number(conn: sqlite3.Connection) -> str:
+    for _ in range(10):
+        order_number = f"O-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}"
+        existing = conn.execute("SELECT id FROM orders WHERE order_number = ?", (order_number,)).fetchone()
+        if not existing:
+            return order_number
+    raise HTTPException(status_code=500, detail="Unable to generate unique order number")
+
+def get_stage2_accepted_quote_for_order(conn: sqlite3.Connection, quote_id: str) -> sqlite3.Row:
+    row = get_stage2_quote_detail_row(conn, quote_id)
+    if row["status"] != Stage2QuoteStatus.ACCEPTED.value:
+        raise HTTPException(status_code=409, detail="Order skeleton requires accepted Quote")
+    existing_order = conn.execute("SELECT id FROM orders WHERE quote_id = ?", (row["id"],)).fetchone()
+    if existing_order:
+        raise HTTPException(status_code=409, detail="Order already exists for Quote")
+    return row
+
+def get_stage2_order_detail_row(conn: sqlite3.Connection, order_id: str) -> sqlite3.Row:
+    row = conn.execute(
+        """
+        SELECT
+            o.*,
+            q.quote_number,
+            q.status AS quote_status,
+            q.final_total AS quote_final_total,
+            c.name AS customer_name,
+            c.email,
+            c.phone,
+            c.wechat_or_other_contact
+        FROM orders o
+        JOIN quotes q ON q.id = o.quote_id
+        JOIN customers c ON c.id = o.customer_id
+        WHERE o.id = ?
+        """,
+        (order_id,)
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return row
+
+def build_stage2_order_response(row: sqlite3.Row) -> Stage2OrderResponse:
+    contact = row["email"] or row["phone"] or row["wechat_or_other_contact"] or ""
+    quote_number = row["quote_number"]
+    return Stage2OrderResponse(
+        id=str(row["id"]),
+        quote_id=str(row["quote_id"]),
+        quote_number=quote_number,
+        lead_id=str(row["lead_id"]),
+        customer_id=str(row["customer_id"]),
+        order_number=row["order_number"],
+        status=row["status"],
+        event_date=row["event_date"],
+        event_location=row["event_location"],
+        currency=row["currency"],
+        total_amount=coerce_stage2_quote_amount(row["total_amount"]),
+        deposit_amount=coerce_stage2_quote_amount(row["deposit_amount"]),
+        deposit_status=row["deposit_status"],
+        payment_reference=row["payment_reference"],
+        selection_snapshot=decode_stage2_order_dict(row["selection_snapshot_json"]),
+        line_items=decode_stage2_order_list(row["line_items_json"]),
+        customer_summary=Stage2OrderCustomerSummary(
+            id=str(row["customer_id"]),
+            name=row["customer_name"],
+            contact=contact
+        ),
+        quote_summary=Stage2OrderQuoteSummary(
+            id=str(row["quote_id"]),
+            quote_number=quote_number,
+            status=row["quote_status"],
+            final_total=coerce_stage2_quote_amount(row["quote_final_total"])
+        ),
+        internal_notes=row["internal_notes"],
+        created_by_user_id=row["created_by_user_id"],
+        confirmed_at=parse_sqlite_datetime(row["confirmed_at"]) if row["confirmed_at"] else None,
+        created_at=parse_sqlite_datetime(row["created_at"]),
+        updated_at=parse_sqlite_datetime(row["updated_at"])
+    )
+
+def create_stage2_order_from_accepted_quote(
+    request: Stage2OrderCreateRequest,
+    current_user: User
+) -> Stage2OrderResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Order skeleton requires sqlite_local lead storage")
+
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_order_sqlite_schema(conn)
+        quote = get_stage2_accepted_quote_for_order(conn, request.quote_id)
+        customer_snapshot = {
+            "id": str(quote["customer_id"]),
+            "name": quote["customer_name"],
+            "contact": quote["email"] or quote["phone"] or quote["wechat_or_other_contact"] or ""
+        }
+        now = datetime.utcnow().isoformat()
+        try:
+            conn.execute("BEGIN")
+            order_number = generate_stage2_order_number(conn)
+            cursor = conn.execute(
+                """
+                INSERT INTO orders (
+                    quote_id, lead_id, customer_id, order_number, status,
+                    event_date, event_location, currency, total_amount, deposit_amount,
+                    deposit_status, payment_reference, selection_snapshot_json, line_items_json,
+                    customer_snapshot_json, internal_notes, created_by_user_id, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    int(quote["id"]),
+                    int(quote["lead_id"]),
+                    int(quote["customer_id"]),
+                    order_number,
+                    Stage2OrderStatus.DRAFT.value,
+                    request.event_date,
+                    request.event_location,
+                    quote["currency"],
+                    coerce_stage2_quote_amount(quote["final_total"]),
+                    0.0,
+                    Stage2DepositStatus.NOT_STARTED.value,
+                    None,
+                    quote["selection_snapshot_json"],
+                    quote["line_items_json"],
+                    encode_stage2_order_snapshot(customer_snapshot),
+                    request.internal_notes,
+                    current_user.id,
+                    now,
+                    now
+                )
+            )
+            conn.execute(
+                "UPDATE quotes SET status = ?, updated_at = ? WHERE id = ?",
+                (Stage2QuoteStatus.CONVERTED_TO_ORDER.value, now, int(quote["id"]))
+            )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+        return build_stage2_order_response(get_stage2_order_detail_row(conn, str(cursor.lastrowid)))
+
+def list_stage2_orders(
+    status: Optional[Stage2OrderStatus] = None,
+    quote_id: Optional[str] = None,
+    lead_id: Optional[str] = None,
+    customer_id: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0
+) -> Stage2OrderListResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Order skeleton requires sqlite_local lead storage")
+
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_order_sqlite_schema(conn)
+        where_clauses = []
+        params: List[Any] = []
+        if status:
+            where_clauses.append("o.status = ?")
+            params.append(status.value)
+        if quote_id:
+            where_clauses.append("o.quote_id = ?")
+            params.append(quote_id)
+        if lead_id:
+            where_clauses.append("o.lead_id = ?")
+            params.append(lead_id)
+        if customer_id:
+            where_clauses.append("o.customer_id = ?")
+            params.append(customer_id)
+        if search:
+            query = f"%{search.strip().lower()}%"
+            where_clauses.append(
+                """
+                (
+                    lower(o.order_number) LIKE ?
+                    OR lower(q.quote_number) LIKE ?
+                    OR lower(c.name) LIKE ?
+                    OR lower(coalesce(c.email, '')) LIKE ?
+                    OR lower(coalesce(c.phone, '')) LIKE ?
+                    OR lower(coalesce(o.event_location, '')) LIKE ?
+                )
+                """
+            )
+            params.extend([query, query, query, query, query, query])
+        where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+        total = conn.execute(
+            f"""
+            SELECT COUNT(*) AS total
+            FROM orders o
+            JOIN quotes q ON q.id = o.quote_id
+            JOIN customers c ON c.id = o.customer_id
+            {where_sql}
+            """,
+            params
+        ).fetchone()["total"]
+        rows = conn.execute(
+            f"""
+            SELECT
+                o.*,
+                q.quote_number,
+                q.status AS quote_status,
+                q.final_total AS quote_final_total,
+                c.name AS customer_name,
+                c.email,
+                c.phone,
+                c.wechat_or_other_contact
+            FROM orders o
+            JOIN quotes q ON q.id = o.quote_id
+            JOIN customers c ON c.id = o.customer_id
+            {where_sql}
+            ORDER BY o.created_at DESC, o.id DESC
+            LIMIT ? OFFSET ?
+            """,
+            params + [limit, offset]
+        ).fetchall()
+        return Stage2OrderListResponse(
+            items=[build_stage2_order_response(row) for row in rows],
+            total=total,
+            limit=limit,
+            offset=offset
+        )
+
+def get_stage2_order_response(order_id: str) -> Stage2OrderResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Order skeleton requires sqlite_local lead storage")
+
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_order_sqlite_schema(conn)
+        return build_stage2_order_response(get_stage2_order_detail_row(conn, order_id))
+
+def update_stage2_order(order_id: str, request: Stage2OrderPatchRequest) -> Stage2OrderResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Order skeleton requires sqlite_local lead storage")
+
+    patch = request.dict(exclude_unset=True)
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_order_sqlite_schema(conn)
+        get_stage2_order_detail_row(conn, order_id)
+        update_fields = []
+        params: List[Any] = []
+        if "status" in patch and patch["status"] is not None:
+            update_fields.append("status = ?")
+            params.append(patch["status"].value)
+            if patch["status"] == Stage2OrderStatus.CONFIRMED:
+                update_fields.append("confirmed_at = COALESCE(confirmed_at, ?)")
+                params.append(datetime.utcnow().isoformat())
+        if "event_date" in patch:
+            update_fields.append("event_date = ?")
+            params.append(patch["event_date"])
+        if "event_location" in patch:
+            update_fields.append("event_location = ?")
+            params.append(patch["event_location"])
+        if "internal_notes" in patch:
+            update_fields.append("internal_notes = ?")
+            params.append(patch["internal_notes"])
+        if "confirmed_at" in patch:
+            update_fields.append("confirmed_at = ?")
+            params.append(patch["confirmed_at"])
+        if update_fields:
+            update_fields.append("updated_at = ?")
+            params.append(datetime.utcnow().isoformat())
+            params.append(order_id)
+            conn.execute(f"UPDATE orders SET {', '.join(update_fields)} WHERE id = ?", params)
+            conn.commit()
+        return build_stage2_order_response(get_stage2_order_detail_row(conn, order_id))
 
 def build_sqlite_lead_response(conn: sqlite3.Connection, row: sqlite3.Row) -> LeadResponse:
     contact = row["email"] or row["phone"] or row["wechat_or_other_contact"] or ""
@@ -3308,6 +3675,55 @@ def update_stage2_quote_skeleton(
     Blocks converted_to_order and does not create Order/payment/external actions.
     """
     return update_stage2_quote(quote_id, request)
+
+# Stage 2 Order API Skeleton
+@app.post("/api/orders", response_model=Stage2OrderResponse, status_code=201)
+def create_stage2_order_skeleton(
+    request: Stage2OrderCreateRequest,
+    current_user: User = Depends(require_admin)
+):
+    """
+    Admin-only Stage 2 Order skeleton.
+
+    Creates a draft Order from an accepted persistent Quote in sqlite_local mode only.
+    It does not create payment sessions, trigger Stripe, run webhook/n8n, or send outbound messages.
+    """
+    return create_stage2_order_from_accepted_quote(request, current_user)
+
+@app.get("/api/orders", response_model=Stage2OrderListResponse)
+def list_stage2_orders_skeleton(
+    status: Optional[Stage2OrderStatus] = None,
+    quote_id: Optional[str] = None,
+    lead_id: Optional[str] = None,
+    customer_id: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    current_user: User = Depends(require_admin)
+):
+    """Admin-only Stage 2 Order list skeleton."""
+    return list_stage2_orders(status, quote_id, lead_id, customer_id, search, limit, offset)
+
+@app.get("/api/orders/{order_id}", response_model=Stage2OrderResponse)
+def get_stage2_order_skeleton(
+    order_id: str,
+    current_user: User = Depends(require_admin)
+):
+    """Admin-only Stage 2 Order detail skeleton."""
+    return get_stage2_order_response(order_id)
+
+@app.patch("/api/orders/{order_id}", response_model=Stage2OrderResponse)
+def update_stage2_order_skeleton(
+    order_id: str,
+    request: Stage2OrderPatchRequest,
+    current_user: User = Depends(require_admin)
+):
+    """
+    Admin-only Stage 2 Order update skeleton.
+
+    Allows operational Order status/details only. It does not mutate payment/deposit fields.
+    """
+    return update_stage2_order(order_id, request)
 
 # User Endpoints
 @app.post("/api/users/register", response_model=UserResponse)
