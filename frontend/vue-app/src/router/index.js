@@ -147,6 +147,18 @@ const routes = [
     meta: { title: 'Quote Detail', requiresAuth: true, requiresAdmin: true }
   },
   {
+    path: '/admin/orders',
+    name: 'AdminOrders',
+    component: () => import('@/views/AdminOrders.vue'),
+    meta: { title: 'Order Review', requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/orders/:orderId',
+    name: 'AdminOrderDetail',
+    component: () => import('@/views/AdminOrderDetail.vue'),
+    meta: { title: 'Order Detail', requiresAuth: true, requiresAdmin: true }
+  },
+  {
     path: '/admin/suppliers',
     name: 'AdminSuppliers',
     component: () => import('@/views/AdminSuppliers.vue'),

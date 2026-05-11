@@ -21,6 +21,7 @@
         <el-menu-item index="/local-demo">Local Demo Hub</el-menu-item>
         <el-menu-item index="/admin/local-leads">Lead Review</el-menu-item>
         <el-menu-item index="/admin/quotes">Quote Review</el-menu-item>
+        <el-menu-item index="/admin/orders">Order Review</el-menu-item>
       </el-menu>
       
       <div class="user-actions">
