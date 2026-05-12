@@ -295,7 +295,9 @@ Lead / Quote / Order 创建验收：
 
 ## 15. commit hash
 
-待本轮本地 commit 后回填。
+Implementation commit:
+
+- `17ad8574` Harden customer read-only experience
 
 ## 16. 下一步建议
 
@@ -305,4 +307,3 @@ Lead / Quote / Order 创建验收：
 2. 建立稳定 customer auth fixture：非 admin customer token + local customer id mapping。
 3. 继续保持 payment / webhook / n8n / deployment 阻断。
 4. 暂不做 customer self-service quote acceptance，直到 read-only API 验收稳定。
-
