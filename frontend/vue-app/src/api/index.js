@@ -4,12 +4,17 @@ import { ElMessage } from 'element-plus'
 
 // API 基础URL配置
 const getBaseURL = () => {
+  // 生产环境使用环境变量或固定地址
+  if (import.meta.env.VITE_API_URL) {
+    const configuredUrl = import.meta.env.VITE_API_URL.replace(/\/$/, '')
+    return configuredUrl.endsWith('/api') ? configuredUrl : `${configuredUrl}/api`
+  }
   // 如果在本地开发环境
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return '/api'
   }
-  // 如果是局域网访问（手机等），使用IP地址
-  return 'http://192.168.1.136:8000'
+  // 默认生产地址（阶段5：先使用本地tunnel或IP，后续切生产域名）
+  return 'http://127.0.0.1:8000'
 }
 
 // 创建 axios 实例

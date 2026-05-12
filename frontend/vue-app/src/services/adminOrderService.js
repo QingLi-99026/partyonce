@@ -141,6 +141,43 @@ export const updateAdminOrderStatus = async (order, status, source) => {
   }
 }
 
+export const updateAdminOrderOperations = async (order, patch, source) => {
+  const normalizedPatch = { ...patch }
+  if (normalizedPatch.internal_note !== undefined) {
+    normalizedPatch.internal_notes = normalizedPatch.internal_note
+    delete normalizedPatch.internal_note
+  }
+
+  if (source === ORDER_SOURCE_API) {
+    try {
+      const response = await apiClient.patch(`/orders/${order.id}`, normalizedPatch)
+      return {
+        source: ORDER_SOURCE_API,
+        error: null,
+        item: normalizeAdminOrder(response)
+      }
+    } catch (error) {
+      const fallbackPatch = {
+        ...patch,
+        internal_note: patch.internal_note ?? patch.internal_notes
+      }
+      const updated = updateAdminOrderSkeleton(order.id, fallbackPatch, order)
+      return {
+        source: ORDER_SOURCE_MIXED_FALLBACK,
+        error,
+        item: normalizeAdminOrder(updated)
+      }
+    }
+  }
+
+  const updated = updateAdminOrderSkeleton(order.id, patch, order)
+  return {
+    source: ORDER_SOURCE_FALLBACK,
+    error: null,
+    item: normalizeAdminOrder(updated)
+  }
+}
+
 export const resetAdminOrderFallback = () => resetAdminOrderSkeletons().map(normalizeAdminOrder)
 
 export const createDraftOrderFromQuote = async (quote) => {

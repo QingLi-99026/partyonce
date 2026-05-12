@@ -159,6 +159,47 @@
           </article>
         </section>
 
+        <section class="panel-grid">
+          <article class="panel">
+            <h2>Ops Owner & Remark</h2>
+            <label class="field-label" for="quote-ops-owner">Owner</label>
+            <el-input
+              id="quote-ops-owner"
+              v-model="quoteOps.owner"
+              placeholder="Local/staging owner"
+            />
+            <label class="field-label stacked" for="quote-ops-next-action">Next Action</label>
+            <el-input
+              id="quote-ops-next-action"
+              v-model="quoteOps.nextAction"
+              placeholder="Example: confirm package changes before sending"
+            />
+            <label class="field-label stacked" for="quote-ops-note">Internal Remark</label>
+            <el-input
+              id="quote-ops-note"
+              v-model="quoteOps.note"
+              type="textarea"
+              :rows="4"
+              maxlength="700"
+              show-word-limit
+              placeholder="Local operations note. Not sent to customer."
+            />
+            <el-button class="create-order-button" type="primary" plain @click="saveQuoteOpsState">
+              Save Local Ops Note
+            </el-button>
+            <p class="control-note">
+              Stored in browser localStorage for local/staging review only. It does not call outbound systems.
+            </p>
+          </article>
+
+          <article class="panel">
+            <h2>Ops Alerts</h2>
+            <ul class="blocked-list">
+              <li v-for="item in quoteOpsAlerts" :key="item">{{ item }}</li>
+            </ul>
+          </article>
+        </section>
+
         <section class="panel">
           <h2>Line Items Snapshot</h2>
           <el-table v-if="lineItems.length > 0" :data="lineItems" row-key="name" style="width: 100%">
@@ -209,15 +250,54 @@ const loading = ref(false)
 const message = ref('')
 const messageType = ref('info')
 const creatingOrder = ref(false)
+const quoteOps = ref({
+  owner: '',
+  nextAction: '',
+  note: '',
+  updatedAt: ''
+})
 
 const lineItems = computed(() => (Array.isArray(quote.value?.line_items) ? quote.value.line_items : []))
 const canCreateDraftOrder = computed(() => quote.value?.status === 'accepted')
+const quoteOpsAlerts = computed(() => {
+  if (!quote.value) return ['Quote detail is still loading.']
+  const alerts = []
+  if (!Number(quote.value.final_total || 0)) alerts.push('Missing final total. Confirm pricing before customer communication.')
+  if (['draft', 'sent'].includes(quote.value.status) && !quote.value.valid_until) alerts.push('Missing valid_until. Add before sending or relying on this quote.')
+  if (quote.value.status === 'sent' && quote.value.valid_until && new Date(quote.value.valid_until).getTime() < Date.now()) alerts.push('Sent quote is past valid_until. Mark expired or reissue manually.')
+  if (quote.value.status === 'accepted') alerts.push('Accepted quote: review whether a draft Order exists. Payment remains blocked.')
+  if (!quoteOps.value.owner) alerts.push('No local ops owner assigned.')
+  return alerts.length ? alerts : ['No active operations alert.']
+})
+
+const opsStorageKey = computed(() => `partyonce_quote_ops_${route.params.quoteId}`)
+
+const loadQuoteOpsState = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(opsStorageKey.value) || '{}')
+    quoteOps.value = {
+      owner: parsed.owner || '',
+      nextAction: parsed.nextAction || '',
+      note: parsed.note || '',
+      updatedAt: parsed.updatedAt || ''
+    }
+  } catch (error) {
+    quoteOps.value = { owner: '', nextAction: '', note: '', updatedAt: '' }
+  }
+}
+
+const saveQuoteOpsState = () => {
+  quoteOps.value.updatedAt = new Date().toISOString()
+  localStorage.setItem(opsStorageKey.value, JSON.stringify(quoteOps.value))
+  ElMessage.success('Local Quote ops note saved. No external action was triggered.')
+}
 
 const loadQuote = async () => {
   loading.value = true
   message.value = ''
   try {
     quote.value = await apiClient.get(`/quotes/${route.params.quoteId}`)
+    loadQuoteOpsState()
   } catch (error) {
     quote.value = null
     message.value = getErrorMessage(error)
@@ -446,6 +526,10 @@ dd {
   font-weight: 700;
 }
 
+.field-label.stacked {
+  margin-top: 14px;
+}
+
 .status-select {
   width: 220px;
 }
@@ -458,6 +542,13 @@ dd {
 
 .create-order-button {
   margin-top: 14px;
+}
+
+.blocked-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #495057;
+  line-height: 1.7;
 }
 
 pre {

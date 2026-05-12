@@ -51,14 +51,28 @@
         v-model="searchQuery"
         class="search-input"
         clearable
-        placeholder="Search quote number, customer, contact, or lead ID"
+        placeholder="Search quote number, customer, contact, lead ID, theme, or package"
         @keyup.enter="loadQuotes"
       />
       <el-select v-model="statusFilter" class="status-filter" placeholder="Status" @change="loadQuotes">
         <el-option label="All statuses" value="" />
         <el-option v-for="status in allowedStatuses" :key="status" :label="status" :value="status" />
       </el-select>
+      <el-select v-model="riskFilter" class="status-filter wide-filter" placeholder="Ops alerts">
+        <el-option label="All quotes" value="" />
+        <el-option label="Missing amount" value="missing_amount" />
+        <el-option label="Missing valid until" value="missing_valid_until" />
+        <el-option label="Expired sent quote" value="expired_sent_quote" />
+        <el-option label="Accepted needs order" value="accepted_needs_order" />
+      </el-select>
       <el-button @click="clearFilters">Clear</el-button>
+    </section>
+
+    <section class="status-guide" aria-label="Quote status guidance">
+      <article v-for="item in statusGuide" :key="item.status">
+        <strong>{{ item.status }}</strong>
+        <span>{{ item.label }}</span>
+      </article>
     </section>
 
     <el-alert
@@ -110,6 +124,22 @@
           </template>
         </el-table-column>
 
+        <el-table-column label="Ops Alerts" min-width="230">
+          <template #default="{ row }">
+            <div class="alert-cell">
+              <el-tag
+                v-for="item in quoteExceptions(row)"
+                :key="item.code"
+                :type="item.type"
+                effect="plain"
+              >
+                {{ item.label }}
+              </el-tag>
+              <span v-if="quoteExceptions(row).length === 0">No active alert</span>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column label="Total" width="140" align="right">
           <template #default="{ row }">{{ formatMoney(row.final_total, row.currency) }}</template>
         </el-table-column>
@@ -125,6 +155,10 @@
 
         <el-table-column label="Created" min-width="170">
           <template #default="{ row }">{{ formatDateTime(row.created_at) }}</template>
+        </el-table-column>
+
+        <el-table-column label="Valid Until" min-width="150">
+          <template #default="{ row }">{{ formatDate(row.valid_until) }}</template>
         </el-table-column>
 
         <el-table-column label="Status Update" min-width="210">
@@ -169,25 +203,55 @@ const quoteTotal = ref(0)
 const loading = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref('')
+const riskFilter = ref('')
 const message = ref('')
 const messageType = ref('info')
+
+const statusGuide = [
+  { status: 'draft', label: '后台准备报价，客户侧只读显示准备中。' },
+  { status: 'sent', label: '报价已发送，运营需关注有效期和客户确认。' },
+  { status: 'accepted', label: '客户已接受，下一步是人工创建或核对订单。' },
+  { status: 'rejected', label: '报价已拒绝，保留备注和复盘原因。' },
+  { status: 'expired', label: '报价已过期，不触发自动支付或外发。' }
+]
 
 const filteredQuotes = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
   return quotes.value.filter((quote) => {
     const matchesStatus = !statusFilter.value || quote.status === statusFilter.value
-    if (!query) return matchesStatus
+    const matchesRisk = !riskFilter.value || quoteExceptions(quote).some((item) => item.code === riskFilter.value)
+    if (!query) return matchesStatus && matchesRisk
     const haystack = [
       quote.id,
       quote.lead_id,
       quote.quote_number,
       quote.customer_summary?.name,
       quote.customer_summary?.contact,
-      quote.status
+      quote.status,
+      selectionSummary(quote),
+      lineItemSummary(quote)
     ].filter(Boolean).join(' ').toLowerCase()
-    return matchesStatus && haystack.includes(query)
+    return matchesStatus && matchesRisk && haystack.includes(query)
   })
 })
+
+const quoteExceptions = (quote) => {
+  const exceptions = []
+  const total = Number(quote.final_total || 0)
+  if (!total) {
+    exceptions.push({ code: 'missing_amount', label: 'Missing amount', type: 'danger' })
+  }
+  if (!quote.valid_until && ['draft', 'sent'].includes(quote.status)) {
+    exceptions.push({ code: 'missing_valid_until', label: 'No valid-until', type: 'warning' })
+  }
+  if (quote.status === 'sent' && quote.valid_until && new Date(quote.valid_until).getTime() < Date.now()) {
+    exceptions.push({ code: 'expired_sent_quote', label: 'Past valid date', type: 'danger' })
+  }
+  if (quote.status === 'accepted') {
+    exceptions.push({ code: 'accepted_needs_order', label: 'Needs order check', type: 'success' })
+  }
+  return exceptions
+}
 
 const loadQuotes = async () => {
   loading.value = true
@@ -239,6 +303,7 @@ const updateQuoteStatus = async (quote, status) => {
 const clearFilters = () => {
   searchQuery.value = ''
   statusFilter.value = ''
+  riskFilter.value = ''
   loadQuotes()
 }
 
@@ -273,6 +338,13 @@ const formatDateTime = (value) => {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return String(value)
   return date.toLocaleString()
+}
+
+const formatDate = (value) => {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+  return date.toLocaleDateString()
 }
 
 const statusTagType = (status) => {
@@ -338,6 +410,7 @@ onMounted(loadQuotes)
 .scope-alert,
 .stats-grid,
 .toolbar,
+.status-guide,
 .table-shell {
   max-width: 1280px;
   margin-left: auto;
@@ -395,6 +468,40 @@ onMounted(loadQuotes)
   width: 180px;
 }
 
+.wide-filter {
+  width: 220px;
+}
+
+.status-guide {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.status-guide article {
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+.status-guide strong,
+.status-guide span {
+  display: block;
+}
+
+.status-guide strong {
+  color: #212529;
+  margin-bottom: 6px;
+}
+
+.status-guide span {
+  color: #868e96;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .table-shell {
   padding: 16px;
   background: #ffffff;
@@ -418,6 +525,18 @@ onMounted(loadQuotes)
   font-size: 13px;
 }
 
+.alert-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.alert-cell span {
+  color: #868e96;
+  font-size: 12px;
+}
+
 @media (max-width: 900px) {
   .page-header,
   .toolbar {
@@ -425,12 +544,14 @@ onMounted(loadQuotes)
     align-items: stretch;
   }
 
-  .stats-grid {
+  .stats-grid,
+  .status-guide {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .search-input,
-  .status-filter {
+  .status-filter,
+  .wide-filter {
     width: 100%;
     max-width: none;
   }
@@ -441,7 +562,8 @@ onMounted(loadQuotes)
     padding: 80px 14px 24px;
   }
 
-  .stats-grid {
+  .stats-grid,
+  .status-guide {
     grid-template-columns: 1fr;
   }
 }

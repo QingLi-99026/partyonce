@@ -68,6 +68,19 @@
         <el-option label="All statuses" value="" />
         <el-option v-for="status in orderStatuses" :key="status" :label="status" :value="status" />
       </el-select>
+      <el-input
+        v-model="ownerFilter"
+        class="owner-filter"
+        clearable
+        placeholder="Filter owner"
+      />
+      <el-select v-model="riskFilter" class="status-filter wide-filter" placeholder="Ops alerts">
+        <el-option label="All orders" value="" />
+        <el-option label="Pending deposit" value="pending_deposit_state" />
+        <el-option label="Missing event date" value="missing_event_date" />
+        <el-option label="Missing location" value="missing_location" />
+        <el-option label="Missing next action" value="missing_next_action" />
+      </el-select>
       <el-button @click="clearFilters">Clear</el-button>
     </section>
 
@@ -104,6 +117,22 @@
           </template>
         </el-table-column>
 
+        <el-table-column label="Ops Alerts" min-width="230">
+          <template #default="{ row }">
+            <div class="alert-cell">
+              <el-tag
+                v-for="item in orderExceptions(row)"
+                :key="item.code"
+                :type="item.type"
+                effect="plain"
+              >
+                {{ item.label }}
+              </el-tag>
+              <span v-if="orderExceptions(row).length === 0">No active alert</span>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column label="Event" min-width="240">
           <template #default="{ row }">
             <div class="order-cell">
@@ -124,7 +153,10 @@
 
         <el-table-column label="Next Action" min-width="260">
           <template #default="{ row }">
-            <span class="next-action">{{ row.next_action }}</span>
+            <div class="order-cell">
+              <strong>{{ row.owner }}</strong>
+              <span class="next-action">{{ row.next_action }}</span>
+            </div>
           </template>
         </el-table-column>
 
@@ -167,6 +199,8 @@ const router = useRouter()
 const orders = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
+const ownerFilter = ref('')
+const riskFilter = ref('')
 const loading = ref(false)
 const dataSource = ref('loading')
 const fallbackNotice = ref('')
@@ -175,7 +209,9 @@ const filteredOrders = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
   return orders.value.filter((order) => {
     const matchesStatus = !statusFilter.value || order.status === statusFilter.value
-    if (!query) return matchesStatus
+    const matchesOwner = !ownerFilter.value.trim() || String(order.owner || '').toLowerCase().includes(ownerFilter.value.trim().toLowerCase())
+    const matchesRisk = !riskFilter.value || orderExceptions(order).some((item) => item.code === riskFilter.value)
+    if (!query) return matchesStatus && matchesOwner && matchesRisk
     const haystack = [
       order.id,
       order.order_number,
@@ -189,13 +225,31 @@ const filteredOrders = computed(() => {
       order.event?.package_tier,
       order.event?.location,
       order.next_action,
-      order.internal_note
+      order.internal_note,
+      order.owner
     ].filter(Boolean).join(' ').toLowerCase()
-    return matchesStatus && haystack.includes(query)
+    return matchesStatus && matchesOwner && matchesRisk && haystack.includes(query)
   })
 })
 
 const nextActionCount = computed(() => orders.value.filter((order) => Boolean(order.next_action)).length)
+
+const orderExceptions = (order) => {
+  const exceptions = []
+  if (order.status === 'pending_deposit') {
+    exceptions.push({ code: 'pending_deposit_state', label: 'Business deposit pending', type: 'warning' })
+  }
+  if (!order.event?.date || order.event.date === '-') {
+    exceptions.push({ code: 'missing_event_date', label: 'Missing event date', type: 'danger' })
+  }
+  if (!order.event?.location || order.event.location === '-') {
+    exceptions.push({ code: 'missing_location', label: 'Missing location', type: 'danger' })
+  }
+  if (!String(order.next_action || '').trim()) {
+    exceptions.push({ code: 'missing_next_action', label: 'No next action', type: 'warning' })
+  }
+  return exceptions
+}
 
 const loadOrders = async () => {
   loading.value = true
@@ -238,6 +292,8 @@ const updateStatus = async (order, status) => {
 const clearFilters = () => {
   searchQuery.value = ''
   statusFilter.value = ''
+  ownerFilter.value = ''
+  riskFilter.value = ''
 }
 
 const formatMoney = (value, currency = 'AUD') => {
@@ -378,6 +434,14 @@ onMounted(loadOrders)
   width: 190px;
 }
 
+.owner-filter {
+  width: 180px;
+}
+
+.wide-filter {
+  width: 220px;
+}
+
 .table-shell {
   padding: 16px;
 }
@@ -401,6 +465,18 @@ onMounted(loadOrders)
   font-size: 13px;
 }
 
+.alert-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.alert-cell span {
+  color: #868e96;
+  font-size: 12px;
+}
+
 @media (max-width: 900px) {
   .page-header,
   .toolbar {
@@ -413,7 +489,9 @@ onMounted(loadOrders)
   }
 
   .search-input,
-  .status-filter {
+  .status-filter,
+  .owner-filter,
+  .wide-filter {
     width: 100%;
     max-width: none;
   }

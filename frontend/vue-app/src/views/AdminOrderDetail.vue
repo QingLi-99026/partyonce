@@ -144,6 +144,18 @@
             <p class="control-note">
               `deposit_paid` is intentionally unavailable here because payment has not entered scope.
             </p>
+            <label class="field-label stacked" for="order-event-date">Event Date</label>
+            <el-input
+              id="order-event-date"
+              v-model="opsForm.event_date"
+              placeholder="YYYY-MM-DD or local event date"
+            />
+            <label class="field-label stacked" for="order-event-location">Event Location</label>
+            <el-input
+              id="order-event-location"
+              v-model="opsForm.event_location"
+              placeholder="Event address or venue"
+            />
           </article>
         </section>
 
@@ -152,11 +164,27 @@
             <h2>Next Action</h2>
             <p class="body-text">{{ order.next_action }}</p>
             <h3>Internal Note</h3>
-            <p class="body-text">{{ order.internal_note }}</p>
+            <el-input
+              v-model="opsForm.internal_note"
+              type="textarea"
+              :rows="5"
+              maxlength="800"
+              show-word-limit
+              placeholder="Record operational context. Not visible to customer."
+            />
+            <el-button class="save-button" type="primary" plain @click="saveOrderOperations">
+              Save Order Ops Fields
+            </el-button>
+            <p class="control-note">
+              Saves only local/staging Order skeleton fields. No Stripe, payment, webhook/n8n, or outbound message is triggered.
+            </p>
           </article>
 
           <article class="panel">
-            <h2>Blocked Actions</h2>
+            <h2>Blocked Actions & Alerts</h2>
+            <ul class="blocked-list alerts-list">
+              <li v-for="item in orderOpsAlerts" :key="item">{{ item }}</li>
+            </ul>
             <ul class="blocked-list">
               <li v-for="action in blockedOrderActions" :key="action">{{ action }}</li>
             </ul>
@@ -192,13 +220,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { blockedOrderActions, orderStatuses } from '@/mock/adminOrders'
 import {
   ORDER_SOURCE_API,
   fetchAdminOrderDetail,
+  updateAdminOrderOperations,
   updateAdminOrderStatus
 } from '@/services/adminOrderService'
 
@@ -208,6 +237,31 @@ const order = ref(null)
 const loading = ref(false)
 const dataSource = ref('loading')
 const fallbackNotice = ref('')
+const opsForm = ref({
+  event_date: '',
+  event_location: '',
+  internal_note: ''
+})
+
+const orderOpsAlerts = computed(() => {
+  if (!order.value) return ['Order detail is still loading.']
+  const alerts = []
+  if (order.value.status === 'pending_deposit') {
+    alerts.push('pending_deposit is a business status only. Stripe payment is still blocked.')
+  }
+  if (!order.value.event?.date || order.value.event.date === '-') alerts.push('Missing event date.')
+  if (!order.value.event?.location || order.value.event.location === '-') alerts.push('Missing event location.')
+  if (!String(opsForm.value.internal_note || '').trim()) alerts.push('Internal note is empty.')
+  return alerts.length ? alerts : ['No active operations alert.']
+})
+
+const syncOpsForm = () => {
+  opsForm.value = {
+    event_date: order.value?.event?.date && order.value.event.date !== '-' ? order.value.event.date : '',
+    event_location: order.value?.event?.location && order.value.event.location !== '-' ? order.value.event.location : '',
+    internal_note: order.value?.internal_note || ''
+  }
+}
 
 const loadOrder = async () => {
   loading.value = true
@@ -216,12 +270,33 @@ const loadOrder = async () => {
     const result = await fetchAdminOrderDetail(route.params.orderId)
     order.value = result.item
     dataSource.value = result.source
+    syncOpsForm()
     if (result.source !== ORDER_SOURCE_API) {
       fallbackNotice.value = 'Local backend Order detail API is unavailable, so this page is using fallback mock data.'
     }
   } finally {
     loading.value = false
   }
+}
+
+const saveOrderOperations = async () => {
+  if (!order.value) return
+  const result = await updateAdminOrderOperations(order.value, {
+    event_date: opsForm.value.event_date || null,
+    event_location: opsForm.value.event_location || null,
+    internal_note: opsForm.value.internal_note
+  }, dataSource.value)
+  if (!result.item) {
+    ElMessage.error('Could not save Order operations fields.')
+    return
+  }
+  order.value = result.item
+  dataSource.value = result.source
+  syncOpsForm()
+  if (result.source !== ORDER_SOURCE_API) {
+    fallbackNotice.value = 'Operations fields used fallback mock storage because the local backend API was unavailable.'
+  }
+  ElMessage.success('Order operations fields saved. No external action was triggered.')
 }
 
 const updateStatus = async (status) => {
@@ -233,6 +308,7 @@ const updateStatus = async (status) => {
   }
   order.value = result.item
   dataSource.value = result.source
+  syncOpsForm()
   if (result.source !== ORDER_SOURCE_API) {
     fallbackNotice.value = 'Status update used fallback mock storage because the local backend API was unavailable.'
   }
@@ -401,8 +477,16 @@ dd {
   font-weight: 700;
 }
 
+.field-label.stacked {
+  margin-top: 14px;
+}
+
 .status-select {
   width: 240px;
+}
+
+.save-button {
+  margin-top: 14px;
 }
 
 .control-note,
@@ -422,6 +506,11 @@ dd {
 .blocked-list li,
 .status-flow li {
   margin-bottom: 10px;
+}
+
+.alerts-list {
+  margin-bottom: 18px;
+  color: #b7791f;
 }
 
 .status-flow li {

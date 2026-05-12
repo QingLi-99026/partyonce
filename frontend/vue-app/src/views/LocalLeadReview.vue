@@ -40,13 +40,24 @@
         v-model="searchQuery"
         class="search-input"
         clearable
-        placeholder="搜索客户姓名或联系方式"
+        placeholder="搜索客户、联系方式、主题、负责人或下一步动作"
       />
       <el-select v-model="statusFilter" class="status-filter" placeholder="状态">
         <el-option label="全部状态" value="" />
-        <el-option label="待处理" value="pending" />
-        <el-option label="已联系" value="contacted" />
-        <el-option label="已关闭" value="closed" />
+        <el-option v-for="status in leadStatuses" :key="status.value" :label="status.label" :value="status.value" />
+      </el-select>
+      <el-select v-model="priorityFilter" class="status-filter" placeholder="优先级">
+        <el-option label="全部优先级" value="" />
+        <el-option label="High" value="High" />
+        <el-option label="Medium" value="Medium" />
+        <el-option label="Low" value="Low" />
+      </el-select>
+      <el-select v-model="exceptionFilter" class="status-filter wide-filter" placeholder="异常">
+        <el-option label="全部 Lead" value="" />
+        <el-option label="缺少联系方式" value="missing_contact" />
+        <el-option label="没有下一步动作" value="missing_next_action" />
+        <el-option label="高优先级" value="high_priority" />
+        <el-option label="需关闭原因" value="needs_close_reason" />
       </el-select>
       <el-button @click="router.push('/quote?theme=forest&scene=clearing&package=standard')">
         打开本地报价页
@@ -150,14 +161,24 @@
               size="small"
               @change="updateLead(row, { status: $event })"
             >
-              <el-option label="新线索" value="new" />
-              <el-option label="待处理" value="pending" />
-              <el-option label="已联系" value="contacted" />
-              <el-option label="已确认需求" value="qualified" />
-              <el-option label="无效线索" value="unqualified" />
-              <el-option label="已转报价" value="converted_to_quote" />
-              <el-option label="已关闭" value="closed" />
+              <el-option v-for="status in leadStatuses" :key="status.value" :label="status.label" :value="status.value" />
             </el-select>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="异常提示" min-width="210">
+          <template #default="{ row }">
+            <div class="exception-cell">
+              <el-tag
+                v-for="item in leadExceptions(row)"
+                :key="item.code"
+                :type="item.type"
+                effect="plain"
+              >
+                {{ item.label }}
+              </el-tag>
+              <span v-if="leadExceptions(row).length === 0">无明显异常</span>
+            </div>
           </template>
         </el-table-column>
 
@@ -225,6 +246,8 @@ const storageKey = 'inquirySubmissions'
 const leads = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
+const priorityFilter = ref('')
+const exceptionFilter = ref('')
 const leadMode = ref('local')
 const isLoading = ref(false)
 const isSyncing = ref(false)
@@ -238,6 +261,16 @@ const defaultFollowUp = {
   note: '',
   updatedAt: ''
 }
+
+const leadStatuses = [
+  { label: '新线索', value: 'new' },
+  { label: '待处理', value: 'pending' },
+  { label: '已联系', value: 'contacted' },
+  { label: '已确认需求', value: 'qualified' },
+  { label: '无效线索', value: 'unqualified' },
+  { label: '已转报价', value: 'converted_to_quote' },
+  { label: '已关闭', value: 'closed' }
+]
 
 const isBackendMode = computed(() => leadMode.value === 'backend')
 
@@ -436,6 +469,29 @@ const getFollowUp = (lead) => ({
   ...(lead.followUp || {})
 })
 
+const hasContact = (lead) => {
+  const contact = String(lead.customerInfo?.contact || '').trim()
+  return contact && contact !== '-'
+}
+
+const leadExceptions = (lead) => {
+  const followUp = getFollowUp(lead)
+  const exceptions = []
+  if (!hasContact(lead)) {
+    exceptions.push({ code: 'missing_contact', label: '缺少联系方式', type: 'danger' })
+  }
+  if (!String(followUp.nextAction || '').trim() && !['closed', 'converted_to_quote'].includes(lead.status)) {
+    exceptions.push({ code: 'missing_next_action', label: '没有下一步动作', type: 'warning' })
+  }
+  if (followUp.priority === 'High') {
+    exceptions.push({ code: 'high_priority', label: '高优先级', type: 'danger' })
+  }
+  if (['closed', 'unqualified'].includes(lead.status) && !String(followUp.note || '').trim()) {
+    exceptions.push({ code: 'needs_close_reason', label: '需关闭原因', type: 'warning' })
+  }
+  return exceptions
+}
+
 const mapLocalLeadToBackendPayload = (lead) => ({
   customer: {
     name: lead.customerInfo?.name || 'Unknown customer',
@@ -478,15 +534,19 @@ const filteredLeads = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
   return leads.value.filter((lead) => {
     const statusOk = !statusFilter.value || (lead.status || 'pending') === statusFilter.value
+    const followUp = getFollowUp(lead)
+    const priorityOk = !priorityFilter.value || followUp.priority === priorityFilter.value
+    const exceptionOk = !exceptionFilter.value || leadExceptions(lead).some((item) => item.code === exceptionFilter.value)
     const queryOk = !query || [
       lead.customerInfo?.name,
       lead.customerInfo?.contact,
       lead.selection?.themeName,
       lead.selection?.packageName,
-      getFollowUp(lead).owner,
-      getFollowUp(lead).nextAction
+      followUp.owner,
+      followUp.nextAction,
+      followUp.note
     ].some((value) => String(value || '').toLowerCase().includes(query))
-    return statusOk && queryOk
+    return statusOk && priorityOk && exceptionOk && queryOk
   })
 })
 
@@ -495,12 +555,13 @@ const stats = computed(() => {
   const pending = leads.value.filter((lead) => (lead.status || 'pending') === 'pending').length
   const contacted = leads.value.filter((lead) => lead.status === 'contacted').length
   const high = leads.value.filter((lead) => getFollowUp(lead).priority === 'High').length
+  const exceptions = leads.value.filter((lead) => leadExceptions(lead).length > 0).length
 
   return [
     { label: 'Total Leads', value: total, note: 'localStorage records' },
     { label: 'Pending', value: pending, note: '需要运营处理' },
-    { label: 'Contacted', value: contacted, note: '已有联系记录' },
-    { label: 'High Priority', value: high, note: '优先跟进' }
+    { label: 'High Priority', value: high, note: '优先跟进' },
+    { label: 'Exceptions', value: exceptions, note: `${contacted} contacted / 需复核异常` }
   ]
 })
 
@@ -574,6 +635,10 @@ onMounted(refreshLeads)
   width: 180px;
 }
 
+.wide-filter {
+  width: 210px;
+}
+
 .mode-toggle {
   flex-shrink: 0;
 }
@@ -587,6 +652,18 @@ onMounted(refreshLeads)
 .save-cell {
   display: grid;
   gap: 4px;
+}
+
+.exception-cell {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.exception-cell span {
+  color: var(--text-secondary);
+  font-size: 12px;
 }
 
 .customer-cell span,
