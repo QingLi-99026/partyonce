@@ -64,6 +64,30 @@ const routes = [
     meta: { title: '我的订单', requiresAuth: true }
   },
   {
+    path: '/payment/deposit',
+    name: 'PaymentDeposit',
+    component: () => import('@/views/PaymentDeposit.vue'),
+    meta: { title: 'Stripe test-mode readiness' }
+  },
+  {
+    path: '/payment/success',
+    name: 'PaymentSuccess',
+    component: () => import('@/views/PaymentSuccess.vue'),
+    meta: { title: 'Test payment success placeholder' }
+  },
+  {
+    path: '/payment/failed',
+    name: 'PaymentFailed',
+    component: () => import('@/views/PaymentFailed.vue'),
+    meta: { title: 'Test payment failed placeholder' }
+  },
+  {
+    path: '/payment/cancelled',
+    name: 'PaymentCancelled',
+    component: () => import('@/views/PaymentCancelled.vue'),
+    meta: { title: 'Payment cancelled placeholder' }
+  },
+  {
     path: '/quotes',
     redirect: '/my/quotes'
   },
