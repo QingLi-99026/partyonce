@@ -45,16 +45,17 @@
 
 当前结论：**No-Go，不能直接生产上线。**
 
+2026-05-12 Production Hardening Patch Pack V1 已处理部分可安全修复项，但真实 payment / webhook / notification、生产数据库迁移、生产 auth/security gate、dirty `.env.production` 和 release branch 清洁度仍未完成。
+
 原因不是功能完全不可用，而是生产发布门禁仍有 P0 阻断：生产环境变量、部署配置、CORS、数据库迁移、真实 payment / webhook / notification 链路和 release 工作区清洁度均未达到生产发布标准。
 
 ## 6. P0 阻断项
 
-1. `.env.production` 当前处于 dirty 状态，且包含 Cloudflare tunnel API URL 与 Stripe test publishable key。该文件不能作为生产配置提交或发布依据。
-2. `render.yaml` 目前看起来按仓库根目录运行 `pip install -r requirements.txt` 与 `uvicorn main:app`，但真实 backend 位于 `backend/`，根目录未确认存在对应 `requirements.txt` / `main.py`。当前 blueprint 可能无法正确启动生产服务。
-3. `render.yaml` 设置 `autoDeploy: true`，不适合当前仍在密集施工、存在 dirty files 和 P0 blockers 的阶段。
-4. `backend/main.py` 的 CORS 为 `allow_origins=["*"]` 且 `allow_credentials=True`。生产环境必须改为明确 origin 白名单。
-5. `backend/main.py` 默认 `DATABASE_URL` 指向本地 MySQL，默认 `SECRET_KEY` 为占位字符串。生产环境必须 fail closed，缺少关键 env 时拒绝启动。
-6. `backend/main.py` 启动时执行 `Base.metadata.create_all(bind=engine)`。生产环境应使用受控 migration，不应在启动时自动建表或隐式改 schema。
+1. `.env.production` 当前处于 dirty 状态。该文件不能作为生产配置提交或发布依据。
+2. `render.yaml` 已在 Hardening V1 中改为 `rootDir: backend`、关闭 `autoDeploy`、手动配置关键 env；仍需 owner review 和 staging deploy runbook 验证。
+3. `backend/main.py` 已在 Hardening V1 中要求生产 CORS 使用 `CORS_ORIGINS` 明确白名单，禁止 wildcard。
+4. `backend/main.py` 已在 Hardening V1 中对生产 `DATABASE_URL`、`SECRET_KEY`、`CORS_ORIGINS` 做 fail-closed guard。
+5. `backend/main.py` 已在 Hardening V1 中对生产自动 `Base.metadata.create_all` 做 guard；生产仍需要 migration-managed schema。
 7. Payment 目前是 Stripe test-mode readiness / 占位状态，尚未完成真实 PaymentIntent、webhook、订单付款状态闭环。
 8. Notification / webhook / n8n 当前是 dry-run payload lab，尚未进入真实外发或真实 n8n 触发链路。
 9. Supplier light closed loop 仍有 local/staging fixture 属性，不能等同完整生产供应商后台。

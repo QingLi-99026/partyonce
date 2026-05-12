@@ -1,29 +1,28 @@
 # Render Blueprint 配置
-# 放在仓库根目录，Render 会自动识别并部署
+# Production hardening V1: blueprint is deployment-ready only after owner review.
+# It intentionally disables auto deploy and requires secrets / database URL to be
+# configured manually in Render. Do not use this file to deploy without the
+# production launch runbook approval gate.
 
 services:
   - type: web
     name: partyonce-prod
     runtime: python
+    rootDir: backend
     plan: free
     region: singapore
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
-    autoDeploy: true  # 关键：每次 git push 自动部署
+    autoDeploy: false
     envVars:
+      - key: ENVIRONMENT
+        value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: partyonce-mysql
-          property: connectionString
+        sync: false
       - key: SECRET_KEY
-        generateValue: true
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
       - key: PYTHON_VERSION
         value: 3.11.0
-
-databases:
-  - name: partyonce-mysql
-    databaseName: partyonce_prod
-    user: root
-    plan: free
-    region: singapore

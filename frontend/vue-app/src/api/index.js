@@ -4,16 +4,27 @@ import { ElMessage } from 'element-plus'
 
 // API 基础URL配置
 const getBaseURL = () => {
-  // 生产环境使用环境变量或固定地址
+  const isProduction = import.meta.env.PROD
+  const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+
   if (import.meta.env.VITE_API_URL) {
     const configuredUrl = import.meta.env.VITE_API_URL.replace(/\/$/, '')
+    if (isProduction && /localhost|127\.0\.0\.1|trycloudflare\.com/i.test(configuredUrl)) {
+      throw new Error('Production API URL is not allowed to use localhost, 127.0.0.1, or temporary tunnel hosts.')
+    }
     return configuredUrl.endsWith('/api') ? configuredUrl : `${configuredUrl}/api`
   }
+
+  if (isProduction) {
+    throw new Error('Production API URL is missing. Set VITE_API_URL to the approved production backend origin.')
+  }
+
   // 如果在本地开发环境
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  if (isLocalHost) {
     return '/api'
   }
-  // 默认生产地址（阶段5：先使用本地tunnel或IP，后续切生产域名）
+
+  // Non-production preview fallback only. Production must be configured explicitly above.
   return 'http://127.0.0.1:8000'
 }
 

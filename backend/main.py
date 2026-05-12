@@ -27,7 +27,9 @@ import hmac
 import secrets
 import sqlite3
 
-load_dotenv()
+BOOT_ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("APP_ENV", "development")).strip().lower()
+if BOOT_ENVIRONMENT != "production":
+    load_dotenv()
 
 # ==================== ENUMS ====================
 
@@ -95,7 +97,7 @@ class TransactionType(PyEnum):
 
 # Runtime / production hardening configuration.
 # Production must fail closed; local and staging keep the historical defaults.
-ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("APP_ENV", "development")).strip().lower()
+ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("APP_ENV", BOOT_ENVIRONMENT)).strip().lower()
 IS_PRODUCTION = ENVIRONMENT == "production"
 DEFAULT_DATABASE_URL = "mysql+pymysql://root:@localhost/partyonce"
 DEFAULT_SECRET_KEY = "your-secret-key-change-in-production"
