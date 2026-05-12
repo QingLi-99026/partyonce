@@ -82,7 +82,9 @@
 
 ## 7. commit hash
 
-待本地 commit 后回填。
+Implementation commit:
+
+- `86f1a381` Add local customer fixture bootstrap
 
 ## 8. 下一步建议
 
