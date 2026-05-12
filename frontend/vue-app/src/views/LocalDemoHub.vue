@@ -102,6 +102,7 @@
           <ul>
             <li>首页入口到主题、场地、报价和留资的本地演示链路已存在。</li>
             <li>Legacy 报价页可本地保存方案和咨询记录。</li>
+            <li>客户侧 My Inquiries / My Quotes / Quote Detail / My Orders / Order Detail 已形成只读演示闭环。</li>
             <li>V1 Quote 草稿页存在，但需要登录，后端接线仍受限。</li>
             <li>供应商申请、状态页、公开供应商展示和后台供应商审核入口已存在。</li>
           </ul>
@@ -110,7 +111,7 @@
           <h3>仍是骨架或受限</h3>
           <ul>
             <li>真实订单跟进中心仍偏只读，留资到运营处理主要靠 localStorage demo。</li>
-            <li>目标仓库当前没有 /admin/dashboard 和 /admin/orders 可演示页面。</li>
+            <li>客户侧订单和报价详情本轮使用 local/staging demo 数据，不代表真实支付或客户认证链路。</li>
             <li>支付入口保持 test / guard 状态，本轮没有启用真实付款。</li>
             <li>合同、素材库、外部通知、n8n、Google Sheet/Drive 等仍应保持阻断。</li>
             <li>供应商资料审核已有页面，但与真实经营数据和自动外联尚未闭环。</li>
@@ -174,11 +175,23 @@ const walkthrough = [
     actions: [
       { label: '打开报价预览', path: '/quote?theme=forest&scene=clearing&package=standard', primary: true },
       { label: '我的咨询记录', path: '/my/inquiries' },
+      { label: '我的报价', path: '/my/quotes' },
       { label: 'Lead Review', path: '/admin/local-leads' }
     ]
   },
   {
     id: '03',
+    title: '看客户侧报价和订单进度',
+    description: '使用 local/staging 只读数据查看 My Quotes、Quote Detail、My Orders 和 Order Detail。',
+    actions: [
+      { label: 'My Quotes', path: '/my/quotes', primary: true },
+      { label: 'Quote Detail', path: '/my/quotes/quote-local-501' },
+      { label: 'My Orders', path: '/my/orders' },
+      { label: 'Order Detail', path: '/my/orders/order-local-1002' }
+    ]
+  },
+  {
+    id: '04',
     title: '看供应商资料和审核入口',
     description: '验证供应商展示、客户选择、申请状态和后台审核的轻量管理体验。',
     actions: [
@@ -188,7 +201,7 @@ const walkthrough = [
     ]
   },
   {
-    id: '04',
+    id: '05',
     title: '看后台与运营跟进入口',
     description: 'Lead Review 是本地免登录演示；供应商审核等真实后台入口仍需要 admin 账号。',
     actions: [
@@ -218,9 +231,12 @@ const routeGroups = [
     routes: [
       { label: 'Legacy Quote Preview', path: '/quote?theme=space&scene=command&package=standard', note: 'localStorage only' },
       { label: 'Inquiry Follow-up', path: '/my/inquiries', note: '本地咨询跟进' },
+      { label: 'My Quotes', path: '/my/quotes', note: '客户只读报价列表' },
+      { label: 'Quote Detail', path: '/my/quotes/quote-local-501', note: '客户只读报价详情' },
       { label: 'Lead Review Ops', path: '/admin/local-leads', note: '运营跟进中心' },
       { label: 'V1 Quote Draft', path: '/quotation', note: '需登录，后端接线受限' },
-      { label: 'My Orders', path: '/orders', note: '登录后查看订单' }
+      { label: 'My Orders', path: '/my/orders', note: '客户只读订单列表' },
+      { label: 'Order Detail', path: '/my/orders/order-local-1002', note: '客户只读订单详情' }
     ]
   },
   {

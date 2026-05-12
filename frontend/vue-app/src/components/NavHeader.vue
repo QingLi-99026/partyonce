@@ -18,6 +18,9 @@
         <el-menu-item index="/ai-planner"><el-icon><MagicStick /></el-icon>AI策划</el-menu-item>
         <el-menu-item index="/3d-designer"><el-icon><View /></el-icon>3D设计</el-menu-item>
         <el-menu-item index="/quotation"><el-icon><Document /></el-icon>报价</el-menu-item>
+        <el-menu-item index="/my/inquiries">My Inquiries</el-menu-item>
+        <el-menu-item index="/my/quotes">My Quotes</el-menu-item>
+        <el-menu-item index="/my/orders">My Orders</el-menu-item>
         <el-menu-item index="/local-demo">Local Demo Hub</el-menu-item>
         <el-menu-item index="/admin/local-leads">Lead Review</el-menu-item>
         <el-menu-item index="/admin/quotes">Quote Review</el-menu-item>
@@ -35,7 +38,9 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="/user"><el-icon><User /></el-icon>个人中心</el-dropdown-item>
-                <el-dropdown-item command="/orders"><el-icon><List /></el-icon>我的订单</el-dropdown-item>
+                <el-dropdown-item command="/my/inquiries"><el-icon><List /></el-icon>我的咨询</el-dropdown-item>
+                <el-dropdown-item command="/my/quotes"><el-icon><Document /></el-icon>我的报价</el-dropdown-item>
+                <el-dropdown-item command="/my/orders"><el-icon><List /></el-icon>我的订单</el-dropdown-item>
                 <el-dropdown-item divided command="logout"><el-icon><SwitchButton /></el-icon>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>

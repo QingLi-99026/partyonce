@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/store'
+import { ElMessage } from 'element-plus'
 
 const routes = [
   {
@@ -63,6 +64,10 @@ const routes = [
     meta: { title: '我的订单', requiresAuth: true }
   },
   {
+    path: '/quotes',
+    redirect: '/my/quotes'
+  },
+  {
     path: '/quote',
     name: 'QuotePage',
     component: () => import('@/views/QuotePage.vue'),
@@ -73,6 +78,30 @@ const routes = [
     name: 'InquiryList',
     component: () => import('@/views/InquiryList.vue'),
     meta: { title: '我的咨询记录' }
+  },
+  {
+    path: '/my/quotes',
+    name: 'MyQuotes',
+    component: () => import('@/views/MyQuotes.vue'),
+    meta: { title: '我的报价' }
+  },
+  {
+    path: '/my/quotes/:id',
+    name: 'MyQuoteDetail',
+    component: () => import('@/views/MyQuoteDetail.vue'),
+    meta: { title: '报价详情' }
+  },
+  {
+    path: '/my/orders',
+    name: 'MyOrders',
+    component: () => import('@/views/MyOrders.vue'),
+    meta: { title: '我的订单' }
+  },
+  {
+    path: '/my/orders/:id',
+    name: 'MyOrderDetail',
+    component: () => import('@/views/MyOrderDetail.vue'),
+    meta: { title: '订单详情' }
   },
   
   // ========== Partner Portal 供应商端 ==========
