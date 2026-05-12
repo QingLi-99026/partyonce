@@ -212,6 +212,12 @@ const routes = [
     meta: { title: 'Order Detail', requiresAuth: true, requiresAdmin: true }
   },
   {
+    path: '/admin/notifications/dry-run',
+    name: 'AdminNotificationDryRun',
+    component: () => import('@/views/AdminNotificationDryRun.vue'),
+    meta: { title: 'Notification dry-run', requiresAuth: true, requiresAdmin: true }
+  },
+  {
     path: '/admin/suppliers',
     name: 'AdminSuppliers',
     component: () => import('@/views/AdminSuppliers.vue'),

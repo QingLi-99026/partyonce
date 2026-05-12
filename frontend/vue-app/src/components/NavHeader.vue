@@ -28,6 +28,7 @@
         <el-menu-item index="/admin/local-leads">Lead Review</el-menu-item>
         <el-menu-item index="/admin/quotes">Quote Review</el-menu-item>
         <el-menu-item index="/admin/orders">Order Review</el-menu-item>
+        <el-menu-item index="/admin/notifications/dry-run">Notify Dry Run</el-menu-item>
         <el-menu-item index="/admin/partners">Partner Review</el-menu-item>
       </el-menu>
       
