@@ -58,6 +58,22 @@
         <el-option label="All statuses" value="" />
         <el-option v-for="status in allowedStatuses" :key="status" :label="status" :value="status" />
       </el-select>
+      <el-input
+        v-model="ownerFilter"
+        class="owner-filter"
+        clearable
+        placeholder="Filter owner"
+        @keyup.enter="loadQuotes"
+        @change="loadQuotes"
+      />
+      <el-input
+        v-model="nextActionFilter"
+        class="next-action-filter"
+        clearable
+        placeholder="Filter next action"
+        @keyup.enter="loadQuotes"
+        @change="loadQuotes"
+      />
       <el-select v-model="riskFilter" class="status-filter wide-filter" placeholder="Ops alerts">
         <el-option label="All quotes" value="" />
         <el-option label="Missing amount" value="missing_amount" />
@@ -140,6 +156,15 @@
           </template>
         </el-table-column>
 
+        <el-table-column label="Owner / Next Action" min-width="260">
+          <template #default="{ row }">
+            <div class="quote-cell">
+              <strong>{{ quoteOwner(row) }}</strong>
+              <span>{{ row.next_action || 'No next action saved' }}</span>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column label="Total" width="140" align="right">
           <template #default="{ row }">{{ formatMoney(row.final_total, row.currency) }}</template>
         </el-table-column>
@@ -203,6 +228,8 @@ const quoteTotal = ref(0)
 const loading = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref('')
+const ownerFilter = ref('')
+const nextActionFilter = ref('')
 const riskFilter = ref('')
 const message = ref('')
 const messageType = ref('info')
@@ -219,8 +246,10 @@ const filteredQuotes = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
   return quotes.value.filter((quote) => {
     const matchesStatus = !statusFilter.value || quote.status === statusFilter.value
+    const matchesOwner = !ownerFilter.value.trim() || quoteOwner(quote).toLowerCase().includes(ownerFilter.value.trim().toLowerCase())
+    const matchesNextAction = !nextActionFilter.value.trim() || String(quote.next_action || '').toLowerCase().includes(nextActionFilter.value.trim().toLowerCase())
     const matchesRisk = !riskFilter.value || quoteExceptions(quote).some((item) => item.code === riskFilter.value)
-    if (!query) return matchesStatus && matchesRisk
+    if (!query) return matchesStatus && matchesOwner && matchesNextAction && matchesRisk
     const haystack = [
       quote.id,
       quote.lead_id,
@@ -228,10 +257,13 @@ const filteredQuotes = computed(() => {
       quote.customer_summary?.name,
       quote.customer_summary?.contact,
       quote.status,
+      quoteOwner(quote),
+      quote.next_action,
+      quote.internal_note,
       selectionSummary(quote),
       lineItemSummary(quote)
     ].filter(Boolean).join(' ').toLowerCase()
-    return matchesStatus && matchesRisk && haystack.includes(query)
+    return matchesStatus && matchesOwner && matchesNextAction && matchesRisk && haystack.includes(query)
   })
 })
 
@@ -263,6 +295,8 @@ const loadQuotes = async () => {
     }
     if (statusFilter.value) params.status = statusFilter.value
     if (searchQuery.value.trim()) params.search = searchQuery.value.trim()
+    if (ownerFilter.value.trim()) params.owner = ownerFilter.value.trim()
+    if (nextActionFilter.value.trim()) params.next_action = nextActionFilter.value.trim()
 
     const response = await apiClient.get('/quotes', { params })
     quotes.value = Array.isArray(response?.items) ? response.items : []
@@ -303,6 +337,8 @@ const updateQuoteStatus = async (quote, status) => {
 const clearFilters = () => {
   searchQuery.value = ''
   statusFilter.value = ''
+  ownerFilter.value = ''
+  nextActionFilter.value = ''
   riskFilter.value = ''
   loadQuotes()
 }
@@ -324,6 +360,8 @@ const lineItemSummary = (quote) => {
   if (items.length === 0) return 'No line item snapshot'
   return `${items.length} line item${items.length === 1 ? '' : 's'}`
 }
+
+const quoteOwner = (quote) => quote.owner_label || (quote.owner_user_id ? `Owner #${quote.owner_user_id}` : 'Unassigned')
 
 const formatMoney = (value, currency = 'AUD') => {
   const amount = Number(value || 0)
@@ -468,6 +506,14 @@ onMounted(loadQuotes)
   width: 180px;
 }
 
+.owner-filter {
+  width: 180px;
+}
+
+.next-action-filter {
+  width: 210px;
+}
+
 .wide-filter {
   width: 220px;
 }
@@ -551,6 +597,8 @@ onMounted(loadQuotes)
 
   .search-input,
   .status-filter,
+  .owner-filter,
+  .next-action-filter,
   .wide-filter {
     width: 100%;
     max-width: none;

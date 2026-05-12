@@ -63,8 +63,9 @@
         class="search-input"
         clearable
         placeholder="Search order, customer, quote, theme, venue, or next action"
+        @keyup.enter="loadOrders"
       />
-      <el-select v-model="statusFilter" class="status-filter" placeholder="Status">
+      <el-select v-model="statusFilter" class="status-filter" placeholder="Status" @change="loadOrders">
         <el-option label="All statuses" value="" />
         <el-option v-for="status in orderStatuses" :key="status" :label="status" :value="status" />
       </el-select>
@@ -73,6 +74,16 @@
         class="owner-filter"
         clearable
         placeholder="Filter owner"
+        @keyup.enter="loadOrders"
+        @change="loadOrders"
+      />
+      <el-input
+        v-model="nextActionFilter"
+        class="next-action-filter"
+        clearable
+        placeholder="Filter next action"
+        @keyup.enter="loadOrders"
+        @change="loadOrders"
       />
       <el-select v-model="riskFilter" class="status-filter wide-filter" placeholder="Ops alerts">
         <el-option label="All orders" value="" />
@@ -200,6 +211,7 @@ const orders = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
 const ownerFilter = ref('')
+const nextActionFilter = ref('')
 const riskFilter = ref('')
 const loading = ref(false)
 const dataSource = ref('loading')
@@ -210,8 +222,9 @@ const filteredOrders = computed(() => {
   return orders.value.filter((order) => {
     const matchesStatus = !statusFilter.value || order.status === statusFilter.value
     const matchesOwner = !ownerFilter.value.trim() || String(order.owner || '').toLowerCase().includes(ownerFilter.value.trim().toLowerCase())
+    const matchesNextAction = !nextActionFilter.value.trim() || String(order.next_action || '').toLowerCase().includes(nextActionFilter.value.trim().toLowerCase())
     const matchesRisk = !riskFilter.value || orderExceptions(order).some((item) => item.code === riskFilter.value)
-    if (!query) return matchesStatus && matchesOwner && matchesRisk
+    if (!query) return matchesStatus && matchesOwner && matchesNextAction && matchesRisk
     const haystack = [
       order.id,
       order.order_number,
@@ -228,7 +241,7 @@ const filteredOrders = computed(() => {
       order.internal_note,
       order.owner
     ].filter(Boolean).join(' ').toLowerCase()
-    return matchesStatus && matchesOwner && matchesRisk && haystack.includes(query)
+    return matchesStatus && matchesOwner && matchesNextAction && matchesRisk && haystack.includes(query)
   })
 })
 
@@ -255,7 +268,12 @@ const loadOrders = async () => {
   loading.value = true
   fallbackNotice.value = ''
   try {
-    const result = await fetchAdminOrders({ limit: 100, offset: 0 })
+    const params = { limit: 100, offset: 0 }
+    if (statusFilter.value) params.status = statusFilter.value
+    if (searchQuery.value.trim()) params.search = searchQuery.value.trim()
+    if (ownerFilter.value.trim()) params.owner = ownerFilter.value.trim()
+    if (nextActionFilter.value.trim()) params.next_action = nextActionFilter.value.trim()
+    const result = await fetchAdminOrders(params)
     orders.value = result.items
     dataSource.value = result.source
     if (result.source === ORDER_SOURCE_FALLBACK) {
@@ -293,7 +311,9 @@ const clearFilters = () => {
   searchQuery.value = ''
   statusFilter.value = ''
   ownerFilter.value = ''
+  nextActionFilter.value = ''
   riskFilter.value = ''
+  loadOrders()
 }
 
 const formatMoney = (value, currency = 'AUD') => {
@@ -438,6 +458,10 @@ onMounted(loadOrders)
   width: 180px;
 }
 
+.next-action-filter {
+  width: 210px;
+}
+
 .wide-filter {
   width: 220px;
 }
@@ -491,6 +515,7 @@ onMounted(loadOrders)
   .search-input,
   .status-filter,
   .owner-filter,
+  .next-action-filter,
   .wide-filter {
     width: 100%;
     max-width: none;

@@ -2197,6 +2197,8 @@ def list_stage2_quotes(
     customer_id: Optional[str] = None,
     status: Optional[Stage2QuoteStatus] = None,
     search: Optional[str] = None,
+    owner: Optional[str] = None,
+    next_action: Optional[str] = None,
     limit: int = 50,
     offset: int = 0
 ) -> Stage2QuoteListResponse:
@@ -2216,6 +2218,15 @@ def list_stage2_quotes(
         if status:
             where_clauses.append("q.status = ?")
             params.append(status.value)
+        if owner:
+            owner_query = f"%{owner.strip().lower()}%"
+            where_clauses.append(
+                "(lower(coalesce(q.owner_label, '')) LIKE ? OR CAST(coalesce(q.owner_user_id, '') AS TEXT) LIKE ?)"
+            )
+            params.extend([owner_query, owner_query])
+        if next_action:
+            where_clauses.append("lower(coalesce(q.next_action, '')) LIKE ?")
+            params.append(f"%{next_action.strip().lower()}%")
         if search:
             query = f"%{search.strip().lower()}%"
             where_clauses.append(
@@ -2481,6 +2492,8 @@ def list_stage2_orders(
     lead_id: Optional[str] = None,
     customer_id: Optional[str] = None,
     search: Optional[str] = None,
+    owner: Optional[str] = None,
+    next_action: Optional[str] = None,
     limit: int = 50,
     offset: int = 0
 ) -> Stage2OrderListResponse:
@@ -2503,6 +2516,15 @@ def list_stage2_orders(
         if customer_id:
             where_clauses.append("o.customer_id = ?")
             params.append(customer_id)
+        if owner:
+            owner_query = f"%{owner.strip().lower()}%"
+            where_clauses.append(
+                "(lower(coalesce(o.owner_label, '')) LIKE ? OR CAST(coalesce(o.owner_user_id, '') AS TEXT) LIKE ?)"
+            )
+            params.extend([owner_query, owner_query])
+        if next_action:
+            where_clauses.append("lower(coalesce(o.next_action, '')) LIKE ?")
+            params.append(f"%{next_action.strip().lower()}%")
         if search:
             query = f"%{search.strip().lower()}%"
             where_clauses.append(
@@ -3766,12 +3788,14 @@ def list_stage2_quotes_skeleton(
     customer_id: Optional[str] = None,
     status: Optional[Stage2QuoteStatus] = None,
     search: Optional[str] = None,
+    owner: Optional[str] = None,
+    next_action: Optional[str] = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(require_admin)
 ):
     """Admin-only Stage 2 Quote list skeleton."""
-    return list_stage2_quotes(lead_id, customer_id, status, search, limit, offset)
+    return list_stage2_quotes(lead_id, customer_id, status, search, owner, next_action, limit, offset)
 
 @app.get("/api/quotes/{quote_id}", response_model=Stage2QuoteResponse)
 def get_stage2_quote_skeleton(
@@ -3815,12 +3839,14 @@ def list_stage2_orders_skeleton(
     lead_id: Optional[str] = None,
     customer_id: Optional[str] = None,
     search: Optional[str] = None,
+    owner: Optional[str] = None,
+    next_action: Optional[str] = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(require_admin)
 ):
     """Admin-only Stage 2 Order list skeleton."""
-    return list_stage2_orders(status, quote_id, lead_id, customer_id, search, limit, offset)
+    return list_stage2_orders(status, quote_id, lead_id, customer_id, search, owner, next_action, limit, offset)
 
 @app.get("/api/orders/{order_id}", response_model=Stage2OrderResponse)
 def get_stage2_order_skeleton(
@@ -3861,7 +3887,7 @@ def list_my_stage2_quotes_skeleton(
     accept, reject, convert, pay, trigger webhook/n8n, or send outbound messages.
     """
     customer_id = resolve_stage2_customer_readonly_identity(x_partyonce_customer_id, current_user)
-    response = list_stage2_quotes(None, customer_id, status, search, limit, offset)
+    response = list_stage2_quotes(None, customer_id, status, search, None, None, limit, offset)
     response.admin_only = False
     response.customer_only = True
     return response
@@ -3895,7 +3921,7 @@ def list_my_stage2_orders_skeleton(
     payment URL and never triggers Stripe, PaymentIntent, webhook/n8n, or outbound messages.
     """
     customer_id = resolve_stage2_customer_readonly_identity(x_partyonce_customer_id, current_user)
-    response = list_stage2_orders(status, None, None, customer_id, search, limit, offset)
+    response = list_stage2_orders(status, None, None, customer_id, search, None, None, limit, offset)
     response.admin_only = False
     response.customer_only = True
     return response
