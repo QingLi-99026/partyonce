@@ -19,6 +19,14 @@
       show-icon
       title="Local/staging read-only view: no online payment, no Stripe, no webhook/n8n, and no outbound message is triggered."
     />
+    <el-alert
+      class="scope-alert"
+      type="info"
+      :closable="false"
+      show-icon
+      :title="`${dataSource} · ${identity.name} (${identity.id})`"
+      :description="apiNotice || identity.accessBoundary"
+    />
 
     <section class="toolbar">
       <el-input v-model="searchQuery" clearable placeholder="Search quote number, theme, package, or customer" />
@@ -88,6 +96,9 @@ const loading = ref(false)
 const quotes = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
+const dataSource = ref('not loaded')
+const apiNotice = ref('')
+const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
 
 const filteredQuotes = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -119,6 +130,9 @@ const loadQuotes = async () => {
   try {
     const result = await fetchCustomerQuotes()
     quotes.value = result.items
+    dataSource.value = result.source
+    identity.value = result.identity
+    apiNotice.value = result.api_error || ''
   } finally {
     loading.value = false
   }

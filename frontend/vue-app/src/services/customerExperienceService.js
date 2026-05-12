@@ -1,6 +1,15 @@
 import { loadAdminOrderSkeletons } from '@/mock/adminOrders'
+import apiClient from '@/api'
+import { useUserStore } from '@/store'
 
-const SOURCE_LOCAL_DEMO = 'local/staging demo data'
+const SOURCE_LOCAL_DEMO = 'local/staging filtered fixture'
+const SOURCE_READONLY_API = 'customer read-only API'
+const DEFAULT_CUSTOMER_FIXTURE = {
+  id: 'customer-local-41',
+  name: 'Ava Thompson',
+  contact: 'ava.parent@example.test',
+  apiCustomerId: null
+}
 
 const quoteStatusText = {
   draft: '后台正在准备',
@@ -39,6 +48,7 @@ const orderNextStep = {
 const quoteFixtures = [
   {
     id: 'quote-local-501',
+    customer_id: 'customer-local-41',
     quote_number: 'PE-Q-0501',
     status: 'accepted',
     customer_name: 'Ava Thompson',
@@ -64,6 +74,7 @@ const quoteFixtures = [
   },
   {
     id: 'quote-local-502',
+    customer_id: 'customer-local-42',
     quote_number: 'PE-Q-0502',
     status: 'sent',
     customer_name: 'Noah Chen',
@@ -89,6 +100,7 @@ const quoteFixtures = [
   },
   {
     id: 'quote-local-503',
+    customer_id: 'customer-local-43',
     quote_number: 'PE-Q-0503',
     status: 'draft',
     customer_name: 'Mia Williams',
@@ -116,6 +128,35 @@ const quoteFixtures = [
 
 const clone = (value) => JSON.parse(JSON.stringify(value))
 
+export const getCustomerReadOnlyIdentity = () => {
+  const userStore = useUserStore()
+  const userInfo = userStore.userInfo || {}
+  const role = userInfo.role || 'customer'
+  const isAdminLike = ['admin', 'manager'].includes(role)
+  const apiCustomerId = userInfo.customer_id || userInfo.customerId || null
+
+  return {
+    id: userInfo.customer_fixture_id || userInfo.customerId || userInfo.id || DEFAULT_CUSTOMER_FIXTURE.id,
+    name: userInfo.full_name || userInfo.name || DEFAULT_CUSTOMER_FIXTURE.name,
+    contact: userInfo.email || userInfo.contact || DEFAULT_CUSTOMER_FIXTURE.contact,
+    role,
+    token: isAdminLike ? '' : userStore.token,
+    apiCustomerId: apiCustomerId && String(apiCustomerId).match(/^\d+$/) ? String(apiCustomerId) : null,
+    isFixture: !userStore.token || !apiCustomerId,
+    accessBoundary: isAdminLike
+      ? 'Admin/manager token is not used as customer identity; local fixture fallback is shown instead.'
+      : 'Customer read-only identity is scoped to the current local/staging customer fixture.'
+  }
+}
+
+const buildCustomerHeaders = () => {
+  const identity = getCustomerReadOnlyIdentity()
+  if (!identity.token && !identity.apiCustomerId) return null
+  const headers = {}
+  if (identity.apiCustomerId) headers['X-PartyOnce-Customer-Id'] = identity.apiCustomerId
+  return headers
+}
+
 const readInquiryQuotes = () => {
   if (typeof window === 'undefined') return []
   try {
@@ -123,6 +164,7 @@ const readInquiryQuotes = () => {
     if (!Array.isArray(parsed)) return []
     return parsed.map((inquiry, index) => ({
       id: inquiry.id || inquiry.demoSeedId || `inquiry-quote-${index + 1}`,
+      customer_id: DEFAULT_CUSTOMER_FIXTURE.id,
       quote_number: `LOCAL-INQ-Q-${String(index + 1).padStart(3, '0')}`,
       status: inquiry.status === 'contacted' ? 'sent' : 'draft',
       customer_name: inquiry.customerInfo?.name || 'Local inquiry customer',
@@ -156,6 +198,7 @@ const normalizeQuote = (quote) => {
   const status = quote.status || 'draft'
   return {
     id: String(quote.id),
+    customer_id: String(quote.customer_id || quote.customer_summary?.id || DEFAULT_CUSTOMER_FIXTURE.id),
     quote_number: quote.quote_number || `Quote #${quote.id}`,
     status,
     status_text: quoteStatusText[status] || status,
@@ -184,6 +227,7 @@ const normalizeOrder = (order) => {
   const status = order.status || 'draft'
   return {
     id: String(order.id),
+    customer_id: String(order.customer_id || order.customer?.id || order.customer_summary?.id || DEFAULT_CUSTOMER_FIXTURE.id),
     order_number: order.order_number || `Order #${order.id}`,
     status,
     status_text: orderStatusText[status] || status,
@@ -207,36 +251,152 @@ const normalizeOrder = (order) => {
 export const quoteStatuses = quoteStatusText
 export const orderStatuses = orderStatusText
 
+const localFixtureQuotes = () => {
+  const identity = getCustomerReadOnlyIdentity()
+  return [...readInquiryQuotes(), ...clone(quoteFixtures)]
+    .map(normalizeQuote)
+    .filter((quote) => String(quote.customer_id) === String(identity.id))
+}
+
+const localFixtureOrders = () => {
+  const identity = getCustomerReadOnlyIdentity()
+  return loadAdminOrderSkeletons()
+    .map(normalizeOrder)
+    .filter((order) => String(order.customer_id) === String(identity.id))
+}
+
 export const fetchCustomerQuotes = async () => {
-  const items = [...readInquiryQuotes(), ...clone(quoteFixtures)].map(normalizeQuote)
+  const identity = getCustomerReadOnlyIdentity()
+  const headers = buildCustomerHeaders()
+  if (headers || identity.token) {
+    try {
+      const response = await apiClient.get('/my/quotes', { params: { limit: 100, offset: 0 }, headers })
+      const items = Array.isArray(response?.items) ? response.items.map(normalizeQuote) : []
+      return {
+        source: SOURCE_READONLY_API,
+        identity,
+        api_error: null,
+        items,
+        total: Number(response?.total || items.length)
+      }
+    } catch (error) {
+      const items = localFixtureQuotes()
+      return {
+        source: SOURCE_LOCAL_DEMO,
+        identity,
+        api_error: error?.response?.data?.detail || error?.message || 'Customer read-only API unavailable; using local fixture fallback.',
+        items,
+        total: items.length
+      }
+    }
+  }
+
+  const items = localFixtureQuotes()
   return {
     source: SOURCE_LOCAL_DEMO,
+    identity,
+    api_error: 'No customer auth token or numeric local customer API fixture; using filtered local/staging fixture.',
     items,
     total: items.length
   }
 }
 
 export const fetchCustomerQuoteDetail = async (quoteId) => {
+  const identity = getCustomerReadOnlyIdentity()
+  const headers = buildCustomerHeaders()
+  if (headers || identity.token) {
+    try {
+      const item = await apiClient.get(`/my/quotes/${quoteId}`, { headers })
+      return {
+        source: SOURCE_READONLY_API,
+        identity,
+        api_error: null,
+        item: normalizeQuote(item)
+      }
+    } catch (error) {
+      const list = await fetchCustomerQuotes()
+      return {
+        source: list.source,
+        identity: list.identity,
+        api_error: error?.response?.data?.detail || error?.message || list.api_error,
+        item: list.items.find((quote) => String(quote.id) === String(quoteId)) || null
+      }
+    }
+  }
+
   const list = await fetchCustomerQuotes()
   return {
     source: list.source,
+    identity: list.identity,
+    api_error: list.api_error,
     item: list.items.find((quote) => String(quote.id) === String(quoteId)) || null
   }
 }
 
 export const fetchCustomerOrders = async () => {
-  const items = loadAdminOrderSkeletons().map(normalizeOrder)
+  const identity = getCustomerReadOnlyIdentity()
+  const headers = buildCustomerHeaders()
+  if (headers || identity.token) {
+    try {
+      const response = await apiClient.get('/my/orders', { params: { limit: 100, offset: 0 }, headers })
+      const items = Array.isArray(response?.items) ? response.items.map(normalizeOrder) : []
+      return {
+        source: SOURCE_READONLY_API,
+        identity,
+        api_error: null,
+        items,
+        total: Number(response?.total || items.length)
+      }
+    } catch (error) {
+      const items = localFixtureOrders()
+      return {
+        source: SOURCE_LOCAL_DEMO,
+        identity,
+        api_error: error?.response?.data?.detail || error?.message || 'Customer read-only API unavailable; using local fixture fallback.',
+        items,
+        total: items.length
+      }
+    }
+  }
+
+  const items = localFixtureOrders()
   return {
     source: SOURCE_LOCAL_DEMO,
+    identity,
+    api_error: 'No customer auth token or numeric local customer API fixture; using filtered local/staging fixture.',
     items,
     total: items.length
   }
 }
 
 export const fetchCustomerOrderDetail = async (orderId) => {
+  const identity = getCustomerReadOnlyIdentity()
+  const headers = buildCustomerHeaders()
+  if (headers || identity.token) {
+    try {
+      const item = await apiClient.get(`/my/orders/${orderId}`, { headers })
+      return {
+        source: SOURCE_READONLY_API,
+        identity,
+        api_error: null,
+        item: normalizeOrder(item)
+      }
+    } catch (error) {
+      const list = await fetchCustomerOrders()
+      return {
+        source: list.source,
+        identity: list.identity,
+        api_error: error?.response?.data?.detail || error?.message || list.api_error,
+        item: list.items.find((order) => String(order.id) === String(orderId)) || null
+      }
+    }
+  }
+
   const list = await fetchCustomerOrders()
   return {
     source: list.source,
+    identity: list.identity,
+    api_error: list.api_error,
     item: list.items.find((order) => String(order.id) === String(orderId)) || null
   }
 }

@@ -19,6 +19,14 @@
       show-icon
       title="pending_deposit is a business status only. Stripe/payment is not enabled in this workpack."
     />
+    <el-alert
+      class="scope-alert"
+      type="info"
+      :closable="false"
+      show-icon
+      :title="`${dataSource} · ${identity.name} (${identity.id})`"
+      :description="apiNotice || identity.accessBoundary"
+    />
 
     <section class="toolbar">
       <el-input v-model="searchQuery" clearable placeholder="Search order number, location, theme, or quote" />
@@ -87,6 +95,9 @@ const loading = ref(false)
 const orders = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
+const dataSource = ref('not loaded')
+const apiNotice = ref('')
+const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
 
 const filteredOrders = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -119,6 +130,9 @@ const loadOrders = async () => {
   try {
     const result = await fetchCustomerOrders()
     orders.value = result.items
+    dataSource.value = result.source
+    identity.value = result.identity
+    apiNotice.value = result.api_error || ''
   } finally {
     loading.value = false
   }

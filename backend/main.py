@@ -992,6 +992,7 @@ class Stage2QuoteListResponse(BaseModel):
     limit: int
     offset: int
     admin_only: bool = True
+    customer_only: bool = False
 
 # ==================== STAGE 2 ORDER API SKELETON SCHEMAS ====================
 
@@ -1067,6 +1068,7 @@ class Stage2OrderListResponse(BaseModel):
     limit: int
     offset: int
     admin_only: bool = True
+    customer_only: bool = False
 
 # ==================== QUOTE SCHEMAS ====================
 
@@ -2497,6 +2499,50 @@ def get_stage2_order_response(order_id: str) -> Stage2OrderResponse:
         ensure_stage2_order_sqlite_schema(conn)
         return build_stage2_order_response(get_stage2_order_detail_row(conn, order_id))
 
+def resolve_stage2_customer_readonly_identity(
+    fixture_customer_id: Optional[str],
+    current_user: Optional[User]
+) -> str:
+    """
+    Resolve a customer identity for local/staging customer read-only endpoints.
+
+    This helper intentionally does not accept admin/manager users as customers and does
+    not create any customer records. A test fixture may pass X-PartyOnce-Customer-Id;
+    otherwise a non-admin user's email/phone is matched against the local SQLite
+    customer table.
+    """
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Customer read-only API requires sqlite_local lead storage")
+
+    if fixture_customer_id:
+        cleaned = fixture_customer_id.strip()
+        if not cleaned.isdigit():
+            raise HTTPException(status_code=403, detail="Invalid local customer fixture")
+        return cleaned
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Customer auth fixture required")
+
+    if current_user.role in ["admin", "manager"]:
+        raise HTTPException(status_code=403, detail="Admin token cannot be used as customer token")
+
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_quote_sqlite_schema(conn)
+        row = conn.execute(
+            """
+            SELECT id FROM customers
+            WHERE lower(coalesce(email, '')) = lower(?)
+               OR coalesce(phone, '') = ?
+               OR coalesce(wechat_or_other_contact, '') = ?
+            ORDER BY id ASC
+            LIMIT 1
+            """,
+            (current_user.email, current_user.phone or "", current_user.email)
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=403, detail="No customer record matches current local/staging user")
+        return str(row["id"])
+
 def update_stage2_order(order_id: str, request: Stage2OrderPatchRequest) -> Stage2OrderResponse:
     if not is_lead_sqlite_local_enabled():
         raise HTTPException(status_code=501, detail="Stage 2 Order skeleton requires sqlite_local lead storage")
@@ -3724,6 +3770,76 @@ def update_stage2_order_skeleton(
     Allows operational Order status/details only. It does not mutate payment/deposit fields.
     """
     return update_stage2_order(order_id, request)
+
+# Customer-facing read-only API fixture
+@app.get("/api/my/quotes", response_model=Stage2QuoteListResponse)
+def list_my_stage2_quotes_skeleton(
+    status: Optional[Stage2QuoteStatus] = None,
+    search: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    x_partyonce_customer_id: Optional[str] = Header(default=None, alias="X-PartyOnce-Customer-Id"),
+    current_user: Optional[User] = Depends(get_current_user_optional)
+):
+    """
+    Customer-facing read-only Quote list for local/staging acceptance.
+
+    Requires either a local customer fixture header or a non-admin user whose
+    email/contact matches a local SQLite customer. It does not create, update,
+    accept, reject, convert, pay, trigger webhook/n8n, or send outbound messages.
+    """
+    customer_id = resolve_stage2_customer_readonly_identity(x_partyonce_customer_id, current_user)
+    response = list_stage2_quotes(None, customer_id, status, search, limit, offset)
+    response.admin_only = False
+    response.customer_only = True
+    return response
+
+@app.get("/api/my/quotes/{quote_id}", response_model=Stage2QuoteResponse)
+def get_my_stage2_quote_skeleton(
+    quote_id: str,
+    x_partyonce_customer_id: Optional[str] = Header(default=None, alias="X-PartyOnce-Customer-Id"),
+    current_user: Optional[User] = Depends(get_current_user_optional)
+):
+    """Customer-facing read-only Quote detail for local/staging acceptance."""
+    customer_id = resolve_stage2_customer_readonly_identity(x_partyonce_customer_id, current_user)
+    quote = get_stage2_quote_response(quote_id)
+    if str(quote.customer_id) != str(customer_id):
+        raise HTTPException(status_code=404, detail="Quote not found for current customer")
+    return quote
+
+@app.get("/api/my/orders", response_model=Stage2OrderListResponse)
+def list_my_stage2_orders_skeleton(
+    status: Optional[Stage2OrderStatus] = None,
+    search: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    x_partyonce_customer_id: Optional[str] = Header(default=None, alias="X-PartyOnce-Customer-Id"),
+    current_user: Optional[User] = Depends(get_current_user_optional)
+):
+    """
+    Customer-facing read-only Order list for local/staging acceptance.
+
+    pending_deposit is an operations status only; this endpoint never returns a
+    payment URL and never triggers Stripe, PaymentIntent, webhook/n8n, or outbound messages.
+    """
+    customer_id = resolve_stage2_customer_readonly_identity(x_partyonce_customer_id, current_user)
+    response = list_stage2_orders(status, None, None, customer_id, search, limit, offset)
+    response.admin_only = False
+    response.customer_only = True
+    return response
+
+@app.get("/api/my/orders/{order_id}", response_model=Stage2OrderResponse)
+def get_my_stage2_order_skeleton(
+    order_id: str,
+    x_partyonce_customer_id: Optional[str] = Header(default=None, alias="X-PartyOnce-Customer-Id"),
+    current_user: Optional[User] = Depends(get_current_user_optional)
+):
+    """Customer-facing read-only Order detail for local/staging acceptance."""
+    customer_id = resolve_stage2_customer_readonly_identity(x_partyonce_customer_id, current_user)
+    order = get_stage2_order_response(order_id)
+    if str(order.customer_id) != str(customer_id):
+        raise HTTPException(status_code=404, detail="Order not found for current customer")
+    return order
 
 # User Endpoints
 @app.post("/api/users/register", response_model=UserResponse)

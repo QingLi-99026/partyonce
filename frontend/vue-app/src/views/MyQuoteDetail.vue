@@ -23,6 +23,14 @@
         show-icon
         title="This quote detail is read-only. Online payment is intentionally blocked in this workpack."
       />
+      <el-alert
+        class="scope-alert"
+        type="info"
+        :closable="false"
+        show-icon
+        :title="`${dataSource} · ${identity.name} (${identity.id})`"
+        :description="apiNotice || identity.accessBoundary"
+      />
 
       <section class="summary-grid">
         <article class="summary-card">
@@ -78,6 +86,8 @@
       <section class="next-step">
         <span>Next step</span>
         <p>{{ quote.next_step }}</p>
+        <el-button disabled>Accept Quote · coming soon</el-button>
+        <el-button disabled>Pay Deposit · blocked</el-button>
         <el-button type="primary" @click="router.push('/my/orders')">View My Orders</el-button>
       </section>
     </template>
@@ -99,6 +109,9 @@ const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
 const quote = ref(null)
+const dataSource = ref('not loaded')
+const apiNotice = ref('')
+const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
 
 const quoteTagType = (status) => ({
   draft: 'info',
@@ -113,6 +126,9 @@ const loadQuote = async () => {
   try {
     const result = await fetchCustomerQuoteDetail(route.params.id)
     quote.value = result.item
+    dataSource.value = result.source
+    identity.value = result.identity
+    apiNotice.value = result.api_error || ''
   } finally {
     loading.value = false
   }

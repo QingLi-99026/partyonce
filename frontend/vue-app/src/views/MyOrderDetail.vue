@@ -23,6 +23,14 @@
         show-icon
         title="pending_deposit is a business status placeholder. No Stripe payment, PaymentIntent, webhook, or n8n action is triggered."
       />
+      <el-alert
+        class="scope-alert"
+        type="info"
+        :closable="false"
+        show-icon
+        :title="`${dataSource} · ${identity.name} (${identity.id})`"
+        :description="apiNotice || identity.accessBoundary"
+      />
 
       <section class="summary-grid">
         <article class="summary-card">
@@ -79,6 +87,10 @@
         <span>Next step</span>
         <p>{{ order.next_step }}</p>
         <small>{{ order.deposit_note }}</small>
+        <div class="blocked-actions">
+          <el-button disabled>Pay Deposit · blocked</el-button>
+          <el-button disabled>Open Stripe · disabled</el-button>
+        </div>
       </section>
     </template>
   </main>
@@ -99,6 +111,9 @@ const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
 const order = ref(null)
+const dataSource = ref('not loaded')
+const apiNotice = ref('')
+const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
 
 const orderTagType = (status) => ({
   draft: 'info',
@@ -114,6 +129,9 @@ const loadOrder = async () => {
   try {
     const result = await fetchCustomerOrderDetail(route.params.id)
     order.value = result.item
+    dataSource.value = result.source
+    identity.value = result.identity
+    apiNotice.value = result.api_error || ''
   } finally {
     loading.value = false
   }
@@ -244,6 +262,13 @@ dd {
 
 .next-step p {
   margin: 4px 0 8px;
+}
+
+.blocked-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 820px) {

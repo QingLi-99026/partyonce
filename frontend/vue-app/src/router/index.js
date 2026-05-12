@@ -83,25 +83,25 @@ const routes = [
     path: '/my/quotes',
     name: 'MyQuotes',
     component: () => import('@/views/MyQuotes.vue'),
-    meta: { title: '我的报价' }
+    meta: { title: '我的报价', customerFixture: true }
   },
   {
     path: '/my/quotes/:id',
     name: 'MyQuoteDetail',
     component: () => import('@/views/MyQuoteDetail.vue'),
-    meta: { title: '报价详情' }
+    meta: { title: '报价详情', customerFixture: true }
   },
   {
     path: '/my/orders',
     name: 'MyOrders',
     component: () => import('@/views/MyOrders.vue'),
-    meta: { title: '我的订单' }
+    meta: { title: '我的订单', customerFixture: true }
   },
   {
     path: '/my/orders/:id',
     name: 'MyOrderDetail',
     component: () => import('@/views/MyOrderDetail.vue'),
-    meta: { title: '订单详情' }
+    meta: { title: '订单详情', customerFixture: true }
   },
   
   // ========== Partner Portal 供应商端 ==========
