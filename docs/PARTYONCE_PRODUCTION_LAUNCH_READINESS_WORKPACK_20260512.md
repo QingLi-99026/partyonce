@@ -47,7 +47,9 @@
 
 2026-05-12 Production Hardening Patch Pack V1 已处理部分可安全修复项。
 
-2026-05-12 Production Migration and Staging Runbook V1 已固化生产迁移、staging 验收和 rollback 规则；本地 SQLite migration dry-run 通过。但 staging smoke 尚未真实执行，production migration 未执行，真实 payment / webhook / notification、生产 auth/security gate、dirty `.env.production` 和 release branch 清洁度仍未完成。
+2026-05-12 Production Migration and Staging Runbook V1 已固化生产迁移、staging 验收和 rollback 规则；本地 SQLite migration dry-run 通过。
+
+2026-05-12 Staging Smoke Execution V1 已在 local-safe profile 下通过：backend health、SQLite migration dry-run、Lead → Quote → Order、customer read-only、supplier light loop、关键浏览器 routes 均通过；notification dry-run 仍需登录态复验。当前仍不是 remote staging deploy，也不是 production deploy。
 
 原因不是功能完全不可用，而是生产发布门禁仍有 P0 阻断：生产环境变量、部署配置、CORS、数据库迁移、真实 payment / webhook / notification 链路和 release 工作区清洁度均未达到生产发布标准。
 
@@ -164,7 +166,7 @@ Build warning：存在大 chunk 警告，需要后续性能优化，但不是本
 
 ## 13. Blocker
 
-当前 blocker：生产上线门禁未通过。`render.yaml`、CORS、production env fail-closed、生产自动建表 guard 和 migration/staging/rollback runbook 已有第一版；剩余阻断集中在 `.env.production` dirty、release branch clean gate、staging smoke 未执行、production migration 未执行、payment / webhook / n8n 仍非真实闭环。
+当前 blocker：生产上线门禁未通过。`render.yaml`、CORS、production env fail-closed、生产自动建表 guard、migration/staging/rollback runbook 和 local-safe staging smoke 已有第一版；剩余阻断集中在 `.env.production` dirty、release branch clean gate、remote staging deploy 未执行、production migration 未执行、payment / webhook / n8n 仍非真实闭环。
 
 ## 14. Commit
 

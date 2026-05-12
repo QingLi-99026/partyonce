@@ -392,14 +392,14 @@ PYTHONPYCACHEPREFIX=/tmp/partyonce_migration_runbook_pycache python3 -m py_compi
 
 1. migration runbook 已完成，但 production migration 未执行，也未获 owner/GPT 批准。
 2. MySQL-compatible migration set 尚未固化。
-3. staging deploy 和 staging smoke 尚未真实跑完。
+3. local-safe staging smoke 已跑通；remote staging deploy 尚未执行。
 4. payment / webhook / n8n 仍是 readiness / dry-run，不是生产闭环。
 5. `.env.production` 仍是历史 dirty / excluded。
 6. release branch clean gate 尚未完成。
 
 可以进入的下一步：
 
-**Staging Smoke Execution V1**。只在 staging / local-safe profile 下执行 runbook，不切 production，不触发真实外部系统。
+**Release Branch Clean Gate V1**。隔离 dirty `.env.production`、`frontend/vue-app/package.json`、`dist` 和历史 untracked 文件，准备 remote staging deploy 前的干净候选。
 
 ## 12. 本轮是否触发外部系统
 
