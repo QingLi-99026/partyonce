@@ -10,6 +10,9 @@
         </p>
       </div>
       <div class="header-actions">
+        <el-button type="warning" @click="bootstrapCustomerFixture">启用本地客户身份</el-button>
+        <el-button @click="go('/my/quotes')">进入 My Quotes</el-button>
+        <el-button @click="go('/my/orders')">进入 My Orders</el-button>
         <el-button type="primary" @click="seedInquiry">生成本地留资样例</el-button>
         <el-button type="success" @click="go('/admin/local-leads')">进入 Lead Review</el-button>
         <el-button @click="clearSeed">清除本页样例</el-button>
@@ -22,6 +25,15 @@
       :closable="false"
       show-icon
       title="演示安全边界：不读取 .env；不创建真实付款；不调用 webhook / n8n；不发送邮件、短信、WhatsApp；不部署线上环境。"
+    />
+
+    <el-alert
+      class="app-alert"
+      type="info"
+      :closable="false"
+      show-icon
+      :title="`Local customer fixture: ${customerFixture.name} · ${customerFixture.id}`"
+      description="点击“启用本地客户身份”只会写入浏览器本地 userInfo fixture，不写 token，不连接生产 auth，不触发付款或外部系统。"
     />
 
     <section class="status-grid app-section">
@@ -126,12 +138,28 @@
 import { computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { bootstrapLocalCustomerFixture, localCustomerFixture } from '@/services/customerExperienceService'
+import { useUserStore } from '@/store'
 
 const router = useRouter()
+const userStore = useUserStore()
 const seedKey = 'partyonce_local_demo_hub_seed'
+const customerFixture = localCustomerFixture
 
 const go = (path) => {
+  if (path === 'bootstrap-customer') {
+    bootstrapCustomerFixture()
+    return
+  }
   router.push(path)
+}
+
+const bootstrapCustomerFixture = () => {
+  const fixture = bootstrapLocalCustomerFixture()
+  userStore.logout()
+  userStore.setUserInfo(fixture)
+  ElMessage.success('已启用本地客户 demo 身份：customer-local-41。仅限 local/staging。')
+  router.push('/my/quotes')
 }
 
 const statusCards = computed(() => [
@@ -142,8 +170,8 @@ const statusCards = computed(() => [
   },
   {
     label: 'Quote / Lead',
-    value: '本地闭环',
-    note: '可用 localStorage 演示报价到留资。'
+    value: '客户只读',
+    note: '可一键启用 customer-local-41 验收 My Quotes / My Orders。'
   },
   {
     label: 'Supplier',
@@ -182,12 +210,13 @@ const walkthrough = [
   {
     id: '03',
     title: '看客户侧报价和订单进度',
-    description: '使用 local/staging 只读数据查看 My Quotes、Quote Detail、My Orders 和 Order Detail。',
+    description: '先一键启用 local/staging customer fixture，再查看 My Quotes、Quote Detail、My Orders 和 Order Detail。',
     actions: [
-      { label: 'My Quotes', path: '/my/quotes', primary: true },
+      { label: '启用客户身份', path: 'bootstrap-customer', primary: true },
+      { label: 'My Quotes', path: '/my/quotes' },
       { label: 'Quote Detail', path: '/my/quotes/quote-local-501' },
       { label: 'My Orders', path: '/my/orders' },
-      { label: 'Order Detail', path: '/my/orders/order-local-1002' }
+      { label: 'Order Detail', path: '/my/orders/order-local-1001' }
     ]
   },
   {
@@ -231,12 +260,13 @@ const routeGroups = [
     routes: [
       { label: 'Legacy Quote Preview', path: '/quote?theme=space&scene=command&package=standard', note: 'localStorage only' },
       { label: 'Inquiry Follow-up', path: '/my/inquiries', note: '本地咨询跟进' },
+      { label: 'Bootstrap Customer', path: 'bootstrap-customer', note: '设置 customer-local-41' },
       { label: 'My Quotes', path: '/my/quotes', note: '客户只读报价列表' },
       { label: 'Quote Detail', path: '/my/quotes/quote-local-501', note: '客户只读报价详情' },
       { label: 'Lead Review Ops', path: '/admin/local-leads', note: '运营跟进中心' },
       { label: 'V1 Quote Draft', path: '/quotation', note: '需登录，后端接线受限' },
       { label: 'My Orders', path: '/my/orders', note: '客户只读订单列表' },
-      { label: 'Order Detail', path: '/my/orders/order-local-1002', note: '客户只读订单详情' }
+      { label: 'Order Detail', path: '/my/orders/order-local-1001', note: '客户只读订单详情' }
     ]
   },
   {

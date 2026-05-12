@@ -41,12 +41,14 @@
                 <el-dropdown-item command="/my/inquiries"><el-icon><List /></el-icon>我的咨询</el-dropdown-item>
                 <el-dropdown-item command="/my/quotes"><el-icon><Document /></el-icon>我的报价</el-dropdown-item>
                 <el-dropdown-item command="/my/orders"><el-icon><List /></el-icon>我的订单</el-dropdown-item>
+                <el-dropdown-item command="bootstrap-customer"><el-icon><User /></el-icon>本地客户身份</el-dropdown-item>
                 <el-dropdown-item divided command="logout"><el-icon><SwitchButton /></el-icon>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </template>
         <template v-else>
+          <el-button plain @click="bootstrapCustomer">本地客户身份</el-button>
           <el-button type="primary" @click="showLogin">登录 / 注册</el-button>
         </template>
       </div>
@@ -59,6 +61,7 @@ import { inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import { bootstrapLocalCustomerFixture } from '@/services/customerExperienceService'
 import {
   ArrowDown,
   Document,
@@ -81,6 +84,14 @@ const showLogin = () => {
   showLoginModal.value = true
 }
 
+const bootstrapCustomer = () => {
+  const fixture = bootstrapLocalCustomerFixture()
+  userStore.logout()
+  userStore.setUserInfo(fixture)
+  ElMessage.success('已启用 local/staging 客户 demo 身份：customer-local-41')
+  router.push('/my/quotes')
+}
+
 const handleCommand = (command) => {
   if (command === 'logout') {
     ElMessageBox.confirm('确定要退出登录吗？', '提示', {
@@ -92,6 +103,8 @@ const handleCommand = (command) => {
       ElMessage.success('已退出登录')
       router.push('/')
     })
+  } else if (command === 'bootstrap-customer') {
+    bootstrapCustomer()
   } else {
     router.push(command)
   }

@@ -250,6 +250,41 @@ const normalizeOrder = (order) => {
 
 export const quoteStatuses = quoteStatusText
 export const orderStatuses = orderStatusText
+export const localCustomerFixture = DEFAULT_CUSTOMER_FIXTURE
+
+export const bootstrapLocalCustomerFixture = () => {
+  if (typeof window === 'undefined') return null
+  const fixtureUserInfo = {
+    id: DEFAULT_CUSTOMER_FIXTURE.id,
+    customer_fixture_id: DEFAULT_CUSTOMER_FIXTURE.id,
+    full_name: DEFAULT_CUSTOMER_FIXTURE.name,
+    name: DEFAULT_CUSTOMER_FIXTURE.name,
+    email: DEFAULT_CUSTOMER_FIXTURE.contact,
+    contact: DEFAULT_CUSTOMER_FIXTURE.contact,
+    role: 'customer',
+    user_type: 'personal',
+    fixture_scope: 'local_staging_only',
+    customer_readonly_fixture: true
+  }
+  window.localStorage.setItem('userInfo', JSON.stringify(fixtureUserInfo))
+  window.localStorage.removeItem('token')
+  return fixtureUserInfo
+}
+
+export const clearLocalCustomerFixture = () => {
+  if (typeof window === 'undefined') return
+  const raw = window.localStorage.getItem('userInfo')
+  if (!raw) return
+  try {
+    const parsed = JSON.parse(raw)
+    if (parsed?.customer_readonly_fixture) {
+      window.localStorage.removeItem('userInfo')
+      window.localStorage.removeItem('token')
+    }
+  } catch (error) {
+    window.localStorage.removeItem('userInfo')
+  }
+}
 
 const localFixtureQuotes = () => {
   const identity = getCustomerReadOnlyIdentity()
