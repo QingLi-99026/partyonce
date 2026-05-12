@@ -92,19 +92,48 @@
           <el-button disabled>Open Stripe · disabled</el-button>
         </div>
       </section>
+
+      <section id="supplement" class="panel interaction-panel">
+        <h2>Update Request / Extra Notes</h2>
+        <p>{{ customerInteractionBoundary.contactBody }}</p>
+        <el-input
+          v-model="supplementNote"
+          type="textarea"
+          :rows="4"
+          maxlength="800"
+          show-word-limit
+          placeholder="Example: event time changed, please confirm setup access, or add a dietary requirement."
+        />
+        <div v-if="interaction.supplement_saved_at" class="saved-note">
+          Update request saved locally at {{ formatCustomerDateTime(interaction.supplement_saved_at) }}.
+        </div>
+        <div class="blocked-actions">
+          <el-button type="primary" @click="saveSupplement">Save Local Note</el-button>
+          <el-button @click="router.push('/my/quotes')">Back to My Quotes</el-button>
+        </div>
+      </section>
+
+      <section class="panel contact-panel">
+        <h2>{{ customerInteractionBoundary.contactTitle }}</h2>
+        <p>Order updates are captured locally for staging review only. No email, SMS, WhatsApp, payment, webhook, or n8n action is triggered.</p>
+      </section>
     </template>
   </main>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import {
+  customerInteractionBoundary,
   fetchCustomerOrderDetail,
   formatCustomerDate,
   formatCustomerDateTime,
   formatCustomerMoney,
-  orderStatuses
+  getCustomerInteractionState,
+  orderStatuses,
+  saveCustomerSupplementRequest
 } from '@/services/customerExperienceService'
 
 const route = useRoute()
@@ -114,6 +143,8 @@ const order = ref(null)
 const dataSource = ref('not loaded')
 const apiNotice = ref('')
 const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
+const interaction = ref({})
+const supplementNote = ref('')
 
 const orderTagType = (status) => ({
   draft: 'info',
@@ -132,9 +163,26 @@ const loadOrder = async () => {
     dataSource.value = result.source
     identity.value = result.identity
     apiNotice.value = result.api_error || ''
+    refreshInteraction()
   } finally {
     loading.value = false
   }
+}
+
+const refreshInteraction = () => {
+  if (!order.value?.id) return
+  interaction.value = getCustomerInteractionState('order', order.value.id)
+  supplementNote.value = interaction.value.supplement_note || ''
+}
+
+const saveSupplement = () => {
+  if (!order.value?.id) return
+  interaction.value = saveCustomerSupplementRequest({
+    type: 'order',
+    id: order.value.id,
+    note: supplementNote.value
+  })
+  ElMessage.success('Order update note saved locally for staging review.')
 }
 
 onMounted(loadOrder)
@@ -269,6 +317,21 @@ dd {
   gap: 10px;
   margin-top: 12px;
   flex-wrap: wrap;
+}
+
+.saved-note {
+  margin-top: 12px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #166534;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.interaction-panel p,
+.contact-panel p {
+  margin: 0 0 12px;
+  color: #475569;
 }
 
 @media (max-width: 820px) {

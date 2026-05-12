@@ -70,7 +70,22 @@
           <p>{{ quote.next_step }}</p>
         </div>
 
-        <el-button type="primary" @click="router.push(`/my/quotes/${quote.id}`)">View Quote Detail</el-button>
+        <div class="interaction-hint">
+          <el-tag v-if="quoteInteraction(quote.id).confirmation_placeholder_at" type="success" effect="plain">
+            Confirmation placeholder saved
+          </el-tag>
+          <el-tag v-if="quoteInteraction(quote.id).supplement_saved_at" type="info" effect="plain">
+            Supplement note saved
+          </el-tag>
+          <span v-if="!quoteInteraction(quote.id).confirmation_placeholder_at && !quoteInteraction(quote.id).supplement_saved_at">
+            Need changes? Open detail to add a local/staging note.
+          </span>
+        </div>
+
+        <div class="card-actions">
+          <el-button type="primary" @click="router.push(`/my/quotes/${quote.id}`)">View Quote Detail</el-button>
+          <el-button @click="router.push(`/my/quotes/${quote.id}#supplement`)">Add Requirements</el-button>
+        </div>
       </article>
     </section>
 
@@ -88,6 +103,7 @@ import {
   formatCustomerDate,
   formatCustomerDateTime,
   formatCustomerMoney,
+  getCustomerInteractionState,
   quoteStatuses
 } from '@/services/customerExperienceService'
 
@@ -124,6 +140,8 @@ const quoteTagType = (status) => ({
   rejected: 'danger',
   expired: ''
 }[status] || 'info')
+
+const quoteInteraction = (quoteId) => getCustomerInteractionState('quote', quoteId)
 
 const loadQuotes = async () => {
   loading.value = true
@@ -258,6 +276,23 @@ dd {
 .next-step p {
   margin: 4px 0 0;
   color: #334155;
+}
+
+.interaction-hint {
+  display: flex;
+  min-height: 32px;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 760px) {

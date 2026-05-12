@@ -4,6 +4,7 @@ import { useUserStore } from '@/store'
 
 const SOURCE_LOCAL_DEMO = 'local/staging filtered fixture'
 const SOURCE_READONLY_API = 'customer read-only API'
+const CUSTOMER_INTERACTION_STORAGE_KEY = 'partyonce_customer_interactions_v1'
 const DEFAULT_CUSTOMER_FIXTURE = {
   id: 'customer-local-41',
   name: 'Ava Thompson',
@@ -251,6 +252,70 @@ const normalizeOrder = (order) => {
 export const quoteStatuses = quoteStatusText
 export const orderStatuses = orderStatusText
 export const localCustomerFixture = DEFAULT_CUSTOMER_FIXTURE
+
+const interactionKey = (type, id) => `${type}:${id}`
+
+const readCustomerInteractionStore = () => {
+  if (typeof window === 'undefined') return {}
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(CUSTOMER_INTERACTION_STORAGE_KEY) || '{}')
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
+  } catch (error) {
+    return {}
+  }
+}
+
+const writeCustomerInteractionStore = (store) => {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(CUSTOMER_INTERACTION_STORAGE_KEY, JSON.stringify(store))
+}
+
+export const getCustomerInteractionState = (type, id) => {
+  const store = readCustomerInteractionStore()
+  return store[interactionKey(type, id)] || {}
+}
+
+export const saveCustomerSupplementRequest = ({ type, id, note }) => {
+  const cleanType = type === 'order' ? 'order' : 'quote'
+  const store = readCustomerInteractionStore()
+  const key = interactionKey(cleanType, id)
+  const current = store[key] || {}
+  const updated = {
+    ...current,
+    type: cleanType,
+    id: String(id),
+    supplement_note: String(note || '').trim(),
+    supplement_saved_at: new Date().toISOString(),
+    local_only: true
+  }
+  store[key] = updated
+  writeCustomerInteractionStore(store)
+  return updated
+}
+
+export const saveQuoteConfirmationPlaceholder = (quoteId) => {
+  const store = readCustomerInteractionStore()
+  const key = interactionKey('quote', quoteId)
+  const current = store[key] || {}
+  const updated = {
+    ...current,
+    type: 'quote',
+    id: String(quoteId),
+    confirmation_placeholder: true,
+    confirmation_placeholder_at: new Date().toISOString(),
+    confirmation_note: 'Local/staging-only customer quote confirmation placeholder. No payment, order creation, webhook, n8n, or outbound message was triggered.',
+    local_only: true
+  }
+  store[key] = updated
+  writeCustomerInteractionStore(store)
+  return updated
+}
+
+export const customerInteractionBoundary = {
+  contactTitle: 'Need help or changes?',
+  contactBody: 'Use the note below to capture requested changes for local/staging review. It does not send email, SMS, WhatsApp, webhook, n8n, or payment actions.',
+  quoteConfirmation: 'This records local customer intent only. It does not accept the quote in production, create an order, or start Stripe payment.'
+}
 
 export const bootstrapLocalCustomerFixture = () => {
   if (typeof window === 'undefined') return null

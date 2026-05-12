@@ -70,7 +70,17 @@
           <p>{{ order.next_step }}</p>
         </div>
 
-        <el-button type="primary" @click="router.push(`/my/orders/${order.id}`)">View Order Detail</el-button>
+        <div class="interaction-hint">
+          <el-tag v-if="orderInteraction(order.id).supplement_saved_at" type="info" effect="plain">
+            Update note saved
+          </el-tag>
+          <span v-else>Need to update event details? Open order detail to add a local/staging note.</span>
+        </div>
+
+        <div class="card-actions">
+          <el-button type="primary" @click="router.push(`/my/orders/${order.id}`)">View Order Detail</el-button>
+          <el-button @click="router.push(`/my/orders/${order.id}#supplement`)">Add Update Note</el-button>
+        </div>
       </article>
     </section>
 
@@ -87,6 +97,7 @@ import {
   fetchCustomerOrders,
   formatCustomerDate,
   formatCustomerMoney,
+  getCustomerInteractionState,
   orderStatuses
 } from '@/services/customerExperienceService'
 
@@ -124,6 +135,8 @@ const orderTagType = (status) => ({
   completed: 'success',
   cancelled: 'danger'
 }[status] || 'info')
+
+const orderInteraction = (orderId) => getCustomerInteractionState('order', orderId)
 
 const loadOrders = async () => {
   loading.value = true
@@ -258,6 +271,23 @@ dd {
 .next-step p {
   margin: 4px 0 0;
   color: #334155;
+}
+
+.interaction-hint {
+  display: flex;
+  min-height: 32px;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 760px) {

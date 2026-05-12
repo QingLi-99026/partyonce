@@ -86,23 +86,71 @@
       <section class="next-step">
         <span>Next step</span>
         <p>{{ quote.next_step }}</p>
-        <el-button disabled>Accept Quote · coming soon</el-button>
-        <el-button disabled>Pay Deposit · blocked</el-button>
-        <el-button type="primary" @click="router.push('/my/orders')">View My Orders</el-button>
+        <el-alert
+          class="interaction-alert"
+          type="info"
+          :closable="false"
+          :title="customerInteractionBoundary.quoteConfirmation"
+        />
+        <div v-if="interaction.confirmation_placeholder_at" class="saved-note">
+          Confirmation placeholder saved locally at {{ formatCustomerDateTime(interaction.confirmation_placeholder_at) }}.
+        </div>
+        <div class="blocked-actions">
+          <el-button
+            type="success"
+            :disabled="!canConfirmQuote"
+            @click="recordConfirmationPlaceholder"
+          >
+            Confirm Quote Interest · non-payment placeholder
+          </el-button>
+          <el-button disabled>Pay Deposit · blocked</el-button>
+          <el-button type="primary" @click="router.push('/my/orders')">View My Orders</el-button>
+        </div>
+      </section>
+
+      <section id="supplement" class="panel interaction-panel">
+        <h2>Supplement Requirements</h2>
+        <p>{{ customerInteractionBoundary.contactBody }}</p>
+        <el-input
+          v-model="supplementNote"
+          type="textarea"
+          :rows="4"
+          maxlength="800"
+          show-word-limit
+          placeholder="Example: please change guest count to 20, add vegetarian snacks, or ask about a different venue time."
+        />
+        <div v-if="interaction.supplement_saved_at" class="saved-note">
+          Supplement note saved locally at {{ formatCustomerDateTime(interaction.supplement_saved_at) }}.
+        </div>
+        <div class="blocked-actions">
+          <el-button type="primary" @click="saveSupplement">Save Local Note</el-button>
+          <el-button @click="router.push('/my/inquiries')">Open My Inquiries</el-button>
+        </div>
+      </section>
+
+      <section class="panel contact-panel">
+        <h2>{{ customerInteractionBoundary.contactTitle }}</h2>
+        <p>For staging review, use the local note above. Production contact channels are intentionally not wired in this workpack.</p>
+        <el-button disabled>Contact send-out · disabled</el-button>
       </section>
     </template>
   </main>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import {
+  customerInteractionBoundary,
   fetchCustomerQuoteDetail,
   formatCustomerDate,
   formatCustomerDateTime,
   formatCustomerMoney,
-  quoteStatuses
+  getCustomerInteractionState,
+  quoteStatuses,
+  saveCustomerSupplementRequest,
+  saveQuoteConfirmationPlaceholder
 } from '@/services/customerExperienceService'
 
 const route = useRoute()
@@ -112,6 +160,10 @@ const quote = ref(null)
 const dataSource = ref('not loaded')
 const apiNotice = ref('')
 const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
+const interaction = ref({})
+const supplementNote = ref('')
+
+const canConfirmQuote = computed(() => ['sent', 'accepted'].includes(quote.value?.status))
 
 const quoteTagType = (status) => ({
   draft: 'info',
@@ -129,9 +181,32 @@ const loadQuote = async () => {
     dataSource.value = result.source
     identity.value = result.identity
     apiNotice.value = result.api_error || ''
+    refreshInteraction()
   } finally {
     loading.value = false
   }
+}
+
+const refreshInteraction = () => {
+  if (!quote.value?.id) return
+  interaction.value = getCustomerInteractionState('quote', quote.value.id)
+  supplementNote.value = interaction.value.supplement_note || ''
+}
+
+const recordConfirmationPlaceholder = () => {
+  if (!quote.value?.id || !canConfirmQuote.value) return
+  interaction.value = saveQuoteConfirmationPlaceholder(quote.value.id)
+  ElMessage.success('Quote interest saved locally. No payment or external action was triggered.')
+}
+
+const saveSupplement = () => {
+  if (!quote.value?.id) return
+  interaction.value = saveCustomerSupplementRequest({
+    type: 'quote',
+    id: quote.value.id,
+    note: supplementNote.value
+  })
+  ElMessage.success('Supplement note saved locally for staging review.')
 }
 
 onMounted(loadQuote)
@@ -254,6 +329,32 @@ dd {
 .status-list span,
 .next-step p {
   color: #334155;
+}
+
+.interaction-alert,
+.saved-note {
+  margin-top: 12px;
+}
+
+.saved-note {
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #166534;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.blocked-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.interaction-panel p,
+.contact-panel p {
+  margin: 0 0 12px;
+  color: #475569;
 }
 
 @media (max-width: 820px) {
