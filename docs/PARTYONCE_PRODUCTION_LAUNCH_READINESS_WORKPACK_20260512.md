@@ -45,7 +45,9 @@
 
 当前结论：**No-Go，不能直接生产上线。**
 
-2026-05-12 Production Hardening Patch Pack V1 已处理部分可安全修复项，但真实 payment / webhook / notification、生产数据库迁移、生产 auth/security gate、dirty `.env.production` 和 release branch 清洁度仍未完成。
+2026-05-12 Production Hardening Patch Pack V1 已处理部分可安全修复项。
+
+2026-05-12 Production Migration and Staging Runbook V1 已固化生产迁移、staging 验收和 rollback 规则；本地 SQLite migration dry-run 通过。但 staging smoke 尚未真实执行，production migration 未执行，真实 payment / webhook / notification、生产 auth/security gate、dirty `.env.production` 和 release branch 清洁度仍未完成。
 
 原因不是功能完全不可用，而是生产发布门禁仍有 P0 阻断：生产环境变量、部署配置、CORS、数据库迁移、真实 payment / webhook / notification 链路和 release 工作区清洁度均未达到生产发布标准。
 
@@ -55,7 +57,7 @@
 2. `render.yaml` 已在 Hardening V1 中改为 `rootDir: backend`、关闭 `autoDeploy`、手动配置关键 env；仍需 owner review 和 staging deploy runbook 验证。
 3. `backend/main.py` 已在 Hardening V1 中要求生产 CORS 使用 `CORS_ORIGINS` 明确白名单，禁止 wildcard。
 4. `backend/main.py` 已在 Hardening V1 中对生产 `DATABASE_URL`、`SECRET_KEY`、`CORS_ORIGINS` 做 fail-closed guard。
-5. `backend/main.py` 已在 Hardening V1 中对生产自动 `Base.metadata.create_all` 做 guard；生产仍需要 migration-managed schema。
+5. `backend/main.py` 已在 Hardening V1 中对生产自动 `Base.metadata.create_all` 做 guard；`PARTYONCE_PRODUCTION_MIGRATION_STAGING_RUNBOOK_V1_20260512.md` 已固化 migration-managed schema 流程，但 production migration 尚未执行。
 7. Payment 目前是 Stripe test-mode readiness / 占位状态，尚未完成真实 PaymentIntent、webhook、订单付款状态闭环。
 8. Notification / webhook / n8n 当前是 dry-run payload lab，尚未进入真实外发或真实 n8n 触发链路。
 9. Supplier light closed loop 仍有 local/staging fixture 属性，不能等同完整生产供应商后台。
@@ -162,7 +164,7 @@ Build warning：存在大 chunk 警告，需要后续性能优化，但不是本
 
 ## 13. Blocker
 
-当前 blocker：生产上线门禁未通过，尤其是 `.env.production` dirty、部署 blueprint 疑似不匹配真实 backend 目录、CORS 过宽、生产数据库迁移策略未收口、payment / webhook / n8n 仍非真实闭环。
+当前 blocker：生产上线门禁未通过。`render.yaml`、CORS、production env fail-closed、生产自动建表 guard 和 migration/staging/rollback runbook 已有第一版；剩余阻断集中在 `.env.production` dirty、release branch clean gate、staging smoke 未执行、production migration 未执行、payment / webhook / n8n 仍非真实闭环。
 
 ## 14. Commit
 

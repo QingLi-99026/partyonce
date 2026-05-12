@@ -174,7 +174,7 @@ git diff --check -- backend/main.py frontend/vue-app/src/api/index.js render.yam
 
 剩余 blocker：
 
-1. 生产数据库 migration runbook 未完成。
+1. 生产数据库 migration runbook 已在 `PARTYONCE_PRODUCTION_MIGRATION_STAGING_RUNBOOK_V1_20260512.md` 固化，但尚未真实执行 production migration。
 2. payment / webhook / n8n 仍非真实闭环。
 3. `.env.production` 与 `dist` 仍需在 release branch 前隔离。
 4. production auth / permission / monitoring / backup / rate limit gate 未完成。
@@ -184,9 +184,9 @@ git diff --check -- backend/main.py frontend/vue-app/src/api/index.js render.yam
 
 建议：仍为 **No-Go**。
 
-下一步最优入口是 **Production Migration and Staging Runbook V1**：
+下一步最优入口是 **Staging Smoke Execution V1**：
 
-1. 定义 migration-managed schema 策略。
-2. 建立 staging deploy runbook，但仍不触发 production。
+1. 按 runbook 在 staging / local-safe profile 执行 smoke。
+2. 继续不触发 production。
 3. 使用 clean release branch 排除 `.env.production`、`dist` 和历史 dirty files。
-4. 跑 staging smoke gate 后，再讨论是否进入 production deploy approval。
+4. staging smoke gate 通过后，再讨论是否进入 production deploy approval。
