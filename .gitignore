@@ -11,11 +11,14 @@ env/
 node_modules/
 npm-debug.log
 frontend/vue-app/dist/
+frontend/vue-app/node_modules/
 dist/
 
 # Test results
 test-results/
 test_evidence/
+.playwright-cli/
+EvidencePack/
 
 # Environment files and local secrets
 .env
@@ -23,6 +26,7 @@ test_evidence/
 !.env.example
 frontend/vue-app/.env
 frontend/vue-app/.env.*
+frontend/vue-app/.env.production
 !frontend/vue-app/.env.example
 backend/.env
 backend/.env.*
