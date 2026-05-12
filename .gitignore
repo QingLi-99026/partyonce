@@ -43,3 +43,6 @@ database/patch_*.sql
 .vscode/
 .idea/
 .DS_Store
+
+# macOS
+.DS_Store

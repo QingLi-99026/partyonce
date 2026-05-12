@@ -16,3 +16,19 @@ HTTP: 401
 Traceback (most recent call last):
   File "<stdin>", line 39, in <module>
 KeyError: 'id'
+
+----------------------------------------------------------------------
+取证补充（2026-03-17 04:03）
+- 截图1：unauth-guard_20260317_040318.png（未登录访问受保护页触发登录拦截）
+- 截图2：quotation-to-deposit_20260317_040318.png（已到 Quotation 页面，Deposit 路径继续联调）
+- 归档路径：projects/PartyOnce/EvidencePack/
+- 合格性：
+  - 未登录拦截：合格
+  - Quotation→PaymentDeposit：部分合格（先到 Quotation，Deposit 路径补证中）
+- 说明：前端服务已恢复至 127.0.0.1:3000；managed browser 直连完成截图。
+
+----------------------------------------------------------------------
+修复与最终补证（2026-03-17 05:15）
+- 阻塞已修复：后端 API 已启动；/api/health=200；/api/payments/deposit 已返回 order_id=PO-20260316-3-4 与 client_secret（见运行日志）。
+- 最终截图：PaymentDeposit_final_20260317_051503.png（已到达支付页主路径）
+- 归档路径：projects/PartyOnce/EvidencePack/
