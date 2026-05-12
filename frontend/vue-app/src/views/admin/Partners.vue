@@ -34,6 +34,7 @@
       <div class="admin-content">
         <div class="content-header">
           <h1>供应商审核</h1>
+          <p>Local/staging light closed loop: 查看申请、更新状态、写审核备注，不触发外发通知。</p>
         </div>
         
         <!-- 筛选栏 -->
@@ -75,6 +76,14 @@
         
         <!-- 数据表格 -->
         <el-card class="table-card">
+          <el-alert
+            class="scope-alert"
+            type="info"
+            :closable="false"
+            show-icon
+            :title="`数据来源：${dataSource}`"
+            description="本轮后台审核为 local/staging 轻量闭环，不做自动审核、自动派单、合同签署或外发通知。"
+          />
           <el-table :data="partners" v-loading="loading" stripe>
             <el-table-column prop="id" label="ID" width="80" />
             
@@ -94,6 +103,12 @@
             </el-table-column>
             
             <el-table-column prop="email" label="邮箱" min-width="180" />
+
+            <el-table-column prop="review_note" label="审核备注" min-width="180">
+              <template #default="{ row }">
+                <span>{{ row.review_note || '-' }}</span>
+              </template>
+            </el-table-column>
             
             <el-table-column prop="service_area" label="服务区域" min-width="150">
               <template #default="{ row }">
@@ -126,13 +141,16 @@
                 </el-button>
                 
                 <template v-if="row.status === 'pending'">
-                  <el-button type="success" link @click="approve(row)">
+                  <el-button type="success" link @click="openReview(row, 'approved')">
                     通过
                   </el-button>
-                  <el-button type="danger" link @click="reject(row)">
+                  <el-button type="danger" link @click="openReview(row, 'rejected')">
                     拒绝
                   </el-button>
                 </template>
+                <el-button type="warning" link @click="openReview(row, row.status)">
+                  备注
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -152,31 +170,52 @@
       </div>
     </div>
     
-    <!-- 拒绝原因对话框 -->
+    <!-- 审核对话框 -->
     <el-dialog
       v-model="rejectDialogVisible"
-      title="拒绝申请"
+      title="更新供应商申请"
       width="500px"
     >
       <p style="margin-bottom: 16px">
-        您正在拒绝供应商 <strong>{{ currentPartner?.company_name }}</strong> 的申请
+        您正在更新供应商 <strong>{{ currentPartner?.company_name }}</strong> 的申请
       </p>
       
       <el-form :model="rejectForm">
-        <el-form-item label="拒绝原因" required>
+        <el-form-item label="审核状态" required>
+          <el-select v-model="rejectForm.status" style="width: 100%">
+            <el-option label="待审核" value="pending" />
+            <el-option label="已通过" value="approved" />
+            <el-option label="已拒绝" value="rejected" />
+            <el-option label="需补充资料" value="needs_info" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="供应商分类">
+          <el-select v-model="rejectForm.category" style="width: 100%">
+            <el-option label="场地租赁" value="venue" />
+            <el-option label="餐饮服务" value="catering" />
+            <el-option label="装饰布置" value="decoration" />
+            <el-option label="摄影摄像" value="photography" />
+            <el-option label="娱乐表演" value="entertainment" />
+            <el-option label="其他服务" value="other" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="审核备注">
           <el-input
-            v-model="rejectForm.reason"
+            v-model="rejectForm.review_note"
             type="textarea"
             :rows="4"
-            placeholder="请输入拒绝原因，将展示给供应商"
+            placeholder="请输入运营备注，将展示在 local/staging 状态页"
           />
+        </el-form-item>
+        <el-form-item v-if="rejectForm.status === 'rejected'" label="拒绝原因">
+          <el-input v-model="rejectForm.reason" placeholder="请输入拒绝原因" />
         </el-form-item>
       </el-form>
       
       <template #footer>
         <el-button @click="rejectDialogVisible = false">取消</el-button>
-        <el-button type="danger" :loading="submitting" @click="confirmReject">
-          确认拒绝
+        <el-button type="primary" :loading="submitting" @click="confirmReview">
+          保存审核
         </el-button>
       </template>
     </el-dialog>
@@ -186,14 +225,18 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import { adminAPI } from '@/api/modules'
+import {
+  listSupplierApplications,
+  updateSupplierApplicationReview
+} from '@/services/supplierLightService'
 import NavHeader from '@/components/NavHeader.vue'
 
 const router = useRouter()
 const loading = ref(false)
 const partners = ref([])
+const dataSource = ref('not loaded')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -208,6 +251,9 @@ const rejectDialogVisible = ref(false)
 const currentPartner = ref(null)
 const submitting = ref(false)
 const rejectForm = reactive({
+  status: 'pending',
+  category: 'other',
+  review_note: '',
   reason: ''
 })
 
@@ -227,7 +273,8 @@ const statusType = (status) => {
   const types = {
     pending: 'warning',
     approved: 'success',
-    rejected: 'danger'
+    rejected: 'danger',
+    needs_info: 'info'
   }
   return types[status] || 'info'
 }
@@ -236,7 +283,8 @@ const statusLabel = (status) => {
   const labels = {
     pending: '待审核',
     approved: '已通过',
-    rejected: '已拒绝'
+    rejected: '已拒绝',
+    needs_info: '需补充资料'
   }
   return labels[status] || status
 }
@@ -265,39 +313,30 @@ const viewDetail = (id) => {
   router.push(`/admin/partners/${id}`)
 }
 
-const approve = async (partner) => {
-  try {
-    await ElMessageBox.confirm(
-      `确定要通过 ${partner.company_name} 的供应商申请吗？`,
-      '确认通过',
-      { type: 'warning' }
-    )
-    await adminAPI.approvePartner(partner.id)
-    ElMessage.success('已通过申请')
-    fetchPartners()
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('操作失败')
-    }
-  }
-}
-
-const reject = (partner) => {
+const openReview = (partner, status) => {
   currentPartner.value = partner
-  rejectForm.reason = ''
+  rejectForm.status = status || partner.status
+  rejectForm.category = partner.category || 'other'
+  rejectForm.review_note = partner.review_note || ''
+  rejectForm.reason = partner.reject_reason || ''
   rejectDialogVisible.value = true
 }
 
-const confirmReject = async () => {
-  if (!rejectForm.reason.trim()) {
+const confirmReview = async () => {
+  if (rejectForm.status === 'rejected' && !rejectForm.reason.trim()) {
     ElMessage.warning('请输入拒绝原因')
     return
   }
   
   submitting.value = true
   try {
-    await adminAPI.rejectPartner(currentPartner.value.id, { reason: rejectForm.reason })
-    ElMessage.success('已拒绝申请')
+    await updateSupplierApplicationReview(currentPartner.value.id, {
+      status: rejectForm.status,
+      category: rejectForm.category,
+      review_note: rejectForm.review_note,
+      reject_reason: rejectForm.reason
+    })
+    ElMessage.success('已保存 local/staging 审核结果')
     rejectDialogVisible.value = false
     fetchPartners()
   } catch (error) {
@@ -310,13 +349,12 @@ const confirmReject = async () => {
 const fetchPartners = async () => {
   loading.value = true
   try {
-    const res = await adminAPI.getPartners({
-      page: currentPage.value,
-      page_size: pageSize.value,
+    const res = await listSupplierApplications({
       ...filterForm
     })
     partners.value = res.items || []
     total.value = res.total || 0
+    dataSource.value = res.source
   } catch (error) {
     ElMessage.error('获取供应商列表失败')
   } finally {
@@ -376,6 +414,15 @@ onMounted(() => {
 .content-header h1 {
   font-size: 24px;
   margin: 0;
+}
+
+.content-header p {
+  margin: 8px 0 0;
+  color: #606266;
+}
+
+.scope-alert {
+  margin-bottom: 16px;
 }
 
 .filter-card {

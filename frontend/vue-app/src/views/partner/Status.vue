@@ -48,6 +48,15 @@
             />
           </div>
 
+          <div v-if="application.review_note" class="review-note">
+            <el-alert
+              :title="'审核备注：' + application.review_note"
+              type="info"
+              :closable="false"
+              show-icon
+            />
+          </div>
+
           <div class="application-info" v-if="application">
             <el-descriptions :column="1" border>
               <el-descriptions-item label="公司名称">
@@ -58,6 +67,9 @@
               </el-descriptions-item>
               <el-descriptions-item label="申请时间">
                 {{ formatDate(application.created_at) }}
+              </el-descriptions-item>
+              <el-descriptions-item label="数据来源">
+                {{ dataSource }}
               </el-descriptions-item>
             </el-descriptions>
           </div>
@@ -92,17 +104,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref, reactive, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { partnerAPI } from '@/api/modules'
+import { getSupplierApplicationByEmail } from '@/services/supplierLightService'
 import NavHeader from '@/components/NavHeader.vue'
 import AppFooter from '@/components/AppFooter.vue'
 
 const router = useRouter()
+const route = useRoute()
 const loading = ref(false)
 const checked = ref(false)
 const application = ref(null)
+const dataSource = ref('not loaded')
 
 const queryForm = reactive({
   email: ''
@@ -160,11 +174,16 @@ const checkStatus = async () => {
 
   loading.value = true
   try {
-    const res = await partnerAPI.checkStatus(queryForm.email)
-    application.value = res
+    const result = await getSupplierApplicationByEmail(queryForm.email)
+    if (!result.item) {
+      ElMessage.warning('未找到该邮箱的 local/staging 申请记录')
+      return
+    }
+    application.value = result.item
+    dataSource.value = result.source
     checked.value = true
   } catch (error) {
-    ElMessage.error(error.response?.data?.detail || '查询失败')
+    ElMessage.error(error?.response?.data?.detail || '查询失败')
   } finally {
     loading.value = false
   }
@@ -181,6 +200,13 @@ const goToApply = () => {
 const reapply = () => {
   router.push('/partner/apply')
 }
+
+onMounted(() => {
+  if (route.query.email) {
+    queryForm.email = String(route.query.email)
+    checkStatus()
+  }
+})
 </script>
 
 <style scoped>
@@ -250,6 +276,11 @@ const reapply = () => {
 }
 
 .reject-reason {
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.review-note {
   margin-bottom: 24px;
   text-align: left;
 }

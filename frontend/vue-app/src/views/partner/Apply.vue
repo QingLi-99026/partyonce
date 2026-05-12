@@ -126,7 +126,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { partnerAPI } from '@/api/modules'
+import { createSupplierApplication } from '@/services/supplierLightService'
 import NavHeader from '@/components/NavHeader.vue'
 import AppFooter from '@/components/AppFooter.vue'
 
@@ -175,11 +175,11 @@ const submitApplication = async () => {
 
   submitting.value = true
   try {
-    await partnerAPI.apply(form)
-    ElMessage.success('申请提交成功！我们会尽快审核')
-    router.push('/partner/status')
+    const result = await createSupplierApplication(form)
+    ElMessage.success('申请已保存到 local/staging 审核队列，未触发外发通知')
+    router.push({ path: '/partner/status', query: { email: result.item.email } })
   } catch (error) {
-    ElMessage.error(error.response?.data?.detail || '提交失败，请稍后重试')
+    ElMessage.error(error?.response?.data?.detail || '提交失败，请稍后重试')
   } finally {
     submitting.value = false
   }

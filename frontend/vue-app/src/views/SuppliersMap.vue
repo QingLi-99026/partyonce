@@ -50,7 +50,7 @@
       <!-- 右侧列表 -->
       <div class="list-section">
         <div class="results-header">
-          <span>找到 {{ suppliers.length }} 个供应商</span>
+          <span>找到 {{ suppliers.length }} 个供应商 · {{ dataSource }}</span>
           <select v-model="sortBy">
             <option value="distance">距离最近</option>
             <option value="rating">评分最高</option>
@@ -97,6 +97,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { listSupplierDisplayItems } from '@/services/supplierLightService'
 
 const router = useRouter()
 const mapContainer = ref(null)
@@ -108,6 +109,7 @@ const weekendOnly = ref(false)
 const sortBy = ref('distance')
 const suppliers = ref([])
 const selectedId = ref(null)
+const dataSource = ref('not loaded')
 
 const sortedSuppliers = computed(() => suppliers.value)
 
@@ -116,35 +118,8 @@ const formatPrice = (level) => {
   return map[level] || level
 }
 
-const getMockSuppliers = () => [
-  {
-    supplier_id: 1,
-    name: '悉尼儿童派对中心',
-    category_level_1: '场地类',
-    suburb: 'North Sydney',
-    rating: 4.8,
-    review_count: 127,
-    price_level: '中',
-    max_capacity: 50,
-    distance_km: 0.5,
-    cover_image_url: 'https://images.unsplash.com/photo-1530103862676-de3c9a59aa38?w=400'
-  },
-  {
-    supplier_id: 2,
-    name: 'Manly海滨派对屋',
-    category_level_1: '场地类',
-    suburb: 'Manly',
-    rating: 4.6,
-    review_count: 89,
-    price_level: '高',
-    max_capacity: 80,
-    distance_km: 8.2,
-    cover_image_url: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400'
-  }
-]
-
 onMounted(() => {
-  suppliers.value = getMockSuppliers()
+  searchNearby()
 })
 
 const selectSupplier = (s) => {
@@ -152,7 +127,15 @@ const selectSupplier = (s) => {
   router.push(`/suppliers/${s.supplier_id}`)
 }
 
-const searchNearby = () => {}
+const searchNearby = async () => {
+  const result = await listSupplierDisplayItems({
+    category: filterCategory.value,
+    suburb: searchLocation.value,
+    price_level: filterPrice.value
+  })
+  dataSource.value = result.source
+  suppliers.value = result.items
+}
 const getCurrentLocation = () => {}
 const zoomIn = () => {}
 const zoomOut = () => {}

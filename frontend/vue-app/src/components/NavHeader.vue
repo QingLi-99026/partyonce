@@ -18,6 +18,9 @@
         <el-menu-item index="/ai-planner"><el-icon><MagicStick /></el-icon>AI策划</el-menu-item>
         <el-menu-item index="/3d-designer"><el-icon><View /></el-icon>3D设计</el-menu-item>
         <el-menu-item index="/quotation"><el-icon><Document /></el-icon>报价</el-menu-item>
+        <el-menu-item index="/suppliers">Suppliers</el-menu-item>
+        <el-menu-item index="/partner/apply">Partner Apply</el-menu-item>
+        <el-menu-item index="/partner/status">Partner Status</el-menu-item>
         <el-menu-item index="/my/inquiries">My Inquiries</el-menu-item>
         <el-menu-item index="/my/quotes">My Quotes</el-menu-item>
         <el-menu-item index="/my/orders">My Orders</el-menu-item>
@@ -25,6 +28,7 @@
         <el-menu-item index="/admin/local-leads">Lead Review</el-menu-item>
         <el-menu-item index="/admin/quotes">Quote Review</el-menu-item>
         <el-menu-item index="/admin/orders">Order Review</el-menu-item>
+        <el-menu-item index="/admin/partners">Partner Review</el-menu-item>
       </el-menu>
       
       <div class="user-actions">
