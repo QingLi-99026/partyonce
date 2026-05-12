@@ -238,21 +238,37 @@
 
 后端 runtime 验收：
 
-- 尝试使用 safe local profile 启动 backend：
+- 使用项目自带 `backend/venv/bin/uvicorn` 启动 safe local profile。
+- 启动环境：
   - `PYTHON_DOTENV_DISABLED=1`
   - `DATABASE_URL=sqlite:////tmp/partyonce_customer_readonly_backend_dummy.sqlite`
   - `PARTYONCE_LEAD_STORAGE_MODE=sqlite_local`
   - `PARTYONCE_LEAD_SQLITE_PATH=/tmp/partyonce_customer_readonly.sqlite`
-  - host `127.0.0.1`
-- 当前本机 Python 环境缺少 `fastapi`，backend runtime 启动失败：
-  - `ModuleNotFoundError: No module named 'fastapi'`
-- 因此本轮未完成真实 backend HTTP route smoke test。
+  - host `127.0.0.1:8095`
+- 后端确认数据库目标为 `/tmp/partyonce_customer_readonly_backend_dummy.sqlite`。
+- `/api/my/*` HTTP smoke test 已补跑通过。
 
 Lead / Quote / Order 创建验收：
 
-- 未重新创建真实 Lead / Quote / Order。
-- 原因：backend runtime 被本机依赖阻断。
-- 页面端使用 filtered local fixture 完成 customer-only read-only 验收。
+- 创建 admin fixture user：通过。
+- 创建 customer fixture user：通过。
+- 创建 Lead：`201 Created`。
+- admin 将 Lead 更新为 `qualified`：`200 OK`。
+- admin 创建 Quote：`201 Created`。
+- admin 将 Quote 更新为 `accepted`：`200 OK`。
+- admin 创建 Order：`201 Created`。
+
+/api/my/* read-only 验收：
+
+- `GET /api/my/quotes` + `X-PartyOnce-Customer-Id`：`200 OK`，只返回当前 customer 的 quote。
+- `GET /api/my/quotes/{quote_id}` + `X-PartyOnce-Customer-Id`：`200 OK`。
+- `GET /api/my/orders` + `X-PartyOnce-Customer-Id`：`200 OK`，只返回当前 customer 的 order。
+- `GET /api/my/orders/{order_id}` + `X-PartyOnce-Customer-Id`：`200 OK`。
+- customer token 访问 `/api/my/quotes`、quote detail、`/api/my/orders`、order detail：均 `200 OK`。
+- 匿名访问 `/api/my/quotes`：`401 Customer auth fixture required`。
+- admin token 访问 `/api/my/quotes`：`403 Admin token cannot be used as customer token`。
+- 非本人 fixture 访问 quote detail：`404 Quote not found for current customer`。
+- 非本人 fixture 访问 order detail：`404 Order not found for current customer`。
 
 ## 11. 是否触发外部系统
 
@@ -285,13 +301,13 @@ Lead / Quote / Order 创建验收：
 
 主要 blocker：
 
-- 本机当前 Python 环境缺少 `fastapi`，无法启动 backend runtime 做 `/api/my/*` HTTP smoke test。
+- 无。上轮本机缺 `fastapi` 的问题已通过项目自带 `backend/venv` 解决，并已补跑 `/api/my/*` HTTP smoke test。
 
 非阻断限制：
 
 - 仍没有生产级 customer auth。
 - local/staging fallback 仍使用 demo fixture。
-- backend `/api/my/*` 已实现 read-only guard，但需要在依赖完整的 backend runtime 中补 smoke test。
+- backend `/api/my/*` read-only guard 已完成 smoke test。
 
 ## 15. commit hash
 
@@ -303,7 +319,7 @@ Implementation commit:
 
 下一步建议：
 
-1. 在 backend 依赖完整环境中补跑 `/api/my/quotes`、`/api/my/quotes/{id}`、`/api/my/orders`、`/api/my/orders/{id}` smoke test。
-2. 建立稳定 customer auth fixture：非 admin customer token + local customer id mapping。
+1. 将 customer fixture 写入正式 staging 验收 SOP：customer token 或 `X-PartyOnce-Customer-Id` 二选一。
+2. 为前端增加一键本地 customer fixture bootstrap，减少手动 localStorage 设置。
 3. 继续保持 payment / webhook / n8n / deployment 阻断。
-4. 暂不做 customer self-service quote acceptance，直到 read-only API 验收稳定。
+4. 暂不做 customer self-service quote acceptance，直到 read-only API/auth fixture 多轮验收稳定。
