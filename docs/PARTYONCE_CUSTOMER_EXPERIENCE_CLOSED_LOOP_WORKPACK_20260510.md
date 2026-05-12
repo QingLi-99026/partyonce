@@ -235,7 +235,9 @@ Playwright 验收路由：
 
 ## 13. commit hash
 
-待本轮本地 commit 后回填。
+Implementation commit:
+
+- `b61d50b7` Complete customer experience closed loop
 
 ## 14. 下一步建议
 
@@ -247,4 +249,3 @@ Playwright 验收路由：
 - 为 customer quote/order read-only API 定义后端只读 skeleton。
 - 继续保持 payment / webhook / n8n / deployment 阻断。
 - 不进入 Stripe，直到客户侧 quote/order read-only auth 边界稳定。
-
