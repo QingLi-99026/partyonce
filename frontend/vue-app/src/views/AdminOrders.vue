@@ -95,6 +95,41 @@
       <el-button @click="clearFilters">Clear</el-button>
     </section>
 
+    <section class="bulk-panel" aria-label="Order bulk operations">
+      <div class="bulk-summary">
+        <strong>{{ selectedOrders.length }} selected</strong>
+        <span>Bulk operations update local/staging Order skeleton fields only.</span>
+      </div>
+      <el-input
+        v-model="bulkOwner"
+        class="bulk-input"
+        clearable
+        placeholder="Owner"
+        :disabled="selectedOrders.length === 0 || bulkLoading"
+      />
+      <el-input
+        v-model="bulkNextAction"
+        class="bulk-input wide-bulk-input"
+        clearable
+        placeholder="Next action"
+        :disabled="selectedOrders.length === 0 || bulkLoading"
+      />
+      <el-select
+        v-model="bulkStatus"
+        class="bulk-status"
+        placeholder="Status"
+        :disabled="selectedOrders.length === 0 || bulkLoading"
+      >
+        <el-option v-for="status in orderStatuses" :key="status" :label="status" :value="status" />
+      </el-select>
+      <el-button :disabled="!canApplyOrderOps" :loading="bulkLoading" @click="applyBulkOrderOps">
+        Apply Owner / Next Action
+      </el-button>
+      <el-button type="warning" plain :disabled="!canApplyOrderStatus" :loading="bulkLoading" @click="applyBulkOrderStatus">
+        Apply Status
+      </el-button>
+    </section>
+
     <section class="table-shell">
       <el-empty
         v-if="filteredOrders.length === 0"
@@ -103,7 +138,16 @@
         <el-button type="primary" @click="resetOrders">Reload Demo Orders</el-button>
       </el-empty>
 
-      <el-table v-else v-loading="loading" :data="filteredOrders" row-key="id" style="width: 100%">
+      <el-table
+        v-else
+        v-loading="loading"
+        :data="filteredOrders"
+        row-key="id"
+        style="width: 100%"
+        @selection-change="selectedOrders = $event"
+      >
+        <el-table-column type="selection" width="48" />
+
         <el-table-column label="Order" min-width="190">
           <template #default="{ row }">
             <div class="order-cell">
@@ -195,7 +239,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { orderStatuses } from '@/mock/adminOrders'
 import {
@@ -203,6 +247,7 @@ import {
   ORDER_SOURCE_FALLBACK,
   fetchAdminOrders,
   resetAdminOrderFallback,
+  updateAdminOrderOperations,
   updateAdminOrderStatus
 } from '@/services/adminOrderService'
 
@@ -216,6 +261,21 @@ const riskFilter = ref('')
 const loading = ref(false)
 const dataSource = ref('loading')
 const fallbackNotice = ref('')
+const selectedOrders = ref([])
+const bulkOwner = ref('')
+const bulkNextAction = ref('')
+const bulkStatus = ref('')
+const bulkLoading = ref(false)
+
+const canApplyOrderOps = computed(() => {
+  return selectedOrders.value.length > 0 && !bulkLoading.value && (
+    bulkOwner.value.trim() || bulkNextAction.value.trim()
+  )
+})
+
+const canApplyOrderStatus = computed(() => {
+  return selectedOrders.value.length > 0 && !bulkLoading.value && orderStatuses.includes(bulkStatus.value)
+})
 
 const filteredOrders = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -307,6 +367,55 @@ const updateStatus = async (order, status) => {
   ElMessage.success(`${order.order_number} updated to ${status}. No external action was triggered.`)
 }
 
+const updateOrderRow = (orderId, updatedOrder) => {
+  const index = orders.value.findIndex((item) => item.id === orderId)
+  if (index !== -1) orders.value[index] = updatedOrder
+}
+
+const applyBulkOrderOps = async () => {
+  if (!canApplyOrderOps.value) return
+  const patch = {}
+  if (bulkOwner.value.trim()) patch.owner_label = bulkOwner.value.trim()
+  if (bulkNextAction.value.trim()) patch.next_action = bulkNextAction.value.trim()
+  await runBulkOrderUpdate(patch, 'Order owner / next action updated')
+}
+
+const applyBulkOrderStatus = async () => {
+  if (!canApplyOrderStatus.value) return
+  try {
+    await ElMessageBox.confirm(
+      `Update ${selectedOrders.value.length} Order skeleton record(s) to ${bulkStatus.value}? This does not change payment or deposit status.`,
+      'Confirm bulk Order status update',
+      { type: 'warning', confirmButtonText: 'Apply Status', cancelButtonText: 'Cancel' }
+    )
+  } catch (error) {
+    return
+  }
+  await runBulkOrderUpdate({ status: bulkStatus.value }, `Order status updated to ${bulkStatus.value}`)
+}
+
+const runBulkOrderUpdate = async (patch, successMessage) => {
+  bulkLoading.value = true
+  let successCount = 0
+  try {
+    for (const order of selectedOrders.value) {
+      const result = await updateAdminOrderOperations(order, patch, dataSource.value)
+      if (!result.item) throw new Error('Could not update the Order skeleton record.')
+      updateOrderRow(order.id, result.item)
+      dataSource.value = result.source
+      successCount += 1
+    }
+    if (dataSource.value !== ORDER_SOURCE_API) {
+      fallbackNotice.value = 'Bulk update used fallback mock storage because the local backend API was unavailable.'
+    }
+    ElMessage.success(`${successMessage}: ${successCount} record(s). No external action was triggered.`)
+  } catch (error) {
+    ElMessage.error(`${successCount} updated before stop: ${error.message || 'Bulk update failed.'}`)
+  } finally {
+    bulkLoading.value = false
+  }
+}
+
 const clearFilters = () => {
   searchQuery.value = ''
   statusFilter.value = ''
@@ -395,6 +504,7 @@ onMounted(loadOrders)
 .scope-alert,
 .stats-grid,
 .toolbar,
+.bulk-panel,
 .table-shell {
   max-width: 1280px;
   margin-left: auto;
@@ -419,6 +529,47 @@ onMounted(loadOrders)
   border: 1px solid #dee2e6;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.bulk-panel {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.bulk-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 210px;
+}
+
+.bulk-summary strong {
+  color: #212529;
+}
+
+.bulk-summary span {
+  color: #868e96;
+  font-size: 12px;
+}
+
+.bulk-input {
+  width: 180px;
+}
+
+.wide-bulk-input {
+  width: 240px;
+}
+
+.bulk-status {
+  width: 170px;
 }
 
 .stat-card {
@@ -503,7 +654,8 @@ onMounted(loadOrders)
 
 @media (max-width: 900px) {
   .page-header,
-  .toolbar {
+  .toolbar,
+  .bulk-panel {
     flex-direction: column;
     align-items: stretch;
   }
@@ -519,6 +671,12 @@ onMounted(loadOrders)
   .wide-filter {
     width: 100%;
     max-width: none;
+  }
+
+  .bulk-input,
+  .wide-bulk-input,
+  .bulk-status {
+    width: 100%;
   }
 }
 

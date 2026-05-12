@@ -91,6 +91,41 @@
       </article>
     </section>
 
+    <section class="bulk-panel" aria-label="Quote bulk operations">
+      <div class="bulk-summary">
+        <strong>{{ selectedQuotes.length }} selected</strong>
+        <span>Bulk operations update local/staging Quote skeleton fields only.</span>
+      </div>
+      <el-input
+        v-model="bulkOwner"
+        class="bulk-input"
+        clearable
+        placeholder="Owner"
+        :disabled="selectedQuotes.length === 0 || bulkLoading"
+      />
+      <el-input
+        v-model="bulkNextAction"
+        class="bulk-input wide-bulk-input"
+        clearable
+        placeholder="Next action"
+        :disabled="selectedQuotes.length === 0 || bulkLoading"
+      />
+      <el-select
+        v-model="bulkStatus"
+        class="bulk-status"
+        placeholder="Status"
+        :disabled="selectedQuotes.length === 0 || bulkLoading"
+      >
+        <el-option v-for="status in allowedStatuses" :key="status" :label="status" :value="status" />
+      </el-select>
+      <el-button :disabled="!canApplyQuoteOps" :loading="bulkLoading" @click="applyBulkQuoteOps">
+        Apply Owner / Next Action
+      </el-button>
+      <el-button type="warning" plain :disabled="!canApplyQuoteStatus" :loading="bulkLoading" @click="applyBulkQuoteStatus">
+        Apply Status
+      </el-button>
+    </section>
+
     <el-alert
       v-if="message"
       class="scope-alert"
@@ -115,7 +150,10 @@
         :data="filteredQuotes"
         row-key="id"
         style="width: 100%"
+        @selection-change="selectedQuotes = $event"
       >
+        <el-table-column type="selection" width="48" />
+
         <el-table-column label="Quote" min-width="190">
           <template #default="{ row }">
             <div class="quote-cell">
@@ -216,7 +254,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import apiClient from '@/api'
 
@@ -233,6 +271,11 @@ const nextActionFilter = ref('')
 const riskFilter = ref('')
 const message = ref('')
 const messageType = ref('info')
+const selectedQuotes = ref([])
+const bulkOwner = ref('')
+const bulkNextAction = ref('')
+const bulkStatus = ref('')
+const bulkLoading = ref(false)
 
 const statusGuide = [
   { status: 'draft', label: '后台准备报价，客户侧只读显示准备中。' },
@@ -241,6 +284,16 @@ const statusGuide = [
   { status: 'rejected', label: '报价已拒绝，保留备注和复盘原因。' },
   { status: 'expired', label: '报价已过期，不触发自动支付或外发。' }
 ]
+
+const canApplyQuoteOps = computed(() => {
+  return selectedQuotes.value.length > 0 && !bulkLoading.value && (
+    bulkOwner.value.trim() || bulkNextAction.value.trim()
+  )
+})
+
+const canApplyQuoteStatus = computed(() => {
+  return selectedQuotes.value.length > 0 && !bulkLoading.value && allowedStatuses.includes(bulkStatus.value)
+})
 
 const filteredQuotes = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -331,6 +384,53 @@ const updateQuoteStatus = async (quote, status) => {
     ElMessage.success(`Quote ${quote.quote_number || quote.id} updated to ${status}`)
   } catch (error) {
     ElMessage.error(getErrorMessage(error))
+  }
+}
+
+const patchQuoteRow = async (quote, patch) => {
+  const updated = await apiClient.patch(`/quotes/${quote.id}`, patch)
+  const index = quotes.value.findIndex((item) => item.id === quote.id)
+  if (index !== -1) {
+    quotes.value[index] = updated
+  }
+  return updated
+}
+
+const applyBulkQuoteOps = async () => {
+  if (!canApplyQuoteOps.value) return
+  const patch = {}
+  if (bulkOwner.value.trim()) patch.owner_label = bulkOwner.value.trim()
+  if (bulkNextAction.value.trim()) patch.next_action = bulkNextAction.value.trim()
+  await runBulkQuoteUpdate(patch, 'Quote owner / next action updated')
+}
+
+const applyBulkQuoteStatus = async () => {
+  if (!canApplyQuoteStatus.value) return
+  try {
+    await ElMessageBox.confirm(
+      `Update ${selectedQuotes.value.length} Quote skeleton record(s) to ${bulkStatus.value}? This does not create Orders, payments, or outbound messages.`,
+      'Confirm bulk Quote status update',
+      { type: 'warning', confirmButtonText: 'Apply Status', cancelButtonText: 'Cancel' }
+    )
+  } catch (error) {
+    return
+  }
+  await runBulkQuoteUpdate({ status: bulkStatus.value }, `Quote status updated to ${bulkStatus.value}`)
+}
+
+const runBulkQuoteUpdate = async (patch, successMessage) => {
+  bulkLoading.value = true
+  let successCount = 0
+  try {
+    for (const quote of selectedQuotes.value) {
+      await patchQuoteRow(quote, patch)
+      successCount += 1
+    }
+    ElMessage.success(`${successMessage}: ${successCount} record(s). No external action was triggered.`)
+  } catch (error) {
+    ElMessage.error(`${successCount} updated before stop: ${getErrorMessage(error)}`)
+  } finally {
+    bulkLoading.value = false
   }
 }
 
@@ -525,6 +625,47 @@ onMounted(loadQuotes)
   margin-bottom: 18px;
 }
 
+.bulk-panel {
+  max-width: 1280px;
+  margin: 0 auto 18px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+.bulk-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 210px;
+}
+
+.bulk-summary strong {
+  color: #212529;
+}
+
+.bulk-summary span {
+  color: #868e96;
+  font-size: 12px;
+}
+
+.bulk-input {
+  width: 180px;
+}
+
+.wide-bulk-input {
+  width: 240px;
+}
+
+.bulk-status {
+  width: 170px;
+}
+
 .status-guide article {
   padding: 12px;
   background: #ffffff;
@@ -585,7 +726,8 @@ onMounted(loadQuotes)
 
 @media (max-width: 900px) {
   .page-header,
-  .toolbar {
+  .toolbar,
+  .bulk-panel {
     flex-direction: column;
     align-items: stretch;
   }
@@ -602,6 +744,12 @@ onMounted(loadQuotes)
   .wide-filter {
     width: 100%;
     max-width: none;
+  }
+
+  .bulk-input,
+  .wide-bulk-input,
+  .bulk-status {
+    width: 100%;
   }
 }
 
