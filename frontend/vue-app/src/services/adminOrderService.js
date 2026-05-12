@@ -64,9 +64,11 @@ export const normalizeAdminOrder = (order) => ({
   deposit_amount: Number(order.deposit_amount || 0),
   deposit_status: order.deposit_status || 'not_started',
   payment_reference: order.payment_reference || null,
-  owner: order.owner || order.owner_user_id || 'Ops review',
+  owner: order.owner_label || order.owner || order.owner_user_id || 'Ops review',
+  owner_user_id: order.owner_user_id || null,
+  owner_label: order.owner_label || order.owner || '',
   next_action: order.next_action || 'Review order details manually',
-  internal_note: order.internal_note || order.intake_notes || order.skeleton_notice || 'Local/staging Order skeleton only.',
+  internal_note: order.internal_notes || order.internal_note || order.intake_notes || order.skeleton_notice || 'Local/staging Order skeleton only.',
   created_at: order.created_at || null,
   updated_at: order.updated_at || null,
   confirmed_at: order.confirmed_at || null,
@@ -146,6 +148,10 @@ export const updateAdminOrderOperations = async (order, patch, source) => {
   if (normalizedPatch.internal_note !== undefined) {
     normalizedPatch.internal_notes = normalizedPatch.internal_note
     delete normalizedPatch.internal_note
+  }
+  if (normalizedPatch.owner !== undefined) {
+    normalizedPatch.owner_label = normalizedPatch.owner
+    delete normalizedPatch.owner
   }
 
   if (source === ORDER_SOURCE_API) {

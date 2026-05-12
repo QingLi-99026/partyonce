@@ -928,6 +928,10 @@ class Stage2QuoteCreateRequest(BaseModel):
     line_items: List[Dict[str, Any]] = Field(default_factory=list)
     selection_snapshot: Dict[str, Any] = Field(default_factory=dict)
     valid_until: Optional[str] = None
+    owner_user_id: Optional[int] = None
+    owner_label: Optional[str] = None
+    next_action: Optional[str] = None
+    internal_note: Optional[str] = None
     subtotal: Optional[float] = None
     discount_total: Optional[float] = None
     tax_total: Optional[float] = None
@@ -943,6 +947,10 @@ class Stage2QuotePatchRequest(BaseModel):
     line_items: Optional[List[Dict[str, Any]]] = None
     selection_snapshot: Optional[Dict[str, Any]] = None
     valid_until: Optional[str] = None
+    owner_user_id: Optional[int] = None
+    owner_label: Optional[str] = None
+    next_action: Optional[str] = None
+    internal_note: Optional[str] = None
     subtotal: Optional[float] = None
     discount_total: Optional[float] = None
     tax_total: Optional[float] = None
@@ -977,6 +985,10 @@ class Stage2QuoteResponse(BaseModel):
     line_items: List[Dict[str, Any]]
     selection_snapshot: Dict[str, Any]
     valid_until: Optional[str]
+    owner_user_id: Optional[int]
+    owner_label: Optional[str]
+    next_action: Optional[str]
+    internal_note: Optional[str]
     sent_at: Optional[datetime]
     accepted_at: Optional[datetime]
     created_by_user_id: Optional[int]
@@ -1016,12 +1028,18 @@ class Stage2OrderCreateRequest(BaseModel):
     quote_id: str = Field(..., min_length=1)
     event_date: Optional[str] = None
     event_location: Optional[str] = None
+    owner_user_id: Optional[int] = None
+    owner_label: Optional[str] = None
+    next_action: Optional[str] = None
     internal_notes: Optional[str] = None
 
 class Stage2OrderPatchRequest(BaseModel):
     status: Optional[Stage2OrderStatus] = None
     event_date: Optional[str] = None
     event_location: Optional[str] = None
+    owner_user_id: Optional[int] = None
+    owner_label: Optional[str] = None
+    next_action: Optional[str] = None
     internal_notes: Optional[str] = None
     confirmed_at: Optional[str] = None
 
@@ -1055,6 +1073,9 @@ class Stage2OrderResponse(BaseModel):
     line_items: List[Dict[str, Any]]
     customer_summary: Stage2OrderCustomerSummary
     quote_summary: Stage2OrderQuoteSummary
+    owner_user_id: Optional[int]
+    owner_label: Optional[str]
+    next_action: Optional[str]
     internal_notes: Optional[str]
     created_by_user_id: Optional[int]
     confirmed_at: Optional[datetime]
@@ -1785,11 +1806,27 @@ def ensure_lead_sqlite_schema(conn: sqlite3.Connection):
         conn.executescript(migration_file.read())
     conn.commit()
 
+def ensure_sqlite_columns(conn: sqlite3.Connection, table_name: str, columns: Dict[str, str]):
+    existing_columns = {
+        row["name"]
+        for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+    }
+    for column_name, column_definition in columns.items():
+        if column_name not in existing_columns:
+            conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition}")
+    conn.commit()
+
 def ensure_stage2_quote_sqlite_schema(conn: sqlite3.Connection):
     ensure_lead_sqlite_schema(conn)
     migration_path = os.path.join(os.path.dirname(__file__), "migrations", "002_create_quote_storage.sql")
     with open(migration_path, "r", encoding="utf-8") as migration_file:
         conn.executescript(migration_file.read())
+    ensure_sqlite_columns(conn, "quotes", {
+        "owner_user_id": "INTEGER",
+        "owner_label": "VARCHAR(120)",
+        "next_action": "TEXT",
+        "internal_note": "TEXT"
+    })
     conn.commit()
 
 def ensure_stage2_order_sqlite_schema(conn: sqlite3.Connection):
@@ -1797,6 +1834,11 @@ def ensure_stage2_order_sqlite_schema(conn: sqlite3.Connection):
     migration_path = os.path.join(os.path.dirname(__file__), "migrations", "003_create_order_storage.sql")
     with open(migration_path, "r", encoding="utf-8") as migration_file:
         conn.executescript(migration_file.read())
+    ensure_sqlite_columns(conn, "orders", {
+        "owner_user_id": "INTEGER",
+        "owner_label": "VARCHAR(120)",
+        "next_action": "TEXT"
+    })
     conn.commit()
 
 def build_lead_response(lead: Dict[str, Any]) -> LeadResponse:
@@ -2036,6 +2078,10 @@ def build_stage2_quote_response(row: sqlite3.Row) -> Stage2QuoteResponse:
         line_items=decode_stage2_quote_list(row["line_items_json"]),
         selection_snapshot=decode_stage2_quote_dict(row["selection_snapshot_json"]),
         valid_until=row["valid_until"],
+        owner_user_id=row["owner_user_id"],
+        owner_label=row["owner_label"],
+        next_action=row["next_action"],
+        internal_note=row["internal_note"],
         sent_at=parse_sqlite_datetime(row["sent_at"]) if row["sent_at"] else None,
         accepted_at=parse_sqlite_datetime(row["accepted_at"]) if row["accepted_at"] else None,
         created_by_user_id=row["created_by_user_id"],
@@ -2109,8 +2155,9 @@ def create_stage2_quote_from_persistent_lead(
                 INSERT INTO quotes (
                     lead_id, customer_id, quote_number, status, currency, subtotal, discount_total,
                     tax_total, final_total, line_items_json, selection_snapshot_json, valid_until,
+                    owner_user_id, owner_label, next_action, internal_note,
                     created_by_user_id, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     int(lead["id"]),
@@ -2125,6 +2172,10 @@ def create_stage2_quote_from_persistent_lead(
                     encode_stage2_quote_snapshot(line_items),
                     encode_stage2_quote_snapshot(selection_snapshot),
                     request.valid_until,
+                    request.owner_user_id,
+                    request.owner_label,
+                    request.next_action,
+                    request.internal_note,
                     current_user.id,
                     now,
                     now
@@ -2175,10 +2226,13 @@ def list_stage2_quotes(
                     OR lower(coalesce(c.email, '')) LIKE ?
                     OR lower(coalesce(c.phone, '')) LIKE ?
                     OR lower(coalesce(q.selection_snapshot_json, '')) LIKE ?
+                    OR lower(coalesce(q.owner_label, '')) LIKE ?
+                    OR lower(coalesce(q.next_action, '')) LIKE ?
+                    OR lower(coalesce(q.internal_note, '')) LIKE ?
                 )
                 """
             )
-            params.extend([query, query, query, query, query])
+            params.extend([query, query, query, query, query, query, query, query])
         where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
         total = conn.execute(
             f"""
@@ -2259,6 +2313,10 @@ def update_stage2_quote(quote_id: str, request: Stage2QuotePatchRequest) -> Stag
         if "valid_until" in patch:
             update_fields.append("valid_until = ?")
             params.append(patch["valid_until"])
+        for field_name in ["owner_user_id", "owner_label", "next_action", "internal_note"]:
+            if field_name in patch:
+                update_fields.append(f"{field_name} = ?")
+                params.append(patch[field_name])
         for field_name in ["subtotal", "discount_total", "tax_total", "final_total"]:
             if field_name in patch and patch[field_name] is not None:
                 update_fields.append(f"{field_name} = ?")
@@ -2342,6 +2400,9 @@ def build_stage2_order_response(row: sqlite3.Row) -> Stage2OrderResponse:
             status=row["quote_status"],
             final_total=coerce_stage2_quote_amount(row["quote_final_total"])
         ),
+        owner_user_id=row["owner_user_id"],
+        owner_label=row["owner_label"],
+        next_action=row["next_action"],
         internal_notes=row["internal_notes"],
         created_by_user_id=row["created_by_user_id"],
         confirmed_at=parse_sqlite_datetime(row["confirmed_at"]) if row["confirmed_at"] else None,
@@ -2374,8 +2435,9 @@ def create_stage2_order_from_accepted_quote(
                     quote_id, lead_id, customer_id, order_number, status,
                     event_date, event_location, currency, total_amount, deposit_amount,
                     deposit_status, payment_reference, selection_snapshot_json, line_items_json,
-                    customer_snapshot_json, internal_notes, created_by_user_id, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    customer_snapshot_json, owner_user_id, owner_label, next_action,
+                    internal_notes, created_by_user_id, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     int(quote["id"]),
@@ -2393,6 +2455,9 @@ def create_stage2_order_from_accepted_quote(
                     quote["selection_snapshot_json"],
                     quote["line_items_json"],
                     encode_stage2_order_snapshot(customer_snapshot),
+                    request.owner_user_id,
+                    request.owner_label,
+                    request.next_action,
                     request.internal_notes,
                     current_user.id,
                     now,
@@ -2449,10 +2514,13 @@ def list_stage2_orders(
                     OR lower(coalesce(c.email, '')) LIKE ?
                     OR lower(coalesce(c.phone, '')) LIKE ?
                     OR lower(coalesce(o.event_location, '')) LIKE ?
+                    OR lower(coalesce(o.owner_label, '')) LIKE ?
+                    OR lower(coalesce(o.next_action, '')) LIKE ?
+                    OR lower(coalesce(o.internal_notes, '')) LIKE ?
                 )
                 """
             )
-            params.extend([query, query, query, query, query, query])
+            params.extend([query, query, query, query, query, query, query, query, query])
         where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
         total = conn.execute(
             f"""
@@ -2565,6 +2633,10 @@ def update_stage2_order(order_id: str, request: Stage2OrderPatchRequest) -> Stag
         if "event_location" in patch:
             update_fields.append("event_location = ?")
             params.append(patch["event_location"])
+        for field_name in ["owner_user_id", "owner_label", "next_action"]:
+            if field_name in patch:
+                update_fields.append(f"{field_name} = ?")
+                params.append(patch[field_name])
         if "internal_notes" in patch:
             update_fields.append("internal_notes = ?")
             params.append(patch["internal_notes"])

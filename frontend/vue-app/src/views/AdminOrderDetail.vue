@@ -156,13 +156,22 @@
               v-model="opsForm.event_location"
               placeholder="Event address or venue"
             />
+            <label class="field-label stacked" for="order-owner">Owner</label>
+            <el-input
+              id="order-owner"
+              v-model="opsForm.owner"
+              placeholder="Local/staging owner"
+            />
           </article>
         </section>
 
         <section class="panel-grid">
           <article class="panel">
             <h2>Next Action</h2>
-            <p class="body-text">{{ order.next_action }}</p>
+            <el-input
+              v-model="opsForm.next_action"
+              placeholder="Example: confirm deposit wording after payment stage is approved"
+            />
             <h3>Internal Note</h3>
             <el-input
               v-model="opsForm.internal_note"
@@ -240,6 +249,8 @@ const fallbackNotice = ref('')
 const opsForm = ref({
   event_date: '',
   event_location: '',
+  owner: '',
+  next_action: '',
   internal_note: ''
 })
 
@@ -251,6 +262,8 @@ const orderOpsAlerts = computed(() => {
   }
   if (!order.value.event?.date || order.value.event.date === '-') alerts.push('Missing event date.')
   if (!order.value.event?.location || order.value.event.location === '-') alerts.push('Missing event location.')
+  if (!String(opsForm.value.owner || '').trim()) alerts.push('No local/staging owner assigned.')
+  if (!String(opsForm.value.next_action || '').trim()) alerts.push('Next action is empty.')
   if (!String(opsForm.value.internal_note || '').trim()) alerts.push('Internal note is empty.')
   return alerts.length ? alerts : ['No active operations alert.']
 })
@@ -259,6 +272,8 @@ const syncOpsForm = () => {
   opsForm.value = {
     event_date: order.value?.event?.date && order.value.event.date !== '-' ? order.value.event.date : '',
     event_location: order.value?.event?.location && order.value.event.location !== '-' ? order.value.event.location : '',
+    owner: order.value?.owner_label || order.value?.owner || '',
+    next_action: order.value?.next_action || '',
     internal_note: order.value?.internal_note || ''
   }
 }
@@ -284,6 +299,8 @@ const saveOrderOperations = async () => {
   const result = await updateAdminOrderOperations(order.value, {
     event_date: opsForm.value.event_date || null,
     event_location: opsForm.value.event_location || null,
+    owner_label: opsForm.value.owner || null,
+    next_action: opsForm.value.next_action || null,
     internal_note: opsForm.value.internal_note
   }, dataSource.value)
   if (!result.item) {

@@ -188,7 +188,7 @@
               Save Local Ops Note
             </el-button>
             <p class="control-note">
-              Stored in browser localStorage for local/staging review only. It does not call outbound systems.
+              Saved to the local/staging Quote skeleton when the backend is available; fallback localStorage is used only if the local API is unavailable.
             </p>
           </article>
 
@@ -273,6 +273,15 @@ const quoteOpsAlerts = computed(() => {
 const opsStorageKey = computed(() => `partyonce_quote_ops_${route.params.quoteId}`)
 
 const loadQuoteOpsState = () => {
+  if (quote.value) {
+    quoteOps.value = {
+      owner: quote.value.owner_label || (quote.value.owner_user_id ? String(quote.value.owner_user_id) : ''),
+      nextAction: quote.value.next_action || '',
+      note: quote.value.internal_note || '',
+      updatedAt: quote.value.updated_at || ''
+    }
+    return
+  }
   try {
     const parsed = JSON.parse(localStorage.getItem(opsStorageKey.value) || '{}')
     quoteOps.value = {
@@ -287,9 +296,23 @@ const loadQuoteOpsState = () => {
 }
 
 const saveQuoteOpsState = () => {
-  quoteOps.value.updatedAt = new Date().toISOString()
-  localStorage.setItem(opsStorageKey.value, JSON.stringify(quoteOps.value))
-  ElMessage.success('Local Quote ops note saved. No external action was triggered.')
+  if (!quote.value) return
+  const payload = {
+    owner_label: quoteOps.value.owner || null,
+    next_action: quoteOps.value.nextAction || null,
+    internal_note: quoteOps.value.note || null
+  }
+  apiClient.patch(`/quotes/${quote.value.id}`, payload)
+    .then((updated) => {
+      quote.value = updated
+      loadQuoteOpsState()
+      ElMessage.success('Quote ops fields saved to local/staging SQLite. No external action was triggered.')
+    })
+    .catch(() => {
+      quoteOps.value.updatedAt = new Date().toISOString()
+      localStorage.setItem(opsStorageKey.value, JSON.stringify(quoteOps.value))
+      ElMessage.warning('Local Quote API unavailable. Ops note saved to browser fallback only.')
+    })
 }
 
 const loadQuote = async () => {
