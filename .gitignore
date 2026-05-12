@@ -10,9 +10,31 @@ env/
 # Node
 node_modules/
 npm-debug.log
+frontend/vue-app/dist/
+dist/
 
 # Test results
 test-results/
+test_evidence/
+
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+frontend/vue-app/.env
+frontend/vue-app/.env.*
+!frontend/vue-app/.env.example
+backend/.env
+backend/.env.*
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+backend/dev.db
+database/*.db
+database/*.sqlite
+database/*.sqlite3
 
 # Database patches (临时)
 database/patch_*.sql

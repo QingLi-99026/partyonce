@@ -93,9 +93,42 @@ class TransactionType(PyEnum):
     ADJUSTMENT = "adjustment"
     TRANSFER = "transfer"
 
-# Database Configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:@localhost/partyonce")
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
+# Runtime / production hardening configuration.
+# Production must fail closed; local and staging keep the historical defaults.
+ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("APP_ENV", "development")).strip().lower()
+IS_PRODUCTION = ENVIRONMENT == "production"
+DEFAULT_DATABASE_URL = "mysql+pymysql://root:@localhost/partyonce"
+DEFAULT_SECRET_KEY = "your-secret-key-change-in-production"
+
+def parse_csv_env(value):
+    return [item.strip() for item in (value or "").split(",") if item.strip()]
+
+DATABASE_URL = os.getenv("DATABASE_URL") or ("" if IS_PRODUCTION else DEFAULT_DATABASE_URL)
+SECRET_KEY = os.getenv("SECRET_KEY") or ("" if IS_PRODUCTION else DEFAULT_SECRET_KEY)
+CORS_ORIGINS = parse_csv_env(os.getenv("CORS_ORIGINS"))
+if not CORS_ORIGINS and not IS_PRODUCTION:
+    CORS_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+
+if IS_PRODUCTION:
+    missing_env = []
+    if not DATABASE_URL:
+        missing_env.append("DATABASE_URL")
+    if not SECRET_KEY:
+        missing_env.append("SECRET_KEY")
+    if not CORS_ORIGINS:
+        missing_env.append("CORS_ORIGINS")
+    if missing_env:
+        raise RuntimeError(f"Production startup blocked: missing required env vars: {', '.join(missing_env)}")
+    if SECRET_KEY == DEFAULT_SECRET_KEY or len(SECRET_KEY) < 32:
+        raise RuntimeError("Production startup blocked: SECRET_KEY must be a non-default value with at least 32 characters")
+    if "*" in CORS_ORIGINS:
+        raise RuntimeError("Production startup blocked: CORS_ORIGINS must be an explicit origin allowlist")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -125,8 +158,10 @@ def sanitize_db_url(url):
 
 print("=" * 60)
 print("PartyOnce API Starting...")
+print(f"Environment: {ENVIRONMENT}")
 print(f"Database URL: {sanitize_db_url(DATABASE_URL)}")
 print(f"Database target: host={engine.url.host}, port={engine.url.port}, name={engine.url.database}")
+print(f"CORS origins configured: {len(CORS_ORIGINS)}")
 print(
     "DB env aliases: "
     f"DB_HOST={os.getenv('DB_HOST')}, DB_PORT={os.getenv('DB_PORT')}, DB_NAME={os.getenv('DB_NAME')}, "
@@ -157,7 +192,7 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -175,6 +210,9 @@ def get_db():
 # Note: In production, use Alembic migrations instead
 @app.on_event("startup")
 def create_tables():
+    if IS_PRODUCTION:
+        print("Production mode: automatic table creation disabled; use controlled migrations.")
+        return
     try:
         Base.metadata.create_all(bind=engine)
         print("✅ Database tables created/verified")
