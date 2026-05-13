@@ -146,6 +146,9 @@ export const listSupplierDisplayItems = async (params = {}) => {
     if (items.length > 0) {
       return { source: SOURCE_REMOTE, items }
     }
+    const unfilteredResponse = await apiClient.get('/suppliers')
+    const unfilteredItems = Array.isArray(unfilteredResponse) ? unfilteredResponse : []
+    return { source: SOURCE_REMOTE, items: unfilteredItems }
   } catch (error) {
     // Fall back to local/staging fixture so preview smoke remains inspectable if the API is unavailable.
   }
