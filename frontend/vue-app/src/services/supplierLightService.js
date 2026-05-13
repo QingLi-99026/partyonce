@@ -1,5 +1,8 @@
+import apiClient from '@/api'
+
 const APPLICATIONS_KEY = 'partyonce_supplier_applications_v1'
 const SOURCE_LOCAL = 'local/staging supplier fixture'
+const SOURCE_REMOTE = 'remote staging supplier API'
 
 const categoryLabels = {
   venue: '场地租赁',
@@ -123,7 +126,7 @@ const seedDemoApplication = () => ({
 export const supplierStatusLabels = statusLabels
 export const supplierCategoryLabels = categoryLabels
 
-export const listSupplierDisplayItems = async (params = {}) => {
+const listLocalSupplierDisplayItems = (params = {}) => {
   const category = params.category || ''
   const suburb = String(params.suburb || '').toLowerCase()
   const price = params.price_level || ''
@@ -134,6 +137,19 @@ export const listSupplierDisplayItems = async (params = {}) => {
     return matchesCategory && matchesSuburb && matchesPrice
   })
   return { source: SOURCE_LOCAL, items }
+}
+
+export const listSupplierDisplayItems = async (params = {}) => {
+  try {
+    const response = await apiClient.get('/suppliers', { params })
+    const items = Array.isArray(response) ? response : []
+    if (items.length > 0) {
+      return { source: SOURCE_REMOTE, items }
+    }
+  } catch (error) {
+    // Fall back to local/staging fixture so preview smoke remains inspectable if the API is unavailable.
+  }
+  return listLocalSupplierDisplayItems(params)
 }
 
 export const createSupplierApplication = async (form) => {
