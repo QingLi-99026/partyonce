@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Events - 三世界首页</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cinzel:wght@400;700&family=Rye&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; }
+        
+        /* ========== 星际探险世界 ========== */
+        .world-star {
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(0,100,200,0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,200,255,0.2) 0%, transparent 40%),
+                linear-gradient(180deg, #050714 0%, #0a1a3a 50%, #050714 100%);
+        }
+        
+        .world-star .main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            text-shadow: 
+                0 0 20px rgba(0,200,255,0.8),
+                0 0 40px rgba(0,200,255,0.4),
+                0 0 60px rgba(0,200,255,0.2);
+        }
+        
+        .world-star .theme-card-star {
+            background: linear-gradient(145deg, rgba(0,50,100,0.6), rgba(0,20,40,0.8));
+            border: 2px solid #00d4ff;
+            box-shadow: 
+                0 0 20px rgba(0,212,255,0.3),
+                inset 0 0 30px rgba(0,212,255,0.1);
+            clip-path: polygon(15% 0%, 100% 0%, 100% 85%, 85% 100%, 0% 100%, 0% 15%);
+        }
+        
+        .world-star .theme-card-star::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, #00d4ff, transparent, #00d4ff);
+            clip-path: polygon(15% 0%, 100% 0%, 100% 85%, 85% 100%, 0% 100%, 0% 15%);
+            z-index: -1;
+            opacity: 0.5;
+        }
+        
+        /* ========== 梦幻城堡世界 ========== */
+        .world-castle {
+            background: 
+                radial-gradient(ellipse at 50% 0%, rgba(255,200,255,0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 30% 70%, rgba(200,150,255,0.2) 0%, transparent 40%),
+                linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 30%, #1a0a2e 100%);
+        }
+        
+        .world-castle .main-title {
+            font-family: 'Cinzel', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.1em;
+            text-shadow: 
+                0 0 30px rgba(255,215,0,0.6),
+                0 0 60px rgba(255,215,0,0.3),
+                2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .world-castle .theme-card-castle {
+            background: linear-gradient(145deg, rgba(150,100,150,0.4), rgba(80,40,80,0.6));
+            border: 3px double #ffd700;
+            border-radius: 20px 20px 0 20px;
+            box-shadow: 
+                0 0 30px rgba(255,215,0,0.2),
+                inset 0 0 50px rgba(255,215,0,0.05);
+        }
+        
+        .world-castle .theme-card-castle::after {
+            content: '✦';
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            font-size: 2rem;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255,215,0,0.8);
+        }
+        
+        /* ========== 森林奇境世界 ========== */
+        .world-forest {
+            background: 
+                radial-gradient(ellipse at 70% 100%, rgba(100,200,100,0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 30%, rgba(200,255,150,0.1) 0%, transparent 40%),
+                linear-gradient(180deg, #0d1f0d 0%, #1a3d1a 40%, #0d1f0d 100%);
+        }
+        
+        .world-forest .main-title {
+            font-family: 'Rye', cursive;
+            font-size: 4.5rem;
+            font-weight: 400;
+            color: #f5f5dc;
+            letter-spacing: 0.05em;
+            text-shadow: 
+                3px 3px 0px #2d5016,
+                6px 6px 0px rgba(0,0,0,0.3),
+                0 0 30px rgba(255,215,0,0.3);
+        }
+        
+        .world-forest .theme-card-forest {
+            background: linear-gradient(145deg, rgba(60,100,60,0.6), rgba(30,60,30,0.8));
+            border: 4px solid #8b4513;
+            border-radius: 8px;
+            box-shadow: 
+                0 0 20px rgba(139,69,19,0.3),
+                inset 0 0 30px rgba(0,0,0,0.2);
+        }
+        
+        .world-forest .theme-card-forest::before {
+            content: '🌿';
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            font-size: 1.5rem;
+        }
+        
+        /* ========== 通用结构 ========== */
+        .world-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.8s ease;
+        }
+        
+        .brand-layer {
+            position: absolute;
+            top: 6%;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-size: 2.2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.15em;
+        }
+        
+        .tagline {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            margin-top: 0.3rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            padding: 2rem;
+            margin-top: -5vh;
+        }
+        
+        .sub-title {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin: 1.5rem 0 2.5rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+        }
+        
+        .cta-button {
+            padding: 1.2rem 4rem;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(255,215,0,0.4);
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 40px rgba(255,215,0,0.6);
+        }
+        
+        .theme-selector {
+            position: absolute;
+            bottom: 10%;
+            display: flex;
+            gap: 3rem;
+            z-index: 10;
+        }
+        
+        .theme-card {
+            width: 200px;
+            height: 220px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .theme-card:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+        
+        .theme-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+        
+        .theme-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .theme-card p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        /* 语音按钮 - 星际风格 */
+        .voice-btn-star {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background: rgba(0,50,100,0.6);
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            box-shadow: 0 0 20px rgba(0,212,255,0.3);
+            transition: all 0.3s;
+        }
+        
+        /* 语音按钮 - 城堡风格 */
+        .voice-btn-castle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background: rgba(100,50,100,0.5);
+            border: 2px solid #ffd700;
+            color: #ffd700;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            box-shadow: 0 0 20px rgba(255,215,0,0.3);
+            transition: all 0.3s;
+        }
+        
+        /* 语音按钮 - 森林风格 */
+        .voice-btn-forest {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background: rgba(50,100,50,0.6);
+            border: 3px solid #8b4513;
+            color: #f5f5dc;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Rye', cursive;
+            font-size: 0.9rem;
+            box-shadow: 0 0 20px rgba(139,69,19,0.3);
+            transition: all 0.3s;
+        }
+        
+        .voice-btn-star:hover, .voice-btn-castle:hover, .voice-btn-forest:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px currentColor;
+        }
+        
+        /* 粒子层 */
+        .particles {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        /* 装饰元素 - 星际 */
+        .deco-star {
+            position: absolute;
+            border: 2px solid rgba(0,212,255,0.3);
+            border-radius: 50%;
+            animation: rotate 30s linear infinite;
+        }
+        
+        /* 装饰元素 - 城堡 */
+        .deco-castle {
+            position: absolute;
+            font-size: 8rem;
+            opacity: 0.1;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+        
+        /* 装饰元素 - 森林 */
+        .deco-forest {
+            position: absolute;
+            font-size: 6rem;
+            opacity: 0.15;
+            animation: sway 4s ease-in-out infinite;
+        }
+        
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes twinkle { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.2; } }
+        @keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+    </style>
+</head>
+<body>
+    <div class="world-container world-star" id="worldContainer">
+        <!-- 粒子 -->
+        <div class="particles" id="particles"></div>
+        
+        <!-- 装饰元素 -->
+        <div id="decorations"></div>
+        
+        <!-- 品牌 -->
+        <div class="brand-layer">
+            <h1 class="logo">Party Events</h1>
+            <p class="tagline">澳大利亚高端派对策划</p>
+        </div>
+        
+        <!-- 主内容 -->
+        <div class="hero-content">
+            <h2 class="main-title">为TA打造专属派对</h2>
+            <p class="sub-title">高端定制 · 主题场景 · 一站式服务</p>
+            <button class="cta-button">开始策划派对</button>
+        </div>
+        
+        <!-- 主题选择 -->
+        <div class="theme-selector">
+            <div class="theme-card theme-card-star" onclick="setWorld('star')">
+                <span class="theme-icon">🪐</span>
+                <h3>星际探险</h3>
+                <p>适合小王子</p>
+            </div>
+            <div class="theme-card theme-card-castle" onclick="setWorld('castle')">
+                <span class="theme-icon">🏰</span>
+                <h3>梦幻城堡</h3>
+                <p>适合小公主</p>
+            </div>
+            <div class="theme-card theme-card-forest" onclick="setWorld('forest')">
+                <span class="theme-icon">🌲</span>
+                <h3>森林奇境</h3>
+                <p>适合小探险家</p>
+            </div>
+        </div>
+        
+        <!-- 语音按钮 -->
+        <button class="voice-btn-star" id="voiceBtn">🎙️ 语音引导</button>
+    </div>
+    
+    <script>
+        function setWorld(world) {
+            const container = document.getElementById('worldContainer');
+            const voiceBtn = document.getElementById('voiceBtn');
+            
+            // 移除所有世界类
+            container.classList.remove('world-star', 'world-castle', 'world-forest');
+            
+            // 添加新世界
+            container.classList.add(`world-${world}`);
+            
+            // 更新语音按钮样式
+            voiceBtn.className = `voice-btn-${world}`;
+            
+            // 更新粒子
+            createParticles(world);
+            
+            // 更新装饰
+            createDecorations(world);
+            
+            console.log('切换到世界:', world);
+        }
+        
+        function createParticles(world) {
+            const container = document.getElementById('particles');
+            container.innerHTML = '';
+            
+            const configs = {
+                star: { colors: ['#00d4ff', '#ffffff', '#00ffff'], count: 30 },
+                castle: { colors: ['#ffd700', '#ffffff', '#ffb6c1'], count: 25 },
+                forest: { colors: ['#90ee90', '#ffd700', '#ffffff'], count: 20 }
+            };
+            
+            const config = configs[world];
+            
+            for (let i = 0; i < config.count; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.width = (Math.random() * 3 + 1) + 'px';
+                p.style.height = p.style.width;
+                p.style.background = config.colors[Math.floor(Math.random() * config.colors.length)];
+                p.style.animationDelay = Math.random() * 20 + 's';
+                p.style.animationDuration = (15 + Math.random() * 10) + 's';
+                p.style.boxShadow = `0 0 ${Math.random() * 10 + 5}px currentColor`;
+                container.appendChild(p);
+            }
+        }
+        
+        function createDecorations(world) {
+            const container = document.getElementById('decorations');
+            container.innerHTML = '';
+            
+            const decos = {
+                star: [
+                    { type: 'deco-star', style: 'top:10%;left:10%;width:100px;height:100px;' },
+                    { type: 'deco-star', style: 'top:70%;right:15%;width:150px;height:150px;' }
+                ],
+                castle: [
+                    { type: 'deco-castle', style: 'top:5%;right:5%;', content: '✦' },
+                    { type: 'deco-castle', style: 'bottom:20%;left:5%;', content: '✧' }
+                ],
+                forest: [
+                    { type: 'deco-forest', style: 'top:15%;left:8%;', content: '🌿' },
+                    { type: 'deco-forest', style: 'bottom:30%;right:10%;', content: '🍃' }
+                ]
+            };
+            
+            (decos[world] || []).forEach(d => {
+                const el = document.createElement('div');
+                el.className = d.type;
+                el.style.cssText = d.style;
+                if (d.content) el.textContent = d.content;
+                container.appendChild(el);
+            });
+        }
+        
+        // 初始化
+        createParticles('star');
+        createDecorations('star');
+    </script>
+</body>
+</html>

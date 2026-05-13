@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森林奇境 - 带主题切换</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rye&family=Patrick+Hand&family=Orbitron:wght@400;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; }
+        
+        /* ========== 森林世界 ========== */
+        .world-forest {
+            width: 100vw;
+            height: 100vh;
+            background: 
+                conic-gradient(from 180deg at 50% 0%, 
+                    transparent 0deg, 
+                    rgba(255,215,0,0.08) 30deg, 
+                    transparent 60deg
+                ),
+                radial-gradient(ellipse at 50% 100%, rgba(100,150,100,0.2) 0%, transparent 50%),
+                linear-gradient(180deg, #0a1a0a 0%, #1a3d1a 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #f5f5dc;
+        }
+        
+        /* 顶部品牌 */
+        .brand-header {
+            width: 100%;
+            text-align: center;
+            padding-top: 4vh;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-family: 'Rye', cursive;
+            font-size: 3rem;
+            color: #f5f5dc;
+            text-shadow: 3px 3px 0px #2d5016, 6px 6px 0px rgba(0,0,0,0.4);
+        }
+        
+        /* 主题切换条 - 精致小型入口 */
+        .theme-switcher {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2vh;
+            z-index: 10;
+        }
+        
+        .theme-tab {
+            padding: 0.6rem 1.2rem;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        
+        .theme-tab:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.4);
+        }
+        
+        .theme-tab.active {
+            background: rgba(139,69,19,0.6);
+            border-color: #8b4513;
+            color: #f5f5dc;
+        }
+        
+        .theme-tab .tab-icon {
+            font-size: 1rem;
+        }
+        
+        /* 主视觉区 */
+        .hero-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+            width: 100%;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+        
+        .main-title {
+            font-family: 'Rye', cursive;
+            font-size: 5rem;
+            color: #f5f5dc;
+            text-shadow: 4px 4px 0px #2d5016, 8px 8px 0px rgba(0,0,0,0.4);
+            margin-bottom: 1rem;
+        }
+        
+        .sub-title {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.4rem;
+            color: rgba(245,245,220,0.9);
+            margin-bottom: 2rem;
+        }
+        
+        .theme-highlight {
+            background: rgba(30,60,30,0.6);
+            border: 3px solid #8b4513;
+            border-radius: 8px;
+            padding: 1.5rem 2.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .highlight-icon {
+            font-size: 3rem;
+        }
+        
+        .highlight-text h3 {
+            font-family: 'Rye', cursive;
+            font-size: 1.4rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .highlight-text p {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .cta-button {
+            padding: 1.2rem 4rem;
+            font-family: 'Rye', cursive;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, #8b4513, #a0522d);
+            color: #f5f5dc;
+            border: 3px solid #d2691e;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            transition: all 0.3s;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+        
+        /* 底部山丘 */
+        .forest-hills {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 18%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 200'%3E%3Cpath fill='%23050a05' d='M0,200 L0,150 Q200,100 400,140 Q600,80 800,130 Q1000,100 1200,160 L1200,200 Z'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+            opacity: 0.8;
+        }
+        
+        /* 萤火虫 */
+        .fireflies {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .firefly {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #90ee90;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #90ee90;
+            animation: glow 4s infinite ease-in-out;
+        }
+        
+        @keyframes glow {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+        
+        /* 语音按钮 */
+        .voice-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            padding: 10px 20px;
+            background: rgba(30,60,30,0.7);
+            border: 2px solid #8b4513;
+            border-radius: 6px;
+            color: #f5f5dc;
+            font-family: 'Rye', cursive;
+            cursor: pointer;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="world-forest" id="worldContainer">
+        <!-- 萤火虫 -->
+        <div class="fireflies">
+            <div class="firefly" style="top:40%;left:15%;"></div>
+            <div class="firefly" style="top:60%;right:20%;animation-delay:2s;"></div>
+            <div class="firefly" style="top:30%;left:70%;animation-delay:4s;"></div>
+        </div>
+        
+        <!-- 顶部品牌 -->
+        <header class="brand-header">
+            <h1 class="logo">Party Events</h1>
+            
+            <!-- 主题切换条 -->
+            <nav class="theme-switcher">
+                <div class="theme-tab" onclick="switchTheme('star')">
+                    <span class="tab-icon">🚀</span>
+                    <span>星际探险</span>
+                </div>
+                <div class="theme-tab" onclick="switchTheme('castle')">
+                    <span class="tab-icon">🏰</span>
+                    <span>梦幻城堡</span>
+                </div>
+                <div class="theme-tab active" onclick="switchTheme('forest')">
+                    <span class="tab-icon">🌲</span>
+                    <span>森林奇境</span>
+                </div>
+            </nav>
+        </header>
+        
+        <!-- 主视觉区 -->
+        <main class="hero-section">
+            <h2 class="main-title">森林奇境</h2>
+            <p class="sub-title">为小探险家开启自然魔法之旅</p>
+            
+            <div class="theme-highlight">
+                <span class="highlight-icon">🌲</span>
+                <div class="highlight-text">
+                    <h3>森林奇境</h3>
+                    <p>树屋探险 · 动物王国 · 篝火故事</p>
+                </div>
+            </div>
+            
+            <button class="cta-button">开始策划派对</button>
+        </main>
+        
+        <!-- 底部山丘 -->
+        <div class="forest-hills"></div>
+        
+        <!-- 语音按钮 -->
+        <button class="voice-btn">🎙️ 语音引导</button>
+    </div>
+    
+    <script>
+        function switchTheme(theme) {
+            // 更新切换条状态
+            document.querySelectorAll('.theme-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.theme-tab').classList.add('active');
+            
+            // 这里可以添加页面切换逻辑
+            console.log('切换到主题:', theme);
+            
+            // 实际项目中这里会路由跳转到对应主题页
+            if (theme === 'star') {
+                alert('跳转到星际探险主题');
+            } else if (theme === 'castle') {
+                alert('跳转到梦幻城堡主题');
+            }
+        }
+    </script>
+</body>
+</html>

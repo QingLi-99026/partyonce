@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Events - 三主题切换功能版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cinzel+Decorative:wght@400;700&family=Rye&family=Rajdhani:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; }
+        
+        .world-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            transition: all 0.5s ease;
+        }
+        
+        /* ===== 星际主题样式 ===== */
+        .world-star {
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(0,100,200,0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,200,255,0.2) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 50%, #0a1a3a 0%, #050714 70%, #020308 100%);
+        }
+        
+        .world-star .logo { font-family: 'Orbitron', sans-serif; text-shadow: 0 0 20px rgba(0,212,255,0.8); }
+        .world-star .main-title { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0,212,255,0.8), 0 0 40px rgba(0,212,255,0.4); }
+        .world-star .sub-title { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.1em; }
+        .world-star .theme-card { background: linear-gradient(145deg, rgba(0,50,100,0.6), rgba(0,20,40,0.8)); border: 2px solid #00d4ff; box-shadow: 0 0 30px rgba(0,212,255,0.3); clip-path: polygon(10% 0%, 100% 0%, 100% 85%, 90% 100%, 0% 100%, 0% 15%); }
+        .world-star .theme-card h3 { font-family: 'Orbitron', sans-serif; color: #00d4ff; }
+        .world-star .theme-card p { font-family: 'Rajdhani', sans-serif; }
+        .world-star .cta-button { font-family: 'Orbitron', sans-serif; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; box-shadow: 0 0 30px rgba(0,212,255,0.5); }
+        .world-star .theme-tab { background: rgba(0,50,100,0.4); border-color: rgba(0,212,255,0.3); font-family: 'Rajdhani', sans-serif; }
+        .world-star .theme-tab.active { background: rgba(0,212,255,0.3); border-color: #00d4ff; color: #00d4ff; }
+        
+        /* ===== 城堡主题样式 ===== */
+        .world-castle {
+            background: 
+                radial-gradient(ellipse at 50% 0%, rgba(255,220,240,0.4) 0%, transparent 50%),
+                radial-gradient(ellipse at 30% 70%, rgba(200,150,255,0.3) 0%, transparent 40%),
+                linear-gradient(180deg, #2d1b4e 0%, #1a0a2e 50%, #0d0518 100%);
+        }
+        
+        .world-castle .logo { font-family: 'Cinzel Decorative', cursive; color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.6); }
+        .world-castle .main-title { font-family: 'Cinzel Decorative', cursive; text-shadow: 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,200,255,0.3); }
+        .world-castle .sub-title { font-family: 'Cormorant Garamond', serif; font-style: italic; }
+        .world-castle .theme-card { background: linear-gradient(145deg, rgba(200,150,200,0.3), rgba(100,50,100,0.5)); border: 3px double #ffd700; border-radius: 20px 20px 0 20px; box-shadow: 0 0 40px rgba(255,215,0,0.2); }
+        .world-castle .theme-card h3 { font-family: 'Cinzel Decorative', cursive; color: #ffd700; }
+        .world-castle .theme-card p { font-family: 'Cormorant Garamond', serif; }
+        .world-castle .cta-button { font-family: 'Cinzel Decorative', cursive; background: linear-gradient(135deg, #ffd700, #ffed4e); color: #2d1b4e; box-shadow: 0 0 40px rgba(255,215,0,0.4); }
+        .world-castle .theme-tab { background: rgba(100,50,100,0.3); border-color: rgba(255,215,0,0.3); font-family: 'Cormorant Garamond', serif; }
+        .world-castle .theme-tab.active { background: rgba(255,215,0,0.2); border-color: #ffd700; color: #ffd700; }
+        
+        /* ===== 森林主题样式 ===== */
+        .world-forest {
+            background: 
+                conic-gradient(from 180deg at 50% 0%, transparent 0deg, rgba(255,215,0,0.1) 40deg, transparent 80deg),
+                radial-gradient(ellipse at 50% 100%, rgba(100,150,100,0.25) 0%, transparent 50%),
+                linear-gradient(180deg, #0a1a0a 0%, #1a3d1a 60%, #0d1f0d 100%);
+        }
+        
+        .world-forest .logo { font-family: 'Rye', cursive; color: #f5f5dc; text-shadow: 3px 3px 0px #2d5016, 6px 6px 0px rgba(0,0,0,0.4); }
+        .world-forest .main-title { font-family: 'Rye', cursive; color: #f5f5dc; text-shadow: 4px 4px 0px #2d5016, 8px 8px 0px rgba(0,0,0,0.4); }
+        .world-forest .sub-title { font-family: 'Patrick Hand', cursive; color: rgba(245,245,220,0.9); }
+        .world-forest .theme-card { background: linear-gradient(145deg, rgba(60,100,60,0.7), rgba(30,60,30,0.9)); border: 4px solid #8b4513; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+        .world-forest .theme-card h3 { font-family: 'Rye', cursive; color: #f5f5dc; }
+        .world-forest .theme-card p { font-family: 'Patrick Hand', cursive; color: rgba(245,245,220,0.85); }
+        .world-forest .cta-button { font-family: 'Rye', cursive; background: linear-gradient(135deg, #8b4513, #a0522d); color: #f5f5dc; border: 3px solid #d2691e; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+        .world-forest .theme-tab { background: rgba(30,60,30,0.4); border-color: rgba(139,69,19,0.4); font-family: 'Patrick Hand', cursive; }
+        .world-forest .theme-tab.active { background: rgba(139,69,19,0.5); border-color: #8b4513; color: #f5f5dc; }
+        
+        /* 通用结构 */
+        .brand-header { width: 100%; text-align: center; padding-top: 4vh; z-index: 10; }
+        .logo { font-size: 2.8rem; letter-spacing: 0.1em; }
+        
+        .theme-switcher { display: flex; gap: 1rem; margin-top: 2vh; z-index: 10; }
+        .theme-tab { padding: 0.6rem 1.2rem; border-radius: 6px; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; }
+        
+        .hero-section { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 10; width: 100%; max-width: 800px; padding: 0 2rem; }
+        .main-title { font-size: 4.5rem; margin-bottom: 1rem; }
+        .sub-title { font-size: 1.4rem; margin-bottom: 2rem; }
+        
+        .theme-card { padding: 2rem 3rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.5rem; position: relative; }
+        .card-icon { font-size: 3.5rem; }
+        .theme-card h3 { font-size: 1.4rem; margin-bottom: 0.3rem; }
+        .theme-card p { font-size: 1.1rem; }
+        
+        .cta-button { padding: 1.2rem 4rem; font-size: 1.2rem; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        
+        .voice-btn { position: fixed; bottom: 25px; right: 25px; padding: 10px 20px; border-radius: 6px; cursor: pointer; z-index: 100; font-size: 0.9rem; }
+        
+        /* 装饰元素 */
+        .decoration { position: absolute; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div class="world-container world-star" id="worldContainer">
+        <!-- 品牌 -->
+        <header class="brand-header">
+            <h1 class="logo">Party Events</h1>
+            <nav class="theme-switcher">
+                <div class="theme-tab active" onclick="switchTheme('star')">星际探险</div>
+                <div class="theme-tab" onclick="switchTheme('castle')">梦幻城堡</div>
+                <div class="theme-tab" onclick="switchTheme('forest')">森林奇境</div>
+            </nav>
+        </header>
+        
+        <!-- 主视觉 -->
+        <main class="hero-section">
+            <h2 class="main-title" id="mainTitle">星际探险</h2>
+            <p class="sub-title" id="subTitle">为小小宇航员开启宇宙之旅</p>
+            
+            <div class="theme-card" id="themeCard">
+                <span class="card-icon" id="cardIcon">🚀</span>
+                <div class="card-text">
+                    <h3 id="cardTitle">星际探险</h3>
+                    <p id="cardDesc">火箭发射 · 星球漫步 · 太空训练</p>
+                </div>
+            </div>
+            
+            <button class="cta-button" id="ctaButton">开启星际任务</button>
+        </main>
+        
+        <!-- 语音按钮 -->
+        <button class="voice-btn" id="voiceBtn">🎙️ 语音引导</button>
+    </div>
+    
+    <script>
+        // 主题数据配置
+        const themes = {
+            star: {
+                className: 'world-star',
+                mainTitle: '星际探险',
+                subTitle: '为小小宇航员开启宇宙之旅',
+                cardIcon: '🚀',
+                cardTitle: '星际探险',
+                cardDesc: '火箭发射 · 星球漫步 · 太空训练',
+                ctaText: '开启星际任务',
+                voiceBtnText: '🎙️ 语音引导'
+            },
+            castle: {
+                className: 'world-castle',
+                mainTitle: '梦幻城堡',
+                subTitle: '为公主打造童话般的梦幻派对',
+                cardIcon: '🏰',
+                cardTitle: '梦幻城堡',
+                cardDesc: '皇冠加冕 · 独角兽花园 · 魔法舞会',
+                ctaText: '进入梦幻城堡',
+                voiceBtnText: '🎙️ 语音引导'
+            },
+            forest: {
+                className: 'world-forest',
+                mainTitle: '森林奇境',
+                subTitle: '为小探险家开启自然魔法之旅',
+                cardIcon: '🌲',
+                cardTitle: '森林奇境',
+                cardDesc: '树屋探险 · 动物王国 · 篝火故事',
+                ctaText: '进入森林秘境',
+                voiceBtnText: '🎙️ 语音引导'
+            }
+        };
+        
+        // 切换主题函数
+        function switchTheme(themeId) {
+            const theme = themes[themeId];
+            const container = document.getElementById('worldContainer');
+            
+            // 1. 切换背景类名
+            container.className = 'world-container ' + theme.className;
+            
+            // 2. 更新主标题
+            document.getElementById('mainTitle').textContent = theme.mainTitle;
+            
+            // 3. 更新副标题
+            document.getElementById('subTitle').textContent = theme.subTitle;
+            
+            // 4. 更新卡片内容
+            document.getElementById('cardIcon').textContent = theme.cardIcon;
+            document.getElementById('cardTitle').textContent = theme.cardTitle;
+            document.getElementById('cardDesc').textContent = theme.cardDesc;
+            
+            // 5. 更新按钮文案
+            document.getElementById('ctaButton').textContent = theme.ctaText;
+            
+            // 6. 更新语音按钮
+            document.getElementById('voiceBtn').textContent = theme.voiceBtnText;
+            
+            // 7. 更新切换标签状态
+            document.querySelectorAll('.theme-tab').forEach((tab, index) => {
+                tab.classList.remove('active');
+                if ((themeId === 'star' && index === 0) ||
+                    (themeId === 'castle' && index === 1) ||
+                    (themeId === 'forest' && index === 2)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            console.log('已切换到主题:', themeId);
+        }
+    </script>
+</body>
+</html>

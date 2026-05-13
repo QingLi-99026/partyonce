@@ -57,6 +57,38 @@
             </button>
           </div>
         </div>
+
+        <div class="investor-asset-panel">
+          <div class="asset-panel-header">
+            <span class="asset-kicker">Investor preview assets</span>
+            <h3 class="asset-panel-title">视觉展示素材已恢复</h3>
+            <p class="asset-panel-copy">
+              Castle Princess / Space Explorer / Forest Adventure 主题效果、餐厅布局、套餐矩阵和 App mockup 均可从这里打开。
+            </p>
+          </div>
+
+          <div class="asset-grid">
+            <a
+              v-for="asset in visualAssetsForTheme"
+              :key="asset.id"
+              class="asset-card"
+              :href="asset.image_path"
+              target="_blank"
+              rel="noopener noreferrer"
+              :style="getAssetCardStyle(asset)"
+            >
+              <div class="asset-preview" :class="`asset-preview-${asset.theme}`">
+                <span class="asset-type">{{ formatAssetType(asset.asset_type) }}</span>
+                <span class="asset-theme-icon">{{ getAssetThemeIcon(asset.theme) }}</span>
+              </div>
+              <div class="asset-body">
+                <span class="asset-tier">{{ asset.tier }}</span>
+                <h4>{{ asset.title }}</h4>
+                <p>{{ asset.description }}</p>
+              </div>
+            </a>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -135,6 +167,7 @@ import ImmersiveHero from '@/components/ImmersiveHero.vue';
 import SceneShowcase from '@/components/SceneShowcase.vue';
 import PackageShowcase from '@/components/PackageShowcase.vue';
 import { getTheme, getAllThemes } from '@/themes';
+import { getVisualAssetsByTheme } from '@/data/visualAssets';
 
 export default {
   name: 'HomePage',
@@ -203,6 +236,10 @@ export default {
   computed: {
     currentThemeConfig() {
       return getTheme(this.currentTheme);
+    },
+
+    visualAssetsForTheme() {
+      return getVisualAssetsByTheme(this.currentTheme);
     },
     
     pageStyle() {
@@ -323,6 +360,36 @@ export default {
         color: btn.color,
         boxShadow: btn.boxShadow
       };
+    },
+
+    getAssetCardStyle(asset) {
+      const themeConfig = asset.theme === 'all' ? this.currentThemeConfig : getTheme(asset.theme);
+      return {
+        borderColor: `${themeConfig.colors.accent}55`,
+        boxShadow: `0 16px 45px ${themeConfig.colors.accent}22`
+      };
+    },
+
+    getAssetThemeIcon(theme) {
+      const icons = {
+        space: '🚀',
+        castle: '👑',
+        forest: '🌲',
+        all: '🎛️'
+      };
+      return icons[theme] || '✨';
+    },
+
+    formatAssetType(type) {
+      const labels = {
+        theme_world: 'Theme world',
+        theme_effect: 'Theme effect',
+        dining_layout: 'Dining layout',
+        theme_switcher: 'Theme switcher',
+        package_matrix: 'Package matrix',
+        app_display_mockup: 'App mockup'
+      };
+      return labels[type] || type;
     },
     
     handleStartPlanning(themeId) {
@@ -510,6 +577,147 @@ export default {
 
 .card-cta:hover {
   transform: translateY(-2px);
+}
+
+.investor-asset-panel {
+  margin-top: 56px;
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+}
+
+.asset-panel-header {
+  max-width: 760px;
+  margin-bottom: 28px;
+}
+
+.asset-kicker {
+  display: inline-flex;
+  margin-bottom: 10px;
+  color: var(--theme-accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.asset-panel-title {
+  margin: 0 0 10px;
+  color: var(--theme-text);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+.asset-panel-copy {
+  color: var(--theme-text-muted);
+  line-height: 1.7;
+}
+
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.asset-card {
+  overflow: hidden;
+  min-height: 310px;
+  color: var(--theme-text);
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.24);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.asset-card:hover {
+  transform: translateY(-6px);
+}
+
+.asset-preview {
+  position: relative;
+  min-height: 150px;
+  padding: 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.asset-preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.86;
+}
+
+.asset-preview-space::before {
+  background:
+    radial-gradient(circle at 72% 22%, rgba(0, 240, 255, 0.38), transparent 22%),
+    radial-gradient(circle at 22% 70%, rgba(255, 215, 0, 0.24), transparent 18%),
+    linear-gradient(135deg, #020408, #102f66 52%, #020408);
+}
+
+.asset-preview-castle::before {
+  background:
+    radial-gradient(circle at 70% 24%, rgba(255, 215, 0, 0.42), transparent 20%),
+    linear-gradient(135deg, #1a0f2e, #7e3fa3 58%, #f3d7e8);
+}
+
+.asset-preview-forest::before {
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 215, 0, 0.32), transparent 20%),
+    linear-gradient(135deg, #071307, #245b28 55%, #8b5a2b);
+}
+
+.asset-preview-all::before {
+  background:
+    linear-gradient(120deg, rgba(0, 240, 255, 0.55), transparent 33%),
+    linear-gradient(240deg, rgba(255, 215, 0, 0.48), transparent 33%),
+    linear-gradient(135deg, #24114f, #11351d);
+}
+
+.asset-type,
+.asset-theme-icon {
+  position: relative;
+  z-index: 1;
+}
+
+.asset-type {
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.32);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.asset-theme-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+.asset-body {
+  padding: 18px;
+}
+
+.asset-tier {
+  color: var(--theme-accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.asset-body h4 {
+  margin: 8px 0 10px;
+  font-size: 1.08rem;
+}
+
+.asset-body p {
+  margin: 0;
+  color: var(--theme-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
 }
 
 /* 流程介绍区 */

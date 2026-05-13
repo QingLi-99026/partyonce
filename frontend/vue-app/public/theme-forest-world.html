@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森林奇境 - 独立世界</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rye&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; }
+        
+        /* ===== 森林世界 - 深绿/苔藓绿/木棕/暖金 ===== */
+        .forest-world {
+            width: 100vw;
+            height: 100vh;
+            background: 
+                /* 林间光束 */
+                conic-gradient(from 180deg at 50% 0%, 
+                    transparent 0deg, 
+                    rgba(255,215,0,0.1) 40deg, 
+                    transparent 80deg
+                ),
+                /* 薄雾 */
+                radial-gradient(ellipse at 50% 100%, rgba(100,150,100,0.25) 0%, transparent 50%),
+                /* 森林渐变 */
+                linear-gradient(180deg, #0a1a0a 0%, #1a3d1a 60%, #0d1f0d 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #f5f5dc;
+        }
+        
+        /* 树木剪影 */
+        .forest-trees {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 25%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 250'%3E%3Cpath fill='%23050a05' d='M0,250 L0,180 Q100,120 200,170 Q300,100 400,160 Q500,80 600,150 Q700,90 800,160 Q900,110 1000,170 Q1100,130 1200,190 L1200,250 Z'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+            opacity: 0.8;
+        }
+        
+        /* 萤火虫 */
+        .firefly {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #90ee90;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #90ee90, 0 0 30px #90ee90;
+            animation: fly 10s infinite ease-in-out;
+        }
+        
+        @keyframes fly {
+            0%, 100% { 
+                transform: translate(0, 0); 
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { 
+                transform: translate(var(--tx), var(--ty)); 
+                opacity: 0;
+            }
+        }
+        
+        /* 蘑菇 */
+        .mushroom {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.7;
+            animation: pop 4s ease-in-out infinite;
+        }
+        
+        @keyframes pop {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* 树叶飘落 */
+        .leaf {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.6;
+            animation: fall 8s linear infinite;
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        /* 品牌 */
+        .brand-header {
+            width: 100%;
+            text-align: center;
+            padding-top: 4vh;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-family: 'Rye', cursive;
+            font-size: 2.8rem;
+            color: #f5f5dc;
+            text-shadow: 
+                3px 3px 0px #2d5016,
+                6px 6px 0px rgba(0,0,0,0.4),
+                0 0 40px rgba(255,215,0,0.3);
+            letter-spacing: 0.05em;
+        }
+        
+        /* 主题切换 */
+        .theme-switcher {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2vh;
+            z-index: 10;
+        }
+        
+        .theme-tab {
+            padding: 0.6rem 1.2rem;
+            background: rgba(30,60,30,0.4);
+            border: 2px solid rgba(139,69,19,0.4);
+            border-radius: 6px;
+            color: rgba(245,245,220,0.7);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .theme-tab.active {
+            background: rgba(139,69,19,0.5);
+            border-color: #8b4513;
+            color: #f5f5dc;
+            box-shadow: 0 0 20px rgba(139,69,19,0.3);
+        }
+        
+        /* 主视觉 */
+        .hero-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        /* 森林字体 - 像森林招牌/木雕 */
+        .main-title {
+            font-family: 'Rye', cursive;
+            font-size: 5rem;
+            color: #f5f5dc;
+            text-shadow: 
+                4px 4px 0px #2d5016,
+                8px 8px 0px rgba(0,0,0,0.4),
+                0 0 40px rgba(255,215,0,0.3);
+            margin-bottom: 1rem;
+        }
+        
+        .sub-title {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.5rem;
+            color: rgba(245,245,220,0.9);
+            margin-bottom: 2rem;
+        }
+        
+        /* 森林卡片 - 自然材质感 */
+        .theme-sign {
+            background: 
+                linear-gradient(145deg, rgba(60,100,60,0.7), rgba(30,60,30,0.9)),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139,69,19,0.1) 2px,
+                    rgba(139,69,19,0.1) 4px
+                );
+            border: 4px solid #8b4513;
+            border-radius: 8px;
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.4),
+                inset 0 0 40px rgba(0,0,0,0.2);
+            padding: 2rem 3rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+        }
+        
+        /* 木牌钉 */
+        .theme-sign::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 12px;
+            height: 12px;
+            background: #5c4033;
+            border-radius: 50%;
+            box-shadow: 
+                280px 0 0 #5c4033,
+                0 140px 0 #5c4033,
+                280px 140px 0 #5c4033;
+        }
+        
+        /* 树叶装饰 */
+        .theme-sign::after {
+            content: '🍃';
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            font-size: 2rem;
+            animation: sway 2s ease-in-out infinite;
+        }
+        
+        @keyframes sway {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+        
+        .sign-icon {
+            font-size: 3.5rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+        }
+        
+        .sign-text h3 {
+            font-family: 'Rye', cursive;
+            font-size: 1.5rem;
+            color: #f5f5dc;
+            margin-bottom: 0.3rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .sign-text p {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: rgba(245,245,220,0.85);
+        }
+        
+        /* 森林按钮 - 像探险入口 */
+        .cta-button {
+            padding: 1.2rem 4rem;
+            font-family: 'Rye', cursive;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, #8b4513, #a0522d);
+            color: #f5f5dc;
+            border: 3px solid #d2691e;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.4),
+                inset 0 2px 5px rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 8px 30px rgba(0,0,0,0.5),
+                inset 0 2px 5px rgba(255,255,255,0.2);
+        }
+        
+        /* 语音按钮 */
+        .voice-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            padding: 10px 20px;
+            background: rgba(30,60,30,0.7);
+            border: 3px solid #8b4513;
+            border-radius: 8px;
+            color: #f5f5dc;
+            font-family: 'Rye', cursive;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="forest-world">
+        <!-- 萤火虫 -->
+        <div class="firefly" style="top:30%;left:15%;--tx:100px;--ty:-80px;"></div>
+        <div class="firefly" style="top:50%;right:20%;--tx:-80px;--ty:-100px;animation-delay:2s;"></div>
+        <div class="firefly" style="top:40%;left:60%;--tx:120px;--ty:-60px;animation-delay:4s;"></div>
+        <div class="firefly" style="top:60%;left:30%;--tx:-60px;--ty:-80px;animation-delay:6s;"></div>
+        
+        <!-- 蘑菇 -->
+        <div class="mushroom" style="bottom:22%;left:8%;">🍄</div>
+        <div class="mushroom" style="bottom:28%;right:12%;animation-delay:2s;">🍄</div>
+        
+        <!-- 树叶 -->
+        <div class="leaf" style="left:10%;animation-delay:0s;">🍂</div>
+        <div class="leaf" style="left:30%;animation-delay:3s;">🍃</div>
+        <div class="leaf" style="left:70%;animation-delay:6s;">🍂</div>
+        
+        <!-- 树木剪影 -->
+        <div class="forest-trees"></div>
+        
+        <!-- 品牌 -->
+        <header class="brand-header">
+            <h1 class="logo">Party Events</h1>
+            <nav class="theme-switcher">
+                <div class="theme-tab">星际探险</div>
+                <div class="theme-tab">梦幻城堡</div>
+                <div class="theme-tab active">森林奇境</div>
+            </nav>
+        </header>
+        
+        <!-- 主视觉 -->
+        <main class="hero-section">
+            <h2 class="main-title">森林奇境</h2>
+            <p class="sub-title">为小探险家开启自然魔法之旅</p>
+            
+            <div class="theme-sign">
+                <span class="sign-icon">🌲</span>
+                <div class="sign-text">
+                    <h3>Forest Adventure</h3>
+                    <p>树屋探险 · 动物王国 · 篝火故事</p>
+                </div>
+            </div>
+            
+            <button class="cta-button">进入森林</button>
+        </main>
+        
+        <!-- 语音按钮 -->
+        <button class="voice-btn">🎙️ 语音引导</button>
+    </div>
+</body>
+</html>

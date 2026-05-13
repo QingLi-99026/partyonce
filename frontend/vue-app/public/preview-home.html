@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Events - 新首页预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+        
+        .home-new {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background: linear-gradient(135deg, #1a237e 0%, #1a237edd 50%, #ffd70033 100%);
+        }
+        
+        .dynamic-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: linear-gradient(135deg, #1a237e 0%, #1a237edd 50%, #ffd70033 100%);
+        }
+        
+        .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+        }
+        
+        .brand-layer {
+            position: absolute;
+            top: 10%;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+        
+        .tagline {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            padding: 2rem;
+        }
+        
+        .main-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .sub-title {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-button {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+        .theme-selector {
+            position: absolute;
+            bottom: 15%;
+            display: flex;
+            gap: 2rem;
+            z-index: 10;
+        }
+        
+        .theme-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            min-width: 150px;
+        }
+        
+        .theme-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .theme-card.active {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.2);
+        }
+        
+        .theme-icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .theme-card h3 {
+            margin: 0.5rem 0;
+            font-size: 1.1rem;
+        }
+        
+        .theme-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .voice-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .voice-button:hover {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #ffd700;
+            transform: scale(1.05);
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 10s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="home-new" id="homePage">
+        <!-- 动态背景 -->
+        <div class="dynamic-background" id="dynamicBg">
+            <div class="gradient-overlay"></div>
+        </div>
+        
+        <!-- 粒子效果 -->
+        <div class="particles" id="particles"></div>
+        
+        <!-- 品牌层 -->
+        <div class="brand-layer">
+            <h1 class="logo">Party Events</h1>
+            <p class="tagline">澳大利亚高端派对策划</p>
+        </div>
+        
+        <!-- 主内容 -->
+        <div class="hero-content">
+            <h2 class="main-title">为TA打造专属派对</h2>
+            <p class="sub-title">高端定制 · 主题场景 · 一站式服务</p>
+            <button class="cta-button" onclick="alert('开始策划派对')">
+                开始策划派对
+            </button>
+        </div>
+        
+        <!-- 主题选择 -->
+        <div class="theme-selector">
+            <div class="theme-card active" onclick="selectTheme('star')" data-theme="star">
+                <span class="theme-icon">🚀</span>
+                <h3>星际探险</h3>
+                <p>适合小王子</p>
+            </div>
+            <div class="theme-card" onclick="selectTheme('castle')" data-theme="castle">
+                <span class="theme-icon">🏰</span>
+                <h3>梦幻城堡</h3>
+                <p>适合小公主</p>
+            </div>
+            <div class="theme-card" onclick="selectTheme('forest')" data-theme="forest">
+                <span class="theme-icon">🌲</span>
+                <h3>森林奇境</h3>
+                <p>适合小探险家</p>
+            </div>
+        </div>
+        
+        <!-- 语音按钮 -->
+        <button class="voice-button" onclick="alert('语音引导')">
+            <span>🎙️</span>
+            <span>语音引导</span>
+        </button>
+    </div>
+    
+    <script>
+        // 主题配置
+        const themes = {
+            star: {
+                primary: '#1a237e',
+                secondary: '#ffd700',
+                name: '星际探险'
+            },
+            castle: {
+                primary: '#e1bee7',
+                secondary: '#ffd700',
+                name: '梦幻城堡'
+            },
+            forest: {
+                primary: '#2e7d32',
+                secondary: '#ffd700',
+                name: '森林奇境'
+            }
+        };
+        
+        // 主题切换
+        function selectTheme(themeId) {
+            const theme = themes[themeId];
+            const bg = document.getElementById('dynamicBg');
+            const homePage = document.getElementById('homePage');
+            
+            // 更新背景
+            bg.style.background = `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary}dd 50%, ${theme.secondary}33 100%)`;
+            homePage.style.background = `linear-gradient(135deg, ${theme.primary} 0%, ${theme.primary}dd 50%, ${theme.secondary}33 100%)`;
+            
+            // 更新卡片状态
+            document.querySelectorAll('.theme-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelector(`[data-theme="${themeId}"]`).classList.add('active');
+            
+            console.log('切换到主题:', theme.name);
+        }
+        
+        // 创建粒子
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        // 初始化
+        createParticles();
+    </script>
+</body>
+</html>

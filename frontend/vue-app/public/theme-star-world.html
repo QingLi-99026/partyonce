@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星际探险 - 独立世界</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; }
+        
+        /* ===== 星际世界 - 深蓝/黑/银/电光蓝 ===== */
+        .star-world {
+            width: 100vw;
+            height: 100vh;
+            background: 
+                /* 星云 */
+                radial-gradient(ellipse at 20% 80%, rgba(0,100,200,0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,200,255,0.2) 0%, transparent 40%),
+                /* 深空 */
+                radial-gradient(ellipse at 50% 50%, #0a1a3a 0%, #050714 70%, #020308 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+        }
+        
+        /* 轨道装饰 */
+        .orbit {
+            position: absolute;
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 50%;
+            animation: rotate 60s linear infinite;
+        }
+        
+        .orbit-1 {
+            width: 600px;
+            height: 600px;
+            top: 10%;
+            left: -200px;
+        }
+        
+        .orbit-2 {
+            width: 800px;
+            height: 800px;
+            top: 20%;
+            right: -300px;
+            animation-duration: 80s;
+            animation-direction: reverse;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 星球装饰 */
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5);
+        }
+        
+        .planet-1 {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #4a90e2, #1a5490);
+            top: 15%;
+            right: 15%;
+            box-shadow: 0 0 30px rgba(74,144,226,0.4);
+        }
+        
+        .planet-2 {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            bottom: 25%;
+            left: 10%;
+        }
+        
+        /* 品牌 - 统一位置 */
+        .brand-header {
+            width: 100%;
+            text-align: center;
+            padding-top: 4vh;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(0,212,255,0.8);
+            letter-spacing: 0.15em;
+        }
+        
+        /* 主题切换条 */
+        .theme-switcher {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2vh;
+            z-index: 10;
+        }
+        
+        .theme-tab {
+            padding: 0.6rem 1.2rem;
+            background: rgba(0,50,100,0.4);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 4px;
+            color: rgba(255,255,255,0.7);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .theme-tab.active {
+            background: rgba(0,212,255,0.3);
+            border-color: #00d4ff;
+            color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0,212,255,0.3);
+        }
+        
+        /* 主视觉 */
+        .hero-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        /* 星际字体 - 硬朗未来感 */
+        .main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #fff;
+            text-shadow: 
+                0 0 20px rgba(0,212,255,0.8),
+                0 0 40px rgba(0,212,255,0.4),
+                0 0 60px rgba(0,212,255,0.2);
+            margin-bottom: 1rem;
+        }
+        
+        .sub-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.85);
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+        }
+        
+        /* 星际卡片 - 科技舱门/控制面板 */
+        .theme-panel {
+            background: linear-gradient(145deg, rgba(0,50,100,0.6), rgba(0,20,40,0.8));
+            border: 2px solid #00d4ff;
+            box-shadow: 
+                0 0 30px rgba(0,212,255,0.3),
+                inset 0 0 30px rgba(0,212,255,0.1);
+            clip-path: polygon(10% 0%, 100% 0%, 100% 85%, 90% 100%, 0% 100%, 0% 15%);
+            padding: 2rem 3rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+        }
+        
+        /* 舱门边角灯 */
+        .theme-panel::before,
+        .theme-panel::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #00d4ff;
+            box-shadow: 0 0 10px #00d4ff;
+        }
+        
+        .theme-panel::before {
+            top: 5px;
+            left: 5px;
+        }
+        
+        .theme-panel::after {
+            bottom: 5px;
+            right: 5px;
+        }
+        
+        .panel-icon {
+            font-size: 3.5rem;
+        }
+        
+        .panel-text h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: #00d4ff;
+            margin-bottom: 0.3rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .panel-text p {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* 星际按钮 - 像"启动任务" */
+        .cta-button {
+            padding: 1.2rem 4rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(0,212,255,0.5);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        .cta-button:hover {
+            box-shadow: 0 0 50px rgba(0,212,255,0.7);
+            transform: scale(1.02);
+        }
+        
+        /* 流星 */
+        .meteor {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, #fff, transparent);
+            animation: meteor 3s linear infinite;
+            opacity: 0;
+        }
+        
+        @keyframes meteor {
+            0% { transform: translateX(-100px) translateY(-100px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(300px) translateY(300px); opacity: 0; }
+        }
+        
+        /* 语音按钮 */
+        .voice-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            padding: 10px 20px;
+            background: rgba(0,50,100,0.6);
+            border: 1px solid #00d4ff;
+            border-radius: 4px;
+            color: #00d4ff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,212,255,0.3);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="star-world">
+        <!-- 轨道 -->
+        <div class="orbit orbit-1"></div>
+        <div class="orbit orbit-2"></div>
+        
+        <!-- 星球 -->
+        <div class="planet planet-1"></div>
+        <div class="planet planet-2"></div>
+        
+        <!-- 流星 -->
+        <div class="meteor" style="top:20%;left:10%;animation-delay:0s;"></div>
+        <div class="meteor" style="top:40%;left:60%;animation-delay:2s;"></div>
+        
+        <!-- 品牌 -->
+        <header class="brand-header">
+            <h1 class="logo">Party Events</h1>
+            <nav class="theme-switcher">
+                <div class="theme-tab active">星际探险</div>
+                <div class="theme-tab">梦幻城堡</div>
+                <div class="theme-tab">森林奇境</div>
+            </nav>
+        </header>
+        
+        <!-- 主视觉 -->
+        <main class="hero-section">
+            <h2 class="main-title">星际探险</h2>
+            <p class="sub-title">为小小宇航员开启宇宙之旅</p>
+            
+            <div class="theme-panel">
+                <span class="panel-icon">🚀</span>
+                <div class="panel-text">
+                    <h3>MISSION: STAR EXPLORER</h3>
+                    <p>火箭发射 · 星球漫步 · 太空训练</p>
+                </div>
+            </div>
+            
+            <button class="cta-button">启动任务</button>
+        </main>
+        
+        <!-- 语音按钮 -->
+        <button class="voice-btn">🎙️ 语音引导</button>
+    </div>
+</body>
+</html>

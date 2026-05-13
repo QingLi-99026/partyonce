@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>梦幻城堡 - 视觉增强版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; }
+        
+        .castle-world {
+            width: 100vw;
+            height: 100vh;
+            background: 
+                /* 梦幻云雾层 */
+                radial-gradient(ellipse at 20% 80%, rgba(255,200,255,0.4) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(220,180,255,0.35) 0%, transparent 45%),
+                radial-gradient(ellipse at 50% 50%, rgba(255,220,240,0.2) 0%, transparent 60%),
+                /* 柔光层 */
+                radial-gradient(ellipse at 30% 30%, rgba(255,215,0,0.15) 0%, transparent 40%),
+                /* 主背景 */
+                linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 30%, #1a0a2e 70%, #0d0518 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+        }
+        
+        /* 梦幻云雾动画 */
+        .cloud {
+            position: absolute;
+            background: radial-gradient(ellipse, rgba(255,220,240,0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(20px);
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        .cloud-1 { width: 400px; height: 200px; top: 5%; left: -5%; animation-delay: 0s; }
+        .cloud-2 { width: 350px; height: 180px; top: 15%; right: -3%; animation-delay: 5s; }
+        .cloud-3 { width: 300px; height: 150px; top: 60%; left: 10%; animation-delay: 10s; }
+        .cloud-4 { width: 250px; height: 120px; bottom: 20%; right: 15%; animation-delay: 15s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            33% { transform: translateX(30px) translateY(-15px); }
+            66% { transform: translateX(-20px) translateY(10px); }
+        }
+        
+        /* 城堡剪影 - 更精致 */
+        .castle-silhouette {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 30%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 300'%3E%3Cdefs%3E%3ClinearGradient id='castleGrad' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%231a0a2e'/%3E%3Cstop offset='100%25' style='stop-color:%230d0518'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23castleGrad)' d='M0,300 L0,180 L60,180 L60,100 L90,100 L90,60 L120,60 L120,140 L150,140 L150,80 L180,40 L210,80 L210,140 L240,140 L240,100 L270,100 L270,60 L300,60 L300,140 L330,140 L360,20 L390,140 L420,140 L450,80 L480,140 L510,140 L540,60 L570,140 L600,140 L630,80 L660,140 L690,140 L720,40 L750,80 L780,140 L810,140 L840,60 L870,100 L900,100 L900,140 L930,140 L960,80 L990,120 L1020,120 L1020,180 L1080,180 L1080,140 L1110,140 L1110,220 L1200,220 L1200,300 Z'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+            opacity: 0.8;
+        }
+        
+        /* 皇冠装饰 */
+        .crown-deco {
+            position: absolute;
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 15px rgba(255,215,0,0.8));
+            animation: crown-glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes crown-glow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(255,215,0,0.6)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 25px rgba(255,215,0,1)); transform: scale(1.1); }
+        }
+        
+        /* 花藤装饰 */
+        .vine-deco {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.7;
+            animation: vine-sway 4s ease-in-out infinite;
+        }
+        
+        @keyframes vine-sway {
+            0%, 100% { transform: rotate(-8deg); }
+            50% { transform: rotate(8deg); }
+        }
+        
+        /* 闪光星 */
+        .sparkle {
+            position: absolute;
+            color: #ffd700;
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px #ffd700;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+        
+        /* 品牌区 */
+        .brand-header {
+            width: 100%;
+            text-align: center;
+            padding-top: 5vh;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 3rem;
+            color: #ffd700;
+            text-shadow: 
+                0 0 30px rgba(255,215,0,0.6),
+                0 0 60px rgba(255,215,0,0.3);
+            letter-spacing: 0.15em;
+        }
+        
+        .tagline {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.85);
+            margin-top: 0.5rem;
+            letter-spacing: 0.2em;
+        }
+        
+        /* 主视觉 */
+        .hero-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .main-title {
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 5rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 
+                0 0 40px rgba(255,215,0,0.5),
+                0 0 80px rgba(255,200,255,0.3),
+                2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .sub-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            color: rgba(255,255,255,0.9);
+            font-style: italic;
+            margin-bottom: 2.5rem;
+            letter-spacing: 0.05em;
+        }
+        
+        /* 精致城堡卡片 */
+        .theme-card {
+            background: 
+                linear-gradient(145deg, rgba(200,150,200,0.25), rgba(100,50,100,0.4)),
+                radial-gradient(ellipse at 30% 20%, rgba(255,215,0,0.1) 0%, transparent 50%);
+            border: 3px double rgba(255,215,0,0.6);
+            border-radius: 25px 25px 0 25px;
+            box-shadow: 
+                0 0 50px rgba(255,215,0,0.15),
+                inset 0 0 60px rgba(255,215,0,0.05);
+            padding: 2.5rem 4rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+        
+        /* 顶部皇冠 */
+        .theme-card::before {
+            content: '👑';
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3rem;
+            filter: drop-shadow(0 0 20px rgba(255,215,0,0.9));
+            animation: crown-glow 3s ease-in-out infinite;
+        }
+        
+        /* 宝石角标 */
+        .gem-corner {
+            position: absolute;
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 8px rgba(255,215,0,0.8));
+        }
+        
+        .gem-tl { top: 10px; left: 15px; }
+        .gem-tr { top: 10px; right: 15px; }
+        .gem-bl { bottom: 10px; left: 15px; }
+        .gem-br { bottom: 10px; right: 15px; }
+        
+        .card-icon {
+            font-size: 4rem;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+        }
+        
+        .card-text h3 {
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 1.6rem;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(255,215,0,0.4);
+        }
+        
+        .card-text p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        /* 精致按钮 */
+        .cta-button {
+            padding: 1.3rem 4.5rem;
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
+            background-size: 200% 200%;
+            color: #2d1b4e;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 
+                0 0 40px rgba(255,215,0,0.4),
+                0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 60px rgba(255,215,0,0.6);
+        }
+        
+        /* 语音按钮 - 融入主题 */
+        .voice-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background: rgba(100,50,100,0.4);
+            border: 2px solid rgba(255,215,0,0.5);
+            border-radius: 25px;
+            color: #ffd700;
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(255,215,0,0.2);
+            transition: all 0.3s;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .voice-btn:hover {
+            background: rgba(255,215,0,0.15);
+            border-color: #ffd700;
+            box-shadow: 0 0 35px rgba(255,215,0,0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="castle-world">
+        <!-- 梦幻云雾 -->
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        <div class="cloud cloud-4"></div>
+        
+        <!-- 皇冠装饰 -->
+        <div class="crown-deco" style="top:8%;left:8%;">👑</div>
+        <div class="crown-deco" style="top:12%;right:10%;animation-delay:1s;">👑</div>
+        
+        <!-- 花藤 -->
+        <div class="vine-deco" style="top:20%;left:5%;">🌹</div>
+        <div class="vine-deco" style="top:25%;right:6%;animation-delay:2s;">🌸</div>
+        <div class="vine-deco" style="bottom:35%;left:8%;animation-delay:1s;">🌺</div>
+        
+        <!-- 闪光星 -->
+        <div class="sparkle" style="top:10%;left:25%;">✦</div>
+        <div class="sparkle" style="top:18%;right:20%;animation-delay:0.5s;">✧</div>
+        <div class="sparkle" style="top:8%;left:70%;animation-delay:1s;">✦</div>
+        <div class="sparkle" style="top:30%;left:15%;animation-delay:1.5s;">✧</div>
+        <div class="sparkle" style="top:22%;right:30%;animation-delay:0.3s;">✦</div>
+        
+        <!-- 城堡剪影 -->
+        <div class="castle-silhouette"></div>
+        
+        <!-- 品牌 -->
+        <header class="brand-header">
+            <h1 class="logo">Party Events</h1>
+            <p class="tagline">澳大利亚高端派对策划</p>
+        </header>
+        
+        <!-- 主视觉 -->
+        <main class="hero-section">
+            <h2 class="main-title">梦幻城堡</h2>
+            <p class="sub-title">为公主打造童话般的梦幻派对</p>
+            
+            <div class="theme-card">
+                <span class="gem-corner gem-tl">💎</span>
+                <span class="gem-corner gem-tr">💎</span>
+                <span class="gem-corner gem-bl">💎</span>
+                <span class="gem-corner gem-br">💎</span>
+                <span class="card-icon">🏰</span>
+                <div class="card-text">
+                    <h3>梦幻城堡</h3>
+                    <p>皇冠加冕 · 独角兽花园 · 魔法舞会</p>
+                </div>
+            </div>
+            
+            <button class="cta-button">进入梦幻城堡</button>
+        </main>
+        
+        <!-- 语音按钮 -->
+        <button class="voice-btn">🎙️ 语音引导</button>
+    </div>
+</body>
+</html>
