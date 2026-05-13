@@ -22,6 +22,12 @@ const routes = [
     meta: { title: '本地演示流程' }
   },
   {
+    path: '/investor-demo',
+    name: 'InvestorDemoMode',
+    component: () => import('@/views/InvestorDemoMode.vue'),
+    meta: { title: '投资人引导演示' }
+  },
+  {
     path: '/themes',
     name: 'Themes',
     component: () => import('@/views/HomePage.vue'),

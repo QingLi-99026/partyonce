@@ -25,6 +25,7 @@
         <el-menu-item index="/my/inquiries">My Inquiries</el-menu-item>
         <el-menu-item index="/my/quotes">My Quotes</el-menu-item>
         <el-menu-item index="/my/orders">My Orders</el-menu-item>
+        <el-menu-item index="/investor-demo">Investor Demo</el-menu-item>
         <el-menu-item index="/local-demo">Local Demo Hub</el-menu-item>
         <el-menu-item index="/admin/local-leads">Lead Review</el-menu-item>
         <el-menu-item index="/admin/quotes">Quote Review</el-menu-item>
