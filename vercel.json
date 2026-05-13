@@ -1,18 +1,14 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "builds": [
+  "framework": "vite",
+  "installCommand": "cd frontend/vue-app && npm install",
+  "buildCommand": "cd frontend/vue-app && npm run build",
+  "outputDirectory": "frontend/vue-app/dist",
+  "rewrites": [
     {
-      "src": "backend/main.py",
-      "use": "@vercel/python"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "backend/main.py"
-    }
-  ],
-  "env": {
-    "APP_MODULE": "main:app"
-  }
+  ]
 }
