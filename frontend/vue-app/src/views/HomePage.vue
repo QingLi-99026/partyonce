@@ -16,6 +16,40 @@
       </div>
     </nav>
 
+    <section
+      class="investor-hero"
+      :style="{ backgroundImage: `linear-gradient(90deg, rgba(5, 8, 20, 0.92), rgba(5, 8, 20, 0.58), rgba(5, 8, 20, 0.26)), url(${investorHero.image})` }"
+    >
+      <div class="investor-hero-content">
+        <span class="investor-kicker">Investor Preview · Visual Story Mode</span>
+        <h1 class="investor-title">把派对主题变成可预览、可报价、可交付的视觉方案</h1>
+        <p class="investor-copy">
+          Castle Princess、Space Explorer、Forest Adventure、餐厅场景、套餐矩阵和 App mockup 已正式纳入 public assets，Preview 远程环境可直接加载。
+        </p>
+
+        <div class="investor-actions">
+          <button
+            v-for="action in investorActions"
+            :key="action.label"
+            class="investor-action"
+            :class="{ 'is-primary': action.primary }"
+            @click="goTo(action.to)"
+          >
+            <span>{{ action.icon }}</span>
+            <span>{{ action.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="investor-visual-stack">
+        <img :src="investorHero.image" :alt="investorHero.alt" class="hero-mockup-image">
+        <div class="visual-stack-meta">
+          <span>Live Preview Assets</span>
+          <strong>Hero · Themes · Dining · Packages</strong>
+        </div>
+      </div>
+    </section>
+
     <!-- 主题切换条 -->
     <ThemeSwitcher 
       :current-theme="currentTheme" 
@@ -49,8 +83,16 @@
             :style="getCardStyle(theme)"
             @click="switchToTheme(theme.id)"
           >
+            <img
+              v-if="theme.image"
+              class="theme-card-image"
+              :src="theme.image"
+              :alt="theme.nameEn || theme.name"
+              loading="lazy"
+            >
             <div class="card-icon">{{ theme.icon }}</div>
             <h3 class="card-title">{{ theme.name }}</h3>
+            <span class="card-title-en">{{ theme.nameEn }}</span>
             <p class="card-description">{{ theme.description }}</p>
             <button class="card-cta" :style="getCardButtonStyle(theme)">
               {{ theme.ctaText }}
@@ -72,12 +114,13 @@
               v-for="asset in visualAssetsForTheme"
               :key="asset.id"
               class="asset-card"
-              :href="asset.image_path"
+              :href="asset.preview_url || asset.image_path"
               target="_blank"
               rel="noopener noreferrer"
               :style="getAssetCardStyle(asset)"
             >
               <div class="asset-preview" :class="`asset-preview-${asset.theme}`">
+                <img :src="asset.image_path" :alt="asset.title" loading="lazy">
                 <span class="asset-type">{{ formatAssetType(asset.asset_type) }}</span>
                 <span class="asset-theme-icon">{{ getAssetThemeIcon(asset.theme) }}</span>
               </div>
@@ -188,23 +231,49 @@ export default {
         {
           id: 'space',
           name: '星际探险',
+          nameEn: 'Space Explorer',
           icon: '🚀',
+          image: '/party-assets/themes/space-explorer.png',
           description: '穿越星河，探索未知的宇宙奥秘，开启一段科幻冒险之旅',
           ctaText: '开启星际任务'
         },
         {
           id: 'castle',
           name: '梦幻城堡',
+          nameEn: 'Castle Princess',
           icon: '🏰',
+          image: '/party-assets/themes/castle-princess-full.png',
           description: '走进童话世界，成为公主或王子，实现童年最美好的梦想',
           ctaText: '进入梦幻城堡'
         },
         {
           id: 'forest',
           name: '森林奇境',
+          nameEn: 'Forest Adventure',
           icon: '🌲',
+          image: '/party-assets/themes/forest-adventure-full.png',
           description: '踏入神秘森林，与大自然亲密接触，发现隐藏在林间的魔法',
           ctaText: '进入森林秘境'
+        }
+      ],
+
+      investorHero: {
+        image: '/party-assets/investor-hero/immersive-homepage-hero.png',
+        alt: 'PartyOnce immersive visual homepage hero'
+      },
+
+      investorActions: [
+        {
+          icon: '🎨',
+          label: '自己来策划',
+          to: '/themes',
+          primary: true
+        },
+        {
+          icon: '🤖',
+          label: 'AI 帮我推荐',
+          to: '/ai-planner',
+          primary: false
         }
       ],
       
@@ -408,6 +477,10 @@ export default {
       this.$router.push(`/planner?theme=${this.currentTheme}`);
     },
 
+    goTo(path) {
+      this.$router.push(path);
+    },
+
     handleSelectScene({ theme, scene }) {
       console.log('Selected scene:', theme, scene);
       // 可以跳转到场景详情或策划页面
@@ -503,6 +576,124 @@ export default {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+.investor-hero {
+  min-height: 92vh;
+  padding: 132px 24px 72px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(360px, 0.72fr);
+  gap: 48px;
+  align-items: center;
+  background-size: cover;
+  background-position: center top;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.investor-hero-content {
+  max-width: 720px;
+  margin-left: max(0px, calc((100vw - 1200px) / 2));
+}
+
+.investor-kicker {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: #00f0ff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.investor-title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  line-height: 1.02;
+  font-weight: 900;
+}
+
+.investor-copy {
+  max-width: 620px;
+  margin: 24px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: clamp(1rem, 1.7vw, 1.25rem);
+  line-height: 1.75;
+}
+
+.investor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 34px;
+}
+
+.investor-action {
+  min-width: 168px;
+  min-height: 54px;
+  padding: 0 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  transition: transform 0.22s ease, background 0.22s ease;
+}
+
+.investor-action:hover {
+  transform: translateY(-2px);
+}
+
+.investor-action.is-primary {
+  color: #03111a;
+  border-color: rgba(0, 240, 255, 0.65);
+  background: linear-gradient(135deg, #00f0ff, #31b7ff);
+  box-shadow: 0 14px 36px rgba(0, 212, 255, 0.34);
+}
+
+.investor-visual-stack {
+  width: min(100%, 460px);
+  justify-self: end;
+  margin-right: max(0px, calc((100vw - 1200px) / 2));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(4, 8, 20, 0.64);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.46);
+  backdrop-filter: blur(18px);
+}
+
+.hero-mockup-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.visual-stack-meta {
+  padding: 18px 20px 20px;
+}
+
+.visual-stack-meta span {
+  display: block;
+  color: #00f0ff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.visual-stack-meta strong {
+  display: block;
+  margin-top: 8px;
+  color: #fff;
+  font-size: 1.05rem;
+}
+
 /* 主题介绍区 */
 .themes-section {
   padding: 100px 24px;
@@ -535,7 +726,8 @@ export default {
 }
 
 .theme-card {
-  padding: 40px 32px;
+  overflow: hidden;
+  padding: 0 0 32px;
   text-align: center;
   cursor: pointer;
   transition: all 0.4s ease;
@@ -546,22 +738,49 @@ export default {
   transform: translateY(-8px);
 }
 
+.theme-card-image {
+  width: 100%;
+  height: 220px;
+  display: block;
+  object-fit: cover;
+  object-position: top center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
 .card-icon {
+  width: 72px;
+  height: 72px;
+  margin: -36px auto 20px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.42);
   font-size: 4rem;
-  margin-bottom: 24px;
+  backdrop-filter: blur(12px);
 }
 
 .card-title {
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin: 0 28px 4px;
   color: var(--theme-text);
+}
+
+.card-title-en {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--theme-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .card-description {
   font-size: 1rem;
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin: 0 32px 24px;
   color: var(--theme-text-muted);
 }
 
@@ -637,50 +856,26 @@ export default {
 .asset-preview {
   position: relative;
   min-height: 150px;
-  padding: 18px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   overflow: hidden;
 }
 
-.asset-preview::before {
-  content: '';
+.asset-preview img {
   position: absolute;
   inset: 0;
-  opacity: 0.86;
-}
-
-.asset-preview-space::before {
-  background:
-    radial-gradient(circle at 72% 22%, rgba(0, 240, 255, 0.38), transparent 22%),
-    radial-gradient(circle at 22% 70%, rgba(255, 215, 0, 0.24), transparent 18%),
-    linear-gradient(135deg, #020408, #102f66 52%, #020408);
-}
-
-.asset-preview-castle::before {
-  background:
-    radial-gradient(circle at 70% 24%, rgba(255, 215, 0, 0.42), transparent 20%),
-    linear-gradient(135deg, #1a0f2e, #7e3fa3 58%, #f3d7e8);
-}
-
-.asset-preview-forest::before {
-  background:
-    radial-gradient(circle at 30% 18%, rgba(255, 215, 0, 0.32), transparent 20%),
-    linear-gradient(135deg, #071307, #245b28 55%, #8b5a2b);
-}
-
-.asset-preview-all::before {
-  background:
-    linear-gradient(120deg, rgba(0, 240, 255, 0.55), transparent 33%),
-    linear-gradient(240deg, rgba(255, 215, 0, 0.48), transparent 33%),
-    linear-gradient(135deg, #24114f, #11351d);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
 }
 
 .asset-type,
 .asset-theme-icon {
   position: relative;
   z-index: 1;
+  margin: 18px;
 }
 
 .asset-type {
@@ -857,6 +1052,26 @@ export default {
 
 /* 移动端适配 */
 @media (max-width: 768px) {
+  .investor-hero {
+    min-height: auto;
+    padding: 118px 18px 54px;
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .investor-hero-content {
+    margin-left: 0;
+  }
+
+  .investor-title {
+    font-size: 2.6rem;
+  }
+
+  .investor-visual-stack {
+    width: 100%;
+    margin-right: 0;
+  }
+
   .nav-links {
     display: none;
   }
