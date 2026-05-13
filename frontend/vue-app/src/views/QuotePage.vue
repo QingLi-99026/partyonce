@@ -86,9 +86,9 @@
       <div class="section-container">
         <h2 class="section-title" :style="titleStyle">视觉方案依据</h2>
         <div class="visual-context-card" :style="cardStyle">
-          <img :src="visualContext.packageVisual.image_path" :alt="visualContext.packageVisual.title">
+          <img :src="visualContext.restaurant.image_path" :alt="visualContext.restaurant.title">
           <div class="visual-context-copy">
-            <span class="visual-kicker">{{ visualContext.packageVisual.title }}</span>
+            <span class="visual-kicker">{{ visualContext.restaurant.title }}</span>
             <p>{{ visualContext.packageVisual.scope }}</p>
             <dl>
               <div>
@@ -96,12 +96,16 @@
                 <dd>{{ visualContext.packageVisual.suitableAge }} 岁</dd>
               </div>
               <div>
-                <dt>餐厅样板</dt>
-                <dd>{{ visualContext.restaurant.structureLock }}</dd>
+                <dt>推荐场地</dt>
+                <dd>{{ visualContext.primaryVenue.name }} · {{ visualContext.primaryVenue.capacity }}</dd>
               </div>
               <div>
                 <dt>供应商建议</dt>
                 <dd>{{ visualContext.suppliers.map((item) => item.name).join(' / ') }}</dd>
+              </div>
+              <div>
+                <dt>报价依据</dt>
+                <dd>{{ visualContext.restaurant.decorationLayer }}</dd>
               </div>
             </dl>
           </div>
@@ -496,10 +500,15 @@ export default {
           venueType: this.aiPrefill?.selection?.venueType || this.sceneData.name,
           restaurantVisual: this.aiPrefill?.selection?.restaurantVisual || this.visualContext.restaurant.image_path,
           packageVisual: this.aiPrefill?.selection?.packageVisual || this.visualContext.packageVisual.image_path,
+          venueId: this.aiPrefill?.selection?.venueId || this.visualContext.primaryVenue.id,
+          venueName: this.aiPrefill?.selection?.venueName || this.visualContext.primaryVenue.name,
+          venueCapacity: this.aiPrefill?.selection?.venueCapacity || this.visualContext.primaryVenue.capacity,
+          venueLayoutImage: this.aiPrefill?.selection?.venueLayoutImage || this.visualContext.primaryVenue.layoutImage || this.visualContext.primaryVenue.image_path,
           supplierSuggestions: this.aiPrefill?.selection?.supplierSuggestions || this.visualContext.suppliers.map((item) => ({
             id: item.id,
             name: item.name,
-            category: item.category
+            category: item.category,
+            role: item.quoteRole
           })),
           addons: this.selectedAddons.map(id => {
             const addon = this.addons.find(a => a.id === id);

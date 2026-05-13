@@ -219,10 +219,10 @@
         <el-table-column label="Visual Context" min-width="260">
           <template #default="{ row }">
             <div class="visual-cell">
-              <img :src="quoteVisual(row).packageVisual.image_path" :alt="quoteVisual(row).packageVisual.title">
+              <img :src="quoteVisual(row).restaurant.image_path" :alt="quoteVisual(row).restaurant.title">
               <div>
-                <strong>{{ quoteVisual(row).packageVisual.title }}</strong>
-                <span>{{ quoteVisual(row).suppliers.map((item) => item.name).join(' / ') }}</span>
+                <strong>{{ quoteVisual(row).restaurant.title }}</strong>
+                <span>{{ quoteVisual(row).primaryVenue.name }} · {{ quoteVisual(row).suppliers.map((item) => item.name).join(' / ') }}</span>
               </div>
             </div>
           </template>
@@ -269,7 +269,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import apiClient from '@/api'
-import { getVisualContext } from '@/data/visualAssets'
+import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 
 const router = useRouter()
 
@@ -472,20 +472,6 @@ const lineItemSummary = (quote) => {
   const items = Array.isArray(quote.line_items) ? quote.line_items : []
   if (items.length === 0) return 'No line item snapshot'
   return `${items.length} line item${items.length === 1 ? '' : 's'}`
-}
-
-const normalizeThemeId = (value = '') => {
-  const normalized = String(value).toLowerCase()
-  if (normalized.includes('castle')) return 'castle'
-  if (normalized.includes('forest')) return 'forest'
-  return 'space'
-}
-
-const normalizeTierId = (value = '') => {
-  const normalized = String(value).toLowerCase()
-  if (normalized.includes('premium') || normalized.includes('尊享')) return 'premium'
-  if (normalized.includes('basic') || normalized.includes('基础')) return 'basic'
-  return 'standard'
 }
 
 const quoteVisual = (quote) => {

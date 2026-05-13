@@ -217,6 +217,45 @@
         </section>
 
         <section class="panel-grid">
+          <article class="panel visual-panel">
+            <h2>Visual Delivery Context</h2>
+            <div class="visual-pair">
+              <img :src="quoteVisualContext.packageVisual.image_path" :alt="quoteVisualContext.packageVisual.title">
+              <img :src="quoteVisualContext.restaurant.image_path" :alt="quoteVisualContext.restaurant.title">
+            </div>
+            <dl>
+              <div>
+                <dt>Theme / Package</dt>
+                <dd>{{ quoteVisualContext.packageVisual.title }}</dd>
+              </div>
+              <div>
+                <dt>Restaurant Rendering</dt>
+                <dd>{{ quoteVisualContext.restaurant.title }}</dd>
+              </div>
+              <div>
+                <dt>Venue</dt>
+                <dd>{{ quoteVisualContext.primaryVenue.name }} · {{ quoteVisualContext.primaryVenue.capacity }}</dd>
+              </div>
+              <div>
+                <dt>Suppliers</dt>
+                <dd>{{ quoteVisualContext.suppliers.map((item) => `${item.name} (${item.category})`).join(' / ') }}</dd>
+              </div>
+            </dl>
+          </article>
+
+          <article class="panel">
+            <h2>Quote Basis</h2>
+            <ul class="blocked-list">
+              <li>{{ quoteVisualContext.packageVisual.scope }}</li>
+              <li>{{ quoteVisualContext.restaurant.decorationLayer }}</li>
+              <li v-for="supplier in quoteVisualContext.suppliers" :key="supplier.id">
+                {{ supplier.name }} · {{ supplier.operationsRole }}
+              </li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="panel-grid">
           <article class="panel">
             <h2>Selection Snapshot</h2>
             <pre>{{ formatJson(quote.selection_snapshot) }}</pre>
@@ -240,6 +279,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import apiClient from '@/api'
 import { createDraftOrderFromQuote } from '@/services/adminOrderService'
+import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 
 const route = useRoute()
 const router = useRouter()
@@ -259,6 +299,13 @@ const quoteOps = ref({
 
 const lineItems = computed(() => (Array.isArray(quote.value?.line_items) ? quote.value.line_items : []))
 const canCreateDraftOrder = computed(() => quote.value?.status === 'accepted')
+const quoteVisualContext = computed(() => {
+  const selection = quote.value?.selection_snapshot || {}
+  return getVisualContext(
+    normalizeThemeId(selection.theme || selection.themeName || quote.value?.theme),
+    normalizeTierId(selection.package || selection.packageName || quote.value?.package_tier)
+  )
+})
 const quoteOpsAlerts = computed(() => {
   if (!quote.value) return ['Quote detail is still loading.']
   const alerts = []
@@ -584,6 +631,25 @@ pre {
   color: #212529;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.visual-panel {
+  overflow: hidden;
+}
+
+.visual-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.visual-pair img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
 }
 
 @media (max-width: 900px) {

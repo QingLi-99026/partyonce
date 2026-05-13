@@ -92,6 +92,7 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
   const result = recommendation || recommendThemeAndPackage(answers);
   const packageVisual = result.visualContext.packageVisual;
   const restaurant = result.visualContext.restaurant;
+  const venue = result.visualContext.primaryVenue;
   const suppliers = result.visualContext.suppliers || [];
 
   return {
@@ -119,6 +120,10 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
       packageId: result.tier,
       packageName: `${result.themeLabel} ${result.tierLabel}`,
       venueType: result.venueType,
+      venueId: venue.id,
+      venueName: venue.name,
+      venueCapacity: venue.capacity,
+      venueLayoutImage: venue.layoutImage || venue.image_path,
       sceneId: 'restaurant-a',
       sceneName: restaurant.title,
       guestCount: result.summary.guestCount,

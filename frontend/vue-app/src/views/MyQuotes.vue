@@ -47,10 +47,10 @@
         </div>
 
         <div class="visual-strip">
-          <img :src="quoteVisual(quote).packageVisual.image_path" :alt="quoteVisual(quote).packageVisual.title">
+          <img :src="quoteVisual(quote).restaurant.image_path" :alt="quoteVisual(quote).restaurant.title">
           <div>
-            <strong>{{ quoteVisual(quote).packageVisual.title }}</strong>
-            <span>{{ quoteVisual(quote).packageVisual.priceHint }} · {{ quoteVisual(quote).packageVisual.suitableVenue }}</span>
+            <strong>{{ quoteVisual(quote).restaurant.title }}</strong>
+            <span>{{ quoteVisual(quote).primaryVenue.name }} · {{ quoteVisual(quote).suppliers.map((item) => item.name).join(' / ') }}</span>
           </div>
         </div>
 
@@ -114,7 +114,7 @@ import {
   getCustomerInteractionState,
   quoteStatuses
 } from '@/services/customerExperienceService'
-import { getVisualContext } from '@/data/visualAssets'
+import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 
 const router = useRouter()
 const loading = ref(false)
@@ -151,20 +151,6 @@ const quoteTagType = (status) => ({
 }[status] || 'info')
 
 const quoteInteraction = (quoteId) => getCustomerInteractionState('quote', quoteId)
-
-const normalizeThemeId = (value = '') => {
-  const normalized = value.toLowerCase()
-  if (normalized.includes('castle')) return 'castle'
-  if (normalized.includes('forest')) return 'forest'
-  return 'space'
-}
-
-const normalizeTierId = (value = '') => {
-  const normalized = value.toLowerCase()
-  if (normalized.includes('premium') || normalized.includes('尊享')) return 'premium'
-  if (normalized.includes('basic') || normalized.includes('基础')) return 'basic'
-  return 'standard'
-}
 
 const quoteVisual = (quote) => getVisualContext(normalizeThemeId(quote.theme), normalizeTierId(quote.package))
 

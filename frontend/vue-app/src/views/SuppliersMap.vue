@@ -86,6 +86,9 @@
                 <span class="price">{{ formatPrice(supplier.price_level) }}</span>
                 <span v-if="supplier.max_capacity">容纳 {{ supplier.max_capacity }} 人</span>
               </div>
+              <div v-if="supplier.service_tags?.length" class="supplier-tags">
+                <span v-for="tag in supplier.service_tags.slice(0, 4)" :key="tag">{{ tag }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -433,6 +436,22 @@ const resetMap = () => {}
   color: #059669;
   font-weight: 800;
   font-size: 15px;
+}
+
+.supplier-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.supplier-tags span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 @media (max-width: 1024px) {

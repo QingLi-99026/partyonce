@@ -130,6 +130,30 @@
             </dl>
           </article>
 
+          <article class="panel visual-panel">
+            <h2>Visual Delivery Context</h2>
+            <div class="visual-pair">
+              <img :src="orderVisualContext.packageVisual.image_path" :alt="orderVisualContext.packageVisual.title">
+              <img :src="orderVisualContext.restaurant.image_path" :alt="orderVisualContext.restaurant.title">
+            </div>
+            <dl>
+              <div>
+                <dt>Venue</dt>
+                <dd>{{ orderVisualContext.primaryVenue.name }} · {{ orderVisualContext.primaryVenue.capacity }}</dd>
+              </div>
+              <div>
+                <dt>Rendering</dt>
+                <dd>{{ orderVisualContext.restaurant.title }}</dd>
+              </div>
+              <div>
+                <dt>Supplier Roles</dt>
+                <dd>{{ orderVisualContext.suppliers.map((item) => item.operationsRole).join(' / ') }}</dd>
+              </div>
+            </dl>
+          </article>
+        </section>
+
+        <section class="panel-grid">
           <article class="panel">
             <h2>Order Controls</h2>
             <label class="field-label" for="order-status-select">Status</label>
@@ -233,6 +257,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { blockedOrderActions, orderStatuses } from '@/mock/adminOrders'
+import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import {
   ORDER_SOURCE_API,
   fetchAdminOrderDetail,
@@ -267,6 +292,11 @@ const orderOpsAlerts = computed(() => {
   if (!String(opsForm.value.internal_note || '').trim()) alerts.push('Internal note is empty.')
   return alerts.length ? alerts : ['No active operations alert.']
 })
+
+const orderVisualContext = computed(() => getVisualContext(
+  normalizeThemeId(order.value?.event?.theme || order.value?.theme),
+  normalizeTierId(order.value?.event?.package_tier || order.value?.package_tier)
+))
 
 const syncOpsForm = () => {
   opsForm.value = {
@@ -546,6 +576,25 @@ dd {
 .status-flow span {
   display: block;
   margin-top: 3px;
+}
+
+.visual-panel {
+  overflow: hidden;
+}
+
+.visual-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.visual-pair img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
 }
 
 @media (max-width: 900px) {

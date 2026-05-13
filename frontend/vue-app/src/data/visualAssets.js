@@ -190,6 +190,10 @@ export const venueDisplaySeeds = [
     chairs: '24 chairs',
     image_path: RESTAURANT_A_IMAGES.original,
     themeFit: ['castle', 'space', 'forest'],
+    bestPackageTiers: ['basic', 'standard', 'premium'],
+    layoutImage: RESTAURANT_A_IMAGES.original,
+    renderings: RESTAURANT_A_IMAGES,
+    aiRecommendationRole: 'Primary AI Concierge sample venue',
     priceRange: '$800-$1,600 room hire',
     contact: 'Local/staging demo contact',
     note: '投资人样板场地，用于展示原貌到主题装饰渲染。'
@@ -203,6 +207,10 @@ export const venueDisplaySeeds = [
     chairs: 'Flexible',
     image_path: THEME_IMAGES.castle,
     themeFit: ['castle', 'forest'],
+    bestPackageTiers: ['basic', 'standard'],
+    layoutImage: THEME_IMAGES.castle,
+    renderings: { castle: { basic: THEME_IMAGES.castle, standard: THEME_IMAGES.castle }, forest: { basic: THEME_IMAGES.forest } },
+    aiRecommendationRole: 'Backup kids cafe venue',
     priceRange: '$600-$1,200 package base',
     contact: 'Local/staging demo contact',
     note: '适合亲子、小龄儿童、甜品台和轻布置。'
@@ -216,6 +224,10 @@ export const venueDisplaySeeds = [
     chairs: '30 chairs',
     image_path: THEME_IMAGES.space,
     themeFit: ['space'],
+    bestPackageTiers: ['standard', 'premium'],
+    layoutImage: THEME_IMAGES.space,
+    renderings: { space: { standard: THEME_IMAGES.space, premium: THEME_IMAGES.space } },
+    aiRecommendationRole: 'Space Explorer backup venue',
     priceRange: '$900-$1,500 room hire',
     contact: 'Local/staging demo contact',
     note: '适合 Space Explorer 与 STEM 派对。'
@@ -230,6 +242,9 @@ export const supplierDisplaySeeds = [
     serviceArea: 'Sydney Metro',
     priceRange: '$220-$850',
     supportedThemes: ['castle', 'space', 'forest'],
+    supportedTiers: ['standard', 'premium'],
+    quoteRole: 'balloon_arch_and_entry_visual',
+    operationsRole: 'Primary decor vendor for arches, balloon clusters, and entrance styling',
     image_path: '/party-assets/packages/package-tier-matrix.png',
     status: 'demo_active',
     serviceContent: '主题气球、拱门、桌边气球束、入口布置',
@@ -242,6 +257,9 @@ export const supplierDisplaySeeds = [
     serviceArea: 'North Sydney',
     priceRange: '$160-$620',
     supportedThemes: ['castle', 'space', 'forest'],
+    supportedTiers: ['basic', 'standard', 'premium'],
+    quoteRole: 'cake_and_dessert_table',
+    operationsRole: 'Theme cake and dessert-table vendor',
     image_path: '/party-assets/quotes/quote-entry-preview.png',
     status: 'demo_active',
     serviceContent: '主题蛋糕、cupcakes、甜品台色系搭配',
@@ -254,6 +272,9 @@ export const supplierDisplaySeeds = [
     serviceArea: 'Sydney + nearby suburbs',
     priceRange: '$280-$900',
     supportedThemes: ['space', 'forest'],
+    supportedTiers: ['standard', 'premium'],
+    quoteRole: 'kids_activity_and_hosting',
+    operationsRole: 'Activity host and themed game vendor',
     image_path: THEME_IMAGES.forest,
     status: 'demo_review',
     serviceContent: '主持人、主题游戏、科学小实验、森林探险任务',
@@ -279,11 +300,82 @@ export function getRestaurantAVisuals(themeId) {
   return restaurantAVisuals.filter((asset) => asset.theme === themeId || asset.theme === 'all');
 }
 
-export function getVisualContext(themeId = 'space', tierId = 'standard') {
+export function normalizeThemeId(value = '') {
+  const normalized = String(value || '').toLowerCase();
+  if (normalized.includes('castle') || normalized.includes('princess') || normalized.includes('城堡') || normalized.includes('公主')) return 'castle';
+  if (normalized.includes('forest') || normalized.includes('jungle') || normalized.includes('nature') || normalized.includes('森林')) return 'forest';
+  if (normalized.includes('space') || normalized.includes('rocket') || normalized.includes('science') || normalized.includes('星际') || normalized.includes('宇宙')) return 'space';
+  return 'space';
+}
+
+export function normalizeTierId(value = '') {
+  const normalized = String(value || '').toLowerCase();
+  if (normalized.includes('premium') || normalized.includes('尊享') || normalized.includes('高端')) return 'premium';
+  if (normalized.includes('basic') || normalized.includes('基础') || normalized.includes('控制预算')) return 'basic';
+  return 'standard';
+}
+
+export function getRecommendedVenue(themeId = 'space', tierId = 'standard') {
+  const theme = normalizeThemeId(themeId);
+  const tier = normalizeTierId(tierId);
+  return venueDisplaySeeds.find((venue) => (
+    venue.themeFit.includes(theme) && (venue.bestPackageTiers || []).includes(tier)
+  )) || venueDisplaySeeds.find((venue) => venue.themeFit.includes(theme)) || venueDisplaySeeds[0];
+}
+
+export function getRecommendedSuppliers(themeId = 'space', tierId = 'standard') {
+  const theme = normalizeThemeId(themeId);
+  const tier = normalizeTierId(tierId);
+  const exact = supplierDisplaySeeds.filter((supplier) => (
+    supplier.supportedThemes.includes(theme) && (supplier.supportedTiers || []).includes(tier)
+  ));
+  const fallback = supplierDisplaySeeds.filter((supplier) => supplier.supportedThemes.includes(theme));
+  return exact.length ? exact : fallback;
+}
+
+export function buildVisualRecommendationSnapshot(themeId = 'space', tierId = 'standard') {
+  const theme = normalizeThemeId(themeId);
+  const tier = normalizeTierId(tierId);
+  const context = getVisualContext(theme, tier);
   return {
-    packageVisual: getThemePackageVisual(themeId, tierId),
-    restaurant: restaurantAVisuals.find((asset) => asset.id === `restaurant-a-${themeId}-${tierId}`) || restaurantAVisuals[0],
-    venues: venueDisplaySeeds.filter((venue) => venue.themeFit.includes(themeId)),
-    suppliers: supplierDisplaySeeds.filter((supplier) => supplier.supportedThemes.includes(themeId))
+    theme,
+    tier,
+    theme_label: context.packageVisual.themeName,
+    package_label: context.packageVisual.tierLabel,
+    package_title: context.packageVisual.title,
+    package_image: context.packageVisual.image_path,
+    restaurant_title: context.restaurant.title,
+    restaurant_rendering: context.restaurant.image_path,
+    venue_id: context.primaryVenue.id,
+    venue_name: context.primaryVenue.name,
+    venue_capacity: context.primaryVenue.capacity,
+    venue_layout_image: context.primaryVenue.layoutImage || context.primaryVenue.image_path,
+    supplier_suggestions: context.suppliers.map((supplier) => ({
+      id: supplier.id,
+      name: supplier.name,
+      category: supplier.category,
+      role: supplier.quoteRole,
+      image_path: supplier.image_path
+    })),
+    quote_basis: [
+      context.packageVisual.scope,
+      context.restaurant.decorationLayer,
+      `${context.primaryVenue.name} · ${context.primaryVenue.capacity}`,
+      context.suppliers.map((supplier) => supplier.name).join(' / ')
+    ].filter(Boolean)
+  };
+}
+
+export function getVisualContext(themeId = 'space', tierId = 'standard') {
+  const theme = normalizeThemeId(themeId);
+  const tier = normalizeTierId(tierId);
+  const primaryVenue = getRecommendedVenue(theme, tier);
+  return {
+    packageVisual: getThemePackageVisual(theme, tier),
+    restaurant: restaurantAVisuals.find((asset) => asset.id === `restaurant-a-${theme}-${tier}`) || restaurantAVisuals[0],
+    primaryVenue,
+    venues: venueDisplaySeeds.filter((venue) => venue.themeFit.includes(theme)),
+    suppliers: getRecommendedSuppliers(theme, tier),
+    allThemeSuppliers: supplierDisplaySeeds.filter((supplier) => supplier.supportedThemes.includes(theme))
   };
 }

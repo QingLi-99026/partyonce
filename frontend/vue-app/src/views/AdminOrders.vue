@@ -254,7 +254,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { orderStatuses } from '@/mock/adminOrders'
-import { getVisualContext } from '@/data/visualAssets'
+import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import {
   ORDER_SOURCE_API,
   ORDER_SOURCE_FALLBACK,
@@ -436,20 +436,6 @@ const clearFilters = () => {
   nextActionFilter.value = ''
   riskFilter.value = ''
   loadOrders()
-}
-
-const normalizeThemeId = (value = '') => {
-  const normalized = String(value).toLowerCase()
-  if (normalized.includes('castle')) return 'castle'
-  if (normalized.includes('forest')) return 'forest'
-  return 'space'
-}
-
-const normalizeTierId = (value = '') => {
-  const normalized = String(value).toLowerCase()
-  if (normalized.includes('premium') || normalized.includes('尊享')) return 'premium'
-  if (normalized.includes('basic') || normalized.includes('基础')) return 'basic'
-  return 'standard'
 }
 
 const orderVisual = (order) => getVisualContext(

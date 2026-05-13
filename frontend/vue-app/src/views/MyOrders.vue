@@ -50,7 +50,7 @@
           <img :src="orderVisual(order).restaurant.image_path" :alt="orderVisual(order).restaurant.title">
           <div>
             <strong>{{ orderVisual(order).restaurant.title }}</strong>
-            <span>{{ orderVisual(order).restaurant.structureLock }}</span>
+            <span>{{ orderVisual(order).primaryVenue.name }} · {{ orderVisual(order).suppliers.map((item) => item.name).join(' / ') }}</span>
           </div>
         </div>
 
@@ -108,7 +108,7 @@ import {
   getCustomerInteractionState,
   orderStatuses
 } from '@/services/customerExperienceService'
-import { getVisualContext } from '@/data/visualAssets'
+import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 
 const router = useRouter()
 const loading = ref(false)
@@ -146,20 +146,6 @@ const orderTagType = (status) => ({
 }[status] || 'info')
 
 const orderInteraction = (orderId) => getCustomerInteractionState('order', orderId)
-
-const normalizeThemeId = (value = '') => {
-  const normalized = value.toLowerCase()
-  if (normalized.includes('castle')) return 'castle'
-  if (normalized.includes('forest')) return 'forest'
-  return 'space'
-}
-
-const normalizeTierId = (value = '') => {
-  const normalized = value.toLowerCase()
-  if (normalized.includes('premium') || normalized.includes('尊享')) return 'premium'
-  if (normalized.includes('basic') || normalized.includes('基础')) return 'basic'
-  return 'standard'
-}
 
 const orderVisual = (order) => getVisualContext(normalizeThemeId(order.theme), normalizeTierId(order.package))
 

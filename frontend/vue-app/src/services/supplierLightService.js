@@ -1,4 +1,5 @@
 import apiClient from '@/api'
+import { supplierDisplaySeeds, venueDisplaySeeds } from '@/data/visualAssets'
 
 const APPLICATIONS_KEY = 'partyonce_supplier_applications_v1'
 const SOURCE_LOCAL = 'local/staging supplier fixture'
@@ -20,52 +21,45 @@ const statusLabels = {
   needs_info: '需补充资料'
 }
 
+const priceLevelFromRange = (range = '') => {
+  if (String(range).includes('2,800') || String(range).includes('850') || String(range).includes('900')) return '高'
+  if (String(range).includes('160') || String(range).includes('220')) return '中'
+  return '中'
+}
+
 const demoSuppliers = [
-  {
-    supplier_id: 'demo-supplier-1',
-    name: '悉尼儿童派对中心',
-    company_name: 'Sydney Kids Party Centre',
+  ...venueDisplaySeeds.map((venue, index) => ({
+    supplier_id: venue.id,
+    name: venue.name,
+    company_name: venue.name,
     category_level_1: '场地类',
     category: 'venue',
-    suburb: 'North Sydney',
-    rating: 4.8,
-    review_count: 127,
-    price_level: '中',
-    max_capacity: 50,
-    distance_km: 0.5,
-    service_tags: ['儿童生日', '室内场地', '周末可用'],
-    cover_image_url: ''
-  },
-  {
-    supplier_id: 'demo-supplier-2',
-    name: 'Manly 海滨派对屋',
-    company_name: 'Manly Beach Party House',
-    category_level_1: '场地类',
-    category: 'venue',
-    suburb: 'Manly',
-    rating: 4.6,
-    review_count: 89,
-    price_level: '高',
-    max_capacity: 80,
-    distance_km: 8.2,
-    service_tags: ['海景', '家庭聚会', '高端场地'],
-    cover_image_url: ''
-  },
-  {
-    supplier_id: 'demo-supplier-3',
-    name: 'Little Star 主题布置',
-    company_name: 'Little Star Styling',
-    category_level_1: '装饰布置',
-    category: 'decoration',
-    suburb: 'Chatswood',
+    suburb: index === 0 ? 'North Sydney' : 'Sydney',
+    rating: 4.6 + (index * 0.1),
+    review_count: 48 + (index * 16),
+    price_level: priceLevelFromRange(venue.priceRange),
+    max_capacity: Number(String(venue.capacity).match(/\d+/g)?.at(-1) || 28),
+    distance_km: 0.8 + index * 2.1,
+    service_tags: ['AI推荐场地', ...(venue.themeFit || []), venue.aiRecommendationRole].filter(Boolean),
+    cover_image_url: venue.image_path,
+    visual_context: venue
+  })),
+  ...supplierDisplaySeeds.map((supplier, index) => ({
+    supplier_id: supplier.id,
+    name: supplier.name,
+    company_name: supplier.name,
+    category_level_1: supplier.category,
+    category: supplier.category,
+    suburb: supplier.serviceArea?.split(' ')?.[0] || 'Sydney',
     rating: 4.7,
-    review_count: 54,
-    price_level: '中',
+    review_count: 54 + index * 11,
+    price_level: priceLevelFromRange(supplier.priceRange),
     max_capacity: 120,
-    distance_km: 5.4,
-    service_tags: ['主题气球', '儿童桌布置', '公主主题'],
-    cover_image_url: ''
-  }
+    distance_km: 3.2 + index,
+    service_tags: [supplier.quoteRole, ...(supplier.supportedThemes || []), ...(supplier.supportedTiers || [])].filter(Boolean),
+    cover_image_url: supplier.image_path,
+    visual_context: supplier
+  }))
 ]
 
 const clone = (value) => JSON.parse(JSON.stringify(value))

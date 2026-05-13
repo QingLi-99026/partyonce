@@ -127,7 +127,7 @@
             @click="$router.push(`/venues/${venue.id}`)"
           >
             <div class="venue-image">
-              <img :src="venue.images?.[0] || 'https://via.placeholder.com/300x200'" :alt="venue.name">
+              <img :src="venue.images?.[0] || venue.image_path || 'https://via.placeholder.com/300x200'" :alt="venue.name">
               <div v-if="venue.is_partner" class="partner-tag">合作伙伴</div>
             </div>
             
@@ -143,9 +143,11 @@
                 <el-tag v-if="venue.venue_type" size="small">{{ venue.venue_type }}</el-tag>
                 <el-tag v-if="venue.capacity" size="small" type="success">{{ venue.capacity }}人</el-tag>
                 <el-tag v-if="venue.is_partner" size="small" type="warning">{{ (venue.discount_rate * 100).toFixed(0) }}%优惠</el-tag>
+                <el-tag v-for="theme in venue.themeFit || []" :key="theme" size="small" type="info">{{ theme }}</el-tag>
               </div>
               
               <p class="venue-desc">{{ venue.description }}</p>
+              <p v-if="venue.recommendationBasis" class="venue-basis">{{ venue.recommendationBasis }}</p>
               
               <div class="venue-footer">
                 <div class="venue-price">
@@ -179,6 +181,7 @@ import { Search, Location } from '@element-plus/icons-vue'
 import { venueAPI } from '@/api/modules'
 import { ElMessage } from 'element-plus'
 import EmptyState from '../components/EmptyState.vue'
+import { venueDisplaySeeds } from '@/data/visualAssets'
 
 const loading = ref(false)
 const searchQuery = ref('')
@@ -199,6 +202,10 @@ const filters = ref({
 const fetchVenues = async () => {
   loading.value = true
   try {
+    if (import.meta.env.VITE_VENUE_REMOTE_API !== 'true') {
+      venues.value = getMockVenues()
+      return
+    }
     const params = {}
     if (filters.value.city) params.city = filters.value.city
     if (filters.value.venueType) params.venue_type = filters.value.venueType
@@ -217,7 +224,25 @@ const fetchVenues = async () => {
 
 // 模拟数据
 const getMockVenues = () => {
+  const visualVenues = venueDisplaySeeds.map((venue, index) => ({
+    id: venue.id,
+    name: venue.name,
+    address: index === 0 ? 'Restaurant A demo district' : 'Local/staging demo address',
+    city: '悉尼',
+    venue_type: venue.type,
+    capacity: Number(String(venue.capacity).match(/\d+/g)?.at(-1) || 28),
+    regular_price: Number(String(venue.priceRange).match(/\d+/g)?.[0] || 900),
+    is_partner: true,
+    discount_rate: 0.1,
+    description: `${venue.note} · ${venue.tables} · ${venue.chairs}`,
+    images: [venue.image_path],
+    image_path: venue.image_path,
+    rating: 4.7,
+    themeFit: venue.themeFit,
+    recommendationBasis: venue.aiRecommendationRole
+  }))
   return [
+    ...visualVenues,
     { id: 1, name: '云端宴会厅', address: '123 市中心大道', city: '悉尼', venue_type: '酒店宴会厅', capacity: 200, regular_price: 2500, is_partner: true, discount_rate: 0.15, description: '豪华宴会厅，配备顶级音响灯光系统', images: ['https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400'], rating: 4.8 },
     { id: 2, name: '海景花园会所', address: '456 海滨路', city: '墨尔本', venue_type: '私人会所', capacity: 150, regular_price: 1800, is_partner: false, description: '私家花园，尽享海景', images: ['https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400'], rating: 4.6 },
     { id: 3, name: '星空露台', address: '789 高楼路', city: '布里斯班', venue_type: '屋顶露台', capacity: 80, regular_price: 1200, is_partner: true, discount_rate: 0.10, description: '城市夜景尽收眼底', images: ['https://images.unsplash.com/photo-1510076857177-7470076d4098?w=400'], rating: 4.5 },
@@ -493,6 +518,13 @@ onMounted(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.venue-basis {
+  margin: 8px 0 0;
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .venue-footer {
