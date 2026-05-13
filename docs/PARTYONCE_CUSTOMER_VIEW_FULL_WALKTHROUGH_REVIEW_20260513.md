@@ -24,6 +24,12 @@ Local automated route smoke result:
 - Console errors: 0.
 - Broken images: 0.
 
+Remote Preview smoke note:
+
+- Preview URL checked after release-candidate push returned `401` for tested routes.
+- This blocks public customer-view validation from this session.
+- The likely cause is Vercel Preview protection/access settings or an access-gated deployment, not a local route failure.
+
 ## 2. Customer Understanding
 
 The app now communicates the product more clearly:

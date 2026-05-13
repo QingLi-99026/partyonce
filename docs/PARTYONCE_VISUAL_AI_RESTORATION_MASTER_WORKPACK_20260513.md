@@ -120,7 +120,14 @@ Routes checked:
 
 Pending:
 
-- Vercel preview redeploy after release-candidate push.
+- Vercel preview full smoke after access is available.
+
+Preview check after pushing `49f4b932`:
+
+- URL checked: `https://partyonce-git-eye-lite-v2-release-2af646-qingli-99026s-projects.vercel.app/`
+- Result: routes returned `401`.
+- Interpretation: Preview is not publicly smoke-testable from this session, likely due to Vercel preview protection/access gate or redeploy access settings.
+- App local build and local route smoke remain clean.
 
 ## 10. Safety
 
@@ -135,4 +142,4 @@ Pending:
 
 ## 11. Next Step
 
-Commit with a whitelist and push only the release candidate branch for Vercel Preview redeploy. After redeploy, rerun the same route smoke against the Preview URL.
+Owner should unlock/provide Vercel Preview access or confirm the latest Preview URL, then rerun the same 12-route smoke against the Preview URL.
