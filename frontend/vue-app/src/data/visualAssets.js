@@ -4,6 +4,25 @@ const THEME_IMAGES = {
   forest: '/party-assets/themes/forest-adventure-full.png'
 };
 
+const RESTAURANT_A_IMAGES = {
+  original: '/party-assets/venues/restaurant-a/restaurant-a-original.png',
+  castle: {
+    basic: '/party-assets/venues/restaurant-a/restaurant-a-castle-basic.png',
+    standard: '/party-assets/venues/restaurant-a/restaurant-a-castle-standard.png',
+    premium: '/party-assets/venues/restaurant-a/restaurant-a-castle-premium.png'
+  },
+  space: {
+    basic: '/party-assets/venues/restaurant-a/restaurant-a-space-basic.png',
+    standard: '/party-assets/venues/restaurant-a/restaurant-a-space-standard.png',
+    premium: '/party-assets/venues/restaurant-a/restaurant-a-space-premium.png'
+  },
+  forest: {
+    basic: '/party-assets/venues/restaurant-a/restaurant-a-forest-basic.png',
+    standard: '/party-assets/venues/restaurant-a/restaurant-a-forest-standard.png',
+    premium: '/party-assets/venues/restaurant-a/restaurant-a-forest-premium.png'
+  }
+};
+
 const THEME_META = {
   castle: {
     id: 'castle',
@@ -145,7 +164,7 @@ export const restaurantAVisuals = [
     theme: 'all',
     tier: 'original',
     title: 'Restaurant A 原貌',
-    image_path: '/party-assets/dining-layouts/private-dining-room-layout.png',
+    image_path: RESTAURANT_A_IMAGES.original,
     structureLock: '桌数、椅子数量、动线和包间结构保持不变',
     decorationLayer: '无主题装饰，仅作为客户确认空间尺度的 reference mockup'
   },
@@ -154,7 +173,7 @@ export const restaurantAVisuals = [
     theme: item.theme,
     tier: item.tier,
     title: `Restaurant A · ${item.themeName} ${item.tierLabel}`,
-    image_path: '/party-assets/dining-layouts/private-dining-room-layout.png',
+    image_path: RESTAURANT_A_IMAGES[item.theme]?.[item.tier] || RESTAURANT_A_IMAGES.original,
     structureLock: '同一餐厅结构不变；仅替换桌布、气球、背景板、甜品台、拍照区和灯光层',
     decorationLayer: item.scope,
     packageVisualId: item.id
@@ -169,7 +188,7 @@ export const venueDisplaySeeds = [
     capacity: '18-28 guests',
     tables: '3 long tables',
     chairs: '24 chairs',
-    image_path: '/party-assets/dining-layouts/private-dining-room-layout.png',
+    image_path: RESTAURANT_A_IMAGES.original,
     themeFit: ['castle', 'space', 'forest'],
     priceRange: '$800-$1,600 room hire',
     contact: 'Local/staging demo contact',
