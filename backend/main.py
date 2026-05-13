@@ -133,6 +133,9 @@ if IS_PRODUCTION:
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+STAGING_FIXTURE_ENVIRONMENTS = {"staging", "development", "test", "local"}
+STAGING_ADMIN_FIXTURE_TOKENS = {"preview-smoke-admin", "staging-smoke-admin"}
+STAGING_ADMIN_FIXTURE_HEADER = "admin-data-smoke-v1"
 
 # Storage Configuration (Cloudflare R2 or AWS S3)
 STORAGE_PROVIDER = os.getenv("STORAGE_PROVIDER", "r2")  # r2 or s3
@@ -1785,6 +1788,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     )
     if not token:
         raise credentials_exception
+    fixture_user = get_staging_admin_fixture_user(token)
+    if fixture_user:
+        return fixture_user
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
@@ -1801,6 +1807,9 @@ def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme_optio
     """可选的当前用户获取，无token时返回None而不是抛出异常"""
     if not token:
         return None
+    fixture_user = get_staging_admin_fixture_user(token)
+    if fixture_user:
+        return fixture_user
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
@@ -1815,6 +1824,24 @@ def require_admin(current_user: User = Depends(get_current_user)):
     if current_user.role not in ["admin", "manager"]:
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
+
+def is_staging_fixture_allowed() -> bool:
+    return (not IS_PRODUCTION) and ENVIRONMENT in STAGING_FIXTURE_ENVIRONMENTS
+
+def get_staging_admin_fixture_user(token: str) -> Optional[User]:
+    if not is_staging_fixture_allowed() or token not in STAGING_ADMIN_FIXTURE_TOKENS:
+        return None
+    return User(
+        id=9001,
+        email="staging-admin-fixture@example.test",
+        password_hash="staging-fixture-disabled-login",
+        full_name="Staging Admin Fixture",
+        user_type="internal",
+        role="admin",
+        phone=None,
+        company_name="PartyOnce Staging",
+        is_active=True
+    )
 
 LEAD_API_SKELETON_STORE: Dict[str, Dict[str, Any]] = {}
 LEAD_STORAGE_MODE = os.getenv("PARTYONCE_LEAD_STORAGE_MODE", "memory").strip().lower()
@@ -2712,6 +2739,358 @@ def update_stage2_order(order_id: str, request: Stage2OrderPatchRequest) -> Stag
             conn.execute(f"UPDATE orders SET {', '.join(update_fields)} WHERE id = ?", params)
             conn.commit()
         return build_stage2_order_response(get_stage2_order_detail_row(conn, order_id))
+
+def find_or_create_staging_fixture_customer(
+    conn: sqlite3.Connection,
+    name: str,
+    email: str,
+    phone: str
+) -> sqlite3.Row:
+    existing = conn.execute("SELECT * FROM customers WHERE email = ?", (email,)).fetchone()
+    if existing:
+        return existing
+    now = datetime.utcnow().isoformat()
+    cursor = conn.execute(
+        """
+        INSERT INTO customers (
+            name, email, phone, preferred_contact_method, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (name, email, phone, "email", now, now)
+    )
+    return conn.execute("SELECT * FROM customers WHERE id = ?", (cursor.lastrowid,)).fetchone()
+
+def find_or_create_staging_fixture_lead(
+    conn: sqlite3.Connection,
+    customer_id: int,
+    preferred_event_date: str,
+    intake_notes: str,
+    selection_snapshot: Dict[str, Any],
+    pricing_snapshot: Dict[str, Any]
+) -> sqlite3.Row:
+    existing = conn.execute(
+        """
+        SELECT * FROM leads
+        WHERE customer_id = ? AND source = ?
+        ORDER BY id ASC
+        LIMIT 1
+        """,
+        (customer_id, "staging_admin_fixture")
+    ).fetchone()
+    if existing:
+        return existing
+    now = datetime.utcnow().isoformat()
+    cursor = conn.execute(
+        """
+        INSERT INTO leads (
+            customer_id, source, status, priority, owner_user_id, preferred_event_date,
+            intake_notes, selection_snapshot_json, pricing_snapshot_json,
+            submitted_at, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            customer_id,
+            "staging_admin_fixture",
+            LeadStatus.QUALIFIED.value,
+            LeadPriority.HIGH.value,
+            9001,
+            preferred_event_date,
+            intake_notes,
+            encode_lead_snapshot(selection_snapshot),
+            encode_lead_snapshot(pricing_snapshot),
+            now,
+            now,
+            now
+        )
+    )
+    return conn.execute("SELECT * FROM leads WHERE id = ?", (cursor.lastrowid,)).fetchone()
+
+def upsert_staging_fixture_quote(
+    conn: sqlite3.Connection,
+    lead: sqlite3.Row,
+    customer: sqlite3.Row,
+    quote_number: str,
+    status: Stage2QuoteStatus,
+    total: float,
+    event_label: str,
+    current_user: User
+) -> sqlite3.Row:
+    now = datetime.utcnow().isoformat()
+    subtotal = round(total / 1.1, 2)
+    tax_total = round(total - subtotal, 2)
+    line_items = [
+        {
+            "type": "venue_package",
+            "name": f"{event_label} venue package",
+            "quantity": 1,
+            "unit_price": subtotal,
+            "final_amount": subtotal,
+            "staging_fixture": True
+        },
+        {
+            "type": "service_note",
+            "name": "Staging data smoke validation only",
+            "quantity": 1,
+            "unit_price": 0,
+            "final_amount": 0,
+            "external_actions": "none"
+        }
+    ]
+    selection_snapshot = {
+        "event_label": event_label,
+        "guest_count": 48,
+        "city": "Sydney",
+        "staging_fixture": True,
+        "payment_triggered": False,
+        "webhook_triggered": False,
+        "outbound_message_sent": False
+    }
+    sent_at = now if status in {Stage2QuoteStatus.SENT, Stage2QuoteStatus.ACCEPTED, Stage2QuoteStatus.CONVERTED_TO_ORDER} else None
+    accepted_at = now if status in {Stage2QuoteStatus.ACCEPTED, Stage2QuoteStatus.CONVERTED_TO_ORDER} else None
+    existing = conn.execute("SELECT * FROM quotes WHERE quote_number = ?", (quote_number,)).fetchone()
+    values = (
+        int(lead["id"]),
+        int(customer["id"]),
+        status.value,
+        "AUD",
+        subtotal,
+        0.0,
+        tax_total,
+        total,
+        encode_stage2_quote_snapshot(line_items),
+        encode_stage2_quote_snapshot(selection_snapshot),
+        "2026-06-30T23:59:59",
+        current_user.id,
+        "Staging Admin Fixture",
+        "Remote staging admin data smoke review",
+        "Fictional staging fixture. No payment, webhook, n8n, email, SMS, WhatsApp, WeChat, or external action is triggered.",
+        sent_at,
+        accepted_at,
+        current_user.id,
+        now
+    )
+    if existing:
+        conn.execute(
+            """
+            UPDATE quotes
+            SET lead_id = ?, customer_id = ?, status = ?, currency = ?, subtotal = ?,
+                discount_total = ?, tax_total = ?, final_total = ?, line_items_json = ?,
+                selection_snapshot_json = ?, valid_until = ?, owner_user_id = ?,
+                owner_label = ?, next_action = ?, internal_note = ?, sent_at = ?,
+                accepted_at = ?, created_by_user_id = ?, updated_at = ?
+            WHERE quote_number = ?
+            """,
+            values + (quote_number,)
+        )
+    else:
+        conn.execute(
+            """
+            INSERT INTO quotes (
+                lead_id, customer_id, quote_number, status, currency, subtotal,
+                discount_total, tax_total, final_total, line_items_json,
+                selection_snapshot_json, valid_until, owner_user_id, owner_label,
+                next_action, internal_note, sent_at, accepted_at, created_by_user_id,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                int(lead["id"]),
+                int(customer["id"]),
+                quote_number,
+                status.value,
+                "AUD",
+                subtotal,
+                0.0,
+                tax_total,
+                total,
+                encode_stage2_quote_snapshot(line_items),
+                encode_stage2_quote_snapshot(selection_snapshot),
+                "2026-06-30T23:59:59",
+                current_user.id,
+                "Staging Admin Fixture",
+                "Remote staging admin data smoke review",
+                "Fictional staging fixture. No payment, webhook, n8n, email, SMS, WhatsApp, WeChat, or external action is triggered.",
+                sent_at,
+                accepted_at,
+                current_user.id,
+                now,
+                now
+            )
+        )
+    return conn.execute("SELECT * FROM quotes WHERE quote_number = ?", (quote_number,)).fetchone()
+
+def upsert_staging_fixture_order(
+    conn: sqlite3.Connection,
+    quote: sqlite3.Row,
+    order_number: str,
+    current_user: User
+) -> sqlite3.Row:
+    now = datetime.utcnow().isoformat()
+    existing = conn.execute("SELECT * FROM orders WHERE order_number = ?", (order_number,)).fetchone()
+    values = (
+        int(quote["id"]),
+        int(quote["lead_id"]),
+        int(quote["customer_id"]),
+        Stage2OrderStatus.PENDING_DEPOSIT.value,
+        "2026-06-21",
+        "Sydney NSW staging venue",
+        quote["currency"],
+        coerce_stage2_quote_amount(quote["final_total"]),
+        0.0,
+        Stage2DepositStatus.NOT_STARTED.value,
+        None,
+        quote["selection_snapshot_json"],
+        quote["line_items_json"],
+        encode_stage2_order_snapshot({"staging_fixture": True, "customer_id": str(quote["customer_id"])}),
+        current_user.id,
+        "Staging Admin Fixture",
+        "Verify admin order queue without payment capture",
+        "Fictional staging fixture. Deposit is not started; no Stripe/payment, webhook, n8n, email, SMS, WhatsApp, WeChat, or external action is triggered.",
+        current_user.id,
+        now
+    )
+    if existing:
+        conn.execute(
+            """
+            UPDATE orders
+            SET quote_id = ?, lead_id = ?, customer_id = ?, status = ?, event_date = ?,
+                event_location = ?, currency = ?, total_amount = ?, deposit_amount = ?,
+                deposit_status = ?, payment_reference = ?, selection_snapshot_json = ?,
+                line_items_json = ?, customer_snapshot_json = ?, owner_user_id = ?,
+                owner_label = ?, next_action = ?, internal_notes = ?, created_by_user_id = ?,
+                updated_at = ?
+            WHERE order_number = ?
+            """,
+            values + (order_number,)
+        )
+    else:
+        conn.execute(
+            """
+            INSERT INTO orders (
+                quote_id, lead_id, customer_id, order_number, status, event_date,
+                event_location, currency, total_amount, deposit_amount, deposit_status,
+                payment_reference, selection_snapshot_json, line_items_json,
+                customer_snapshot_json, owner_user_id, owner_label, next_action,
+                internal_notes, created_by_user_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                int(quote["id"]),
+                int(quote["lead_id"]),
+                int(quote["customer_id"]),
+                order_number,
+                Stage2OrderStatus.PENDING_DEPOSIT.value,
+                "2026-06-21",
+                "Sydney NSW staging venue",
+                quote["currency"],
+                coerce_stage2_quote_amount(quote["final_total"]),
+                0.0,
+                Stage2DepositStatus.NOT_STARTED.value,
+                None,
+                quote["selection_snapshot_json"],
+                quote["line_items_json"],
+                encode_stage2_order_snapshot({"staging_fixture": True, "customer_id": str(quote["customer_id"])}),
+                current_user.id,
+                "Staging Admin Fixture",
+                "Verify admin order queue without payment capture",
+                "Fictional staging fixture. Deposit is not started; no Stripe/payment, webhook, n8n, email, SMS, WhatsApp, WeChat, or external action is triggered.",
+                current_user.id,
+                now,
+                now
+            )
+        )
+    return conn.execute("SELECT * FROM orders WHERE order_number = ?", (order_number,)).fetchone()
+
+def seed_staging_admin_data_fixture(current_user: User) -> Dict[str, Any]:
+    if not is_staging_fixture_allowed():
+        raise HTTPException(status_code=403, detail="Staging admin fixture is disabled outside staging/local test environments")
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Staging admin fixture requires sqlite_local lead storage")
+
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_order_sqlite_schema(conn)
+        try:
+            conn.execute("BEGIN")
+            customer_one = find_or_create_staging_fixture_customer(
+                conn,
+                "Avery Staging Demo",
+                "avery.staging.demo@example.test",
+                "+61 400 000 101"
+            )
+            lead_one = find_or_create_staging_fixture_lead(
+                conn,
+                int(customer_one["id"]),
+                "2026-06-21",
+                "Fictional staging admin fixture for quote-to-order smoke. No external actions.",
+                {"event_type": "birthday", "guest_count": 48, "staging_fixture": True},
+                {"subtotal": 2545.45, "taxTotal": 254.55, "finalTotal": 2800.00}
+            )
+            quote_one = upsert_staging_fixture_quote(
+                conn,
+                lead_one,
+                customer_one,
+                "STG-Q-20260513-001",
+                Stage2QuoteStatus.CONVERTED_TO_ORDER,
+                2800.00,
+                "Staging birthday package",
+                current_user
+            )
+            order_one = upsert_staging_fixture_order(
+                conn,
+                quote_one,
+                "STG-O-20260513-001",
+                current_user
+            )
+
+            customer_two = find_or_create_staging_fixture_customer(
+                conn,
+                "Morgan Preview Demo",
+                "morgan.preview.demo@example.test",
+                "+61 400 000 202"
+            )
+            lead_two = find_or_create_staging_fixture_lead(
+                conn,
+                int(customer_two["id"]),
+                "2026-07-05",
+                "Fictional staging admin fixture for open quote smoke. No external actions.",
+                {"event_type": "corporate", "guest_count": 72, "staging_fixture": True},
+                {"subtotal": 3818.18, "taxTotal": 381.82, "finalTotal": 4200.00}
+            )
+            quote_two = upsert_staging_fixture_quote(
+                conn,
+                lead_two,
+                customer_two,
+                "STG-Q-20260513-002",
+                Stage2QuoteStatus.SENT,
+                4200.00,
+                "Staging corporate package",
+                current_user
+            )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+        return {
+            "seeded": True,
+            "environment": ENVIRONMENT,
+            "storage_mode": LEAD_STORAGE_MODE,
+            "quotes": [
+                build_stage2_quote_response(get_stage2_quote_detail_row(conn, str(quote_one["id"]))).dict(),
+                build_stage2_quote_response(get_stage2_quote_detail_row(conn, str(quote_two["id"]))).dict()
+            ],
+            "orders": [
+                build_stage2_order_response(get_stage2_order_detail_row(conn, str(order_one["id"]))).dict()
+            ],
+            "safety": {
+                "staging_only": True,
+                "production_enabled": False,
+                "payment_triggered": False,
+                "webhook_triggered": False,
+                "n8n_triggered": False,
+                "outbound_message_sent": False
+            }
+        }
 
 def build_sqlite_lead_response(conn: sqlite3.Connection, row: sqlite3.Row) -> LeadResponse:
     contact = row["email"] or row["phone"] or row["wechat_or_other_contact"] or ""
@@ -3807,6 +4186,21 @@ def update_lead_skeleton(
     lead["updated_at"] = datetime.utcnow()
     LEAD_API_SKELETON_STORE[lead_id] = lead
     return build_lead_response(lead)
+
+@app.post("/api/admin/staging-fixtures/admin-data-smoke")
+def seed_staging_admin_data_smoke(
+    x_partyonce_staging_fixture: Optional[str] = Header(default=None),
+    current_user: User = Depends(require_admin)
+):
+    """
+    Staging-only admin smoke fixture.
+
+    Seeds fictional Quote/Order data for remote staging UI validation. This endpoint
+    is disabled in production and does not trigger payment, webhook, n8n, or outbound messaging.
+    """
+    if x_partyonce_staging_fixture != STAGING_ADMIN_FIXTURE_HEADER:
+        raise HTTPException(status_code=403, detail="Staging fixture header required")
+    return seed_staging_admin_data_fixture(current_user)
 
 # Stage 2 Quote API Skeleton
 @app.post("/api/quotes", response_model=Stage2QuoteResponse, status_code=201)
