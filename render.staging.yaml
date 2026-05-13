@@ -1,0 +1,29 @@
+# Render Blueprint for PartyOnce remote staging.
+# This file is preparation-only. Do not deploy without owner approval.
+
+services:
+  - type: web
+    name: partyonce-staging-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeploy: false
+    envVars:
+      - key: ENVIRONMENT
+        value: staging
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PARTYONCE_LEAD_STORAGE_MODE
+        value: sqlite_local
+      - key: PARTYONCE_LEAD_SQLITE_PATH
+        sync: false
