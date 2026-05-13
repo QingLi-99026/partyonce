@@ -132,6 +132,42 @@
             </a>
           </div>
         </div>
+
+        <div class="restoration-grid">
+          <article class="restoration-panel">
+            <div class="asset-panel-header">
+              <span class="asset-kicker">Three themes · nine package visuals</span>
+              <h3 class="asset-panel-title">三主题九套餐体系</h3>
+              <p class="asset-panel-copy">每个主题已绑定 Basic / Standard / Premium 的装饰、材料、价格层级和适合场地说明。</p>
+            </div>
+            <div class="mini-visual-grid">
+              <div v-for="item in packageVisualsForTheme" :key="item.id" class="mini-visual-card">
+                <img :src="item.image_path" :alt="item.title" loading="lazy">
+                <div>
+                  <strong>{{ item.tierLabel }} · {{ item.priceHint }}</strong>
+                  <span>{{ item.scope }}</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="restoration-panel">
+            <div class="asset-panel-header">
+              <span class="asset-kicker">Restaurant A rendering sample</span>
+              <h3 class="asset-panel-title">餐厅原貌 + 主题装饰层</h3>
+              <p class="asset-panel-copy">Restaurant A 保持桌椅和空间结构不变，只改变气球、桌布、背景板、甜品台和灯光层。</p>
+            </div>
+            <div class="mini-visual-grid">
+              <div v-for="item in restaurantVisualsForTheme" :key="item.id" class="mini-visual-card">
+                <img :src="item.image_path" :alt="item.title" loading="lazy">
+                <div>
+                  <strong>{{ item.title }}</strong>
+                  <span>{{ item.decorationLayer }}</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -210,7 +246,7 @@ import ImmersiveHero from '@/components/ImmersiveHero.vue';
 import SceneShowcase from '@/components/SceneShowcase.vue';
 import PackageShowcase from '@/components/PackageShowcase.vue';
 import { getTheme, getAllThemes } from '@/themes';
-import { getVisualAssetsByTheme } from '@/data/visualAssets';
+import { getRestaurantAVisuals, getThemePackageVisuals, getVisualAssetsByTheme } from '@/data/visualAssets';
 
 export default {
   name: 'HomePage',
@@ -272,7 +308,7 @@ export default {
         {
           icon: '🤖',
           label: 'AI 帮我推荐',
-          to: '/ai-planner',
+          to: '/ai-voice-intake',
           primary: false
         }
       ],
@@ -309,6 +345,14 @@ export default {
 
     visualAssetsForTheme() {
       return getVisualAssetsByTheme(this.currentTheme);
+    },
+
+    packageVisualsForTheme() {
+      return getThemePackageVisuals(this.currentTheme);
+    },
+
+    restaurantVisualsForTheme() {
+      return getRestaurantAVisuals(this.currentTheme);
     },
     
     pageStyle() {
@@ -913,6 +957,61 @@ export default {
   color: var(--theme-text-muted);
   font-size: 0.92rem;
   line-height: 1.55;
+}
+
+.restoration-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 22px;
+}
+
+.restoration-panel {
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 22px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.mini-visual-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.mini-visual-card {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mini-visual-card img {
+  width: 112px;
+  height: 78px;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.mini-visual-card strong,
+.mini-visual-card span {
+  display: block;
+}
+
+.mini-visual-card strong {
+  color: var(--theme-text);
+  font-size: 0.98rem;
+}
+
+.mini-visual-card span {
+  margin-top: 5px;
+  color: var(--theme-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 /* 流程介绍区 */

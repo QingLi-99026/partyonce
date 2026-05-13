@@ -46,6 +46,12 @@ const routes = [
     meta: { title: 'AI策划', requiresAuth: true }
   },
   {
+    path: '/ai-voice-intake',
+    name: 'AIVoiceIntake',
+    component: () => import('@/views/AIVoiceIntake.vue'),
+    meta: { title: 'AI 语音式引导' }
+  },
+  {
     path: '/designer',
     name: 'Designer3D',
     component: () => import('@/views/Designer3D.vue'),

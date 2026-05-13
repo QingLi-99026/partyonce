@@ -140,6 +140,11 @@ const listLocalSupplierDisplayItems = (params = {}) => {
 }
 
 export const listSupplierDisplayItems = async (params = {}) => {
+  const enableRemoteSupplierApi = import.meta.env.VITE_SUPPLIER_REMOTE_API === 'true'
+  if (!enableRemoteSupplierApi) {
+    return listLocalSupplierDisplayItems(params)
+  }
+
   try {
     const response = await apiClient.get('/suppliers', { params })
     const items = Array.isArray(response) ? response : []

@@ -67,7 +67,7 @@
             @click="selectSupplier(supplier)"
           >
             <div class="card-image">
-              <img :src="supplier.cover_image_url || '/placeholder-venue.jpg'" :alt="supplier.name" />
+              <img :src="supplier.cover_image_url || '/party-assets/packages/package-tier-matrix.png'" :alt="supplier.name" />
               <span class="distance-badge">{{ supplier.distance_km }}km</span>
             </div>
             

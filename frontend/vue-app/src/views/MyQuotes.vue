@@ -46,6 +46,14 @@
           <el-tag :type="quoteTagType(quote.status)" effect="plain">{{ quote.status_text }}</el-tag>
         </div>
 
+        <div class="visual-strip">
+          <img :src="quoteVisual(quote).packageVisual.image_path" :alt="quoteVisual(quote).packageVisual.title">
+          <div>
+            <strong>{{ quoteVisual(quote).packageVisual.title }}</strong>
+            <span>{{ quoteVisual(quote).packageVisual.priceHint }} · {{ quoteVisual(quote).packageVisual.suitableVenue }}</span>
+          </div>
+        </div>
+
         <dl class="detail-list">
           <div>
             <dt>Theme / package</dt>
@@ -106,6 +114,7 @@ import {
   getCustomerInteractionState,
   quoteStatuses
 } from '@/services/customerExperienceService'
+import { getVisualContext } from '@/data/visualAssets'
 
 const router = useRouter()
 const loading = ref(false)
@@ -142,6 +151,22 @@ const quoteTagType = (status) => ({
 }[status] || 'info')
 
 const quoteInteraction = (quoteId) => getCustomerInteractionState('quote', quoteId)
+
+const normalizeThemeId = (value = '') => {
+  const normalized = value.toLowerCase()
+  if (normalized.includes('castle')) return 'castle'
+  if (normalized.includes('forest')) return 'forest'
+  return 'space'
+}
+
+const normalizeTierId = (value = '') => {
+  const normalized = value.toLowerCase()
+  if (normalized.includes('premium') || normalized.includes('尊享')) return 'premium'
+  if (normalized.includes('basic') || normalized.includes('基础')) return 'basic'
+  return 'standard'
+}
+
+const quoteVisual = (quote) => getVisualContext(normalizeThemeId(quote.theme), normalizeTierId(quote.package))
 
 const loadQuotes = async () => {
   loading.value = true
@@ -220,6 +245,37 @@ h1 {
   background: #fff;
   padding: 18px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.visual-strip {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin: 14px 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.visual-strip img {
+  width: 96px;
+  height: 68px;
+  border-radius: 8px;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.visual-strip strong,
+.visual-strip span {
+  display: block;
+}
+
+.visual-strip span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .card-head {

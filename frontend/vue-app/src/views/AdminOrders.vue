@@ -197,6 +197,18 @@
           </template>
         </el-table-column>
 
+        <el-table-column label="Visual Context" min-width="260">
+          <template #default="{ row }">
+            <div class="visual-cell">
+              <img :src="orderVisual(row).restaurant.image_path" :alt="orderVisual(row).restaurant.title">
+              <div>
+                <strong>{{ orderVisual(row).restaurant.title }}</strong>
+                <span>{{ orderVisual(row).suppliers.map((item) => item.name).join(' / ') }}</span>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column label="Amount" width="150" align="right">
           <template #default="{ row }">
             <div class="amount-cell">
@@ -242,6 +254,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { orderStatuses } from '@/mock/adminOrders'
+import { getVisualContext } from '@/data/visualAssets'
 import {
   ORDER_SOURCE_API,
   ORDER_SOURCE_FALLBACK,
@@ -424,6 +437,25 @@ const clearFilters = () => {
   riskFilter.value = ''
   loadOrders()
 }
+
+const normalizeThemeId = (value = '') => {
+  const normalized = String(value).toLowerCase()
+  if (normalized.includes('castle')) return 'castle'
+  if (normalized.includes('forest')) return 'forest'
+  return 'space'
+}
+
+const normalizeTierId = (value = '') => {
+  const normalized = String(value).toLowerCase()
+  if (normalized.includes('premium') || normalized.includes('尊享')) return 'premium'
+  if (normalized.includes('basic') || normalized.includes('基础')) return 'basic'
+  return 'standard'
+}
+
+const orderVisual = (order) => getVisualContext(
+  normalizeThemeId(order.event?.theme || order.theme),
+  normalizeTierId(order.event?.package_tier || order.package_tier)
+)
 
 const formatMoney = (value, currency = 'AUD') => {
   const amount = Number(value || 0)
@@ -650,6 +682,33 @@ onMounted(loadOrders)
 .alert-cell span {
   color: #868e96;
   font-size: 12px;
+}
+
+.visual-cell {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.visual-cell img {
+  width: 72px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.visual-cell strong,
+.visual-cell span {
+  display: block;
+}
+
+.visual-cell span {
+  margin-top: 3px;
+  color: #868e96;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 @media (max-width: 900px) {

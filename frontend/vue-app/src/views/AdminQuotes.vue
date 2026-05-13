@@ -216,6 +216,18 @@
           </template>
         </el-table-column>
 
+        <el-table-column label="Visual Context" min-width="260">
+          <template #default="{ row }">
+            <div class="visual-cell">
+              <img :src="quoteVisual(row).packageVisual.image_path" :alt="quoteVisual(row).packageVisual.title">
+              <div>
+                <strong>{{ quoteVisual(row).packageVisual.title }}</strong>
+                <span>{{ quoteVisual(row).suppliers.map((item) => item.name).join(' / ') }}</span>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column label="Created" min-width="170">
           <template #default="{ row }">{{ formatDateTime(row.created_at) }}</template>
         </el-table-column>
@@ -257,6 +269,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import apiClient from '@/api'
+import { getVisualContext } from '@/data/visualAssets'
 
 const router = useRouter()
 
@@ -459,6 +472,28 @@ const lineItemSummary = (quote) => {
   const items = Array.isArray(quote.line_items) ? quote.line_items : []
   if (items.length === 0) return 'No line item snapshot'
   return `${items.length} line item${items.length === 1 ? '' : 's'}`
+}
+
+const normalizeThemeId = (value = '') => {
+  const normalized = String(value).toLowerCase()
+  if (normalized.includes('castle')) return 'castle'
+  if (normalized.includes('forest')) return 'forest'
+  return 'space'
+}
+
+const normalizeTierId = (value = '') => {
+  const normalized = String(value).toLowerCase()
+  if (normalized.includes('premium') || normalized.includes('尊享')) return 'premium'
+  if (normalized.includes('basic') || normalized.includes('基础')) return 'basic'
+  return 'standard'
+}
+
+const quoteVisual = (quote) => {
+  const selection = quote.selection_snapshot || {}
+  return getVisualContext(
+    normalizeThemeId(selection.theme || quote.theme || selectionSummary(quote)),
+    normalizeTierId(selection.package || quote.package_tier || selectionSummary(quote))
+  )
 }
 
 const quoteOwner = (quote) => quote.owner_label || (quote.owner_user_id ? `Owner #${quote.owner_user_id}` : 'Unassigned')
@@ -722,6 +757,33 @@ onMounted(loadQuotes)
 .alert-cell span {
   color: #868e96;
   font-size: 12px;
+}
+
+.visual-cell {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.visual-cell img {
+  width: 72px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.visual-cell strong,
+.visual-cell span {
+  display: block;
+}
+
+.visual-cell span {
+  margin-top: 3px;
+  color: #868e96;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 @media (max-width: 900px) {

@@ -46,6 +46,14 @@
           <el-tag :type="orderTagType(order.status)" effect="plain">{{ order.status_text }}</el-tag>
         </div>
 
+        <div class="visual-strip">
+          <img :src="orderVisual(order).restaurant.image_path" :alt="orderVisual(order).restaurant.title">
+          <div>
+            <strong>{{ orderVisual(order).restaurant.title }}</strong>
+            <span>{{ orderVisual(order).restaurant.structureLock }}</span>
+          </div>
+        </div>
+
         <dl class="detail-list">
           <div>
             <dt>Event date</dt>
@@ -100,6 +108,7 @@ import {
   getCustomerInteractionState,
   orderStatuses
 } from '@/services/customerExperienceService'
+import { getVisualContext } from '@/data/visualAssets'
 
 const router = useRouter()
 const loading = ref(false)
@@ -137,6 +146,22 @@ const orderTagType = (status) => ({
 }[status] || 'info')
 
 const orderInteraction = (orderId) => getCustomerInteractionState('order', orderId)
+
+const normalizeThemeId = (value = '') => {
+  const normalized = value.toLowerCase()
+  if (normalized.includes('castle')) return 'castle'
+  if (normalized.includes('forest')) return 'forest'
+  return 'space'
+}
+
+const normalizeTierId = (value = '') => {
+  const normalized = value.toLowerCase()
+  if (normalized.includes('premium') || normalized.includes('尊享')) return 'premium'
+  if (normalized.includes('basic') || normalized.includes('基础')) return 'basic'
+  return 'standard'
+}
+
+const orderVisual = (order) => getVisualContext(normalizeThemeId(order.theme), normalizeTierId(order.package))
 
 const loadOrders = async () => {
   loading.value = true
@@ -215,6 +240,37 @@ h1 {
   background: #fff;
   padding: 18px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.visual-strip {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin: 14px 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.visual-strip img {
+  width: 96px;
+  height: 68px;
+  border-radius: 8px;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.visual-strip strong,
+.visual-strip span {
+  display: block;
+}
+
+.visual-strip span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .card-head {

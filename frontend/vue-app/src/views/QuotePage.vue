@@ -72,6 +72,33 @@
       </div>
     </section>
 
+    <section class="visual-context-section">
+      <div class="section-container">
+        <h2 class="section-title" :style="titleStyle">视觉方案依据</h2>
+        <div class="visual-context-card" :style="cardStyle">
+          <img :src="visualContext.packageVisual.image_path" :alt="visualContext.packageVisual.title">
+          <div class="visual-context-copy">
+            <span class="visual-kicker">{{ visualContext.packageVisual.title }}</span>
+            <p>{{ visualContext.packageVisual.scope }}</p>
+            <dl>
+              <div>
+                <dt>适合年龄</dt>
+                <dd>{{ visualContext.packageVisual.suitableAge }} 岁</dd>
+              </div>
+              <div>
+                <dt>餐厅样板</dt>
+                <dd>{{ visualContext.restaurant.structureLock }}</dd>
+              </div>
+              <div>
+                <dt>供应商建议</dt>
+                <dd>{{ visualContext.suppliers.map((item) => item.name).join(' / ') }}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 附加项 -->
     <section class="addons-section">
       <div class="section-container">
@@ -184,6 +211,7 @@
 
 <script>
 import { getTheme } from '@/themes';
+import { getVisualContext } from '@/data/visualAssets';
 
 export default {
   name: 'QuotePageSimple',
@@ -262,6 +290,10 @@ export default {
         }
       };
       return packages[this.packageId] || packages.standard;
+    },
+
+    visualContext() {
+      return getVisualContext(this.themeId, this.packageId);
     },
     
     addonsTotal() {
@@ -656,6 +688,58 @@ export default {
   border-radius: 16px;
 }
 
+.visual-context-section {
+  padding: 46px 0;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.visual-context-card {
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+  gap: 22px;
+  padding: 18px;
+}
+
+.visual-context-card img {
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  border-radius: 14px;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.visual-context-copy {
+  align-self: center;
+}
+
+.visual-kicker {
+  display: inline-flex;
+  margin-bottom: 12px;
+  color: var(--theme-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.visual-context-copy p,
+.visual-context-copy dd {
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.65;
+}
+
+.visual-context-copy dl {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+}
+
+.visual-context-copy dt {
+  color: #fff;
+  font-weight: 800;
+}
+
 .price-row {
   display: flex;
   justify-content: space-between;
@@ -699,6 +783,12 @@ export default {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
+}
+
+@media (max-width: 760px) {
+  .visual-context-card {
+    grid-template-columns: 1fr;
+  }
 }
 
 .addon-card {

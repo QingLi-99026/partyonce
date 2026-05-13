@@ -36,6 +36,7 @@
             <th>分类</th>
             <th>区域</th>
             <th>联系人</th>
+            <th>视觉 / 主题支持</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -52,6 +53,12 @@
             </td>
             <td>{{ s.suburb }}</td>
             <td>{{ s.contact_name || '-' }}</td>
+            <td>
+              <div class="visual-supplier-cell">
+                <img :src="s.cover_image_url || '/party-assets/packages/package-tier-matrix.png'" :alt="s.name" />
+                <span>{{ s.theme_support || 'Castle / Space / Forest' }}</span>
+              </div>
+            </td>
             <td class="actions">
               <button @click="viewDetail(s)">查看</button>
               <button @click="editSupplier(s)">编辑</button>
@@ -66,27 +73,19 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { supplierDisplaySeeds } from '@/data/visualAssets'
 
 const router = useRouter()
 
-const suppliers = ref([
-  {
-    supplier_id: 1,
-    name: '悉尼儿童派对中心',
-    category_level_1: '场地类',
-    suburb: 'North Sydney',
-    contact_name: 'Sarah Chen',
-    cover_image_url: 'https://images.unsplash.com/photo-1530103862676-de3c9a59aa38?w=200'
-  },
-  {
-    supplier_id: 2,
-    name: 'Manly海滨派对屋',
-    category_level_1: '场地类',
-    suburb: 'Manly',
-    contact_name: 'Mike Wilson',
-    cover_image_url: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=200'
-  }
-])
+const suppliers = ref(supplierDisplaySeeds.map((item, index) => ({
+  supplier_id: index + 1,
+  name: item.name,
+  category_level_1: item.category,
+  suburb: item.serviceArea,
+  contact_name: item.status,
+  cover_image_url: item.image_path,
+  theme_support: item.supportedThemes.join(' / ')
+})))
 
 const viewDetail = (s) => router.push(`/suppliers/${s.supplier_id}`)
 const editSupplier = (s) => router.push(`/admin/suppliers/${s.supplier_id}/edit`)
@@ -224,6 +223,28 @@ const editSupplier = (s) => router.push(`/admin/suppliers/${s.supplier_id}/edit`
 .supplier-name .name {
   font-weight: 800;
   color: #000000;
+}
+
+.visual-supplier-cell {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 10px;
+  align-items: center;
+  max-width: 220px;
+}
+
+.visual-supplier-cell img {
+  width: 58px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #333333;
+}
+
+.visual-supplier-cell span {
+  color: #555555;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .category-tag {
