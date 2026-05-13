@@ -131,7 +131,15 @@ AI Concierge flow smoke：
 
 ## 9. Preview redeploy 结果
 
-本地验证已通过。本轮提交后可 push release candidate branch 触发 Vercel Preview redeploy。
+已 push release candidate branch：
+
+`eye-lite-v2-release-candidate-20260512`
+
+Vercel Preview 已 redeploy，并通过公开 URL 验证：
+
+- `/ai-voice-intake`：200，渲染新 AI Concierge 页面，console error = 0
+- 远程 AI Concierge flow：完成 10 步问答后跳转 `/quote?theme=space&package=standard&scene=restaurant-a&source=ai_concierge`
+- 远程 `/quote`：显示 `AI CONCIERGE PREFILL`，说明 quote request 预填链路可用
 
 Preview URL 继续使用：
 
@@ -159,7 +167,7 @@ Preview URL 继续使用：
 
 无本轮代码 blocker。
 
-Preview redeploy 需要在提交并 push release candidate branch 后由 Vercel 执行；仍禁止 production deploy。
+无本轮代码 blocker。Preview 已更新并验证。
 
 ## 15. 下一步建议
 
