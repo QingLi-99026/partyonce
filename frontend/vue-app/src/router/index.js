@@ -6,8 +6,14 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/Home.vue'),
+    component: () => import('@/views/HomePage.vue'),
     meta: { title: '首页' }
+  },
+  {
+    path: '/home-simple',
+    name: 'HomeSimple',
+    component: () => import('@/views/Home.vue'),
+    meta: { title: '首页简版' }
   },
   {
     path: '/local-demo',
