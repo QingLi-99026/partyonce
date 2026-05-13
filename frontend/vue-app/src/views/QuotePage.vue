@@ -13,6 +13,16 @@
       <p class="page-subtitle">确认您的派对方案</p>
     </header>
 
+    <section v-if="aiPrefillNotice" class="ai-prefill-notice">
+      <div class="section-container">
+        <div class="ai-prefill-card" :style="cardStyle">
+          <span class="ai-prefill-kicker">AI Concierge prefill</span>
+          <strong>{{ aiPrefillNotice.title }}</strong>
+          <p>{{ aiPrefillNotice.body }}</p>
+        </div>
+      </div>
+    </section>
+
     <!-- 当前选择结果 -->
     <section class="current-selection">
       <div class="section-container">
@@ -212,6 +222,7 @@
 <script>
 import { getTheme } from '@/themes';
 import { getVisualContext } from '@/data/visualAssets';
+import { readQuotePrefill } from '@/services/aiVoiceIntakeService';
 
 export default {
   name: 'QuotePageSimple',
@@ -235,7 +246,9 @@ export default {
       submitSuccess: false,
       submitError: false,
       submitMessage: '',
-      isSubmittingInquiry: false
+      isSubmittingInquiry: false,
+      aiPrefill: null,
+      quoteSource: this.$route.query.source || 'web_quote'
     };
   },
   
@@ -247,16 +260,19 @@ export default {
     sceneData() {
       const scenes = {
         space: {
+          'restaurant-a': { name: 'Restaurant A 私人餐厅样板', icon: '🍽️', basePrice: 2600 },
           command: { name: '星际指挥舱', icon: '🚀', basePrice: 2800 },
           moon: { name: '月球表面基地', icon: '🌙', basePrice: 3200 },
           observatory: { name: '星际观测站', icon: '🔭', basePrice: 2500 }
         },
         castle: {
+          'restaurant-a': { name: 'Restaurant A 私人餐厅样板', icon: '🍽️', basePrice: 2800 },
           banquet: { name: '皇家宴会厅', icon: '👑', basePrice: 3500 },
           garden: { name: '秘密花园露台', icon: '🌹', basePrice: 2800 },
           tower: { name: '魔法塔楼', icon: '🏰', basePrice: 3000 }
         },
         forest: {
+          'restaurant-a': { name: 'Restaurant A 私人餐厅样板', icon: '🍽️', basePrice: 2400 },
           clearing: { name: '林间空地', icon: '🌲', basePrice: 2200 },
           treehouse: { name: '树屋秘境', icon: '🏕️', basePrice: 3800 },
           firefly: { name: '萤火虫溪谷', icon: '✨', basePrice: 2600 }
@@ -294,6 +310,14 @@ export default {
 
     visualContext() {
       return getVisualContext(this.themeId, this.packageId);
+    },
+
+    aiPrefillNotice() {
+      if (!this.aiPrefill) return null;
+      return {
+        title: `${this.aiPrefill.selection?.themeName || this.themeConfig.name} · ${this.aiPrefill.selection?.packageName || this.packageData.name}`,
+        body: '已从 AI Concierge 自动带入联系人、日期、人数、预算、场地偏好和推荐理由。确认后只会提交 inquiry / Lead skeleton，不会创建 Quote、Order 或 PaymentIntent。'
+      };
     },
     
     addonsTotal() {
@@ -393,7 +417,7 @@ export default {
         intake_notes: inquiryData.customerInfo.notes || null,
         selection: inquiryData.selection || {},
         pricing_snapshot: inquiryData.pricing || {},
-        source: 'web_quote'
+        source: inquiryData.source || 'web_quote'
       };
     },
 
@@ -455,7 +479,11 @@ export default {
           name: this.inquiryForm.name,
           contact: this.inquiryForm.contact,
           preferredDate: this.inquiryForm.date,
-          notes: this.inquiryForm.notes
+          notes: this.inquiryForm.notes,
+          guestCount: this.aiPrefill?.customerInfo?.guestCount || null,
+          budgetRange: this.aiPrefill?.customerInfo?.budgetRange || null,
+          area: this.aiPrefill?.customerInfo?.area || null,
+          venuePreference: this.aiPrefill?.customerInfo?.venuePreference || null
         },
         selection: {
           themeId: this.themeId,
@@ -464,6 +492,15 @@ export default {
           sceneName: this.sceneData.name,
           packageId: this.packageId,
           packageName: this.packageData.name,
+          source: this.quoteSource,
+          venueType: this.aiPrefill?.selection?.venueType || this.sceneData.name,
+          restaurantVisual: this.aiPrefill?.selection?.restaurantVisual || this.visualContext.restaurant.image_path,
+          packageVisual: this.aiPrefill?.selection?.packageVisual || this.visualContext.packageVisual.image_path,
+          supplierSuggestions: this.aiPrefill?.selection?.supplierSuggestions || this.visualContext.suppliers.map((item) => ({
+            id: item.id,
+            name: item.name,
+            category: item.category
+          })),
           addons: this.selectedAddons.map(id => {
             const addon = this.addons.find(a => a.id === id);
             return { id, name: addon?.name, price: addon?.price };
@@ -473,8 +510,11 @@ export default {
           packagePrice: this.packageData.price,
           sceneFee: this.sceneData.basePrice * 0.1,
           addonsTotal: this.addonsTotal,
-          finalTotal: this.finalTotal
+          finalTotal: this.finalTotal,
+          aiEstimate: this.aiPrefill?.pricing || null
         },
+        source: this.quoteSource,
+        aiRecommendation: this.aiPrefill?.aiRecommendation || null,
         submitTime: new Date().toISOString(),
         status: 'pending'
       };
@@ -547,10 +587,31 @@ export default {
           console.error('读取保存的方案失败:', e);
         }
       }
+    },
+
+    applyAiConciergePrefill() {
+      const prefill = readQuotePrefill();
+      if (!prefill || this.$route.query.source !== 'ai_concierge') {
+        return;
+      }
+
+      this.aiPrefill = prefill;
+      this.quoteSource = 'ai_concierge';
+      this.themeId = prefill.selection?.themeId || this.themeId;
+      this.sceneId = prefill.selection?.sceneId || 'restaurant-a';
+      this.packageId = prefill.selection?.packageId || this.packageId;
+      this.inquiryForm = {
+        name: prefill.customerInfo?.name || '',
+        contact: prefill.customerInfo?.contact || '',
+        date: prefill.customerInfo?.preferredDate || '',
+        notes: prefill.customerInfo?.notes || ''
+      };
+      this.showForm = true;
     }
   },
 
   mounted() {
+    this.applyAiConciergePrefill();
     this.loadSavedQuote();
     
     // Debug: 暴露方法到全局，供验证使用
@@ -620,6 +681,29 @@ export default {
   max-width: 800px;
   margin: 0 auto;
   padding: 0 24px;
+}
+
+.ai-prefill-notice {
+  margin-bottom: 28px;
+}
+
+.ai-prefill-card {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(139, 92, 246, 0.34);
+  background:
+    linear-gradient(135deg, rgba(124, 58, 237, 0.16), rgba(56, 189, 248, 0.12)),
+    rgba(255, 255, 255, 0.08);
+}
+
+.ai-prefill-kicker {
+  color: #c4b5fd;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .section-title {
