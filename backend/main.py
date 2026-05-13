@@ -131,6 +131,10 @@ if IS_PRODUCTION:
     if "*" in CORS_ORIGINS:
         raise RuntimeError("Production startup blocked: CORS_ORIGINS must be an explicit origin allowlist")
 
+CORS_ALLOW_ORIGIN_REGEX = os.getenv("CORS_ALLOW_ORIGIN_REGEX")
+if not CORS_ALLOW_ORIGIN_REGEX and not IS_PRODUCTION:
+    CORS_ALLOW_ORIGIN_REGEX = r"https://.*\.vercel\.app"
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 STAGING_FIXTURE_ENVIRONMENTS = {"staging", "development", "test", "local"}
@@ -198,6 +202,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
+    allow_origin_regex=CORS_ALLOW_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
