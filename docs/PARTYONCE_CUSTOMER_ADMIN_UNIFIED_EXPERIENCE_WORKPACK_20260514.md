@@ -152,18 +152,25 @@ Result:
 
 ## 10. Preview redeploy 结果
 
-Pending until this workpack is committed and the release candidate branch is pushed.
+Release candidate branch was pushed and the Preview routes were checked.
 
-Expected Preview URL:
+Preview URL:
 `https://partyonce-git-eye-lite-v2-release-2af646-qingli-99026s-projects.vercel.app/`
 
-Recommended Preview checks after push:
+Preview routes checked:
 - `/my/quotes/quote-local-501`
 - `/my/orders/order-local-1001`
 - `/admin/quotes/1`
 - `/admin/orders/1`
 - `/investor-demo`
 - `/experimental/party-3d`
+
+Result:
+- HTTP 200: passed
+- Non-blank: passed
+- Unified context marker visible: passed
+- Console error: 0
+- Broken images: 0
 
 ## 11. 是否读取/修改 `.env.production`
 
