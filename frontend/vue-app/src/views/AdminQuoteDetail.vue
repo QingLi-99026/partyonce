@@ -357,6 +357,9 @@
               <strong>party_scene_config</strong>
               <p>{{ quoteSceneConfigSummary.layout }}</p>
               <span>{{ quoteSceneConfigSummary.decor }}</span>
+              <el-button size="small" plain @click="openParty3DPreview">
+                View experimental 3D preview
+              </el-button>
             </div>
             <p class="body-text">
               {{ quotePackageExplanation.positioning }}
@@ -437,6 +440,7 @@ import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visu
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
 import { buildQuoteLineItemsFromSelection, normalizeQuoteLineItem, normalizeQuoteLineItems, quoteLineItemOrder, quoteLineItemTypes, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
+import { writePartySceneConfig } from '@/services/partyScenePreviewService'
 
 const route = useRoute()
 const router = useRouter()
@@ -795,6 +799,11 @@ const createDraftOrder = async () => {
   } finally {
     creatingOrder.value = false
   }
+}
+
+const openParty3DPreview = () => {
+  writePartySceneConfig(quotePartySceneConfig.value)
+  router.push('/experimental/party-3d')
 }
 
 const getErrorMessage = (error, fallback = 'Could not load the local/staging Quote detail.') => {

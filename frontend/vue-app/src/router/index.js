@@ -58,6 +58,12 @@ const routes = [
     meta: { title: 'AI 语音式引导' }
   },
   {
+    path: '/experimental/party-3d',
+    name: 'Party3DPreview',
+    component: () => import('@/views/Party3DPreview.vue'),
+    meta: { title: 'Experimental Party 3D Preview' }
+  },
+  {
     path: '/designer',
     name: 'Designer3D',
     component: () => import('@/views/Designer3D.vue'),

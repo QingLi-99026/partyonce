@@ -16,6 +16,7 @@
         <el-menu-item index="/"><el-icon><HomeFilled /></el-icon>首页</el-menu-item>
         <el-menu-item index="/venues"><el-icon><OfficeBuilding /></el-icon>场地</el-menu-item>
         <el-menu-item index="/ai-voice-intake"><el-icon><MagicStick /></el-icon>AI引导</el-menu-item>
+        <el-menu-item index="/experimental/party-3d"><el-icon><View /></el-icon>3D Preview</el-menu-item>
         <el-menu-item index="/ai-planner"><el-icon><MagicStick /></el-icon>AI策划</el-menu-item>
         <el-menu-item index="/3d-designer"><el-icon><View /></el-icon>3D设计</el-menu-item>
         <el-menu-item index="/quotation"><el-icon><Document /></el-icon>报价</el-menu-item>

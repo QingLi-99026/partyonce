@@ -178,6 +178,9 @@
               <dd>{{ partySceneConfig.future3d.suggestedRoute }} · {{ partySceneConfig.future3d.layoutCoordinateSystem }}</dd>
             </div>
           </dl>
+          <button class="scene-preview-btn" type="button" @click="openParty3DPreview">
+            查看实验性 3D 场景预览
+          </button>
         </div>
       </div>
     </section>
@@ -315,6 +318,7 @@ import { getVisualContext } from '@/data/visualAssets';
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation';
 import { buildQuoteLineItemsFromSelection, summarizeQuoteLineItems } from '@/data/quoteLineItems';
 import { readQuotePrefill } from '@/services/aiVoiceIntakeService';
+import { writePartySceneConfig } from '@/services/partyScenePreviewService';
 
 export default {
   name: 'QuotePageSimple',
@@ -484,6 +488,13 @@ export default {
 
     editPackage() {
       this.$router.push(`/theme/${this.themeId}/scenes/${this.sceneId}/packages`);
+    },
+
+    openParty3DPreview() {
+      if (this.partySceneConfig) {
+        writePartySceneConfig(this.partySceneConfig);
+      }
+      this.$router.push('/experimental/party-3d');
     },
 
     toggleAddon(addon) {
@@ -1025,6 +1036,22 @@ export default {
   margin: 0;
   color: rgba(255, 255, 255, 0.78);
   line-height: 1.55;
+}
+
+.scene-preview-btn {
+  margin-top: 18px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.scene-preview-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
 }
 
 .visual-context-copy dt {
