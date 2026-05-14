@@ -51,6 +51,11 @@
     "aiRecommend": "AI 帮我推荐",
     "visualMeta": "温暖的客户预览",
     "visualMetaStrong": "AI · 主题 · 餐厅 A · 报价",
+    "heroMockupFallbackTitle": "策划一场温暖、可视化的儿童派对",
+    "heroMockupFallbackCopy": "英文模式会用干净的 UI 卡片替代带中文标注的 mockup 截图。",
+    "englishThemeHeroKicker": "主题预览",
+    "englishThemeHeroTitle": "城堡、太空、森林三大派对世界",
+    "englishThemeHeroCopy": "英文模式会用清晰的策划说明替代带中文标注的主题大图，避免混合语言截图。",
     "themesTitle": "选择你的派对主题",
     "themesSubtitle": "三大沉浸式主题世界，每一个都是独一无二的体验",
     "themeCta": {
@@ -61,12 +66,66 @@
     "assetKicker": "投资人预览素材",
     "assetTitle": "视觉展示素材已恢复",
     "assetCopy": "Castle Princess / Space Explorer / Forest Adventure 主题效果、餐厅布局、套餐矩阵和 App mockup 均可从这里打开。",
+    "assetFallbackKicker": "英文预览",
+    "assetFallbackTitle": "不展示含中文贴图的主题预览",
+    "assetFallbackCopy": "英文模式下会用干净的文字卡片替代含中文 baked-in text 的图片素材，直到英文视觉资产制作完成。",
+    "assetFallbackCards": {
+      "castle": {
+        "title": "Castle Princess",
+        "copy": "童话城堡餐厅布置，包含背景板、甜品台、气球造型和适合小朋友的拍照区。",
+        "cta": "查看城堡主题"
+      },
+      "space": {
+        "title": "Space Explorer",
+        "copy": "蓝银色任务风派对，包含火箭、探索者元素和适合孩子活动的动线。",
+        "cta": "查看太空主题"
+      },
+      "forest": {
+        "title": "Forest Adventure",
+        "copy": "自然灵感派对，包含绿植、暖光、桌面造型和探索感场景。",
+        "cta": "查看森林主题"
+      }
+    },
     "packageKicker": "三主题 · 九套餐视觉",
     "packageTitle": "三主题九套餐体系",
     "packageCopy": "每个主题已绑定 Basic / Standard / Premium 的装饰、材料、价格层级和适合场地说明。",
+    "packageFallbackKicker": "套餐矩阵",
+    "packageFallbackTitle": "英文说明套餐层级",
+    "packageFallbackCopy": "原套餐截图含中文文字，因此英文模式先使用文字卡片说明。",
+    "packageFallbackCards": {
+      "basic": {
+        "title": "Basic 基础布置",
+        "copy": "基础桌面造型、轻主题装饰和简洁拍照角，适合控制预算。"
+      },
+      "standard": {
+        "title": "Standard 标准布置",
+        "copy": "更完整的派对体验，包含主题装饰、背景板、甜品台造型和供应商建议。"
+      },
+      "premium": {
+        "title": "Premium 高级布置",
+        "copy": "更沉浸的视觉体验，包含灯光层、定制板、主拍照区和现场协调。"
+      }
+    },
     "restaurantKicker": "Restaurant A 渲染样例",
     "restaurantTitle": "餐厅原貌 + 主题装饰层",
     "restaurantCopy": "Restaurant A 保持桌椅和空间结构不变，只改变气球、桌布、背景板、甜品台和灯光层。",
+    "restaurantFallbackKicker": "餐厅布局",
+    "restaurantFallbackTitle": "Restaurant A 英文概念说明",
+    "restaurantFallbackCopy": "英文模式下隐藏带中文标注的渲染图，改为清晰的布局文字说明。",
+    "restaurantFallbackCards": {
+      "before": {
+        "title": "餐厅原貌",
+        "copy": "桌椅、入口动线和餐厅结构在装饰前保持稳定。"
+      },
+      "decor": {
+        "title": "主题装饰层",
+        "copy": "按主题调整气球、桌布、背景板、甜品台、灯光和拍照区。"
+      },
+      "flow": {
+        "title": "宾客动线",
+        "copy": "帮助家长理解孩子从入场、集合、拍照、用餐到庆祝的流程。"
+      }
+    },
     "localizedScenesTitle": "预览派对场景",
     "localizedScenesSubtitle": "每个场景都说明氛围、布局和视觉效果。",
     "localizedScenes": {
@@ -121,7 +180,8 @@
       "name": "森林奇境",
       "nameEn": "Forest Adventure",
       "description": "踏入神秘森林，与大自然亲密接触，发现隐藏在林间的魔法"
-    }
+    },
+    "englishImageFallback": "英文预览占位。英文模式会隐藏带中文标注的图片。"
   },
   "tiers": {
     "basic": "Basic",
@@ -167,9 +227,50 @@
     "soundOn": "打开声音",
     "soundOff": "关闭声音",
     "restart": "重新开始",
+    "back": "返回上一步",
+    "confirmItem": "确认这一项",
+    "continueQuote": "确认并继续到 Quote",
+    "viewThemes": "查看主题视觉",
     "safetyNote": "不接付费 TTS，不上传真人声音，不触发付款、webhook、n8n 或外发消息。",
     "visualCues": "Visual cues",
-    "compareThemes": "我会用同一套餐逻辑比较三种主题"
+    "compareThemes": "我会用同一套餐逻辑比较三种主题",
+    "ageRange": "适合年龄",
+    "supplier": "供应商",
+    "themeCue": {
+      "castle": "适合小龄儿童 · 餐厅包间友好",
+      "space": "探索氛围 · 活动动线清楚",
+      "forest": "自然氛围 · 温暖布局"
+    },
+    "restaurantPlaceholderTitle": "Restaurant A 样板布局",
+    "restaurantPlaceholderCopy": "英文模式会隐藏带中文标注的渲染图，改用干净的布局说明。",
+    "recommendation": {
+      "theme": "推荐主题",
+      "package": "推荐套餐",
+      "venue": "推荐场地 / Restaurant A",
+      "reason": "推荐理由",
+      "ageGuests": "适合年龄 / 人数",
+      "budget": "预算匹配说明",
+      "includes": "套餐包含内容",
+      "priceDrivers": "价格差异来自哪里",
+      "customerFit": "这个方案为什么适合我",
+      "nextStep": "下一步",
+      "nextStepBoundary": "当前为 staging preview，不会创建真实 Quote / Order，也不会触发 payment。",
+      "title": "AI 推荐",
+      "customerBrief": "客户需求摘要",
+      "genericHeadline": "已为您的派对准备好平衡的主题和套餐建议。",
+      "genericBrief": "AI Concierge 已把年龄、人数、预算、主题偏好和场地上下文整理成可进入报价的摘要。",
+      "budgetGeneric": "符合当前选择的 staging 预估预算区间。",
+      "reasonGeneric1": "匹配已选择的主题氛围和宾客画像。",
+      "reasonGeneric2": "使用 Restaurant A 作为清晰的报价样板场地。",
+      "includeGeneric1": "主题布置、场地上下文和供应商协调。",
+      "includeGeneric2": "面向客户的 local/staging 报价摘要。",
+      "priceDriverGeneric1": "场地时间、布置范围和供应商档期。",
+      "priceDriverGeneric2": "套餐档位和可选升级。",
+      "customerFitGeneric": "该方案让家长从主题选择到报价请求的路径更清楚、更低阻力。",
+      "upgradeTitle": "升级价值",
+      "upgradeGeneric1": "更高档位会增加更强的视觉细节。",
+      "upgradeGeneric2": "策划支持和供应商协调会更完整。"
+    }
   },
   "quotePage": {
     "back": "返回套餐",
@@ -189,7 +290,193 @@
     "package": "套餐",
     "edit": "修改",
     "priceDetails": "价格明细",
-    "estimatedTotal": "预估总价"
+    "estimatedTotal": "预估总价",
+    "lineItemsKicker": "标准化报价项",
+    "lineItemsTitle": "报价由哪些稳定类型构成",
+    "lineItemsCopy": "场地、布置、供应商、人力、运输、服务和可选升级费用都会进入报价快照，方便人工复核。",
+    "lineItemGenericDescription": "local/staging 预估组成项，用于客户复核。",
+    "packageExplanationKicker": "套餐解释",
+    "packageDifference": "套餐差异",
+    "whyRecommend": "为什么推荐这一档",
+    "priceDrivers": "价格差异来自哪里",
+    "customerFit": "这个方案为什么适合我",
+    "visualBasis": "视觉方案依据",
+    "visualBasisCopy": "用于报价预估的主题布置层级与餐厅动线。",
+    "sampleRoom": "Restaurant A 样板包间",
+    "suitableAge": "适合年龄",
+    "recommendedVenue": "推荐场地",
+    "supplierSuggestions": "供应商建议",
+    "quoteBasis": "报价依据",
+    "view3dPreview": "查看实验性 3D 场景预览（不是施工图）",
+    "sceneConfigKicker": "场景配置",
+    "optionalAddons": "可选升级",
+    "selectedAddons": "已选 {count} 项，小计 {total}",
+    "restoredNotice": "已恢复上次保存的方案",
+    "savedNotice": "方案已保存。总计 {total}",
+    "saving": "保存中...",
+    "savePlan": "保存方案",
+    "submitInquiry": "提交 inquiry",
+    "submitting": "提交中...",
+    "contactName": "联系人姓名",
+    "contactNamePlaceholder": "请输入姓名",
+    "contactMethod": "联系方式",
+    "contactMethodPlaceholder": "电话、微信或邮箱",
+    "eventDate": "活动日期",
+    "notes": "备注",
+    "notesPlaceholder": "描述特殊需求或问题",
+    "noticeEstimate": "* 价格为预估，会根据日期、人数、场地和供应商档期调整。",
+    "noticeFollowup": "提交后，策划师可在 staging 中人工跟进。",
+    "aiPrefillBody": "AI Concierge 已预填联系人、日期、人数、预算、场地偏好和推荐备注。确认后只提交 local/staging inquiry skeleton。",
+    "aiPrepared": "AI Concierge 已准备",
+    "currentPlan": "当前方案",
+    "flowBody": "确认主题、套餐和 Restaurant A 视觉上下文后提交 inquiry skeleton。不会触发真实支付。",
+    "requiredError": "请填写必填项：姓名、联系方式和活动日期。",
+    "backendSaved": "Inquiry 已保存并同步到本地 Lead API skeleton（{id}）。",
+    "localSavedBackendFailed": "Inquiry 已保存到本地浏览器；Lead API skeleton 暂不可用。",
+    "submitSuccess": "Inquiry 已提交，等待 local/staging 复核。",
+    "submitFailure": "本地保存失败。请检查浏览器存储后重试。",
+    "syncRecorded": "已记录 local/staging Lead skeleton：{id}。",
+    "syncFailed": "已保存到浏览器；Lead API skeleton 暂不可用，demo 可继续。",
+    "localSaved": "已保存到浏览器，用于 staging demo 和客户路径说明。",
+    "inquiryReceivedKicker": "已收到 inquiry · staging preview",
+    "receivedTitle": "我们已收到您的派对需求",
+    "receivedSummary": "团队可人工复核场地、主题和供应商档期，并在客户侧展示报价进度。",
+    "receivedItem1": "团队可结合 Restaurant A、主题视觉和供应商建议确认方案。",
+    "receivedItem2": "您可以在 My Quotes 查看报价进度。",
+    "receivedItem3": "后续订单状态可在 My Orders 查看。",
+    "receivedItem4": "这是 staging preview，不会触发 payment、PaymentIntent、webhook、n8n 或外发消息。",
+    "localizedPackageCopy": "该套餐为 local/staging 预估展示，最终范围需人工复核。",
+    "localizedPackagePoint1": "布置、场地和供应商范围会影响最终预估。",
+    "localizedPackagePoint2": "更高档位会增加视觉细节和协调服务。",
+    "scenes": {
+      "restaurantA": "Restaurant A 餐厅包间样板",
+      "command": "太空指挥舱",
+      "moon": "月球基地",
+      "observatory": "星空观测台",
+      "banquet": "皇家宴会厅",
+      "garden": "秘密花园露台",
+      "tower": "魔法高塔",
+      "clearing": "森林空地",
+      "treehouse": "树屋小屋",
+      "firefly": "萤火虫谷",
+      "unknown": "未知场景"
+    },
+    "packages": {
+      "basic": { "name": "Basic 套餐", "description": "基础布置与短时场地使用" },
+      "standard": { "name": "Standard 套餐", "description": "完整布置、更长场地使用和策划支持" },
+      "premium": { "name": "Premium 套餐", "description": "VIP 定制、全天场地使用和专属支持" }
+    },
+    "addons": {
+      "cake": "定制主题蛋糕",
+      "photo": "专业摄影",
+      "catering": "餐饮服务"
+    }
+  },
+  "customerPages": {
+    "workspace": "客户工作台",
+    "status": "状态",
+    "allStatuses": "全部状态",
+    "whyFits": "为什么适合你",
+    "priceDrivers": "价格主要来自",
+    "sceneConfig": "AI 场景配置",
+    "quoteExplanation": "报价解释",
+    "upgradeValue": "升级价值",
+    "startAi": "从 AI Concierge 开始",
+    "myQuotes": {
+      "title": "My Quotes",
+      "subtitle": "查看派对报价状态、套餐快照、金额、有效期和下一步动作。",
+      "safety": "Local/staging 只读视图：不会触发在线支付、Stripe、webhook/n8n 或外发消息。",
+      "search": "搜索报价号、主题、套餐或客户",
+      "emptyEyebrow": "当前本地身份暂无可见报价",
+      "emptyTitle": "这个 Preview 暂无匹配报价",
+      "emptyCopy": "可从 AI Concierge 或 Investor Demo 开始。真实客户报价会在这里展示主题、Restaurant A、价格和下一步状态。"
+    },
+    "myOrders": {
+      "title": "My Orders",
+      "subtitle": "跟踪订单状态、活动信息、金额、占位订金和下一步动作。",
+      "safety": "pending_deposit 只是业务状态。本工作包没有启用 Stripe/payment。",
+      "search": "搜索订单号、地区、主题或报价",
+      "emptyEyebrow": "当前本地身份暂无可见订单",
+      "emptyTitle": "这个 Preview 暂无匹配订单",
+      "emptyCopy": "正常流程是 AI Concierge → Quote request → My Quotes → My Orders。Demo 数据可从 Investor Demo 开始。"
+    }
+  },
+  "venues": {
+    "title": "探索精选场地",
+    "subtitle": "发现适合您派对的完美场地",
+    "searchPlaceholder": "搜索场地名称、城市...",
+    "search": "搜索",
+    "filters": "筛选条件",
+    "city": "城市",
+    "selectCity": "选择城市",
+    "venueType": "场地类型",
+    "selectType": "选择类型",
+    "capacity": "容纳人数",
+    "people": "人",
+    "partnerOnly": "仅显示合作伙伴",
+    "amenities": "设施服务",
+    "foundPrefix": "共找到",
+    "foundSuffix": "个场地",
+    "sortDefault": "默认",
+    "sortPriceAsc": "价格从低到高",
+    "sortPriceDesc": "价格从高到低",
+    "sortCapacity": "容量",
+    "emptyTitle": "没有找到场地",
+    "emptyDescription": "当前筛选条件下暂无场地，试试调整筛选条件或浏览全部场地",
+    "viewAll": "查看全部场地",
+    "loadDemo": "加载示例场地",
+    "emptyTip": "💡 提示：可以先查看全部场地，再逐步缩小范围",
+    "sampleVenueName": "云端宴会厅",
+    "partner": "合作伙伴",
+    "discount": "优惠",
+    "from": "起",
+    "viewDetails": "查看详情",
+    "genericVenueDescription": "local/staging 场地样板，用于派对策划、主题匹配和报价流程预览。",
+    "recommendationBasis": "适合当前派对策划流程。",
+    "demoLoaded": "已加载示例场地",
+    "loadFailed": "获取场地列表失败，已改为显示示例场地。",
+    "cities": {
+      "sydney": "悉尼",
+      "melbourne": "墨尔本",
+      "brisbane": "布里斯班",
+      "perth": "珀斯",
+      "adelaide": "阿德莱德"
+    },
+    "types": {
+      "hotel": "酒店宴会厅",
+      "club": "私人会所",
+      "garden": "户外花园",
+      "art": "艺术空间",
+      "restaurant": "餐厅包场",
+      "rooftop": "屋顶露台"
+    },
+    "amenityLabels": {
+      "parking": "停车位",
+      "catering": "餐饮服务",
+      "audio": "音响设备",
+      "projector": "投影仪",
+      "bar": "吧台"
+    }
+  },
+  "party3d": {
+    "eyebrow": "Experimental Sandbox",
+    "title": "Party Scene 3D Preview",
+    "disclaimerBefore": "这是由以下配置生成的视觉规划预览：",
+    "disclaimerAfter": "这不是正式施工图、建筑图、场地测量文件或供应商最终执行图。",
+    "backQuote": "返回 Quote",
+    "aiConcierge": "AI Concierge",
+    "reset": "重置 Castle Standard",
+    "sceneSummary": "场景摘要",
+    "suggestedSuppliers": "个建议供应商",
+    "boundary": "只读边界",
+    "sandboxOnly": "仅 Sandbox",
+    "boundaryItems": {
+      "storage": "读取 sessionStorage / localStorage / AI prefill，如无数据则回退到 Restaurant A Castle Standard。",
+      "visualOnly": "仅用于视觉规划：不是施工图、建筑图或供应商执行图。",
+      "no3dService": "不支持拖拽编辑，不调用外部 3D 服务，不远程加载模型。",
+      "noExternal": "不触发 PaymentIntent、webhook、n8n、production deploy 或外发消息。"
+    },
+    "futureInput": "未来 3D 输入结构"
   },
   "footer": {
     "tagline": "派对活动一站式策划平台",

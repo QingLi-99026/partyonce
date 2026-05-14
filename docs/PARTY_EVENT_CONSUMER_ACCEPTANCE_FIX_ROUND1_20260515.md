@@ -62,6 +62,66 @@ Fixer round for owner-confirmed Safari QA P0/P1 issues only. No backend, payment
 - Updated the shared AppFooter brand and contrast treatment so footer text is clearly readable and not polluted by homepage background styling.
 - Follow-up footer/CTA pass: reduced the final CTA height, changed it into a lighter warm transition band, and changed AppFooter to one unified warm background with darker readable text so the bottom no longer appears split into mismatched dark/white layers.
 
+### P1-5 English-mode Chinese residual text
+
+- Localized AppFooter service/about/help/copyright text so English mode no longer shows Chinese footer copy.
+- Localized the `/3d-designer` preview page hero, safety note, CTA buttons, scene labels, and status cards.
+- Added English-mode localized homepage scene/package sections in `HomePage.vue` so the embedded Chinese-only scene/package components are not shown to English users.
+- Chinese mode keeps the original Chinese scene/package components and Chinese footer copy.
+
+### P1-6 English-mode Chinese baked into image assets
+
+- Root cause:
+  - Several investor-preview images contain text baked into the image pixels, including theme names, package/quote labels, Restaurant A labels, and supplier/decor notes.
+  - Locale JSON cannot translate text that is part of the image itself.
+- Fix:
+  - English mode hides homepage theme-card images that contain Chinese labels and replaces them with clean icon/title placeholders.
+  - English mode hides the investor visual asset image grid and replaces it with English-only theme explanation cards.
+  - English mode hides the package matrix and Restaurant A rendering sample images and replaces them with English-only package/layout cards.
+  - Chinese mode continues to show the original visual assets.
+- Scope control:
+  - No new image production.
+  - No Canva.
+  - No external images.
+  - No business logic changes.
+
+### P1-7 English-mode remaining hero image Chinese
+
+- Root cause:
+  - The homepage right-side preview mockup image still contained baked-in Chinese labels.
+  - The homepage still rendered the old immersive theme hero in English mode, exposing Castle/Princess Chinese hero text and CTAs.
+  - Theme detail pages still rendered theme artwork that may contain Chinese labels.
+- Fix:
+  - English mode replaces the homepage mockup image with an English-only planning placeholder card.
+  - English mode does not render the old `ImmersiveHero`; it renders an English-only theme summary and CTAs instead.
+  - English mode replaces theme detail hero images with English-only placeholders.
+  - Chinese mode keeps the original images and immersive hero.
+  - Source scan for owner-confirmed strings (`星际探险`, `梦幻城堡`, `走进童话`, `进入梦幻城堡`, `探索更多主题`, `听一听`) in the English-mode touched files returned no matches.
+- Scope control:
+  - No new image production.
+  - No Canva.
+  - No external images.
+  - No backend, AI Concierge, 3D, payment, deploy, or external API work.
+
+### P1-8 English-mode Chinese residuals on `/venues`, `/ai-voice-intake`, and `/3d-preview`
+
+- `/venues` fix:
+  - Localized page title, subtitle, search, filters, city/type/capacity/amenity labels, sort labels, empty state, partner badge, price unit, and detail button.
+  - English mode maps Chinese mock venue names, cities, venue types, addresses, descriptions, and recommendation basis into English display helpers.
+  - English mode hides venue images and shows clean venue placeholder cards because some visual venue assets may contain baked-in Chinese text.
+- `/ai-voice-intake` fix:
+  - Added English display mapping for the existing intake step labels, prompts, helpers, placeholders, and choice options without changing the recommendation logic.
+  - English mode hides visual cue package images and Restaurant A rendering images, replacing them with clean English placeholder cards.
+  - Localized visible control labels and recommendation section headings.
+- `/3d-preview` fix:
+  - Localized the page disclaimer and read-only boundary copy.
+  - The direct 3D preview component now hides the Chinese construction-warning sentence in English mode while keeping it for non-English modes.
+- Scope control:
+  - No backend changes.
+  - No new AI Concierge functionality.
+  - No PlayCanvas / new 3D functionality.
+  - No Canva, external images, external API, payment, deploy, or production work.
+
 ## Validation
 
 - Build command:
@@ -87,6 +147,18 @@ Fixer round for owner-confirmed Safari QA P0/P1 issues only. No backend, payment
     - `/tmp/partyonce_consumer_fix_round1_evidence_20260515/3d-designer-webkit.png`
     - `/tmp/partyonce_consumer_fix_round1_evidence_20260515/3d-designer-webkit-check.json`
 - Note: port 5181 was already occupied by a local Vite server during validation; the requested routes were reachable on 5181.
+- i18n follow-up validation:
+  - Locale JSON parse check: passed.
+  - English visible-text scan across the touched view/footer files leaves only the language option label `中文` and non-rendered comments.
+  - Build after i18n fix: passed.
+  - `http://127.0.0.1:5181/`: 200 after restarting local Vite.
+- Image baked-in text follow-up:
+  - English mode no longer renders the homepage theme card image files, investor visual asset image grid, package matrix images, or Restaurant A rendering sample images.
+  - Chinese mode keeps the original image asset sections.
+  - Build after baked-in image text fix: passed.
+  - Build after remaining hero image Chinese fix: passed.
+  - Build after `/venues`, `/ai-voice-intake`, and `/3d-preview` English residual fix: passed.
+  - English-mode source scan of the touched page/component files still finds Chinese inside local mock data and Chinese locale data only; those strings are display-mapped to English or hidden from English mode.
 
 ## Safari Owner Re-check Checklist
 

@@ -10,7 +10,9 @@
 
     <div class="construction-warning" role="note">
       Visual planning preview only · not a construction drawing, architecture plan, venue measurement, or final supplier execution drawing.
-      仅用于视觉规划 · 不是施工图、建筑图、场地测量图或供应商最终执行图。
+      <template v-if="locale === 'zh'">
+        仅用于视觉规划 · 不是施工图、建筑图、场地测量图或供应商最终执行图。
+      </template>
     </div>
 
     <div class="room-stage">
@@ -71,6 +73,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { buildPartyScenePreviewModel } from '@/services/partyScenePreviewService';
 
 const props = defineProps({
@@ -80,6 +83,7 @@ const props = defineProps({
   }
 });
 
+const { locale } = useI18n();
 const model = computed(() => buildPartyScenePreviewModel(props.sceneConfig));
 
 const sceneStyle = computed(() => ({

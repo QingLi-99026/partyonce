@@ -2,13 +2,13 @@
   <main class="customer-page">
     <header class="page-hero">
       <div>
-        <p class="eyebrow">Customer workspace</p>
-        <h1>My Quotes</h1>
-        <p>View your party quote status, package snapshot, amount, expiry, and the next action.</p>
+        <p class="eyebrow">{{ t('customerPages.workspace') }}</p>
+        <h1>{{ t('customerPages.myQuotes.title') }}</h1>
+        <p>{{ t('customerPages.myQuotes.subtitle') }}</p>
       </div>
       <div class="hero-actions">
-        <el-button @click="router.push('/my/inquiries')">My Inquiries</el-button>
-        <el-button type="primary" @click="router.push('/my/orders')">My Orders</el-button>
+        <el-button @click="router.push('/my/inquiries')">{{ t('nav.myInquiries') }}</el-button>
+        <el-button type="primary" @click="router.push('/my/orders')">{{ t('nav.myOrders') }}</el-button>
       </div>
     </header>
 
@@ -17,7 +17,7 @@
       type="warning"
       :closable="false"
       show-icon
-      title="Local/staging read-only view: no online payment, no Stripe, no webhook/n8n, and no outbound message is triggered."
+      :title="t('customerPages.myQuotes.safety')"
     />
     <el-alert
       class="scope-alert"
@@ -29,9 +29,9 @@
     />
 
     <section class="toolbar">
-      <el-input v-model="searchQuery" clearable placeholder="Search quote number, theme, package, or customer" />
-      <el-select v-model="statusFilter" clearable placeholder="Status">
-        <el-option label="All statuses" value="" />
+      <el-input v-model="searchQuery" clearable :placeholder="t('customerPages.myQuotes.search')" />
+      <el-select v-model="statusFilter" clearable :placeholder="t('customerPages.status')">
+        <el-option :label="t('customerPages.allStatuses')" value="" />
         <el-option v-for="(label, status) in quoteStatuses" :key="status" :label="`${status} · ${label}`" :value="status" />
       </el-select>
     </section>
@@ -49,8 +49,8 @@
         <div class="visual-strip">
           <img :src="quoteVisual(quote).restaurant.image_path" :alt="quoteVisual(quote).restaurant.title">
           <div>
-            <strong>{{ quoteVisual(quote).restaurant.title }}</strong>
-            <span>{{ quoteVisual(quote).primaryVenue.name }} · {{ quoteVisual(quote).suppliers.map((item) => item.name).join(' / ') }}</span>
+            <strong>{{ displayVisualTitle(quoteVisual(quote)) }}</strong>
+            <span>{{ displayVisualSummary(quoteVisual(quote)) }}</span>
           </div>
         </div>
 
@@ -74,13 +74,13 @@
         </dl>
 
         <div class="package-explanation">
-          <strong>{{ quotePackageExplanation(quote).label }} · 为什么适合你</strong>
+          <strong>{{ displayPackageLabel(quotePackageExplanation(quote)) }} · {{ t('customerPages.whyFits') }}</strong>
           <p>{{ quotePackageExplanation(quote).customerFit }}</p>
-          <span>价格主要来自：{{ quotePackageExplanation(quote).priceDrivers.slice(0, 3).join(' / ') }}</span>
+          <span>{{ t('customerPages.priceDrivers') }}: {{ displayPriceDrivers(quotePackageExplanation(quote)).join(' / ') }}</span>
         </div>
 
         <div v-if="sceneConfigSummary(quote)" class="scene-config-summary">
-          <strong>AI 场景配置</strong>
+          <strong>{{ t('customerPages.sceneConfig') }}</strong>
           <p>{{ sceneConfigSummary(quote).layout }}</p>
           <span>{{ sceneConfigSummary(quote).decor }}</span>
         </div>
@@ -111,17 +111,14 @@
 
     <section v-if="!loading && filteredQuotes.length === 0" class="demo-empty-state">
       <div>
-        <p class="eyebrow">No quote visible for this local identity</p>
-        <h2>这不是系统坏了，是当前 Preview 没有匹配的客户报价</h2>
-        <p>
-          先从 AI Concierge 生成 inquiry / quote request，或进入 Investor Demo 启动演示样例。
-          正式客户报价会在这里显示主题、Restaurant A 渲染图、报价组成和下一步状态。
-        </p>
+        <p class="eyebrow">{{ t('customerPages.myQuotes.emptyEyebrow') }}</p>
+        <h2>{{ t('customerPages.myQuotes.emptyTitle') }}</h2>
+        <p>{{ t('customerPages.myQuotes.emptyCopy') }}</p>
       </div>
       <div class="empty-actions">
-        <el-button type="primary" @click="router.push('/ai-voice-intake')">AI 帮我生成需求</el-button>
-        <el-button @click="router.push('/investor-demo')">打开 Investor Demo</el-button>
-        <el-button @click="router.push('/my/inquiries')">Open My Inquiries</el-button>
+        <el-button type="primary" @click="router.push('/ai-voice-intake')">{{ t('customerPages.startAi') }}</el-button>
+        <el-button @click="router.push('/investor-demo')">{{ t('nav.investorDemo') }}</el-button>
+        <el-button @click="router.push('/my/inquiries')">{{ t('nav.myInquiries') }}</el-button>
       </div>
     </section>
   </main>
@@ -130,6 +127,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   fetchCustomerQuotes,
   formatCustomerDate,
@@ -143,6 +141,7 @@ import { getPackageExplanation } from '@/data/packageExplanation'
 import { summarizePartySceneConfig } from '@/data/partySceneConfig'
 
 const router = useRouter()
+const { t, locale } = useI18n()
 const loading = ref(false)
 const quotes = ref([])
 const searchQuery = ref('')
@@ -181,6 +180,18 @@ const quoteInteraction = (quoteId) => getCustomerInteractionState('quote', quote
 const quoteVisual = (quote) => getVisualContext(normalizeThemeId(quote.theme), normalizeTierId(quote.package))
 const quotePackageExplanation = (quote) => getPackageExplanation(normalizeTierId(quote.package))
 const sceneConfigSummary = (quote) => summarizePartySceneConfig(quote.party_scene_config || quote.selection_snapshot?.party_scene_config)
+
+const isChineseLocale = computed(() => locale.value === 'zh')
+const displayVisualTitle = (visual) => isChineseLocale.value ? visual.restaurant.title : t('ai.restaurantPlaceholderTitle')
+const displayVisualSummary = (visual) => isChineseLocale.value
+  ? `${visual.primaryVenue.name} · ${visual.suppliers.map((item) => item.name).join(' / ')}`
+  : t('ai.restaurantPlaceholderCopy')
+const displayPackageLabel = (explanation) => isChineseLocale.value ? explanation.label : t('quotePage.package')
+const displayPriceDrivers = (explanation) => (
+  isChineseLocale.value
+    ? explanation.priceDrivers.slice(0, 3)
+    : [t('ai.recommendation.priceDriverGeneric1'), t('ai.recommendation.priceDriverGeneric2')]
+)
 
 const loadQuotes = async () => {
   loading.value = true

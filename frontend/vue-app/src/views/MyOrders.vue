@@ -2,13 +2,13 @@
   <main class="customer-page">
     <header class="page-hero">
       <div>
-        <p class="eyebrow">Customer workspace</p>
-        <h1>My Orders</h1>
-        <p>Track your order status, event details, amount, placeholder deposit, and next action.</p>
+        <p class="eyebrow">{{ t('customerPages.workspace') }}</p>
+        <h1>{{ t('customerPages.myOrders.title') }}</h1>
+        <p>{{ t('customerPages.myOrders.subtitle') }}</p>
       </div>
       <div class="hero-actions">
-        <el-button @click="router.push('/my/inquiries')">My Inquiries</el-button>
-        <el-button type="primary" @click="router.push('/my/quotes')">My Quotes</el-button>
+        <el-button @click="router.push('/my/inquiries')">{{ t('nav.myInquiries') }}</el-button>
+        <el-button type="primary" @click="router.push('/my/quotes')">{{ t('nav.myQuotes') }}</el-button>
       </div>
     </header>
 
@@ -17,7 +17,7 @@
       type="warning"
       :closable="false"
       show-icon
-      title="pending_deposit is a business status only. Stripe/payment is not enabled in this workpack."
+      :title="t('customerPages.myOrders.safety')"
     />
     <el-alert
       class="scope-alert"
@@ -29,9 +29,9 @@
     />
 
     <section class="toolbar">
-      <el-input v-model="searchQuery" clearable placeholder="Search order number, location, theme, or quote" />
-      <el-select v-model="statusFilter" clearable placeholder="Status">
-        <el-option label="All statuses" value="" />
+      <el-input v-model="searchQuery" clearable :placeholder="t('customerPages.myOrders.search')" />
+      <el-select v-model="statusFilter" clearable :placeholder="t('customerPages.status')">
+        <el-option :label="t('customerPages.allStatuses')" value="" />
         <el-option v-for="(label, status) in orderStatuses" :key="status" :label="`${status} · ${label}`" :value="status" />
       </el-select>
     </section>
@@ -49,8 +49,8 @@
         <div class="visual-strip">
           <img :src="orderVisual(order).restaurant.image_path" :alt="orderVisual(order).restaurant.title">
           <div>
-            <strong>{{ orderVisual(order).restaurant.title }}</strong>
-            <span>{{ orderVisual(order).primaryVenue.name }} · {{ orderVisual(order).suppliers.map((item) => item.name).join(' / ') }}</span>
+            <strong>{{ displayVisualTitle(orderVisual(order)) }}</strong>
+            <span>{{ displayVisualSummary(orderVisual(order)) }}</span>
           </div>
         </div>
 
@@ -74,13 +74,13 @@
         </dl>
 
         <div class="package-explanation">
-          <strong>{{ orderPackageExplanation(order).label }} · 报价解释</strong>
+          <strong>{{ displayPackageLabel(orderPackageExplanation(order)) }} · {{ t('customerPages.quoteExplanation') }}</strong>
           <p>{{ orderPackageExplanation(order).quoteExplanation }}</p>
-          <span>升级价值：{{ orderPackageExplanation(order).upgradeAdds.slice(0, 2).join(' / ') }}</span>
+          <span>{{ t('customerPages.upgradeValue') }}: {{ displayUpgradeAdds(orderPackageExplanation(order)).join(' / ') }}</span>
         </div>
 
         <div v-if="sceneConfigSummary(order)" class="scene-config-summary">
-          <strong>AI 场景配置</strong>
+          <strong>{{ t('customerPages.sceneConfig') }}</strong>
           <p>{{ sceneConfigSummary(order).layout }}</p>
           <span>{{ sceneConfigSummary(order).decor }}</span>
         </div>
@@ -106,17 +106,14 @@
 
     <section v-if="!loading && filteredOrders.length === 0" class="demo-empty-state">
       <div>
-        <p class="eyebrow">No order visible for this local identity</p>
-        <h2>当前 Preview 没有匹配订单，客户订单体验需要先有 quote / demo 样例</h2>
-        <p>
-          正常流程是 AI Concierge → Quote request → My Quotes → My Orders。
-          演示时可从 Investor Demo 启动样例，订单详情会展示 Restaurant A、3D Preview、报价组成和分享奖励状态。
-        </p>
+        <p class="eyebrow">{{ t('customerPages.myOrders.emptyEyebrow') }}</p>
+        <h2>{{ t('customerPages.myOrders.emptyTitle') }}</h2>
+        <p>{{ t('customerPages.myOrders.emptyCopy') }}</p>
       </div>
       <div class="empty-actions">
-        <el-button type="primary" @click="router.push('/my/quotes')">Open My Quotes</el-button>
-        <el-button @click="router.push('/investor-demo')">打开 Investor Demo</el-button>
-        <el-button @click="router.push('/ai-voice-intake')">从 AI Concierge 开始</el-button>
+        <el-button type="primary" @click="router.push('/my/quotes')">{{ t('nav.myQuotes') }}</el-button>
+        <el-button @click="router.push('/investor-demo')">{{ t('nav.investorDemo') }}</el-button>
+        <el-button @click="router.push('/ai-voice-intake')">{{ t('customerPages.startAi') }}</el-button>
       </div>
     </section>
   </main>
@@ -125,6 +122,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   fetchCustomerOrders,
   formatCustomerDate,
@@ -137,6 +135,7 @@ import { getPackageExplanation } from '@/data/packageExplanation'
 import { summarizePartySceneConfig } from '@/data/partySceneConfig'
 
 const router = useRouter()
+const { t, locale } = useI18n()
 const loading = ref(false)
 const orders = ref([])
 const searchQuery = ref('')
@@ -176,6 +175,18 @@ const orderInteraction = (orderId) => getCustomerInteractionState('order', order
 const orderVisual = (order) => getVisualContext(normalizeThemeId(order.theme), normalizeTierId(order.package))
 const orderPackageExplanation = (order) => getPackageExplanation(normalizeTierId(order.package))
 const sceneConfigSummary = (order) => summarizePartySceneConfig(order.party_scene_config)
+
+const isChineseLocale = computed(() => locale.value === 'zh')
+const displayVisualTitle = (visual) => isChineseLocale.value ? visual.restaurant.title : t('ai.restaurantPlaceholderTitle')
+const displayVisualSummary = (visual) => isChineseLocale.value
+  ? `${visual.primaryVenue.name} · ${visual.suppliers.map((item) => item.name).join(' / ')}`
+  : t('ai.restaurantPlaceholderCopy')
+const displayPackageLabel = (explanation) => isChineseLocale.value ? explanation.label : t('quotePage.package')
+const displayUpgradeAdds = (explanation) => (
+  isChineseLocale.value
+    ? explanation.upgradeAdds.slice(0, 2)
+    : [t('ai.recommendation.upgradeGeneric1'), t('ai.recommendation.upgradeGeneric2')]
+)
 
 const loadOrders = async () => {
   loading.value = true

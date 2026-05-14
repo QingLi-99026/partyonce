@@ -13,7 +13,12 @@
           </router-link>
         </div>
       </div>
-      <img :src="theme.image" :alt="theme.name" class="hero-image">
+      <img v-if="locale === 'zh'" :src="theme.image" :alt="theme.name" class="hero-image">
+      <div v-else class="hero-image-placeholder">
+        <span>{{ theme.icon }}</span>
+        <strong>{{ theme.englishName }}</strong>
+        <p>{{ t('themes.englishImageFallback') }}</p>
+      </div>
     </section>
 
     <section class="package-section">
@@ -36,13 +41,14 @@ import { useI18n } from 'vue-i18n'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const themeMap = computed(() => ({
   'castle-princess': {
     id: 'castle',
     slug: 'castle-princess',
     englishName: 'Castle Princess',
+    icon: '🏰',
     name: t('themes.castle.name'),
     description: t('themes.castle.description'),
     image: '/party-assets/themes/castle-princess-full.png'
@@ -51,6 +57,7 @@ const themeMap = computed(() => ({
     id: 'space',
     slug: 'space-explorer',
     englishName: 'Space Explorer',
+    icon: '🚀',
     name: t('themes.space.name'),
     description: t('themes.space.description'),
     image: '/party-assets/themes/space-explorer.png'
@@ -59,6 +66,7 @@ const themeMap = computed(() => ({
     id: 'forest',
     slug: 'forest-adventure',
     englishName: 'Forest Adventure',
+    icon: '🌲',
     name: t('themes.forest.name'),
     description: t('themes.forest.description'),
     image: '/party-assets/themes/forest-adventure-full.png'
@@ -173,6 +181,39 @@ const tiers = computed(() => [
   object-fit: cover;
   border-radius: 8px;
   box-shadow: 0 18px 50px rgba(64, 30, 48, 0.18);
+}
+
+.hero-image-placeholder {
+  min-height: 360px;
+  aspect-ratio: 16 / 11;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  padding: 30px;
+  text-align: center;
+  border: 1px solid #f0d6e2;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 20% 22%, rgba(255, 138, 91, 0.22), transparent 28%),
+    linear-gradient(135deg, #fff, #fff0f7 48%, #edf8ff);
+  box-shadow: 0 18px 50px rgba(64, 30, 48, 0.12);
+}
+
+.hero-image-placeholder span {
+  font-size: 4rem;
+}
+
+.hero-image-placeholder strong {
+  color: #241823;
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  line-height: 1.1;
+}
+
+.hero-image-placeholder p {
+  max-width: 360px;
+  margin: 0;
+  color: #65505f;
 }
 
 .package-section {

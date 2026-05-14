@@ -51,6 +51,11 @@
     "aiRecommend": "AI يقترح لي",
     "visualMeta": "معاينة دافئة للعميل",
     "visualMetaStrong": "AI · ثيمات · Restaurant A · عرض سعر",
+    "heroMockupFallbackTitle": "خطط لحفل أطفال دافئ وواضح بصرياً",
+    "heroMockupFallbackCopy": "في العربية نستبدل صور mockup التي تحتوي نصاً صينياً ببطاقات نظيفة.",
+    "englishThemeHeroKicker": "معاينة الثيم",
+    "englishThemeHeroTitle": "عوالم القصر والفضاء والغابة",
+    "englishThemeHeroCopy": "نخفي الصور التي تحتوي نصاً صينياً ونستخدم وصفاً واضحاً للثيمات والأزرار.",
     "themesTitle": "اختر ثيم الحفل",
     "themesSubtitle": "ثلاثة عوالم غامرة، وكل عالم يقدم تجربة مختلفة.",
     "themeCta": {
@@ -67,6 +72,92 @@
     "restaurantKicker": "عينة عرض Restaurant A",
     "restaurantTitle": "غرفة الطعام الأصلية + طبقة ديكور الثيم",
     "restaurantCopy": "يبقى ترتيب الطاولات والكراسي والمساحة كما هو، وتتغير البالونات والمفارش والخلفية وطاولة الحلويات والإضاءة.",
+    "assetFallbackKicker": "معاينة عربية",
+    "assetFallbackTitle": "شرح الثيمات بدون صور تحمل نصاً صينياً",
+    "assetFallbackCopy": "للمستخدم العربي نعرض بطاقات نصية نظيفة بدلاً من صور تحتوي نصاً صينياً.",
+    "assetFallbackCards": {
+      "castle": {
+        "title": "Castle Princess",
+        "copy": "حفل قصص خيالية مع خلفية وطاولة حلويات وبالونات ونقاط تصوير للأطفال.",
+        "cta": "عرض ثيم القصر"
+      },
+      "space": {
+        "title": "Space Explorer",
+        "copy": "حفل مهمة فضائية باللونين الأزرق والفضي مع صواريخ وتفاصيل استكشاف.",
+        "cta": "عرض ثيم الفضاء"
+      },
+      "forest": {
+        "title": "Forest Adventure",
+        "copy": "ثيم طبيعي مع إضاءة دافئة وخضرة وتنسيق طاولات وأجواء اكتشاف.",
+        "cta": "عرض ثيم الغابة"
+      }
+    },
+    "packageFallbackKicker": "مصفوفة الباقات",
+    "packageFallbackTitle": "شرح مستويات الباقات بالعربية",
+    "packageFallbackCopy": "نخفي صور الباقات التي تحتوي نصاً صينياً ونستخدم بطاقات شرح.",
+    "packageFallbackCards": {
+      "basic": {
+        "title": "إعداد Basic",
+        "copy": "تنسيق أساسي للطاولات وديكور خفيف وركن تصوير بسيط."
+      },
+      "standard": {
+        "title": "إعداد Standard",
+        "copy": "تجربة حفلة أوضح مع ديكور أقوى وخلفية وطاولة حلويات وتوجيه الموردين."
+      },
+      "premium": {
+        "title": "إعداد Premium",
+        "copy": "تجربة أكثر غمراً مع إضاءة وعناصر مخصصة ومناطق تصوير وتنسيق ميداني."
+      }
+    },
+    "restaurantFallbackKicker": "تخطيط المطعم",
+    "restaurantFallbackTitle": "شرح مفهوم Restaurant A",
+    "restaurantFallbackCopy": "نخفي صور العرض ذات النص الصيني ونقدم شرحاً واضحاً للتخطيط.",
+    "restaurantFallbackCards": {
+      "before": {
+        "title": "المكان الأصلي",
+        "copy": "تبقى الطاولات والكراسي ومسار الدخول وبنية الغرفة ثابتة."
+      },
+      "decor": {
+        "title": "طبقة ديكور الثيم",
+        "copy": "تتغير البالونات والمفارش والخلفية وطاولة الحلويات والإضاءة ومنطقة الصور."
+      },
+      "flow": {
+        "title": "مسار الضيوف",
+        "copy": "يساعد الأهل على فهم الدخول والتجمع والتصوير والطعام والاحتفال."
+      }
+    },
+    "localizedScenesTitle": "معاينة مشهد الحفل",
+    "localizedScenesSubtitle": "كل مشهد يوضح الأجواء والتخطيط والنتيجة البصرية.",
+    "localizedScenes": {
+      "castle": {
+        "title": "غرفة طعام القصر",
+        "copy": "إعداد ناعم للأطفال مع خلفية وطاولة حلويات وبالونات ومنطقة صور."
+      },
+      "space": {
+        "title": "غرفة مهمة الفضاء",
+        "copy": "تفاصيل صواريخ ومسار نشاط واضح للأطفال."
+      },
+      "forest": {
+        "title": "ركن مغامرة الغابة",
+        "copy": "إضاءة دافئة وخضرة وتنسيق طبيعي لأجواء اكتشاف."
+      }
+    },
+    "localizedPackagesTitle": "قارن مستويات الباقات",
+    "localizedPackagesSubtitle": "اختر المستوى المناسب للميزانية والتوقع البصري وحجم الحفل.",
+    "localizedPackages": {
+      "basic": {
+        "title": "أساسيات Basic",
+        "copy": "إعداد خفيف يراعي الميزانية."
+      },
+      "standard": {
+        "title": "تجربة Standard",
+        "copy": "حفل أوضح بصرياً مع خلفية وطاولة حلويات."
+      },
+      "premium": {
+        "title": "إعداد Premium غامر",
+        "copy": "تجربة بصرية أقوى مع إضاءة وعناصر مخصصة."
+      }
+    },
     "stepsTitle": "أربع خطوات بسيطة لحفل جاهز",
     "finalTitle": "هل أنت جاهز لبدء رحلة الحفل؟",
     "footerTagline": "اجعل كل حفل مختلفاً",
@@ -89,7 +180,8 @@
       "name": "Forest Adventure",
       "nameEn": "Forest Adventure",
       "description": "ادخل غابة ساحرة، اقترب من الطبيعة، واكتشف مفاجآت مخفية."
-    }
+    },
+    "englishImageFallback": "Placeholder للمعاينة المحلية. يتم إخفاء الصور التي تحتوي نصاً صينياً."
   },
   "tiers": {
     "basic": "Basic",
@@ -135,9 +227,50 @@
     "soundOn": "تشغيل الصوت",
     "soundOff": "إيقاف الصوت",
     "restart": "البدء من جديد",
+    "back": "رجوع",
+    "confirmItem": "تأكيد هذا البند",
+    "continueQuote": "المتابعة إلى Quote",
+    "viewThemes": "عرض الثيمات",
     "safetyNote": "لا يتم تشغيل TTS مدفوع، ولا رفع صوت حقيقي، ولا دفع أو webhook أو n8n أو رسائل خارجية.",
     "visualCues": "إشارات مرئية",
-    "compareThemes": "أقارن الثيمات الثلاثة بنفس منطق الباقات"
+    "compareThemes": "أقارن الثيمات الثلاثة بنفس منطق الباقات",
+    "ageRange": "الفئة العمرية",
+    "supplier": "مورد",
+    "themeCue": {
+      "castle": "مناسب للأطفال · ملائم لغرفة طعام",
+      "space": "أجواء استكشاف · مسار نشاط",
+      "forest": "أجواء طبيعية · تخطيط دافئ"
+    },
+    "restaurantPlaceholderTitle": "تخطيط Restaurant A التجريبي",
+    "restaurantPlaceholderCopy": "نخفي صور العرض التي تحتوي نصاً صينياً ونستخدم ملخص تخطيط نظيفاً.",
+    "recommendation": {
+      "theme": "الثيم المقترح",
+      "package": "الباقة المقترحة",
+      "venue": "القاعة المقترحة / Restaurant A",
+      "reason": "سبب الملاءمة",
+      "ageGuests": "العمر / الضيوف",
+      "budget": "ملاءمة الميزانية",
+      "includes": "ما تتضمنه الباقة",
+      "priceDrivers": "ما يغير السعر",
+      "customerFit": "لماذا يناسبني هذا الخيار",
+      "nextStep": "الخطوة التالية",
+      "nextStepBoundary": "هذه معاينة staging فقط. لا تنشئ Quote / Order حقيقياً ولا تشغل payment.",
+      "title": "توصية AI",
+      "customerBrief": "ملخص العميل",
+      "genericHeadline": "توصية الثيم والباقة جاهزة لحفلك.",
+      "genericBrief": "لخص AI Concierge العمر وعدد الضيوف والميزانية وتفضيل الثيم وسياق القاعة في موجز جاهز للعرض.",
+      "budgetGeneric": "ضمن نطاق الميزانية المختار كتقدير staging.",
+      "reasonGeneric1": "يناسب أجواء الثيم المختار وملف الضيوف.",
+      "reasonGeneric2": "يستخدم Restaurant A كقاعة عينة واضحة لمراجعة العرض.",
+      "includeGeneric1": "ديكور الثيم وسياق القاعة وتنسيق الموردين.",
+      "includeGeneric2": "ملخص عرض جاهز للعميل لمراجعة local/staging.",
+      "priceDriverGeneric1": "وقت القاعة ونطاق الديكور وتوفر الموردين.",
+      "priceDriverGeneric2": "فئة الباقة والترقيات الاختيارية.",
+      "customerFitGeneric": "تمنح الخطة الأهل مساراً واضحاً من اختيار الثيم إلى طلب العرض.",
+      "upgradeTitle": "قيمة الترقية",
+      "upgradeGeneric1": "الفئات الأعلى تضيف تفاصيل بصرية أقوى.",
+      "upgradeGeneric2": "دعم المخطط وتنسيق الموردين يصبحان أكثر اكتمالاً."
+    }
   },
   "quotePage": {
     "back": "العودة إلى الباقات",
@@ -157,6 +290,235 @@
     "package": "الباقة",
     "edit": "تعديل",
     "priceDetails": "تفاصيل السعر",
-    "estimatedTotal": "الإجمالي التقديري"
+    "estimatedTotal": "الإجمالي التقديري",
+    "lineItemsKicker": "عناصر عرض السعر القياسية",
+    "lineItemsTitle": "العناصر الثابتة التي تكوّن عرض السعر",
+    "lineItemsCopy": "تشمل لقطة عرض السعر القاعة والديكور والموردين والعمالة والنقل والخدمة والترقيات الاختيارية للمراجعة.",
+    "lineItemGenericDescription": "عنصر تقديري local/staging لمراجعة العميل.",
+    "packageExplanationKicker": "شرح الباقة",
+    "packageDifference": "اختلافات الباقة",
+    "whyRecommend": "لماذا نوصي بهذه الفئة",
+    "priceDrivers": "ما يغير السعر",
+    "customerFit": "لماذا تناسبني هذه الخطة",
+    "visualBasis": "أساس الخطة البصرية",
+    "visualBasisCopy": "طبقة ديكور الثيم ومسار غرفة الطعام المستخدمان لتقدير السعر.",
+    "sampleRoom": "غرفة عينة في Restaurant A",
+    "suitableAge": "العمر المناسب",
+    "recommendedVenue": "القاعة المقترحة",
+    "supplierSuggestions": "اقتراحات الموردين",
+    "quoteBasis": "أساس عرض السعر",
+    "view3dPreview": "عرض معاينة 3D التجريبية للمشهد (ليست مخطط تنفيذ)",
+    "sceneConfigKicker": "إعداد المشهد",
+    "optionalAddons": "إضافات اختيارية",
+    "selectedAddons": "تم اختيار {count} عناصر، الإجمالي الفرعي {total}",
+    "restoredNotice": "تمت استعادة الخطة المحفوظة سابقاً",
+    "savedNotice": "تم حفظ الخطة. الإجمالي {total}",
+    "saving": "جارٍ الحفظ...",
+    "savePlan": "حفظ الخطة",
+    "submitInquiry": "إرسال الاستفسار",
+    "submitting": "جارٍ الإرسال...",
+    "contactName": "اسم جهة الاتصال",
+    "contactNamePlaceholder": "أدخل اسمك",
+    "contactMethod": "طريقة التواصل",
+    "contactMethodPlaceholder": "هاتف أو WeChat أو بريد إلكتروني",
+    "eventDate": "تاريخ الفعالية",
+    "notes": "ملاحظات",
+    "notesPlaceholder": "اكتب أي احتياجات أو أسئلة خاصة",
+    "noticeEstimate": "* الأسعار تقديرية وقد تتغير حسب التاريخ وعدد الضيوف والقاعة وتوفر الموردين.",
+    "noticeFollowup": "بعد إرسال الاستفسار، يمكن للمخطط المتابعة يدوياً في staging.",
+    "aiPrefillBody": "قام AI Concierge بتعبئة جهة الاتصال والتاريخ وعدد الضيوف والميزانية وتفضيل القاعة والملاحظات. التأكيد يرسل inquiry skeleton في local/staging فقط.",
+    "aiPrepared": "AI Concierge جاهز",
+    "currentPlan": "الخطة الحالية",
+    "flowBody": "أكد الثيم والباقة وسياق Restaurant A البصري، ثم أرسل inquiry skeleton. لا يتم تشغيل أي دفع حقيقي.",
+    "requiredError": "يرجى إكمال الحقول المطلوبة: الاسم، طريقة التواصل، وتاريخ الفعالية.",
+    "backendSaved": "تم حفظ الاستفسار ومزامنته مع Lead API skeleton المحلي ({id}).",
+    "localSavedBackendFailed": "تم حفظ الاستفسار في المتصفح؛ مزامنة Lead API skeleton غير متاحة.",
+    "submitSuccess": "تم إرسال الاستفسار للمراجعة في local/staging.",
+    "submitFailure": "فشل الحفظ المحلي. تحقق من تخزين المتصفح ثم أعد المحاولة.",
+    "syncRecorded": "تم تسجيل Lead skeleton في local/staging: {id}.",
+    "syncFailed": "تم الحفظ في المتصفح؛ مزامنة Lead API skeleton غير متاحة، ويمكن متابعة demo.",
+    "localSaved": "تم الحفظ في المتصفح لشرح staging demo ومسار العميل.",
+    "inquiryReceivedKicker": "تم استلام الاستفسار · staging preview",
+    "receivedTitle": "استلمنا احتياجات الحفل",
+    "receivedSummary": "يمكن للفريق مراجعة توفر القاعة والثيم والموردين يدوياً ثم عرض تقدم عرض السعر للعميل.",
+    "receivedItem1": "يمكن للفريق تأكيد الخطة باستخدام Restaurant A ومرئيات الثيم واقتراحات الموردين.",
+    "receivedItem2": "يمكنك متابعة عرض السعر في My Quotes.",
+    "receivedItem3": "يمكنك متابعة حالة الطلب لاحقاً في My Orders.",
+    "receivedItem4": "هذه معاينة staging ولا تشغل payment أو PaymentIntent أو webhook أو n8n أو رسائل خارجية.",
+    "localizedPackageCopy": "تظهر هذه الباقة كتقدير local/staging. النطاق النهائي يحتاج مراجعة بشرية.",
+    "localizedPackagePoint1": "نطاق الديكور والقاعة والموردين يؤثر في التقدير النهائي.",
+    "localizedPackagePoint2": "الفئات الأعلى تضيف تفاصيل بصرية وتنسيقاً أقوى.",
+    "scenes": {
+      "restaurantA": "عينة غرفة طعام خاصة في Restaurant A",
+      "command": "غرفة قيادة فضائية",
+      "moon": "قاعدة على سطح القمر",
+      "observatory": "مرصد النجوم",
+      "banquet": "قاعة مأدبة ملكية",
+      "garden": "شرفة حديقة سرية",
+      "tower": "برج سحري",
+      "clearing": "فسحة غابة",
+      "treehouse": "مخبأ بيت الشجرة",
+      "firefly": "وادي اليراعات",
+      "unknown": "مشهد غير معروف"
+    },
+    "packages": {
+      "basic": { "name": "Basic package", "description": "ديكور أساسي واستخدام قصير للقاعة" },
+      "standard": { "name": "Standard package", "description": "ديكور كامل، استخدام أطول للقاعة، ودعم مخطط" },
+      "premium": { "name": "Premium package", "description": "تخصيص VIP، استخدام يوم كامل للقاعة، ودعم مخصص" }
+    },
+    "addons": {
+      "cake": "كيكة ثيم مخصصة",
+      "photo": "تصوير احترافي",
+      "catering": "خدمة ضيافة"
+    }
+  },
+  "customerPages": {
+    "workspace": "مساحة العميل",
+    "status": "الحالة",
+    "allStatuses": "كل الحالات",
+    "whyFits": "لماذا يناسبك",
+    "priceDrivers": "السعر يعتمد أساساً على",
+    "sceneConfig": "إعداد مشهد AI",
+    "quoteExplanation": "شرح عرض السعر",
+    "upgradeValue": "قيمة الترقية",
+    "startAi": "ابدأ مع AI Concierge",
+    "myQuotes": {
+      "title": "My Quotes",
+      "subtitle": "راجع حالة عرض السعر ولقطة الباقة والمبلغ وتاريخ الانتهاء والخطوة التالية.",
+      "safety": "عرض local/staging للقراءة فقط: لا يتم تشغيل دفع إلكتروني أو Stripe أو webhook/n8n أو رسائل خارجية.",
+      "search": "ابحث برقم العرض أو الثيم أو الباقة أو العميل",
+      "emptyEyebrow": "لا توجد عروض ظاهرة لهذه الهوية المحلية",
+      "emptyTitle": "لا يوجد عرض مطابق في هذا Preview",
+      "emptyCopy": "ابدأ من AI Concierge أو Investor Demo. ستظهر عروض العملاء الحقيقية هنا مع الثيم وRestaurant A والسعر والحالة التالية."
+    },
+    "myOrders": {
+      "title": "My Orders",
+      "subtitle": "تابع حالة الطلب وتفاصيل الفعالية والمبلغ والعربون المؤقت والخطوة التالية.",
+      "safety": "pending_deposit حالة عمل فقط. Stripe/payment غير مفعّل في هذا النطاق.",
+      "search": "ابحث برقم الطلب أو الموقع أو الثيم أو العرض",
+      "emptyEyebrow": "لا توجد طلبات ظاهرة لهذه الهوية المحلية",
+      "emptyTitle": "لا يوجد طلب مطابق في هذا Preview",
+      "emptyCopy": "المسار الطبيعي هو AI Concierge → Quote request → My Quotes → My Orders. يمكن بدء بيانات Demo من Investor Demo."
+    }
+  },
+  "venues": {
+    "title": "استكشف القاعات المختارة",
+    "subtitle": "اعثر على المساحة المناسبة لحفلك",
+    "searchPlaceholder": "ابحث باسم القاعة أو المدينة...",
+    "search": "بحث",
+    "filters": "الفلاتر",
+    "city": "المدينة",
+    "selectCity": "اختر المدينة",
+    "venueType": "نوع القاعة",
+    "selectType": "اختر النوع",
+    "capacity": "السعة",
+    "people": "شخص",
+    "partnerOnly": "الشركاء فقط",
+    "amenities": "الخدمات",
+    "foundPrefix": "تم العثور على",
+    "foundSuffix": "قاعات",
+    "sortDefault": "افتراضي",
+    "sortPriceAsc": "السعر من الأقل",
+    "sortPriceDesc": "السعر من الأعلى",
+    "sortCapacity": "السعة",
+    "emptyTitle": "لم يتم العثور على قاعات",
+    "emptyDescription": "لا توجد قاعات تطابق الفلاتر الحالية. عدل الفلاتر أو اعرض كل القاعات.",
+    "viewAll": "عرض كل القاعات",
+    "loadDemo": "تحميل قاعات تجريبية",
+    "emptyTip": "نصيحة: اعرض كل القاعات أولاً ثم ضيق النطاق.",
+    "sampleVenueName": "Cloud Banquet Hall",
+    "partner": "شريك",
+    "discount": "خصم",
+    "from": "ابتداءً",
+    "viewDetails": "عرض التفاصيل",
+    "genericVenueDescription": "عينة قاعة local/staging لمعاينة تخطيط الحفل وملاءمة الثيم ومسار عرض السعر.",
+    "recommendationBasis": "مقترحة لمسار تخطيط الحفل الحالي.",
+    "demoLoaded": "تم تحميل القاعات التجريبية",
+    "loadFailed": "تعذر تحميل القاعات. يتم عرض قاعات تجريبية بدلاً من ذلك.",
+    "cities": {
+      "sydney": "Sydney",
+      "melbourne": "Melbourne",
+      "brisbane": "Brisbane",
+      "perth": "Perth",
+      "adelaide": "Adelaide"
+    },
+    "types": {
+      "hotel": "قاعة فندق",
+      "club": "نادي خاص",
+      "garden": "حديقة خارجية",
+      "art": "مساحة فنية",
+      "restaurant": "مطعم خاص",
+      "rooftop": "تراس علوي"
+    },
+    "amenityLabels": {
+      "parking": "مواقف",
+      "catering": "ضيافة",
+      "audio": "معدات صوت",
+      "projector": "جهاز عرض",
+      "bar": "بار"
+    }
+  },
+  "party3d": {
+    "eyebrow": "Sandbox تجريبي",
+    "title": "معاينة مشهد الحفل 3D",
+    "disclaimerBefore": "هذه معاينة تخطيط بصري مولدة من",
+    "disclaimerAfter": "وليست رسم تنفيذ أو مخططاً معمارياً أو قياس قاعة أو رسماً نهائياً للمورد.",
+    "backQuote": "العودة إلى Quote",
+    "aiConcierge": "AI Concierge",
+    "reset": "إعادة Castle Standard",
+    "sceneSummary": "ملخص المشهد",
+    "suggestedSuppliers": "موردين مقترحين",
+    "boundary": "حدود القراءة فقط",
+    "sandboxOnly": "Sandbox فقط",
+    "boundaryItems": {
+      "storage": "يقرأ sessionStorage / localStorage / AI prefill ثم يعود إلى Restaurant A Castle Standard عند عدم وجود بيانات.",
+      "visualOnly": "للتخطيط البصري فقط، وليس رسم تنفيذ أو مخططاً معمارياً أو رسماً للمورد.",
+      "no3dService": "لا يوجد تحرير بالسحب، ولا خدمة 3D خارجية، ولا تحميل نموذج عن بعد.",
+      "noExternal": "لا يشغل PaymentIntent أو webhook أو n8n أو production deploy أو رسالة خارجية."
+    },
+    "futureInput": "شكل إدخال 3D المستقبلي"
+  },
+  "footer": {
+    "tagline": "تخطيط حفلات عائلية من مكان واحد",
+    "services": "الخدمات",
+    "venueBooking": "حجز القاعات",
+    "aiPlanning": "تخطيط AI",
+    "design3d": "تصميم 3D",
+    "onlineQuote": "عرض سعر أونلاين",
+    "about": "من نحن",
+    "aboutUs": "عن المنصة",
+    "partners": "الشركاء",
+    "news": "الأخبار",
+    "joinUs": "انضم إلينا",
+    "help": "المساعدة",
+    "faq": "الأسئلة الشائعة",
+    "guide": "دليل الاستخدام",
+    "contactSupport": "الدعم",
+    "feedback": "ملاحظات",
+    "copyright": "© 2024 Party Event. All rights reserved. | سياسة الخصوصية | شروط الخدمة"
+  },
+  "designerPreview": {
+    "eyebrow": "Beta / Coming soon / Local preview",
+    "title": "معاينة تصميم الحفل 3D",
+    "lead": "عاين مساحة الحفل والطاولات والمسرح وديكور الثيم لفهم مسار Restaurant A وأجوائه قبل التخطيط.",
+    "safetyNote": "هذه معاينة تخطيط بصري تجريبية وليست رسم تنفيذ نهائي أو مخططاً معمارياً أو خطة تنفيذ للمورد.",
+    "backHome": "العودة للرئيسية",
+    "enterThemes": "دخول الثيمات",
+    "getQuote": "احصل على عرض",
+    "scene": {
+      "backdrop": "خلفية الثيم",
+      "photoZone": "منطقة الصور",
+      "dessertTable": "طاولة الحلويات",
+      "mainTable": "الطاولة الرئيسية",
+      "entrance": "مسار الدخول"
+    },
+    "status": {
+      "currentTitle": "الحالة الحالية",
+      "currentCopy": "هذا placeholder آمن يمنع صفحة 3D Design من الظهور كصفحة فارغة ويوضح حدود القدرة الحالية.",
+      "contentTitle": "المحتوى البصري",
+      "contentCopy": "يعرض الطاولات والطاولة الرئيسية وطاولة الحلويات ومنطقة الصور والخلفية وقوس البالونات ومسار الدخول.",
+      "nextTitle": "الخطوة التالية",
+      "nextCopy": "سيتم تقييم التحرير ثلاثي الأبعاد والسحب والتصميم ورسومات تنفيذ الموردين في حزمة لاحقة."
+    }
   }
 }

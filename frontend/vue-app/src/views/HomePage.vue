@@ -23,7 +23,17 @@
       </div>
 
       <div class="investor-visual-stack">
-        <img :src="investorHero.image" :alt="investorHero.alt" class="hero-mockup-image">
+        <img
+          v-if="isChineseLocale"
+          :src="investorHero.image"
+          :alt="investorHero.alt"
+          class="hero-mockup-image"
+        >
+        <div v-else class="hero-mockup-placeholder">
+          <span class="hero-placeholder-icon">🎉</span>
+          <strong>{{ $t('home.heroMockupFallbackTitle') }}</strong>
+          <p>{{ $t('home.heroMockupFallbackCopy') }}</p>
+        </div>
         <div class="visual-stack-meta">
           <span>{{ $t('home.visualMeta') }}</span>
           <strong>{{ $t('home.visualMetaStrong') }}</strong>
@@ -32,12 +42,33 @@
     </section>
 
     <!-- 沉浸式Hero -->
-    <ImmersiveHero 
+    <ImmersiveHero
+      v-if="isChineseLocale"
       :theme-id="currentTheme"
       @start-planning="handleStartPlanning"
       @explore-themes="scrollToThemes"
       @play-voice="handlePlayVoice"
     />
+    <section v-else class="english-theme-hero">
+      <div class="section-container english-theme-hero-grid">
+        <div>
+          <span class="asset-kicker">{{ $t('home.englishThemeHeroKicker') }}</span>
+          <h2 class="section-title english-theme-title">{{ $t('home.englishThemeHeroTitle') }}</h2>
+          <p class="section-subtitle english-theme-copy">{{ $t('home.englishThemeHeroCopy') }}</p>
+        </div>
+        <div class="english-theme-hero-actions">
+          <button class="localized-card-button" @click="goTo('/themes/castle-princess')">
+            {{ $t('home.assetFallbackCards.castle.cta') }}
+          </button>
+          <button class="localized-card-button" @click="goTo('/themes')">
+            {{ $t('home.navThemes') }}
+          </button>
+          <button class="localized-card-button" @click="goTo('/quote')">
+            {{ $t('quote.entry') }}
+          </button>
+        </div>
+      </div>
+    </section>
 
     <!-- 主题介绍区 -->
     <section id="themes" class="themes-section">
@@ -59,12 +90,16 @@
             @click="switchToTheme(theme.id)"
           >
             <img
-              v-if="theme.image"
+              v-if="theme.image && isChineseLocale"
               class="theme-card-image"
               :src="theme.image"
               :alt="theme.nameEn || theme.name"
               loading="lazy"
             >
+            <div v-else class="theme-card-image-placeholder">
+              <span>{{ theme.icon }}</span>
+              <strong>{{ theme.nameEn || theme.name }}</strong>
+            </div>
             <div class="card-icon">{{ theme.icon }}</div>
             <h3 class="card-title">{{ theme.name }}</h3>
             <span class="card-title-en">{{ theme.nameEn }}</span>
@@ -75,7 +110,7 @@
           </div>
         </div>
 
-        <div class="investor-asset-panel">
+        <div v-if="isChineseLocale" class="investor-asset-panel">
           <div class="asset-panel-header">
             <span class="asset-kicker">{{ $t('home.assetKicker') }}</span>
             <h3 class="asset-panel-title">{{ $t('home.assetTitle') }}</h3>
@@ -108,7 +143,26 @@
           </div>
         </div>
 
-        <div class="restoration-grid">
+        <div v-else class="investor-asset-panel english-asset-panel">
+          <div class="asset-panel-header">
+            <span class="asset-kicker">{{ $t('home.assetFallbackKicker') }}</span>
+            <h3 class="asset-panel-title">{{ $t('home.assetFallbackTitle') }}</h3>
+            <p class="asset-panel-copy">
+              {{ $t('home.assetFallbackCopy') }}
+            </p>
+          </div>
+
+          <div class="localized-card-grid">
+            <article v-for="asset in englishAssetCards" :key="asset.title" class="localized-info-card">
+              <span class="localized-card-icon">{{ asset.icon }}</span>
+              <h3>{{ asset.title }}</h3>
+              <p>{{ asset.copy }}</p>
+              <button class="localized-card-button" @click="goTo(asset.to)">{{ asset.cta }}</button>
+            </article>
+          </div>
+        </div>
+
+        <div v-if="isChineseLocale" class="restoration-grid">
           <article class="restoration-panel">
             <div class="asset-panel-header">
               <span class="asset-kicker">{{ $t('home.packageKicker') }}</span>
@@ -143,6 +197,38 @@
             </div>
           </article>
         </div>
+
+        <div v-else class="restoration-grid english-restoration-grid">
+          <article class="restoration-panel">
+            <div class="asset-panel-header">
+              <span class="asset-kicker">{{ $t('home.packageFallbackKicker') }}</span>
+              <h3 class="asset-panel-title">{{ $t('home.packageFallbackTitle') }}</h3>
+              <p class="asset-panel-copy">{{ $t('home.packageFallbackCopy') }}</p>
+            </div>
+            <div class="localized-card-grid compact-localized-grid">
+              <article v-for="pkg in englishPackageAssetCards" :key="pkg.title" class="localized-info-card">
+                <span class="localized-tier">{{ pkg.tier }}</span>
+                <h3>{{ pkg.title }}</h3>
+                <p>{{ pkg.copy }}</p>
+              </article>
+            </div>
+          </article>
+
+          <article class="restoration-panel">
+            <div class="asset-panel-header">
+              <span class="asset-kicker">{{ $t('home.restaurantFallbackKicker') }}</span>
+              <h3 class="asset-panel-title">{{ $t('home.restaurantFallbackTitle') }}</h3>
+              <p class="asset-panel-copy">{{ $t('home.restaurantFallbackCopy') }}</p>
+            </div>
+            <div class="localized-card-grid compact-localized-grid">
+              <article v-for="scene in englishRestaurantAssetCards" :key="scene.title" class="localized-info-card">
+                <span class="localized-card-icon">{{ scene.icon }}</span>
+                <h3>{{ scene.title }}</h3>
+                <p>{{ scene.copy }}</p>
+              </article>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -171,7 +257,7 @@
 
     <!-- 场景展示区 -->
     <SceneShowcase
-      v-if="!isEnglishLocale"
+      v-if="isChineseLocale"
       :theme-id="currentTheme"
       @select-scene="handleSelectScene"
     />
@@ -192,7 +278,7 @@
 
     <!-- 套餐/价格联动区 -->
     <PackageShowcase
-      v-if="!isEnglishLocale"
+      v-if="isChineseLocale"
       :theme-id="currentTheme"
       @select-package="handleSelectPackage"
     />
@@ -352,8 +438,8 @@ export default {
       return getRestaurantAVisuals(this.currentTheme);
     },
 
-    isEnglishLocale() {
-      return this.$i18n.locale === 'en';
+    isChineseLocale() {
+      return this.$i18n.locale === 'zh';
     },
 
     localizedSceneCards() {
@@ -392,6 +478,72 @@ export default {
           tier: this.$t('tiers.premium'),
           title: this.$t('home.localizedPackages.premium.title'),
           copy: this.$t('home.localizedPackages.premium.copy')
+        }
+      ];
+    },
+
+    englishAssetCards() {
+      return [
+        {
+          icon: '🏰',
+          title: this.$t('home.assetFallbackCards.castle.title'),
+          copy: this.$t('home.assetFallbackCards.castle.copy'),
+          cta: this.$t('home.assetFallbackCards.castle.cta'),
+          to: '/themes/castle-princess'
+        },
+        {
+          icon: '🚀',
+          title: this.$t('home.assetFallbackCards.space.title'),
+          copy: this.$t('home.assetFallbackCards.space.copy'),
+          cta: this.$t('home.assetFallbackCards.space.cta'),
+          to: '/themes/space-explorer'
+        },
+        {
+          icon: '🌲',
+          title: this.$t('home.assetFallbackCards.forest.title'),
+          copy: this.$t('home.assetFallbackCards.forest.copy'),
+          cta: this.$t('home.assetFallbackCards.forest.cta'),
+          to: '/themes/forest-adventure'
+        }
+      ];
+    },
+
+    englishPackageAssetCards() {
+      return [
+        {
+          tier: this.$t('tiers.basic'),
+          title: this.$t('home.packageFallbackCards.basic.title'),
+          copy: this.$t('home.packageFallbackCards.basic.copy')
+        },
+        {
+          tier: this.$t('tiers.standard'),
+          title: this.$t('home.packageFallbackCards.standard.title'),
+          copy: this.$t('home.packageFallbackCards.standard.copy')
+        },
+        {
+          tier: this.$t('tiers.premium'),
+          title: this.$t('home.packageFallbackCards.premium.title'),
+          copy: this.$t('home.packageFallbackCards.premium.copy')
+        }
+      ];
+    },
+
+    englishRestaurantAssetCards() {
+      return [
+        {
+          icon: '🍽️',
+          title: this.$t('home.restaurantFallbackCards.before.title'),
+          copy: this.$t('home.restaurantFallbackCards.before.copy')
+        },
+        {
+          icon: '🎈',
+          title: this.$t('home.restaurantFallbackCards.decor.title'),
+          copy: this.$t('home.restaurantFallbackCards.decor.copy')
+        },
+        {
+          icon: '🧁',
+          title: this.$t('home.restaurantFallbackCards.flow.title'),
+          copy: this.$t('home.restaurantFallbackCards.flow.copy')
         }
       ];
     },
@@ -685,6 +837,35 @@ export default {
   object-position: top center;
 }
 
+.hero-mockup-placeholder {
+  min-height: 520px;
+  aspect-ratio: 4 / 5;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  padding: 42px;
+  color: #251522;
+  background:
+    radial-gradient(circle at 78% 18%, rgba(255, 138, 91, 0.24), transparent 30%),
+    linear-gradient(135deg, #fff8f0, #f5e8ff 48%, #dff7ff);
+}
+
+.hero-placeholder-icon {
+  font-size: 4rem;
+}
+
+.hero-mockup-placeholder strong {
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  line-height: 1.08;
+}
+
+.hero-mockup-placeholder p {
+  max-width: 340px;
+  margin: 0;
+  color: #5b4653;
+  line-height: 1.7;
+}
+
 .visual-stack-meta {
   padding: 18px 20px 20px;
   background: #fff;
@@ -703,6 +884,38 @@ export default {
   margin-top: 8px;
   color: #251522;
   font-size: 1.05rem;
+}
+
+.english-theme-hero {
+  padding: 72px 24px;
+  background: #fff8f0;
+}
+
+.english-theme-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
+  gap: 30px;
+  align-items: center;
+}
+
+.english-theme-title,
+.english-theme-copy {
+  text-align: left;
+}
+
+:global([dir='rtl']) .english-theme-title,
+:global([dir='rtl']) .english-theme-copy {
+  text-align: right;
+}
+
+.english-theme-copy {
+  max-width: 720px;
+  margin: 0;
+}
+
+.english-theme-hero-actions {
+  display: grid;
+  gap: 12px;
 }
 
 /* 主题介绍区 */
@@ -756,6 +969,28 @@ export default {
   object-fit: cover;
   object-position: top center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.theme-card-image-placeholder {
+  height: 220px;
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  padding: 28px;
+  color: var(--theme-text);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.22), transparent 24%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.22));
+}
+
+.theme-card-image-placeholder span {
+  font-size: 3rem;
+}
+
+.theme-card-image-placeholder strong {
+  font-size: 1.28rem;
+  line-height: 1.2;
 }
 
 .card-icon {
@@ -816,6 +1051,11 @@ export default {
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(16px);
+}
+
+.english-asset-panel,
+.english-restoration-grid .restoration-panel {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .asset-panel-header {
@@ -996,6 +1236,11 @@ export default {
   gap: 24px;
 }
 
+.compact-localized-grid {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
 .localized-info-card {
   min-height: 260px;
   padding: 28px;
@@ -1003,6 +1248,11 @@ export default {
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.14);
+}
+
+.compact-localized-grid .localized-info-card {
+  min-height: auto;
+  padding: 22px;
 }
 
 .localized-card-icon,

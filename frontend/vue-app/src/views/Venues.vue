@@ -3,20 +3,20 @@
     <!-- Search Header -->
     <div class="search-header">
       <div class="search-content">
-        <h1>探索精选场地</h1>
-        <p>发现适合您派对的完美场地</p>
+        <h1>{{ t('venues.title') }}</h1>
+        <p>{{ t('venues.subtitle') }}</p>
         
         <div class="search-box">
           <el-input
             v-model="searchQuery"
-            placeholder="搜索场地名称、城市..."
+            :placeholder="t('venues.searchPlaceholder')"
             size="large"
             :prefix-icon="Search"
             clearable
             @keyup.enter="handleSearch"
           >
             <template #append>
-              <el-button type="primary" @click="handleSearch">搜索</el-button>
+              <el-button type="primary" @click="handleSearch">{{ t('venues.search') }}</el-button>
             </template>
           </el-input>
         </div>
@@ -27,53 +27,53 @@
       <!-- Filter Sidebar -->
       <aside class="filter-sidebar">
         <div class="filter-section">
-          <h3>筛选条件</h3>
+          <h3>{{ t('venues.filters') }}</h3>
           
           <div class="filter-group">
-            <label>城市</label>
-            <el-select v-model="filters.city" placeholder="选择城市" clearable @change="applyFilters">
-              <el-option label="悉尼" value="悉尼" />
-              <el-option label="墨尔本" value="墨尔本" />
-              <el-option label="布里斯班" value="布里斯班" />
-              <el-option label="珀斯" value="珀斯" />
-              <el-option label="阿德莱德" value="阿德莱德" />
+            <label>{{ t('venues.city') }}</label>
+            <el-select v-model="filters.city" :placeholder="t('venues.selectCity')" clearable @change="applyFilters">
+              <el-option :label="t('venues.cities.sydney')" value="悉尼" />
+              <el-option :label="t('venues.cities.melbourne')" value="墨尔本" />
+              <el-option :label="t('venues.cities.brisbane')" value="布里斯班" />
+              <el-option :label="t('venues.cities.perth')" value="珀斯" />
+              <el-option :label="t('venues.cities.adelaide')" value="阿德莱德" />
             </el-select>
           </div>
           
           <div class="filter-group">
-            <label>场地类型</label>
-            <el-select v-model="filters.venueType" placeholder="选择类型" clearable @change="applyFilters">
-              <el-option label="酒店宴会厅" value="hotel" />
-              <el-option label="私人会所" value="club" />
-              <el-option label="户外花园" value="garden" />
-              <el-option label="艺术空间" value="art" />
-              <el-option label="餐厅包场" value="restaurant" />
-              <el-option label="屋顶露台" value="rooftop" />
+            <label>{{ t('venues.venueType') }}</label>
+            <el-select v-model="filters.venueType" :placeholder="t('venues.selectType')" clearable @change="applyFilters">
+              <el-option :label="t('venues.types.hotel')" value="hotel" />
+              <el-option :label="t('venues.types.club')" value="club" />
+              <el-option :label="t('venues.types.garden')" value="garden" />
+              <el-option :label="t('venues.types.art')" value="art" />
+              <el-option :label="t('venues.types.restaurant')" value="restaurant" />
+              <el-option :label="t('venues.types.rooftop')" value="rooftop" />
             </el-select>
           </div>
           
           <div class="filter-group">
-            <label>容纳人数</label>
+            <label>{{ t('venues.capacity') }}</label>
             <el-slider v-model="filters.capacity" range :max="500" @change="applyFilters" />
-            <div class="range-label">{{ filters.capacity[0] }} - {{ filters.capacity[1] }} 人</div>
+            <div class="range-label">{{ filters.capacity[0] }} - {{ filters.capacity[1] }} {{ t('venues.people') }}</div>
           </div>
           
           <div class="filter-group">
             <el-checkbox v-model="filters.partnerOnly" @change="applyFilters">
-              仅显示合作伙伴
+              {{ t('venues.partnerOnly') }}
             </el-checkbox>
           </div>
         </div>
         
         <div class="filter-section">
-          <h3>设施服务</h3>
+          <h3>{{ t('venues.amenities') }}</h3>
           <el-checkbox-group v-model="filters.amenities" @change="applyFilters">
             <el-checkbox label="wifi">WiFi</el-checkbox>
-            <el-checkbox label="parking">停车位</el-checkbox>
-            <el-checkbox label="catering">餐饮服务</el-checkbox>
-            <el-checkbox label="audio">音响设备</el-checkbox>
-            <el-checkbox label="projector">投影仪</el-checkbox>
-            <el-checkbox label="bar">吧台</el-checkbox>
+            <el-checkbox label="parking">{{ t('venues.amenityLabels.parking') }}</el-checkbox>
+            <el-checkbox label="catering">{{ t('venues.amenityLabels.catering') }}</el-checkbox>
+            <el-checkbox label="audio">{{ t('venues.amenityLabels.audio') }}</el-checkbox>
+            <el-checkbox label="projector">{{ t('venues.amenityLabels.projector') }}</el-checkbox>
+            <el-checkbox label="bar">{{ t('venues.amenityLabels.bar') }}</el-checkbox>
           </el-checkbox-group>
         </div>
       </aside>
@@ -81,12 +81,12 @@
       <!-- Venue List -->
       <div class="venues-content">
         <div class="venues-toolbar">
-          <span>共找到 {{ filteredVenues.length }} 个场地</span>
+          <span>{{ t('venues.foundPrefix') }} {{ filteredVenues.length }} {{ t('venues.foundSuffix') }}</span>
           <el-radio-group v-model="sortBy" size="small" @change="handleSort">
-            <el-radio-button label="default">默认</el-radio-button>
-            <el-radio-button label="price-asc">价格从低到高</el-radio-button>
-            <el-radio-button label="price-desc">价格从高到低</el-radio-button>
-            <el-radio-button label="capacity">容量</el-radio-button>
+            <el-radio-button label="default">{{ t('venues.sortDefault') }}</el-radio-button>
+            <el-radio-button label="price-asc">{{ t('venues.sortPriceAsc') }}</el-radio-button>
+            <el-radio-button label="price-desc">{{ t('venues.sortPriceDesc') }}</el-radio-button>
+            <el-radio-button label="capacity">{{ t('venues.sortCapacity') }}</el-radio-button>
           </el-radio-group>
         </div>
 
@@ -96,12 +96,12 @@
 
         <EmptyState
           v-else-if="filteredVenues.length === 0"
-          title="没有找到场地"
-          description="当前筛选条件下暂无场地，试试调整筛选条件或浏览全部场地"
+          :title="t('venues.emptyTitle')"
+          :description="t('venues.emptyDescription')"
           :show-example="true"
-          primary-text="查看全部场地"
-          secondary-text="加载示例场地"
-          tip="💡 提示：可以先查看全部场地，再逐步缩小范围"
+          :primary-text="t('venues.viewAll')"
+          :secondary-text="t('venues.loadDemo')"
+          :tip="t('venues.emptyTip')"
           @primary="clearAllFilters"
           @secondary="loadDemoVenues"
         >
@@ -112,8 +112,8 @@
             <div class="venue-preview-example">
               <div class="venue-image-placeholder"></div>
               <div class="venue-info-placeholder">
-                <div class="venue-name">云端宴会厅</div>
-                <div class="venue-meta">悉尼 · 200人</div>
+                <div class="venue-name">{{ t('venues.sampleVenueName') }}</div>
+                <div class="venue-meta">{{ t('venues.cities.sydney') }} · 200 {{ t('venues.people') }}</div>
               </div>
             </div>
           </template>
@@ -127,34 +127,38 @@
             @click="$router.push(`/venues/${venue.id}`)"
           >
             <div class="venue-image">
-              <img :src="venue.images?.[0] || venue.image_path || 'https://via.placeholder.com/300x200'" :alt="venue.name">
-              <div v-if="venue.is_partner" class="partner-tag">合作伙伴</div>
+              <img v-if="isChineseLocale" :src="venue.images?.[0] || venue.image_path || 'https://via.placeholder.com/300x200'" :alt="displayVenueName(venue)">
+              <div v-else class="venue-english-placeholder">
+                <span>🏛️</span>
+                <strong>{{ displayVenueName(venue) }}</strong>
+              </div>
+              <div v-if="venue.is_partner" class="partner-tag">{{ t('venues.partner') }}</div>
             </div>
             
             <div class="venue-details">
               <div class="venue-header">
-                <h3>{{ venue.name }}</h3>
+                <h3>{{ displayVenueName(venue) }}</h3>
                 <el-rate v-model="venue.rating" disabled show-score text-color="#ff9900" />
               </div>
               
-              <p class="venue-address"><el-icon><Location /></el-icon>{{ venue.address }}, {{ venue.city }}</p>
+              <p class="venue-address"><el-icon><Location /></el-icon>{{ displayVenueAddress(venue) }}, {{ displayCity(venue.city) }}</p>
               
               <div class="venue-tags">
-                <el-tag v-if="venue.venue_type" size="small">{{ venue.venue_type }}</el-tag>
-                <el-tag v-if="venue.capacity" size="small" type="success">{{ venue.capacity }}人</el-tag>
-                <el-tag v-if="venue.is_partner" size="small" type="warning">{{ (venue.discount_rate * 100).toFixed(0) }}%优惠</el-tag>
+                <el-tag v-if="venue.venue_type" size="small">{{ displayVenueType(venue.venue_type) }}</el-tag>
+                <el-tag v-if="venue.capacity" size="small" type="success">{{ venue.capacity }} {{ t('venues.people') }}</el-tag>
+                <el-tag v-if="venue.is_partner" size="small" type="warning">{{ (venue.discount_rate * 100).toFixed(0) }}% {{ t('venues.discount') }}</el-tag>
                 <el-tag v-for="theme in venue.themeFit || []" :key="theme" size="small" type="info">{{ theme }}</el-tag>
               </div>
               
-              <p class="venue-desc">{{ venue.description }}</p>
-              <p v-if="venue.recommendationBasis" class="venue-basis">{{ venue.recommendationBasis }}</p>
+              <p class="venue-desc">{{ displayVenueDescription(venue) }}</p>
+              <p v-if="displayRecommendationBasis(venue)" class="venue-basis">{{ displayRecommendationBasis(venue) }}</p>
               
               <div class="venue-footer">
                 <div class="venue-price">
                   <span class="price">${{ venue.regular_price || 0 }}</span>
-                  <span class="unit">/起</span>
+                  <span class="unit">/{{ t('venues.from') }}</span>
                 </div>
-                <el-button type="primary" size="small">查看详情</el-button>
+                <el-button type="primary" size="small">{{ t('venues.viewDetails') }}</el-button>
               </div>
             </div>
           </div>
@@ -180,9 +184,11 @@ import { ref, computed, onMounted } from 'vue'
 import { Search, Location } from '@element-plus/icons-vue'
 import { venueAPI } from '@/api/modules'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import EmptyState from '../components/EmptyState.vue'
 import { venueDisplaySeeds } from '@/data/visualAssets'
 
+const { t, locale } = useI18n()
 const loading = ref(false)
 const searchQuery = ref('')
 const venues = ref([])
@@ -197,6 +203,8 @@ const filters = ref({
   partnerOnly: false,
   amenities: []
 })
+
+const isChineseLocale = computed(() => locale.value === 'zh')
 
 // 获取场地列表
 const fetchVenues = async () => {
@@ -214,7 +222,7 @@ const fetchVenues = async () => {
     const data = await venueAPI.getVenues(params)
     venues.value = data.map(v => ({ ...v, rating: 4.5 }))
   } catch (error) {
-    ElMessage.error('获取场地列表失败')
+    ElMessage.error(t('venues.loadFailed'))
     // 使用模拟数据
     venues.value = getMockVenues()
   } finally {
@@ -250,6 +258,81 @@ const getMockVenues = () => {
     { id: 5, name: '绿茵庄园', address: '654 郊区大道', city: '墨尔本', venue_type: '户外花园', capacity: 250, regular_price: 2200, is_partner: true, discount_rate: 0.20, description: '占地5000平的私人庄园', images: ['https://images.unsplash.com/photo-1478146059778-26028b07395a?w=400'], rating: 4.9 },
     { id: 6, name: '都市酒廊', address: '987 商业街', city: '悉尼', venue_type: '餐厅包场', capacity: 100, regular_price: 1500, is_partner: false, description: '时尚现代的私人酒廊', images: ['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'], rating: 4.4 }
   ]
+}
+
+const cityLabels = {
+  悉尼: 'sydney',
+  墨尔本: 'melbourne',
+  布里斯班: 'brisbane',
+  珀斯: 'perth',
+  阿德莱德: 'adelaide'
+}
+
+const venueTypeLabels = {
+  酒店宴会厅: 'hotel',
+  私人会所: 'club',
+  户外花园: 'garden',
+  艺术空间: 'art',
+  餐厅包场: 'restaurant',
+  屋顶露台: 'rooftop',
+  restaurant: 'restaurant',
+  hotel: 'hotel',
+  club: 'club',
+  garden: 'garden',
+  art: 'art',
+  rooftop: 'rooftop'
+}
+
+const englishVenueNames = {
+  云端宴会厅: 'Cloud Banquet Hall',
+  海景花园会所: 'Seaview Garden Club',
+  星空露台: 'Skyline Rooftop',
+  艺术中心: 'Art Centre',
+  绿茵庄园: 'Green Lawn Estate',
+  都市酒廊: 'Urban Lounge'
+}
+
+function displayCity(city) {
+  if (isChineseLocale.value) return city
+  const key = cityLabels[city]
+  return key ? t(`venues.cities.${key}`) : city
+}
+
+function displayVenueType(type) {
+  if (isChineseLocale.value) return type
+  const key = venueTypeLabels[type]
+  return key ? t(`venues.types.${key}`) : type
+}
+
+function displayVenueName(venue) {
+  if (isChineseLocale.value) return venue.name
+  if (englishVenueNames[venue.name]) return englishVenueNames[venue.name]
+  if (String(venue.id || '').includes('restaurant-a')) return 'Restaurant A Demo Dining Room'
+  return venue.nameEn || venue.name || t('venues.sampleVenueName')
+}
+
+function displayVenueAddress(venue) {
+  if (isChineseLocale.value) return venue.address
+  if (String(venue.address || '').includes('市中心')) return '123 City Centre Avenue'
+  if (String(venue.address || '').includes('海滨')) return '456 Seaside Road'
+  if (String(venue.address || '').includes('高楼')) return '789 High Street'
+  if (String(venue.address || '').includes('文化')) return '321 Culture Street'
+  if (String(venue.address || '').includes('郊区')) return '654 Suburban Avenue'
+  if (String(venue.address || '').includes('商业')) return '987 Business Street'
+  return venue.address || 'Local/staging demo address'
+}
+
+function displayVenueDescription(venue) {
+  if (isChineseLocale.value) return venue.description
+  if (String(venue.id || '').includes('restaurant-a')) {
+    return 'Restaurant A sample room for comparing original layout, themed decor layers, and parent-friendly party flow.'
+  }
+  return t('venues.genericVenueDescription')
+}
+
+function displayRecommendationBasis(venue) {
+  if (isChineseLocale.value) return venue.recommendationBasis
+  return venue.recommendationBasis ? t('venues.recommendationBasis') : ''
 }
 
 // 过滤后的场地
@@ -311,7 +394,7 @@ const clearAllFilters = () => {
 
 const loadDemoVenues = () => {
   venues.value = getMockVenues()
-  ElMessage.success('已加载示例场地')
+  ElMessage.success(t('venues.demoLoaded'))
 }
 
 const handleSort = () => {
@@ -464,6 +547,30 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.venue-english-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 18px;
+  text-align: center;
+  color: #263342;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(102, 126, 234, 0.22), transparent 26%),
+    linear-gradient(135deg, #fff, #edf4ff);
+}
+
+.venue-english-placeholder span {
+  font-size: 2.4rem;
+}
+
+.venue-english-placeholder strong {
+  font-size: 1rem;
+  line-height: 1.25;
 }
 
 .partner-tag {

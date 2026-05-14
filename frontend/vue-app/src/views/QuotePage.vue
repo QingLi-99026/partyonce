@@ -86,7 +86,7 @@
             class="price-row"
             :class="{ 'is-addon': group.type === 'optional_upgrade' }"
           >
-            <span>{{ group.labelZh }} · {{ group.customerLabel }}</span>
+            <span>{{ displayLineItemGroup(group) }} · {{ group.customerLabel }}</span>
             <span>{{ formatPrice(group.amount) }}</span>
           </div>
           <div class="price-divider"></div>
@@ -98,15 +98,15 @@
 
         <div class="line-item-card" :style="cardStyle">
           <div class="pricing-explainer-header">
-            <span class="visual-kicker">Standardized line items</span>
-            <h3>报价由哪些稳定类型构成</h3>
-            <p>场地费、装饰费、供应商费、人工费、运输费、服务费和可选升级项会进入 quote snapshot，方便后台编辑、PDF 报价单和未来 deposit 计算。</p>
+            <span class="visual-kicker">{{ $t('quotePage.lineItemsKicker') }}</span>
+            <h3>{{ $t('quotePage.lineItemsTitle') }}</h3>
+            <p>{{ $t('quotePage.lineItemsCopy') }}</p>
           </div>
           <div class="line-item-grid">
             <article v-for="group in lineItemSummary.groups" :key="group.type">
-              <strong>{{ group.labelZh }}</strong>
+              <strong>{{ displayLineItemGroup(group) }}</strong>
               <span>{{ formatPrice(group.amount) }}</span>
-              <p>{{ group.description }}</p>
+              <p>{{ isChineseLocale ? group.description : $t('quotePage.lineItemGenericDescription') }}</p>
               <small>{{ group.items.map((item) => item.amount_basis).filter(Boolean).join(' / ') }}</small>
             </article>
           </div>
@@ -117,68 +117,72 @@
 
         <div class="pricing-explainer" :style="cardStyle">
           <div class="pricing-explainer-header">
-            <span class="visual-kicker">Package explanation</span>
-            <h3>{{ packageExplanation.label }} 到底差在哪里</h3>
-            <p>{{ packageExplanation.positioning }}</p>
+            <span class="visual-kicker">{{ $t('quotePage.packageExplanationKicker') }}</span>
+            <h3>{{ displayPackageExplanationLabel }} {{ $t('quotePage.packageDifference') }}</h3>
+            <p>{{ displayPackageText(packageExplanation.positioning) }}</p>
           </div>
           <div class="pricing-explainer-grid">
             <div>
-              <h4>为什么推荐这一档</h4>
-              <p>{{ packageExplanation.whyRecommend }}</p>
+              <h4>{{ $t('quotePage.whyRecommend') }}</h4>
+              <p>{{ displayPackageText(packageExplanation.whyRecommend) }}</p>
             </div>
             <div>
-              <h4>价格差异来自哪里</h4>
+              <h4>{{ $t('quotePage.priceDrivers') }}</h4>
               <ul>
-                <li v-for="item in packageExplanation.priceDrivers" :key="item">{{ item }}</li>
+                <li v-for="item in displayPackageList(packageExplanation.priceDrivers)" :key="item">{{ item }}</li>
               </ul>
             </div>
             <div>
-              <h4>{{ upgradeExplanation.title }}</h4>
+              <h4>{{ displayPackageText(upgradeExplanation.title) }}</h4>
               <ul>
-                <li v-for="item in upgradeExplanation.items" :key="item">{{ item }}</li>
+                <li v-for="item in displayPackageList(upgradeExplanation.items)" :key="item">{{ item }}</li>
               </ul>
             </div>
             <div>
-              <h4>这个方案为什么适合我</h4>
-              <p>{{ packageExplanation.customerFit }}</p>
+              <h4>{{ $t('quotePage.customerFit') }}</h4>
+              <p>{{ displayPackageText(packageExplanation.customerFit) }}</p>
             </div>
           </div>
-          <p class="pricing-explainer-note">{{ packageExplanation.quoteExplanation }}</p>
+          <p class="pricing-explainer-note">{{ displayPackageText(packageExplanation.quoteExplanation) }}</p>
         </div>
       </div>
     </section>
 
     <section class="visual-context-section">
       <div class="section-container">
-        <h2 class="section-title" :style="titleStyle">视觉方案依据</h2>
+        <h2 class="section-title" :style="titleStyle">{{ $t('quotePage.visualBasis') }}</h2>
         <div class="visual-context-card" :style="cardStyle">
-          <img :src="visualContext.restaurant.image_path" :alt="visualContext.restaurant.title">
+          <img v-if="isChineseLocale" :src="visualContext.restaurant.image_path" :alt="visualContext.restaurant.title">
+          <div v-else class="visual-placeholder-card">
+            <span>🍽️</span>
+            <strong>{{ $t('ai.restaurantPlaceholderTitle') }}</strong>
+          </div>
           <div class="visual-context-copy">
-            <span class="visual-kicker">{{ visualContext.restaurant.title }}</span>
-            <p>{{ visualContext.packageVisual.scope }}</p>
+            <span class="visual-kicker">{{ isChineseLocale ? visualContext.restaurant.title : $t('ai.restaurantPlaceholderTitle') }}</span>
+            <p>{{ isChineseLocale ? visualContext.packageVisual.scope : $t('ai.restaurantPlaceholderCopy') }}</p>
             <dl>
               <div>
-                <dt>适合年龄</dt>
-                <dd>{{ visualContext.packageVisual.suitableAge }} 岁</dd>
+                <dt>{{ $t('quotePage.suitableAge') }}</dt>
+                <dd>{{ isChineseLocale ? `${visualContext.packageVisual.suitableAge} 岁` : $t('ai.ageRange') }}</dd>
               </div>
               <div>
-                <dt>推荐场地</dt>
-                <dd>{{ visualContext.primaryVenue.name }} · {{ visualContext.primaryVenue.capacity }}</dd>
+                <dt>{{ $t('quotePage.recommendedVenue') }}</dt>
+                <dd>{{ isChineseLocale ? `${visualContext.primaryVenue.name} · ${visualContext.primaryVenue.capacity}` : $t('quotePage.sampleRoom') }}</dd>
               </div>
               <div>
-                <dt>供应商建议</dt>
-                <dd>{{ visualContext.suppliers.map((item) => item.name).join(' / ') }}</dd>
+                <dt>{{ $t('quotePage.supplierSuggestions') }}</dt>
+                <dd>{{ isChineseLocale ? visualContext.suppliers.map((item) => item.name).join(' / ') : $t('ai.supplier') }}</dd>
               </div>
               <div>
-                <dt>报价依据</dt>
-                <dd>{{ visualContext.restaurant.decorationLayer }}</dd>
+                <dt>{{ $t('quotePage.quoteBasis') }}</dt>
+                <dd>{{ isChineseLocale ? visualContext.restaurant.decorationLayer : $t('quotePage.visualBasisCopy') }}</dd>
               </div>
             </dl>
           </div>
         </div>
         <div v-if="partySceneConfig" class="scene-config-card" :style="cardStyle">
-          <span class="visual-kicker">party_scene_config · {{ partySceneConfig.version }}</span>
-          <h3>AI 场景配置摘要</h3>
+          <span class="visual-kicker">{{ $t('quotePage.sceneConfigKicker') }} · {{ partySceneConfig.version }}</span>
+          <h3>{{ $t('customerPages.sceneConfig') }}</h3>
           <dl>
             <div>
               <dt>Layout</dt>
@@ -198,7 +202,7 @@
             </div>
           </dl>
           <button class="scene-preview-btn" type="button" @click="openParty3DPreview">
-            查看实验性 3D 场景预览（非施工图）
+            {{ $t('quotePage.view3dPreview') }}
           </button>
         </div>
       </div>
@@ -207,9 +211,9 @@
     <!-- 附加项 -->
     <section class="addons-section">
       <div class="section-container">
-        <h2 class="section-title" :style="titleStyle">可选附加项</h2>
+        <h2 class="section-title" :style="titleStyle">{{ $t('quotePage.optionalAddons') }}</h2>
         <div v-if="selectedAddons.length > 0" class="addons-subtotal">
-          已选 {{ selectedAddons.length }} 项，小计 {{ formatPrice(addonsTotal) }}
+          {{ $t('quotePage.selectedAddons', { count: selectedAddons.length, total: formatPrice(addonsTotal) }) }}
         </div>
         <div class="addons-grid">
           <div 
@@ -233,13 +237,13 @@
     <!-- 恢复方案提示 -->
     <div v-if="restoredFromSave" class="restore-notice">
       <span class="restore-icon">↺</span>
-      <span>已恢复您上次保存的方案</span>
+      <span>{{ $t('quotePage.restoredNotice') }}</span>
     </div>
 
     <!-- 保存成功提示 -->
     <div v-if="saveSuccess" class="save-success">
       <span class="success-icon">✓</span>
-      <span>方案已保存！总价 {{ formatPrice(finalTotal) }}</span>
+      <span>{{ $t('quotePage.savedNotice', { total: formatPrice(finalTotal) }) }}</span>
     </div>
 
     <!-- 提交成功提示 -->
@@ -251,15 +255,15 @@
     <section v-if="submittedNextSteps" class="post-inquiry-section">
       <div class="section-container">
         <div class="post-inquiry-card" :style="cardStyle">
-          <span class="visual-kicker">Inquiry received · staging preview</span>
+          <span class="visual-kicker">{{ $t('quotePage.inquiryReceivedKicker') }}</span>
           <h2>{{ submittedNextSteps.title }}</h2>
           <p>{{ submittedNextSteps.summary }}</p>
           <ul>
             <li v-for="item in submittedNextSteps.items" :key="item">{{ item }}</li>
           </ul>
           <div class="post-inquiry-actions">
-            <button class="btn-secondary" @click="$router.push('/my/quotes')">查看 My Quotes</button>
-            <button class="btn-secondary" @click="$router.push('/my/orders')">查看 My Orders</button>
+            <button class="btn-secondary" @click="$router.push('/my/quotes')">{{ $t('nav.myQuotes') }}</button>
+            <button class="btn-secondary" @click="$router.push('/my/orders')">{{ $t('nav.myOrders') }}</button>
           </div>
         </div>
       </div>
@@ -276,10 +280,10 @@
       <div class="section-container">
         <div class="action-buttons">
           <button class="btn-secondary" @click="saveQuote" :disabled="isSaving">
-            {{ isSaving ? '保存中...' : '保存方案' }}
+            {{ isSaving ? $t('quotePage.saving') : $t('quotePage.savePlan') }}
           </button>
           <button class="btn-primary" @click="showInquiryForm">
-            提交咨询 →
+            {{ $t('quotePage.submitInquiry') }} →
           </button>
         </div>
       </div>
@@ -289,35 +293,35 @@
     <div v-if="showForm" class="form-overlay" @click.self="hideInquiryForm">
       <div class="inquiry-form" :style="formStyle">
         <div class="form-header">
-          <h3>提交咨询</h3>
+          <h3>{{ $t('quotePage.submitInquiry') }}</h3>
           <button class="close-btn" @click="hideInquiryForm">×</button>
         </div>
         <div class="form-body">
           <div class="form-group">
-            <label>联系人姓名 *</label>
-            <input v-model="inquiryForm.name" type="text" placeholder="请输入您的姓名" required />
+            <label>{{ $t('quotePage.contactName') }} *</label>
+            <input v-model="inquiryForm.name" type="text" :placeholder="$t('quotePage.contactNamePlaceholder')" required />
           </div>
           <div class="form-group">
-            <label>联系方式 *</label>
-            <input v-model="inquiryForm.contact" type="text" placeholder="手机号或微信号" required />
+            <label>{{ $t('quotePage.contactMethod') }} *</label>
+            <input v-model="inquiryForm.contact" type="text" :placeholder="$t('quotePage.contactMethodPlaceholder')" required />
           </div>
           <div class="form-group">
-            <label>活动日期 *</label>
+            <label>{{ $t('quotePage.eventDate') }} *</label>
             <input v-model="inquiryForm.date" type="date" required />
           </div>
           <div class="form-group">
-            <label>备注需求</label>
-            <textarea v-model="inquiryForm.notes" rows="3" placeholder="请描述您的特殊需求或问题"></textarea>
+            <label>{{ $t('quotePage.notes') }}</label>
+            <textarea v-model="inquiryForm.notes" rows="3" :placeholder="$t('quotePage.notesPlaceholder')"></textarea>
           </div>
           <div class="form-summary">
-            <span>预估总价：</span>
+            <span>{{ $t('quotePage.estimatedTotal') }}:</span>
             <strong>{{ formatPrice(finalTotal) }}</strong>
           </div>
         </div>
         <div class="form-footer">
-          <button class="btn-cancel" @click="hideInquiryForm">取消</button>
+          <button class="btn-cancel" @click="hideInquiryForm">{{ $t('nav.cancel') }}</button>
           <button class="btn-submit" @click="submitInquiryForm" :disabled="isSubmittingInquiry">
-            {{ isSubmittingInquiry ? '提交中...' : '确认提交' }}
+            {{ isSubmittingInquiry ? $t('quotePage.submitting') : $t('nav.confirm') }}
           </button>
         </div>
       </div>
@@ -325,8 +329,8 @@
 
     <!-- 提示信息 -->
     <div class="notice">
-      <p>* 以上价格为预估报价，最终价格将根据具体日期、人数、场地等因素调整</p>
-      <p>提交咨询后，我们的策划师将在24小时内与您联系</p>
+      <p>{{ $t('quotePage.noticeEstimate') }}</p>
+      <p>{{ $t('quotePage.noticeFollowup') }}</p>
     </div>
   </div>
 </template>
@@ -372,29 +376,33 @@ export default {
     themeConfig() {
       return getTheme(this.themeId);
     },
+
+    isChineseLocale() {
+      return this.$i18n.locale === 'zh';
+    },
     
     sceneData() {
       const scenes = {
         space: {
-          'restaurant-a': { name: 'Restaurant A 私人餐厅样板', icon: '🍽️', basePrice: 2600 },
-          command: { name: '星际指挥舱', icon: '🚀', basePrice: 2800 },
-          moon: { name: '月球表面基地', icon: '🌙', basePrice: 3200 },
-          observatory: { name: '星际观测站', icon: '🔭', basePrice: 2500 }
+          'restaurant-a': { name: this.$t('quotePage.scenes.restaurantA'), icon: '🍽️', basePrice: 2600 },
+          command: { name: this.$t('quotePage.scenes.command'), icon: '🚀', basePrice: 2800 },
+          moon: { name: this.$t('quotePage.scenes.moon'), icon: '🌙', basePrice: 3200 },
+          observatory: { name: this.$t('quotePage.scenes.observatory'), icon: '🔭', basePrice: 2500 }
         },
         castle: {
-          'restaurant-a': { name: 'Restaurant A 私人餐厅样板', icon: '🍽️', basePrice: 2800 },
-          banquet: { name: '皇家宴会厅', icon: '👑', basePrice: 3500 },
-          garden: { name: '秘密花园露台', icon: '🌹', basePrice: 2800 },
-          tower: { name: '魔法塔楼', icon: '🏰', basePrice: 3000 }
+          'restaurant-a': { name: this.$t('quotePage.scenes.restaurantA'), icon: '🍽️', basePrice: 2800 },
+          banquet: { name: this.$t('quotePage.scenes.banquet'), icon: '👑', basePrice: 3500 },
+          garden: { name: this.$t('quotePage.scenes.garden'), icon: '🌹', basePrice: 2800 },
+          tower: { name: this.$t('quotePage.scenes.tower'), icon: '🏰', basePrice: 3000 }
         },
         forest: {
-          'restaurant-a': { name: 'Restaurant A 私人餐厅样板', icon: '🍽️', basePrice: 2400 },
-          clearing: { name: '林间空地', icon: '🌲', basePrice: 2200 },
-          treehouse: { name: '树屋秘境', icon: '🏕️', basePrice: 3800 },
-          firefly: { name: '萤火虫溪谷', icon: '✨', basePrice: 2600 }
+          'restaurant-a': { name: this.$t('quotePage.scenes.restaurantA'), icon: '🍽️', basePrice: 2400 },
+          clearing: { name: this.$t('quotePage.scenes.clearing'), icon: '🌲', basePrice: 2200 },
+          treehouse: { name: this.$t('quotePage.scenes.treehouse'), icon: '🏕️', basePrice: 3800 },
+          firefly: { name: this.$t('quotePage.scenes.firefly'), icon: '✨', basePrice: 2600 }
         }
       };
-      return (scenes[this.themeId] || scenes.space)[this.sceneId] || { name: '未知场景', icon: '❓', basePrice: 0 };
+      return (scenes[this.themeId] || scenes.space)[this.sceneId] || { name: this.$t('quotePage.scenes.unknown'), icon: '❓', basePrice: 0 };
     },
     
     packageData() {
@@ -403,21 +411,21 @@ export default {
       
       const packages = {
         basic: { 
-          name: '基础探索包', 
+          name: this.$t('quotePage.packages.basic.name'), 
           icon: '🎈', 
-          description: '基础布置，2小时场地',
+          description: this.$t('quotePage.packages.basic.description'),
           price: Math.round(basePrice * 0.3 * multiplier)
         },
         standard: { 
-          name: '标准体验包', 
+          name: this.$t('quotePage.packages.standard.name'), 
           icon: '🎉', 
-          description: '全套布置，4小时场地，策划师服务',
+          description: this.$t('quotePage.packages.standard.description'),
           price: Math.round(basePrice * 0.55 * multiplier)
         },
         premium: { 
-          name: '高端尊享包', 
+          name: this.$t('quotePage.packages.premium.name'), 
           icon: '👑', 
-          description: 'VIP定制，全天场地，专属团队',
+          description: this.$t('quotePage.packages.premium.description'),
           price: Math.round(basePrice * multiplier)
         }
       };
@@ -430,6 +438,10 @@ export default {
 
     packageExplanation() {
       return getPackageExplanation(this.packageId);
+    },
+
+    displayPackageExplanationLabel() {
+      return this.isChineseLocale ? this.packageExplanation.label : this.packageData.name;
     },
 
     upgradeExplanation() {
@@ -447,15 +459,15 @@ export default {
       if (!this.aiPrefill) return null;
       return {
         title: `${this.aiPrefill.selection?.themeName || this.themeConfig.name} · ${this.aiPrefill.selection?.packageName || this.packageData.name}`,
-        body: '已从 AI Concierge 自动带入联系人、日期、人数、预算、场地偏好和推荐理由。确认后只会提交 inquiry / Lead skeleton，不会创建 Quote、Order 或 PaymentIntent。'
+        body: this.$t('quotePage.aiPrefillBody')
       };
     },
 
     quoteFlowSummary() {
-      const source = this.aiPrefill ? 'AI Concierge 已整理' : '当前方案';
+      const source = this.aiPrefill ? this.$t('quotePage.aiPrepared') : this.$t('quotePage.currentPlan');
       return {
         title: `${source}: ${this.themeConfig.name} · ${this.packageData.name} · ${this.visualContext.primaryVenue.name}`,
-        body: '先确认主题、套餐和 Restaurant A 视觉效果；再看套餐差异和报价组成；最后只提交 inquiry / Lead skeleton，不会触发真实支付。'
+        body: this.$t('quotePage.flowBody')
       };
     },
     
@@ -489,9 +501,9 @@ export default {
     
     addons() {
       return [
-        { id: 'cake', name: '定制主题蛋糕', icon: '🎂', price: 150 },
-        { id: 'photo', name: '专业摄影服务', icon: '📷', price: 300 },
-        { id: 'catering', name: '精致餐饮服务', icon: '🍽️', price: 500 }
+        { id: 'cake', name: this.$t('quotePage.addons.cake'), icon: '🎂', price: 150 },
+        { id: 'photo', name: this.$t('quotePage.addons.photo'), icon: '📷', price: 300 },
+        { id: 'catering', name: this.$t('quotePage.addons.catering'), icon: '🍽️', price: 500 }
       ];
     }
   },
@@ -499,6 +511,21 @@ export default {
   methods: {
     formatPrice(price) {
       return '$' + price.toLocaleString();
+    },
+
+    displayLineItemGroup(group) {
+      return this.isChineseLocale ? group.labelZh : group.customerLabel;
+    },
+
+    displayPackageText(text) {
+      return this.isChineseLocale ? text : this.$t('quotePage.localizedPackageCopy');
+    },
+
+    displayPackageList(items) {
+      return this.isChineseLocale ? items : [
+        this.$t('quotePage.localizedPackagePoint1'),
+        this.$t('quotePage.localizedPackagePoint2')
+      ];
     },
 
     goBack() {
@@ -622,7 +649,7 @@ export default {
       // 验证必填字段
       if (!this.inquiryForm.name || !this.inquiryForm.contact || !this.inquiryForm.date) {
         this.submitError = true;
-        this.submitMessage = '请填写所有必填字段（姓名、联系方式、活动日期）';
+        this.submitMessage = this.$t('quotePage.requiredError');
         setTimeout(() => {
           this.submitError = false;
         }, 3000);
@@ -729,11 +756,11 @@ export default {
         // 显示成功反馈
         this.submitSuccess = true;
         if (backendLead?.id) {
-          this.submitMessage = `咨询已保存，并已同步到本地 Lead API skeleton（${backendLead.id}）。`;
+          this.submitMessage = this.$t('quotePage.backendSaved', { id: backendLead.id });
         } else if (backendSyncFailed) {
-          this.submitMessage = '咨询已保存在本地浏览器；本地 Lead API skeleton 暂未同步。';
+          this.submitMessage = this.$t('quotePage.localSavedBackendFailed');
         } else {
-          this.submitMessage = '咨询提交成功！我们的策划师将在24小时内与您联系。';
+          this.submitMessage = this.$t('quotePage.submitSuccess');
         }
         this.submittedNextSteps = this.buildPostInquiryNextSteps(backendLead, backendSyncFailed);
         this.showForm = false;
@@ -749,7 +776,7 @@ export default {
         console.log('咨询已提交:', inquiryData);
       } catch (error) {
         this.submitError = true;
-        this.submitMessage = '本地保存失败，请检查浏览器存储后重试。';
+        this.submitMessage = this.$t('quotePage.submitFailure');
         console.error('咨询保存失败:', error);
       } finally {
         this.isSubmittingInquiry = false;
@@ -758,19 +785,19 @@ export default {
 
     buildPostInquiryNextSteps(backendLead, backendSyncFailed) {
       const syncLine = backendLead?.id
-        ? `Local/staging Lead skeleton 已记录：${backendLead.id}。`
+        ? this.$t('quotePage.syncRecorded', { id: backendLead.id })
         : backendSyncFailed
-          ? '浏览器本地已保存，Lead API skeleton 暂未同步；演示仍可继续。'
-          : '浏览器本地已保存，适合 staging 演示和客户路径说明。';
+          ? this.$t('quotePage.syncFailed')
+          : this.$t('quotePage.localSaved');
 
       return {
-        title: '我们已收到你的派对需求',
-        summary: '团队会根据场地、主题和供应商可用性人工确认方案，并把报价进度展示在客户侧页面。',
+        title: this.$t('quotePage.receivedTitle'),
+        summary: this.$t('quotePage.receivedSummary'),
         items: [
-          '团队会根据 Restaurant A 样板、主题视觉和供应商建议确认方案。',
-          '你可以在 My Quotes 查看报价进度和状态说明。',
-          '你可以在 My Orders 查看后续订单状态。',
-          '当前为 staging preview，不会触发真实支付、PaymentIntent、webhook、n8n 或外发消息。',
+          this.$t('quotePage.receivedItem1'),
+          this.$t('quotePage.receivedItem2'),
+          this.$t('quotePage.receivedItem3'),
+          this.$t('quotePage.receivedItem4'),
           syncLine
         ]
       };
@@ -1041,6 +1068,27 @@ export default {
   border-radius: 14px;
   object-fit: cover;
   object-position: top center;
+}
+
+.visual-placeholder-card {
+  min-height: 240px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.18), rgba(255, 255, 255, 0.08));
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  padding: 28px;
+}
+
+.visual-placeholder-card strong {
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.visual-placeholder-card p {
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.6;
 }
 
 .visual-context-copy {

@@ -51,6 +51,11 @@
     "aiRecommend": "AI 추천받기",
     "visualMeta": "따뜻한 고객 미리보기",
     "visualMetaStrong": "AI · 테마 · Restaurant A · 견적",
+    "heroMockupFallbackTitle": "따뜻하고 시각적인 어린이 파티를 기획하세요",
+    "heroMockupFallbackCopy": "한국어 모드에서는 중국어가 포함된 목업 이미지 대신 깔끔한 카드로 보여줍니다.",
+    "englishThemeHeroKicker": "테마 미리보기",
+    "englishThemeHeroTitle": "캐슬, 우주, 숲 파티 월드",
+    "englishThemeHeroCopy": "중국어가 포함된 테마 이미지는 숨기고, 이해하기 쉬운 테마 설명과 버튼을 제공합니다.",
     "themesTitle": "파티 테마 선택",
     "themesSubtitle": "세 가지 몰입형 테마 월드가 각기 다른 경험을 제공합니다.",
     "themeCta": {
@@ -67,6 +72,92 @@
     "restaurantKicker": "Restaurant A 렌더링 샘플",
     "restaurantTitle": "기존 다이닝룸 + 테마 장식 레이어",
     "restaurantCopy": "Restaurant A는 테이블, 의자, 공간 구조를 유지하고 풍선, 린넨, 배경판, 디저트 테이블, 조명만 바꿉니다.",
+    "assetFallbackKicker": "한국어 미리보기",
+    "assetFallbackTitle": "중국어가 포함된 이미지를 숨긴 테마 설명",
+    "assetFallbackCopy": "한국어 사용자에게는 중국어 텍스트가 들어간 이미지 대신 깔끔한 설명 카드를 보여줍니다.",
+    "assetFallbackCards": {
+      "castle": {
+        "title": "Castle Princess",
+        "copy": "배경판, 디저트 테이블, 풍선 장식, 사진 포인트가 있는 동화풍 파티입니다.",
+        "cta": "캐슬 테마 보기"
+      },
+      "space": {
+        "title": "Space Explorer",
+        "copy": "로켓과 탐험 요소가 있는 블루/실버 우주 미션 파티입니다.",
+        "cta": "우주 테마 보기"
+      },
+      "forest": {
+        "title": "Forest Adventure",
+        "copy": "초록 장식, 따뜻한 조명, 자연스러운 테이블 스타일이 있는 숲 테마입니다.",
+        "cta": "숲 테마 보기"
+      }
+    },
+    "packageFallbackKicker": "패키지 매트릭스",
+    "packageFallbackTitle": "패키지 단계를 한국어로 설명",
+    "packageFallbackCopy": "중국어가 포함된 패키지 이미지는 숨기고 텍스트 카드로 비교합니다.",
+    "packageFallbackCards": {
+      "basic": {
+        "title": "Basic 구성",
+        "copy": "기본 테이블 스타일, 가벼운 테마 장식, 간단한 포토존을 포함합니다."
+      },
+      "standard": {
+        "title": "Standard 구성",
+        "copy": "더 완성도 높은 장식, 배경판, 디저트 테이블, 공급사 제안을 포함합니다."
+      },
+      "premium": {
+        "title": "Premium 구성",
+        "copy": "조명, 맞춤 보드, 강한 포토존, 현장 조율을 포함한 몰입형 구성입니다."
+      }
+    },
+    "restaurantFallbackKicker": "다이닝 레이아웃",
+    "restaurantFallbackTitle": "Restaurant A 개념 설명",
+    "restaurantFallbackCopy": "중국어가 포함된 렌더링 이미지는 숨기고 레이아웃 설명을 제공합니다.",
+    "restaurantFallbackCards": {
+      "before": {
+        "title": "기존 공간",
+        "copy": "테이블, 의자, 입구 동선과 공간 구조는 유지됩니다."
+      },
+      "decor": {
+        "title": "테마 장식 레이어",
+        "copy": "풍선, 린넨, 배경판, 디저트 테이블, 조명, 포토존이 테마에 맞게 바뀝니다."
+      },
+      "flow": {
+        "title": "손님 동선",
+        "copy": "입장, 모임, 사진, 식사, 축하 흐름을 쉽게 이해할 수 있습니다."
+      }
+    },
+    "localizedScenesTitle": "파티 장면 미리보기",
+    "localizedScenesSubtitle": "각 장면의 분위기, 레이아웃, 시각 결과를 설명합니다.",
+    "localizedScenes": {
+      "castle": {
+        "title": "캐슬 다이닝룸",
+        "copy": "어린이를 위한 부드러운 공주풍 구성과 사진 포인트를 제공합니다."
+      },
+      "space": {
+        "title": "우주 미션 룸",
+        "copy": "로켓 디테일과 활동적인 동선이 있는 탐험형 파티입니다."
+      },
+      "forest": {
+        "title": "숲 탐험 코너",
+        "copy": "따뜻한 조명과 자연 소재로 편안한 탐험 분위기를 만듭니다."
+      }
+    },
+    "localizedPackagesTitle": "패키지 단계 비교",
+    "localizedPackagesSubtitle": "예산, 기대하는 비주얼, 파티 규모에 맞는 단계를 선택하세요.",
+    "localizedPackages": {
+      "basic": {
+        "title": "Basic 기본 구성",
+        "copy": "예산을 관리하는 가벼운 구성입니다."
+      },
+      "standard": {
+        "title": "Standard 파티 경험",
+        "copy": "테마감과 사진 포인트가 더 분명한 완성형 구성입니다."
+      },
+      "premium": {
+        "title": "Premium 몰입 구성",
+        "copy": "조명과 맞춤 요소가 강화된 더 풍부한 시각 경험입니다."
+      }
+    },
     "stepsTitle": "네 단계로 완성하는 파티",
     "finalTitle": "파티 여정을 시작할 준비가 되었나요?",
     "footerTagline": "모든 파티를 특별하게",
@@ -89,7 +180,8 @@
       "name": "Forest Adventure",
       "nameEn": "Forest Adventure",
       "description": "신비로운 숲으로 들어가 자연과 가까워지고 숨겨진 마법을 발견합니다."
-    }
+    },
+    "englishImageFallback": "현지화 미리보기 placeholder입니다. 중국어가 포함된 이미지는 숨깁니다."
   },
   "tiers": {
     "basic": "Basic",
@@ -135,9 +227,50 @@
     "soundOn": "소리 켜기",
     "soundOff": "소리 끄기",
     "restart": "다시 시작",
+    "back": "이전 단계",
+    "confirmItem": "이 항목 확인",
+    "continueQuote": "Quote로 계속",
+    "viewThemes": "테마 비주얼 보기",
     "safetyNote": "유료 TTS, 실제 음성 업로드, 결제, webhook, n8n, 외부 메시지를 실행하지 않습니다.",
     "visualCues": "비주얼 힌트",
-    "compareThemes": "같은 패키지 로직으로 세 가지 테마를 비교합니다"
+    "compareThemes": "같은 패키지 로직으로 세 가지 테마를 비교합니다",
+    "ageRange": "연령대",
+    "supplier": "공급사",
+    "themeCue": {
+      "castle": "어린이 친화적 · 다이닝룸 적합",
+      "space": "탐험 분위기 · 활동 동선",
+      "forest": "자연 분위기 · 따뜻한 레이아웃"
+    },
+    "restaurantPlaceholderTitle": "Restaurant A 샘플 레이아웃",
+    "restaurantPlaceholderCopy": "중국어가 포함된 렌더링 이미지는 숨기고 깔끔한 레이아웃 요약을 보여줍니다.",
+    "recommendation": {
+      "theme": "추천 테마",
+      "package": "추천 패키지",
+      "venue": "추천 장소 / Restaurant A",
+      "reason": "추천 이유",
+      "ageGuests": "연령 / 인원",
+      "budget": "예산 적합도",
+      "includes": "패키지 포함 내용",
+      "priceDrivers": "가격 차이 요소",
+      "customerFit": "이 플랜이 맞는 이유",
+      "nextStep": "다음 단계",
+      "nextStepBoundary": "현재는 staging preview이며 실제 Quote / Order를 만들거나 payment를 트리거하지 않습니다.",
+      "title": "AI 추천",
+      "customerBrief": "고객 요약",
+      "genericHeadline": "파티에 맞춘 테마와 패키지 추천이 준비되었습니다.",
+      "genericBrief": "AI Concierge가 연령, 인원, 예산, 테마 선호, 장소 맥락을 견적 준비용 요약으로 정리했습니다.",
+      "budgetGeneric": "Staging 예상 견적 기준으로 선택한 예산 범위에 맞습니다.",
+      "reasonGeneric1": "선택한 테마 분위기와 게스트 프로필에 맞습니다.",
+      "reasonGeneric2": "Restaurant A를 명확한 견적 검토용 샘플 장소로 사용합니다.",
+      "includeGeneric1": "테마 장식, 장소 맥락, 공급업체 조율.",
+      "includeGeneric2": "Local/staging 검토용 고객 견적 요약.",
+      "priceDriverGeneric1": "장소 이용 시간, 장식 범위, 공급업체 가능 여부.",
+      "priceDriverGeneric2": "패키지 등급과 선택 업그레이드.",
+      "customerFitGeneric": "부모가 테마 선택부터 견적 요청까지 명확하게 이동할 수 있는 플랜입니다.",
+      "upgradeTitle": "업그레이드 가치",
+      "upgradeGeneric1": "상위 등급은 더 강한 비주얼 디테일을 추가합니다.",
+      "upgradeGeneric2": "플래너 지원과 공급업체 조율이 더 완성됩니다."
+    }
   },
   "quotePage": {
     "back": "패키지로 돌아가기",
@@ -157,6 +290,235 @@
     "package": "패키지",
     "edit": "수정",
     "priceDetails": "가격 상세",
-    "estimatedTotal": "예상 총액"
+    "estimatedTotal": "예상 총액",
+    "lineItemsKicker": "표준 견적 항목",
+    "lineItemsTitle": "견적을 구성하는 안정적인 항목",
+    "lineItemsCopy": "장소, 장식, 공급업체, 인력, 운송, 서비스, 선택 업그레이드 비용을 검토용 견적 스냅샷에 담습니다.",
+    "lineItemGenericDescription": "고객 검토용 local/staging 예상 항목입니다.",
+    "packageExplanationKicker": "패키지 설명",
+    "packageDifference": "패키지 차이",
+    "whyRecommend": "이 등급을 추천하는 이유",
+    "priceDrivers": "가격을 바꾸는 요소",
+    "customerFit": "이 플랜이 나에게 맞는 이유",
+    "visualBasis": "비주얼 플랜 기준",
+    "visualBasisCopy": "견적 산정에 사용한 테마 장식 레이어와 다이닝룸 동선입니다.",
+    "sampleRoom": "Restaurant A 샘플룸",
+    "suitableAge": "적합 연령",
+    "recommendedVenue": "추천 장소",
+    "supplierSuggestions": "공급업체 제안",
+    "quoteBasis": "견적 기준",
+    "view3dPreview": "실험용 3D 장면 미리보기 보기(시공 도면 아님)",
+    "sceneConfigKicker": "장면 설정",
+    "optionalAddons": "선택 추가 항목",
+    "selectedAddons": "{count}개 선택, 소계 {total}",
+    "restoredNotice": "이전에 저장한 플랜을 복원했습니다",
+    "savedNotice": "플랜을 저장했습니다. 총액 {total}",
+    "saving": "저장 중...",
+    "savePlan": "플랜 저장",
+    "submitInquiry": "문의 제출",
+    "submitting": "제출 중...",
+    "contactName": "연락처 이름",
+    "contactNamePlaceholder": "이름을 입력하세요",
+    "contactMethod": "연락 방법",
+    "contactMethodPlaceholder": "전화, WeChat 또는 이메일",
+    "eventDate": "행사 날짜",
+    "notes": "메모",
+    "notesPlaceholder": "특별 요청이나 질문을 적어주세요",
+    "noticeEstimate": "* 가격은 예상치이며 날짜, 인원, 장소, 공급업체 가능 여부에 따라 달라질 수 있습니다.",
+    "noticeFollowup": "문의 제출 후 플래너가 staging에서 수동으로 후속 안내할 수 있습니다.",
+    "aiPrefillBody": "AI Concierge가 연락처, 날짜, 인원, 예산, 장소 선호도와 추천 메모를 미리 채웠습니다. 확인하면 local/staging inquiry skeleton만 제출됩니다.",
+    "aiPrepared": "AI Concierge 준비 완료",
+    "currentPlan": "현재 플랜",
+    "flowBody": "테마, 패키지, Restaurant A 비주얼 맥락을 확인한 뒤 inquiry skeleton을 제출합니다. 실제 결제는 트리거되지 않습니다.",
+    "requiredError": "필수 항목을 입력하세요: 이름, 연락 방법, 행사 날짜.",
+    "backendSaved": "문의가 저장되고 로컬 Lead API skeleton에 동기화되었습니다({id}).",
+    "localSavedBackendFailed": "문의가 브라우저에 저장되었습니다. Lead API skeleton 동기화는 사용할 수 없습니다.",
+    "submitSuccess": "문의가 local/staging 검토용으로 제출되었습니다.",
+    "submitFailure": "로컬 저장에 실패했습니다. 브라우저 저장소를 확인한 뒤 다시 시도하세요.",
+    "syncRecorded": "Local/staging Lead skeleton 기록됨: {id}.",
+    "syncFailed": "브라우저에 저장되었습니다. Lead API skeleton 동기화는 사용할 수 없지만 demo는 계속할 수 있습니다.",
+    "localSaved": "Staging demo와 고객 경로 설명을 위해 브라우저에 저장했습니다.",
+    "inquiryReceivedKicker": "문의 접수 · staging preview",
+    "receivedTitle": "파티 요청을 받았습니다",
+    "receivedSummary": "팀이 장소, 테마, 공급업체 가능 여부를 수동으로 검토하고 고객 화면에서 견적 진행 상황을 보여줄 수 있습니다.",
+    "receivedItem1": "팀은 Restaurant A, 테마 비주얼, 공급업체 제안을 바탕으로 플랜을 확인할 수 있습니다.",
+    "receivedItem2": "My Quotes에서 견적 진행 상황을 볼 수 있습니다.",
+    "receivedItem3": "이후 주문 상태는 My Orders에서 볼 수 있습니다.",
+    "receivedItem4": "이것은 staging preview이며 payment, PaymentIntent, webhook, n8n 또는 외부 메시지를 트리거하지 않습니다.",
+    "localizedPackageCopy": "이 패키지는 local/staging 예상치로 표시됩니다. 최종 범위는 사람이 검토해야 합니다.",
+    "localizedPackagePoint1": "장식, 장소, 공급업체 범위가 최종 예상 금액에 영향을 줍니다.",
+    "localizedPackagePoint2": "상위 등급은 더 강한 비주얼 디테일과 조율을 추가합니다.",
+    "scenes": {
+      "restaurantA": "Restaurant A 프라이빗 다이닝 샘플",
+      "command": "우주 지휘실",
+      "moon": "달 표면 기지",
+      "observatory": "별 관측소",
+      "banquet": "왕실 연회장",
+      "garden": "비밀 정원 테라스",
+      "tower": "마법의 탑",
+      "clearing": "숲속 공터",
+      "treehouse": "트리하우스 은신처",
+      "firefly": "반딧불 계곡",
+      "unknown": "알 수 없는 장면"
+    },
+    "packages": {
+      "basic": { "name": "Basic package", "description": "기본 장식과 짧은 장소 이용" },
+      "standard": { "name": "Standard package", "description": "완성형 장식, 더 긴 장소 이용, 플래너 지원" },
+      "premium": { "name": "Premium package", "description": "VIP 맞춤, 종일 장소 이용, 전담 지원" }
+    },
+    "addons": {
+      "cake": "맞춤 테마 케이크",
+      "photo": "전문 촬영",
+      "catering": "케이터링 서비스"
+    }
+  },
+  "customerPages": {
+    "workspace": "고객 워크스페이스",
+    "status": "상태",
+    "allStatuses": "전체 상태",
+    "whyFits": "나에게 맞는 이유",
+    "priceDrivers": "가격 주요 요소",
+    "sceneConfig": "AI 장면 설정",
+    "quoteExplanation": "견적 설명",
+    "upgradeValue": "업그레이드 가치",
+    "startAi": "AI Concierge로 시작",
+    "myQuotes": {
+      "title": "My Quotes",
+      "subtitle": "파티 견적 상태, 패키지 스냅샷, 금액, 만료일, 다음 액션을 확인하세요.",
+      "safety": "Local/staging 읽기 전용 화면입니다. 온라인 결제, Stripe, webhook/n8n, 외부 메시지는 트리거되지 않습니다.",
+      "search": "견적 번호, 테마, 패키지 또는 고객 검색",
+      "emptyEyebrow": "이 로컬 ID에 표시할 견적이 없습니다",
+      "emptyTitle": "이 Preview에 일치하는 견적이 없습니다",
+      "emptyCopy": "AI Concierge 또는 Investor Demo에서 시작하세요. 실제 고객 견적은 테마, Restaurant A, 가격, 다음 상태와 함께 여기에 표시됩니다."
+    },
+    "myOrders": {
+      "title": "My Orders",
+      "subtitle": "주문 상태, 행사 정보, 금액, 자리표시자 보증금, 다음 액션을 추적하세요.",
+      "safety": "pending_deposit은 업무 상태일 뿐입니다. 이 작업 범위에서는 Stripe/payment가 활성화되지 않습니다.",
+      "search": "주문 번호, 지역, 테마 또는 견적 검색",
+      "emptyEyebrow": "이 로컬 ID에 표시할 주문이 없습니다",
+      "emptyTitle": "이 Preview에 일치하는 주문이 없습니다",
+      "emptyCopy": "일반 흐름은 AI Concierge → Quote request → My Quotes → My Orders입니다. Demo 데이터는 Investor Demo에서 시작할 수 있습니다."
+    }
+  },
+  "venues": {
+    "title": "선별된 장소 둘러보기",
+    "subtitle": "파티에 맞는 공간을 찾아보세요",
+    "searchPlaceholder": "장소명 또는 도시 검색...",
+    "search": "검색",
+    "filters": "필터",
+    "city": "도시",
+    "selectCity": "도시 선택",
+    "venueType": "장소 유형",
+    "selectType": "유형 선택",
+    "capacity": "수용 인원",
+    "people": "명",
+    "partnerOnly": "파트너만 보기",
+    "amenities": "시설",
+    "foundPrefix": "총",
+    "foundSuffix": "개 장소",
+    "sortDefault": "기본",
+    "sortPriceAsc": "가격 낮은순",
+    "sortPriceDesc": "가격 높은순",
+    "sortCapacity": "수용 인원",
+    "emptyTitle": "장소를 찾지 못했습니다",
+    "emptyDescription": "현재 필터에 맞는 장소가 없습니다. 필터를 조정하거나 전체 장소를 보세요.",
+    "viewAll": "전체 장소 보기",
+    "loadDemo": "데모 장소 불러오기",
+    "emptyTip": "팁: 전체 장소를 먼저 본 뒤 범위를 좁혀보세요.",
+    "sampleVenueName": "Cloud Banquet Hall",
+    "partner": "파트너",
+    "discount": "할인",
+    "from": "부터",
+    "viewDetails": "상세 보기",
+    "genericVenueDescription": "파티 기획, 테마 적합도, 견적 흐름을 확인하는 local/staging 장소 샘플입니다.",
+    "recommendationBasis": "현재 파티 기획 흐름에 추천됩니다.",
+    "demoLoaded": "데모 장소를 불러왔습니다",
+    "loadFailed": "장소 목록을 불러오지 못했습니다. 대신 데모 장소를 표시합니다.",
+    "cities": {
+      "sydney": "Sydney",
+      "melbourne": "Melbourne",
+      "brisbane": "Brisbane",
+      "perth": "Perth",
+      "adelaide": "Adelaide"
+    },
+    "types": {
+      "hotel": "호텔 연회장",
+      "club": "프라이빗 클럽",
+      "garden": "야외 정원",
+      "art": "아트 공간",
+      "restaurant": "레스토랑 대관",
+      "rooftop": "루프톱 테라스"
+    },
+    "amenityLabels": {
+      "parking": "주차",
+      "catering": "케이터링",
+      "audio": "음향 장비",
+      "projector": "프로젝터",
+      "bar": "바"
+    }
+  },
+  "party3d": {
+    "eyebrow": "실험용 Sandbox",
+    "title": "Party Scene 3D Preview",
+    "disclaimerBefore": "이 화면은 다음 설정으로 만든 시각 기획 미리보기입니다:",
+    "disclaimerAfter": "시공도, 건축 도면, 장소 실측 문서 또는 공급사 최종 실행 도면이 아닙니다.",
+    "backQuote": "Quote로 돌아가기",
+    "aiConcierge": "AI Concierge",
+    "reset": "Castle Standard로 초기화",
+    "sceneSummary": "장면 요약",
+    "suggestedSuppliers": "개 추천 공급사",
+    "boundary": "읽기 전용 범위",
+    "sandboxOnly": "Sandbox 전용",
+    "boundaryItems": {
+      "storage": "sessionStorage / localStorage / AI prefill을 읽고, 없으면 Restaurant A Castle Standard로 돌아갑니다.",
+      "visualOnly": "시각 기획 전용이며 시공도, 건축 도면, 공급사 실행 도면이 아닙니다.",
+      "no3dService": "드래그 편집, 외부 3D 서비스, 원격 모델 로딩은 없습니다.",
+      "noExternal": "PaymentIntent, webhook, n8n, production deploy 또는 외부 메시지를 실행하지 않습니다."
+    },
+    "futureInput": "향후 3D 입력 구조"
+  },
+  "footer": {
+    "tagline": "가족 축하를 위한 원스톱 파티 기획",
+    "services": "서비스",
+    "venueBooking": "장소 예약",
+    "aiPlanning": "AI 기획",
+    "design3d": "3D 디자인",
+    "onlineQuote": "온라인 견적",
+    "about": "소개",
+    "aboutUs": "회사 소개",
+    "partners": "파트너",
+    "news": "소식",
+    "joinUs": "함께하기",
+    "help": "도움말",
+    "faq": "FAQ",
+    "guide": "사용 가이드",
+    "contactSupport": "지원 문의",
+    "feedback": "피드백",
+    "copyright": "© 2024 Party Event. All rights reserved. | 개인정보 처리방침 | 이용 약관"
+  },
+  "designerPreview": {
+    "eyebrow": "Beta / Coming soon / Local preview",
+    "title": "3D 파티 디자인 미리보기",
+    "lead": "파티 공간, 테이블, 무대, 테마 장식을 미리 보고 Restaurant A의 동선과 분위기를 이해합니다.",
+    "safetyNote": "실험용 시각 기획 미리보기이며 최종 시공도, 건축 도면 또는 공급사 실행 도면이 아닙니다.",
+    "backHome": "홈으로",
+    "enterThemes": "테마 보기",
+    "getQuote": "견적 받기",
+    "scene": {
+      "backdrop": "테마 배경",
+      "photoZone": "포토존",
+      "dessertTable": "디저트 테이블",
+      "mainTable": "메인 테이블",
+      "entrance": "입구 동선"
+    },
+    "status": {
+      "currentTitle": "현재 상태",
+      "currentCopy": "이 안전한 placeholder는 3D Design 진입점이 빈 화면으로 보이지 않게 하고 현재 범위를 설명합니다.",
+      "contentTitle": "시각 콘텐츠",
+      "contentCopy": "테이블, 메인 테이블, 디저트 테이블, 포토존, 배경, 풍선 아치, 입구 동선을 보여줍니다.",
+      "nextTitle": "다음 단계",
+      "nextCopy": "정식 3D 편집, 드래그 디자인, 공급사 실행 도면은 이후 작업에서 별도로 평가합니다."
+    }
   }
 }

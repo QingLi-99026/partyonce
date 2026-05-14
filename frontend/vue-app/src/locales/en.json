@@ -51,6 +51,11 @@
     "aiRecommend": "AI recommends",
     "visualMeta": "Warm customer preview",
     "visualMetaStrong": "AI · Themes · Restaurant A · Quote",
+    "heroMockupFallbackTitle": "Plan a warm, visual children’s party",
+    "heroMockupFallbackCopy": "English preview uses clean UI cards instead of Chinese-labelled mockup screenshots.",
+    "englishThemeHeroKicker": "Theme preview",
+    "englishThemeHeroTitle": "Castle, Space, and Forest party worlds",
+    "englishThemeHeroCopy": "English mode replaces Chinese-labelled hero artwork with a clean planning summary, so parents can choose a theme without mixed-language screenshots.",
     "themesTitle": "Choose your party theme",
     "themesSubtitle": "Three immersive theme worlds, each designed as a distinct experience.",
     "themeCta": {
@@ -61,12 +66,66 @@
     "assetKicker": "Investor preview assets",
     "assetTitle": "Visual showcase assets restored",
     "assetCopy": "Castle Princess, Space Explorer, Forest Adventure, dining layouts, package matrix, and app mockups are available here.",
+    "assetFallbackKicker": "English preview",
+    "assetFallbackTitle": "Theme previews without baked-in Chinese text",
+    "assetFallbackCopy": "For English users, image previews that contain Chinese labels are replaced with clean text cards until English visual assets are produced.",
+    "assetFallbackCards": {
+      "castle": {
+        "title": "Castle Princess",
+        "copy": "A fairytale dining-room setup with a backdrop, dessert table, balloon styling, and photo moments for younger children.",
+        "cta": "View castle theme"
+      },
+      "space": {
+        "title": "Space Explorer",
+        "copy": "A blue and silver mission-style party with rockets, explorer details, and an active child-friendly flow.",
+        "cta": "View space theme"
+      },
+      "forest": {
+        "title": "Forest Adventure",
+        "copy": "A warm nature-inspired party with greenery, soft lights, table styling, and discovery moments.",
+        "cta": "View forest theme"
+      }
+    },
     "packageKicker": "Three themes · nine package visuals",
     "packageTitle": "Three-theme, nine-package system",
     "packageCopy": "Each theme is mapped to Basic, Standard, and Premium decor, materials, pricing levels, and venue fit notes.",
+    "packageFallbackKicker": "Package matrix",
+    "packageFallbackTitle": "Package levels explained in English",
+    "packageFallbackCopy": "The original package screenshots contain Chinese text, so English mode uses text cards for now.",
+    "packageFallbackCards": {
+      "basic": {
+        "title": "Basic setup",
+        "copy": "Essential table styling, light theme decoration, and a simple photo corner for a controlled budget."
+      },
+      "standard": {
+        "title": "Standard setup",
+        "copy": "A fuller party experience with stronger decor, backdrop, dessert table styling, and supplier guidance."
+      },
+      "premium": {
+        "title": "Premium setup",
+        "copy": "A more immersive setup with lighting layers, custom boards, stronger photo zones, and on-site coordination."
+      }
+    },
     "restaurantKicker": "Restaurant A rendering sample",
     "restaurantTitle": "Original dining room + theme decor layer",
     "restaurantCopy": "Restaurant A keeps tables, chairs, and spatial structure unchanged while balloons, linens, backdrop, dessert table, and lighting change.",
+    "restaurantFallbackKicker": "Dining layout",
+    "restaurantFallbackTitle": "Restaurant A concept in English",
+    "restaurantFallbackCopy": "Chinese-labelled rendering samples are hidden in English mode and replaced with a clear layout explanation.",
+    "restaurantFallbackCards": {
+      "before": {
+        "title": "Original room",
+        "copy": "Tables, chairs, entrance flow, and dining-room structure remain stable before decoration begins."
+      },
+      "decor": {
+        "title": "Theme decor layer",
+        "copy": "Balloons, linens, backdrop, dessert table, lighting, and photo zones are adjusted by theme."
+      },
+      "flow": {
+        "title": "Guest flow",
+        "copy": "Parents can understand where children enter, gather, take photos, eat, and celebrate."
+      }
+    },
     "localizedScenesTitle": "Preview the party scene",
     "localizedScenesSubtitle": "Each scene explains the mood, layout, and visual result in plain English.",
     "localizedScenes": {
@@ -121,7 +180,8 @@
       "name": "Forest Adventure",
       "nameEn": "Forest Adventure",
       "description": "Enter a magical forest, meet nature up close, and discover hidden surprises."
-    }
+    },
+    "englishImageFallback": "English preview placeholder. Chinese-labelled artwork is hidden in English mode."
   },
   "tiers": {
     "basic": "Basic",
@@ -167,9 +227,50 @@
     "soundOn": "Turn sound on",
     "soundOff": "Turn sound off",
     "restart": "Restart",
+    "back": "Back",
+    "confirmItem": "Confirm this item",
+    "continueQuote": "Continue to Quote",
+    "viewThemes": "View theme visuals",
     "safetyNote": "No paid TTS, no real voice upload, and no payment, webhook, n8n, or outbound message is triggered.",
     "visualCues": "Visual cues",
-    "compareThemes": "I compare the three themes with the same package logic"
+    "compareThemes": "I compare the three themes with the same package logic",
+    "ageRange": "Age range",
+    "supplier": "Supplier",
+    "themeCue": {
+      "castle": "Young-child friendly · dining room fit",
+      "space": "Explorer mood · active flow",
+      "forest": "Nature mood · warm layout"
+    },
+    "restaurantPlaceholderTitle": "Restaurant A sample layout",
+    "restaurantPlaceholderCopy": "English mode hides Chinese-labelled rendering images and uses a clean layout summary.",
+    "recommendation": {
+      "theme": "Recommended theme",
+      "package": "Recommended package",
+      "venue": "Recommended venue / Restaurant A",
+      "reason": "Why this fits",
+      "ageGuests": "Age / guests",
+      "budget": "Budget match",
+      "includes": "Package includes",
+      "priceDrivers": "What changes the price",
+      "customerFit": "Why this works for me",
+      "nextStep": "Next step",
+      "nextStepBoundary": "This is a staging preview. It will not create a real Quote / Order and will not trigger payment.",
+      "title": "AI recommendation",
+      "customerBrief": "Customer brief",
+      "genericHeadline": "A balanced theme and package recommendation is ready for your party.",
+      "genericBrief": "AI Concierge summarized age, guests, budget, theme preference, and venue context into a quote-ready brief.",
+      "budgetGeneric": "Within the selected budget range for a staging estimate.",
+      "reasonGeneric1": "Matches the selected theme mood and guest profile.",
+      "reasonGeneric2": "Uses Restaurant A as a clear sample venue for quote review.",
+      "includeGeneric1": "Theme decor, venue context, and supplier coordination.",
+      "includeGeneric2": "Customer-ready quote summary for local/staging review.",
+      "priceDriverGeneric1": "Venue time, decor scope, and supplier availability.",
+      "priceDriverGeneric2": "Package tier and optional upgrades.",
+      "customerFitGeneric": "The plan gives parents a clear, low-friction path from theme choice to quote request.",
+      "upgradeTitle": "Upgrade value",
+      "upgradeGeneric1": "Higher tiers add stronger visual detail.",
+      "upgradeGeneric2": "Planner support and supplier coordination become more complete."
+    }
   },
   "quotePage": {
     "back": "Back to packages",
@@ -189,7 +290,193 @@
     "package": "Package",
     "edit": "Edit",
     "priceDetails": "Price details",
-    "estimatedTotal": "Estimated total"
+    "estimatedTotal": "Estimated total",
+    "lineItemsKicker": "Standardized line items",
+    "lineItemsTitle": "What stable line item types make up the quote",
+    "lineItemsCopy": "Venue, decor, supplier, labor, transport, service, and optional upgrade costs are captured in the quote snapshot for review.",
+    "lineItemGenericDescription": "Local/staging estimate component for customer review.",
+    "packageExplanationKicker": "Package explanation",
+    "packageDifference": "package differences",
+    "whyRecommend": "Why this tier is recommended",
+    "priceDrivers": "What changes the price",
+    "customerFit": "Why this plan fits me",
+    "visualBasis": "Visual plan basis",
+    "visualBasisCopy": "Theme decor layer and dining-room flow used for the quote estimate.",
+    "sampleRoom": "Restaurant A sample room",
+    "suitableAge": "Suitable age",
+    "recommendedVenue": "Recommended venue",
+    "supplierSuggestions": "Supplier suggestions",
+    "quoteBasis": "Quote basis",
+    "view3dPreview": "View experimental 3D scene preview (not a construction drawing)",
+    "sceneConfigKicker": "Scene config",
+    "optionalAddons": "Optional add-ons",
+    "selectedAddons": "Selected {count} items, subtotal {total}",
+    "restoredNotice": "Restored your previously saved plan",
+    "savedNotice": "Plan saved. Total {total}",
+    "saving": "Saving...",
+    "savePlan": "Save plan",
+    "submitInquiry": "Submit inquiry",
+    "submitting": "Submitting...",
+    "contactName": "Contact name",
+    "contactNamePlaceholder": "Enter your name",
+    "contactMethod": "Contact method",
+    "contactMethodPlaceholder": "Phone, WeChat, or email",
+    "eventDate": "Event date",
+    "notes": "Notes",
+    "notesPlaceholder": "Describe special needs or questions",
+    "noticeEstimate": "* Prices are estimates and may change based on date, guest count, venue, and supplier availability.",
+    "noticeFollowup": "After inquiry submission, a planner can follow up manually in staging.",
+    "aiPrefillBody": "AI Concierge prefilled contact, date, guest count, budget, venue preference, and recommendation notes. Confirming only submits a local/staging inquiry skeleton.",
+    "aiPrepared": "AI Concierge prepared",
+    "currentPlan": "Current plan",
+    "flowBody": "Confirm the theme, package, and Restaurant A visual context, then submit an inquiry skeleton. No real payment is triggered.",
+    "requiredError": "Please complete required fields: name, contact method, and event date.",
+    "backendSaved": "Inquiry saved and synced to local Lead API skeleton ({id}).",
+    "localSavedBackendFailed": "Inquiry saved in local browser; Lead API skeleton sync is not available.",
+    "submitSuccess": "Inquiry submitted for local/staging review.",
+    "submitFailure": "Local save failed. Check browser storage and retry.",
+    "syncRecorded": "Local/staging Lead skeleton recorded: {id}.",
+    "syncFailed": "Saved in browser; Lead API skeleton sync is unavailable, demo can continue.",
+    "localSaved": "Saved in browser for staging demo and customer path explanation.",
+    "inquiryReceivedKicker": "Inquiry received · staging preview",
+    "receivedTitle": "We received your party needs",
+    "receivedSummary": "The team can manually review venue, theme, and supplier availability, then show quote progress on the customer side.",
+    "receivedItem1": "The team can confirm the plan using Restaurant A, theme visuals, and supplier suggestions.",
+    "receivedItem2": "You can view quote progress in My Quotes.",
+    "receivedItem3": "You can view later order status in My Orders.",
+    "receivedItem4": "This is a staging preview and does not trigger payment, PaymentIntent, webhook, n8n, or outbound messages.",
+    "localizedPackageCopy": "This package is shown as a local/staging estimate. Final scope requires human review.",
+    "localizedPackagePoint1": "Decor, venue, and supplier scope affect the final estimate.",
+    "localizedPackagePoint2": "Higher tiers add stronger visual detail and coordination.",
+    "scenes": {
+      "restaurantA": "Restaurant A private dining sample",
+      "command": "Space command room",
+      "moon": "Moon surface base",
+      "observatory": "Star observatory",
+      "banquet": "Royal banquet hall",
+      "garden": "Secret garden terrace",
+      "tower": "Magic tower",
+      "clearing": "Forest clearing",
+      "treehouse": "Treehouse hideaway",
+      "firefly": "Firefly valley",
+      "unknown": "Unknown scene"
+    },
+    "packages": {
+      "basic": { "name": "Basic package", "description": "Essential decor and short venue use" },
+      "standard": { "name": "Standard package", "description": "Complete decor, longer venue use, and planner support" },
+      "premium": { "name": "Premium package", "description": "VIP customization, full-day venue use, and dedicated support" }
+    },
+    "addons": {
+      "cake": "Custom theme cake",
+      "photo": "Professional photography",
+      "catering": "Catering service"
+    }
+  },
+  "customerPages": {
+    "workspace": "Customer workspace",
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "whyFits": "Why it fits you",
+    "priceDrivers": "Price mainly comes from",
+    "sceneConfig": "AI scene config",
+    "quoteExplanation": "Quote explanation",
+    "upgradeValue": "Upgrade value",
+    "startAi": "Start with AI Concierge",
+    "myQuotes": {
+      "title": "My Quotes",
+      "subtitle": "View your party quote status, package snapshot, amount, expiry, and next action.",
+      "safety": "Local/staging read-only view: no online payment, Stripe, webhook/n8n, or outbound message is triggered.",
+      "search": "Search quote number, theme, package, or customer",
+      "emptyEyebrow": "No quote visible for this local identity",
+      "emptyTitle": "No matching quote is available in this Preview",
+      "emptyCopy": "Start from AI Concierge or Investor Demo. Real customer quotes will show theme, Restaurant A, pricing, and next status here."
+    },
+    "myOrders": {
+      "title": "My Orders",
+      "subtitle": "Track your order status, event details, amount, placeholder deposit, and next action.",
+      "safety": "pending_deposit is a business status only. Stripe/payment is not enabled in this workpack.",
+      "search": "Search order number, location, theme, or quote",
+      "emptyEyebrow": "No order visible for this local identity",
+      "emptyTitle": "No matching order is available in this Preview",
+      "emptyCopy": "The normal flow is AI Concierge → Quote request → My Quotes → My Orders. Demo data can be started from Investor Demo."
+    }
+  },
+  "venues": {
+    "title": "Explore selected venues",
+    "subtitle": "Find the right space for your party",
+    "searchPlaceholder": "Search venue name or city...",
+    "search": "Search",
+    "filters": "Filters",
+    "city": "City",
+    "selectCity": "Select city",
+    "venueType": "Venue type",
+    "selectType": "Select type",
+    "capacity": "Capacity",
+    "people": "people",
+    "partnerOnly": "Partners only",
+    "amenities": "Amenities",
+    "foundPrefix": "Found",
+    "foundSuffix": "venues",
+    "sortDefault": "Default",
+    "sortPriceAsc": "Price: low to high",
+    "sortPriceDesc": "Price: high to low",
+    "sortCapacity": "Capacity",
+    "emptyTitle": "No venues found",
+    "emptyDescription": "No venues match the current filters. Adjust filters or view all venues.",
+    "viewAll": "View all venues",
+    "loadDemo": "Load demo venues",
+    "emptyTip": "Tip: view all venues first, then narrow the range.",
+    "sampleVenueName": "Cloud Banquet Hall",
+    "partner": "Partner",
+    "discount": "off",
+    "from": "from",
+    "viewDetails": "View details",
+    "genericVenueDescription": "Local/staging venue sample for party planning, theme fit, and quote flow preview.",
+    "recommendationBasis": "Recommended for the current party planning flow.",
+    "demoLoaded": "Demo venues loaded",
+    "loadFailed": "Failed to load venues. Demo venues are shown instead.",
+    "cities": {
+      "sydney": "Sydney",
+      "melbourne": "Melbourne",
+      "brisbane": "Brisbane",
+      "perth": "Perth",
+      "adelaide": "Adelaide"
+    },
+    "types": {
+      "hotel": "Hotel ballroom",
+      "club": "Private club",
+      "garden": "Outdoor garden",
+      "art": "Art space",
+      "restaurant": "Private restaurant",
+      "rooftop": "Rooftop terrace"
+    },
+    "amenityLabels": {
+      "parking": "Parking",
+      "catering": "Catering",
+      "audio": "Audio equipment",
+      "projector": "Projector",
+      "bar": "Bar"
+    }
+  },
+  "party3d": {
+    "eyebrow": "Experimental Sandbox",
+    "title": "Party Scene 3D Preview",
+    "disclaimerBefore": "This is a visual planning preview generated from",
+    "disclaimerAfter": "It is not a construction drawing, architectural plan, venue measurement document, or final supplier execution drawing.",
+    "backQuote": "Back to Quote",
+    "aiConcierge": "AI Concierge",
+    "reset": "Reset Castle Standard",
+    "sceneSummary": "Scene Summary",
+    "suggestedSuppliers": "suggested suppliers",
+    "boundary": "Read-only Boundary",
+    "sandboxOnly": "Sandbox only",
+    "boundaryItems": {
+      "storage": "Reads sessionStorage / localStorage / AI prefill, then falls back to Restaurant A Castle Standard.",
+      "visualOnly": "Visual planning only: no construction drawing, no architecture plan, no supplier execution drawing.",
+      "no3dService": "No drag editing, no external 3D service, no remote model loading.",
+      "noExternal": "No PaymentIntent, webhook, n8n, production deploy, or outbound message."
+    },
+    "futureInput": "Future 3D input shape"
   },
   "footer": {
     "tagline": "One-stop party planning for family celebrations",

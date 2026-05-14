@@ -2,17 +2,16 @@
   <main class="party-3d-page">
     <section class="hero-band">
       <div>
-        <p class="eyebrow">Experimental Sandbox</p>
-        <h1>Party Scene 3D Preview</h1>
+        <p class="eyebrow">{{ t('party3d.eyebrow') }}</p>
+        <h1>{{ t('party3d.title') }}</h1>
         <p>
-          This is a visual planning preview generated from <code>party_scene_config</code>.
-          It is not a construction drawing, architectural plan, venue measurement document, or final supplier execution drawing.
-          这是视觉规划预览，不是正式施工图、建筑图、场地测量文件或供应商最终执行图。
+          {{ t('party3d.disclaimerBefore') }} <code>party_scene_config</code>.
+          {{ t('party3d.disclaimerAfter') }}
         </p>
       </div>
       <div class="hero-actions">
-        <router-link class="button primary" to="/quote">Back to Quote</router-link>
-        <router-link class="button secondary" to="/ai-voice-intake">AI Concierge</router-link>
+        <router-link class="button primary" to="/quote">{{ t('party3d.backQuote') }}</router-link>
+        <router-link class="button secondary" to="/ai-voice-intake">{{ t('party3d.aiConcierge') }}</router-link>
       </div>
     </section>
 
@@ -33,14 +32,14 @@
           <option value="premium">Premium</option>
         </select>
       </div>
-      <button type="button" @click="resetToDefault">Reset Castle Standard</button>
+      <button type="button" @click="resetToDefault">{{ t('party3d.reset') }}</button>
     </section>
 
     <PartyScenePreview3D :scene-config="sceneConfig" />
 
     <section class="details-grid">
       <article>
-        <p class="eyebrow">Scene Summary</p>
+        <p class="eyebrow">{{ t('party3d.sceneSummary') }}</p>
         <h2>{{ summary?.label }}</h2>
         <dl>
           <div>
@@ -57,19 +56,19 @@
           </div>
           <div>
             <dt>Suppliers</dt>
-            <dd>{{ summary?.supplierCount }} suggested suppliers</dd>
+            <dd>{{ summary?.supplierCount }} {{ t('party3d.suggestedSuppliers') }}</dd>
           </div>
         </dl>
       </article>
 
       <article>
-        <p class="eyebrow">Read-only Boundary</p>
-        <h2>Sandbox only</h2>
+        <p class="eyebrow">{{ t('party3d.boundary') }}</p>
+        <h2>{{ t('party3d.sandboxOnly') }}</h2>
         <ul>
-          <li>Reads sessionStorage / localStorage / AI prefill, then falls back to Restaurant A Castle Standard.</li>
-          <li>Visual planning only: no construction drawing, no architecture plan, no supplier execution drawing.</li>
-          <li>No drag editing, no external 3D service, no remote model loading.</li>
-          <li>No PaymentIntent, webhook, n8n, production deploy, or outbound message.</li>
+          <li>{{ t('party3d.boundaryItems.storage') }}</li>
+          <li>{{ t('party3d.boundaryItems.visualOnly') }}</li>
+          <li>{{ t('party3d.boundaryItems.no3dService') }}</li>
+          <li>{{ t('party3d.boundaryItems.noExternal') }}</li>
         </ul>
       </article>
     </section>
@@ -77,7 +76,7 @@
     <section class="json-panel">
       <div>
         <p class="eyebrow">party_scene_config JSON</p>
-        <h2>Future 3D input shape</h2>
+        <h2>{{ t('party3d.futureInput') }}</h2>
       </div>
       <pre>{{ formattedConfig }}</pre>
     </section>
@@ -86,6 +85,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import PartyScenePreview3D from '@/components/PartyScenePreview3D.vue';
 import {
   buildDefaultPartySceneConfig,
@@ -94,6 +94,7 @@ import {
 } from '@/services/partyScenePreviewService';
 import { summarizePartySceneConfig } from '@/data/partySceneConfig';
 
+const { t } = useI18n();
 const sceneConfig = ref(buildDefaultPartySceneConfig());
 const selectedTheme = ref('castle');
 const selectedTier = ref('standard');
