@@ -1,0 +1,162 @@
+{
+  "language": {
+    "label": "语言",
+    "zh": "中文",
+    "en": "English",
+    "ko": "한국어",
+    "ar": "العربية"
+  },
+  "nav": {
+    "home": "首页",
+    "venues": "场地",
+    "aiGuide": "AI引导",
+    "party3d": "3D Preview",
+    "aiPlanner": "AI策划",
+    "designer3d": "3D设计",
+    "quote": "报价",
+    "suppliers": "供应商",
+    "partnerApply": "供应商申请",
+    "partnerStatus": "申请状态",
+    "myInquiries": "我的咨询",
+    "myQuotes": "我的报价",
+    "myOrders": "我的订单",
+    "myRewards": "我的奖励",
+    "investorDemo": "投资人演示",
+    "localDemo": "本地演示",
+    "leadReview": "留资跟进",
+    "quoteReview": "报价审核",
+    "orderReview": "订单审核",
+    "rewardsReview": "奖励审核",
+    "notifyDryRun": "通知 Dry Run",
+    "partnerReview": "供应商审核",
+    "profile": "个人中心",
+    "localCustomer": "本地客户身份",
+    "login": "登录 / 注册",
+    "logout": "退出登录",
+    "logoutConfirm": "确定要退出登录吗？",
+    "confirm": "确定",
+    "cancel": "取消",
+    "loggedOut": "已退出登录",
+    "localCustomerReady": "已启用 local/staging 客户 demo 身份：customer-local-41"
+  },
+  "home": {
+    "navThemes": "主题",
+    "navProcess": "流程",
+    "navVenues": "场地",
+    "navCta": "开始策划",
+    "kicker": "Welcome · AI Party Concierge",
+    "title": "欢迎来到 PartyOnce，让孩子的派对先被看见",
+    "intro": "从梦幻城堡、星际探险到森林奇境，先看主题、餐厅布置和套餐差异，再让 AI 帮你整理成清楚的 quote request。",
+    "planYourself": "自己来策划",
+    "aiRecommend": "AI 帮我推荐",
+    "visualMeta": "温暖的客户预览",
+    "visualMetaStrong": "AI · 主题 · 餐厅 A · 报价",
+    "themesTitle": "选择你的派对主题",
+    "themesSubtitle": "三大沉浸式主题世界，每一个都是独一无二的体验",
+    "themeCta": {
+      "space": "开启星际任务",
+      "castle": "进入梦幻城堡",
+      "forest": "进入森林秘境"
+    },
+    "assetKicker": "投资人预览素材",
+    "assetTitle": "视觉展示素材已恢复",
+    "assetCopy": "Castle Princess / Space Explorer / Forest Adventure 主题效果、餐厅布局、套餐矩阵和 App mockup 均可从这里打开。",
+    "packageKicker": "三主题 · 九套餐视觉",
+    "packageTitle": "三主题九套餐体系",
+    "packageCopy": "每个主题已绑定 Basic / Standard / Premium 的装饰、材料、价格层级和适合场地说明。",
+    "restaurantKicker": "Restaurant A 渲染样例",
+    "restaurantTitle": "餐厅原貌 + 主题装饰层",
+    "restaurantCopy": "Restaurant A 保持桌椅和空间结构不变，只改变气球、桌布、背景板、甜品台和灯光层。",
+    "stepsTitle": "简单四步，梦想派对成真",
+    "finalTitle": "准备好开启你的派对之旅了吗？",
+    "footerTagline": "让每一个派对都独一无二",
+    "about": "关于我们",
+    "contact": "联系方式",
+    "privacy": "隐私政策"
+  },
+  "themes": {
+    "space": {
+      "name": "星际探险",
+      "nameEn": "Space Explorer",
+      "description": "穿越星河，探索未知的宇宙奥秘，开启一段科幻冒险之旅"
+    },
+    "castle": {
+      "name": "梦幻城堡",
+      "nameEn": "Castle Princess",
+      "description": "走进童话世界，成为公主或王子，实现童年最美好的梦想"
+    },
+    "forest": {
+      "name": "森林奇境",
+      "nameEn": "Forest Adventure",
+      "description": "踏入神秘森林，与大自然亲密接触，发现隐藏在林间的魔法"
+    }
+  },
+  "tiers": {
+    "basic": "Basic",
+    "standard": "Standard",
+    "premium": "Premium"
+  },
+  "steps": {
+    "chooseTheme": {
+      "title": "选择主题",
+      "description": "从三大沉浸式主题中选择你喜欢的派对风格"
+    },
+    "aiPlan": {
+      "title": "AI策划",
+      "description": "智能助手为你量身定制专属派对方案"
+    },
+    "venue": {
+      "title": "挑选场地",
+      "description": "浏览精选场地，找到最适合的派对空间"
+    },
+    "party": {
+      "title": "开启派对",
+      "description": "一切准备就绪，享受难忘的派对时光"
+    }
+  },
+  "empty": {
+    "loading": "正在加载内容...",
+    "noQuotes": "暂无报价",
+    "noOrders": "暂无订单",
+    "noAssets": "暂无视觉素材"
+  },
+  "quote": {
+    "entry": "获取报价",
+    "request": "创建报价请求",
+    "view": "查看报价"
+  },
+  "ai": {
+    "eyebrow": "AI Concierge · local/staging only",
+    "title": "让 AI Concierge 帮你把派对需求整理成报价咨询",
+    "intro": "每一步只问一个问题。AI 会根据年龄、人数、预算、主题偏好和场地状态，推荐 Castle / Space / Forest 主题、套餐层级和 Restaurant A 样板，并自动预填 quote request。",
+    "quickDemo": "Quick demo recommendation",
+    "sampleToQuote": "Use sample and go Quote",
+    "listen": "听当前问题",
+    "soundOn": "打开声音",
+    "soundOff": "关闭声音",
+    "restart": "重新开始",
+    "safetyNote": "不接付费 TTS，不上传真人声音，不触发付款、webhook、n8n 或外发消息。",
+    "visualCues": "Visual cues",
+    "compareThemes": "我会用同一套餐逻辑比较三种主题"
+  },
+  "quotePage": {
+    "back": "返回套餐",
+    "title": "报价汇总",
+    "subtitle": "确认您的派对方案",
+    "summaryKicker": "从这里开始 · 客户摘要",
+    "steps": {
+      "summary": "方案摘要",
+      "rendering": "餐厅渲染",
+      "package": "套餐差异",
+      "pricing": "报价组成",
+      "inquiry": "提交 inquiry"
+    },
+    "currentSelection": "当前选择",
+    "theme": "主题",
+    "scene": "场景",
+    "package": "套餐",
+    "edit": "修改",
+    "priceDetails": "价格明细",
+    "estimatedTotal": "预估总价"
+  }
+}

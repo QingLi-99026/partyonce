@@ -8,11 +8,14 @@
           <span class="logo-text">PartyOnce</span>
         </div>
         <div class="nav-links">
-          <a href="#themes" class="nav-link">主题</a>
-          <a href="#how-it-works" class="nav-link">流程</a>
-          <a href="#venues" class="nav-link">场地</a>
+          <a href="#themes" class="nav-link">{{ $t('home.navThemes') }}</a>
+          <a href="#how-it-works" class="nav-link">{{ $t('home.navProcess') }}</a>
+          <a href="#venues" class="nav-link">{{ $t('home.navVenues') }}</a>
         </div>
-        <button class="nav-cta">开始策划</button>
+        <div class="nav-actions">
+          <LanguageSwitcher />
+          <button class="nav-cta">{{ $t('home.navCta') }}</button>
+        </div>
       </div>
     </nav>
 
@@ -21,10 +24,10 @@
       :style="{ backgroundImage: `linear-gradient(90deg, rgba(42, 23, 38, 0.78), rgba(126, 71, 96, 0.48), rgba(255, 230, 238, 0.24)), url(${investorHero.image})` }"
     >
       <div class="investor-hero-content">
-        <span class="investor-kicker">Welcome · AI Party Concierge</span>
-        <h1 class="investor-title">欢迎来到 PartyOnce，让孩子的派对先被看见</h1>
+        <span class="investor-kicker">{{ $t('home.kicker') }}</span>
+        <h1 class="investor-title">{{ $t('home.title') }}</h1>
         <p class="investor-copy">
-          从梦幻城堡、星际探险到森林奇境，先看主题、餐厅布置和套餐差异，再让 AI 帮你整理成清楚的 quote request。
+          {{ $t('home.intro') }}
         </p>
 
         <div class="investor-actions">
@@ -44,8 +47,8 @@
       <div class="investor-visual-stack">
         <img :src="investorHero.image" :alt="investorHero.alt" class="hero-mockup-image">
         <div class="visual-stack-meta">
-          <span>Warm customer preview</span>
-          <strong>AI · Themes · Restaurant A · Quote</strong>
+          <span>{{ $t('home.visualMeta') }}</span>
+          <strong>{{ $t('home.visualMetaStrong') }}</strong>
         </div>
       </div>
     </section>
@@ -68,10 +71,10 @@
     <section id="themes" class="themes-section">
       <div class="section-container">
         <h2 class="section-title" :style="sectionTitleStyle">
-          选择你的派对主题
+          {{ $t('home.themesTitle') }}
         </h2>
         <p class="section-subtitle" :style="sectionSubtitleStyle">
-          三大沉浸式主题世界，每一个都是独一无二的体验
+          {{ $t('home.themesSubtitle') }}
         </p>
         
         <div class="theme-cards">
@@ -102,10 +105,10 @@
 
         <div class="investor-asset-panel">
           <div class="asset-panel-header">
-            <span class="asset-kicker">Investor preview assets</span>
-            <h3 class="asset-panel-title">视觉展示素材已恢复</h3>
+            <span class="asset-kicker">{{ $t('home.assetKicker') }}</span>
+            <h3 class="asset-panel-title">{{ $t('home.assetTitle') }}</h3>
             <p class="asset-panel-copy">
-              Castle Princess / Space Explorer / Forest Adventure 主题效果、餐厅布局、套餐矩阵和 App mockup 均可从这里打开。
+              {{ $t('home.assetCopy') }}
             </p>
           </div>
 
@@ -125,7 +128,7 @@
                 <span class="asset-theme-icon">{{ getAssetThemeIcon(asset.theme) }}</span>
               </div>
               <div class="asset-body">
-                <span class="asset-tier">{{ asset.tier }}</span>
+                <span class="asset-tier">{{ formatTier(asset.tier) }}</span>
                 <h4>{{ asset.title }}</h4>
                 <p>{{ asset.description }}</p>
               </div>
@@ -136,15 +139,15 @@
         <div class="restoration-grid">
           <article class="restoration-panel">
             <div class="asset-panel-header">
-              <span class="asset-kicker">Three themes · nine package visuals</span>
-              <h3 class="asset-panel-title">三主题九套餐体系</h3>
-              <p class="asset-panel-copy">每个主题已绑定 Basic / Standard / Premium 的装饰、材料、价格层级和适合场地说明。</p>
+              <span class="asset-kicker">{{ $t('home.packageKicker') }}</span>
+              <h3 class="asset-panel-title">{{ $t('home.packageTitle') }}</h3>
+              <p class="asset-panel-copy">{{ $t('home.packageCopy') }}</p>
             </div>
             <div class="mini-visual-grid">
               <div v-for="item in packageVisualsForTheme" :key="item.id" class="mini-visual-card">
                 <img :src="item.image_path" :alt="item.title">
                 <div>
-                  <strong>{{ item.tierLabel }} · {{ item.priceHint }}</strong>
+                  <strong>{{ formatTier(item.tierLabel) }} · {{ item.priceHint }}</strong>
                   <span>{{ item.scope }}</span>
                 </div>
               </div>
@@ -153,9 +156,9 @@
 
           <article class="restoration-panel">
             <div class="asset-panel-header">
-              <span class="asset-kicker">Restaurant A rendering sample</span>
-              <h3 class="asset-panel-title">餐厅原貌 + 主题装饰层</h3>
-              <p class="asset-panel-copy">Restaurant A 保持桌椅和空间结构不变，只改变气球、桌布、背景板、甜品台和灯光层。</p>
+              <span class="asset-kicker">{{ $t('home.restaurantKicker') }}</span>
+              <h3 class="asset-panel-title">{{ $t('home.restaurantTitle') }}</h3>
+              <p class="asset-panel-copy">{{ $t('home.restaurantCopy') }}</p>
             </div>
             <div class="mini-visual-grid">
               <div v-for="item in restaurantVisualsForTheme" :key="item.id" class="mini-visual-card">
@@ -175,7 +178,7 @@
     <section id="how-it-works" class="how-it-works">
       <div class="section-container">
         <h2 class="section-title" :style="sectionTitleStyle">
-          简单四步，梦想派对成真
+          {{ $t('home.stepsTitle') }}
         </h2>
         
         <div class="steps">
@@ -210,14 +213,14 @@
     <section class="final-cta">
       <div class="section-container">
         <h2 class="cta-title" :style="ctaTitleStyle">
-          准备好开启你的派对之旅了吗？
+          {{ $t('home.finalTitle') }}
         </h2>
         <button 
           class="cta-main-button" 
           :style="finalCtaStyle"
           @click="handleFinalCTA"
         >
-          <span>{{ currentThemeConfig.ctaText }}</span>
+          <span>{{ currentThemeCtaText }}</span>
           <span class="cta-arrow">→</span>
         </button>
       </div>
@@ -228,12 +231,12 @@
       <div class="footer-container">
         <div class="footer-brand">
           <span class="footer-logo">🎉 PartyOnce</span>
-          <p class="footer-tagline">让每一个派对都独一无二</p>
+          <p class="footer-tagline">{{ $t('home.footerTagline') }}</p>
         </div>
         <div class="footer-links">
-          <a href="#">关于我们</a>
-          <a href="#">联系方式</a>
-          <a href="#">隐私政策</a>
+          <a href="#">{{ $t('home.about') }}</a>
+          <a href="#">{{ $t('home.contact') }}</a>
+          <a href="#">{{ $t('home.privacy') }}</a>
         </div>
       </div>
     </footer>
@@ -243,9 +246,10 @@
 <script>
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import ImmersiveHero from '@/components/ImmersiveHero.vue';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import SceneShowcase from '@/components/SceneShowcase.vue';
 import PackageShowcase from '@/components/PackageShowcase.vue';
-import { getTheme, getAllThemes } from '@/themes';
+import { getTheme } from '@/themes';
 import { getRestaurantAVisuals, getThemePackageVisuals, getVisualAssetsByTheme } from '@/data/visualAssets';
 
 export default {
@@ -254,6 +258,7 @@ export default {
   components: {
     ThemeSwitcher,
     ImmersiveHero,
+    LanguageSwitcher,
     SceneShowcase,
     PackageShowcase
   },
@@ -262,85 +267,94 @@ export default {
     return {
       currentTheme: this.$route.query.theme || 'castle',
       isScrolled: false,
-      
-      themeCards: [
-        {
-          id: 'space',
-          name: '星际探险',
-          nameEn: 'Space Explorer',
-          icon: '🚀',
-          image: '/party-assets/themes/space-explorer.png',
-          description: '穿越星河，探索未知的宇宙奥秘，开启一段科幻冒险之旅',
-          ctaText: '开启星际任务'
-        },
-        {
-          id: 'castle',
-          name: '梦幻城堡',
-          nameEn: 'Castle Princess',
-          icon: '🏰',
-          image: '/party-assets/themes/castle-princess-full.png',
-          description: '走进童话世界，成为公主或王子，实现童年最美好的梦想',
-          ctaText: '进入梦幻城堡'
-        },
-        {
-          id: 'forest',
-          name: '森林奇境',
-          nameEn: 'Forest Adventure',
-          icon: '🌲',
-          image: '/party-assets/themes/forest-adventure-full.png',
-          description: '踏入神秘森林，与大自然亲密接触，发现隐藏在林间的魔法',
-          ctaText: '进入森林秘境'
-        }
-      ],
-
       investorHero: {
         image: '/party-assets/investor-hero/immersive-homepage-hero.png',
         alt: 'PartyOnce immersive visual homepage hero'
-      },
+      }
+    };
+  },
+  
+  computed: {
+    themeCards() {
+      return [
+        {
+          id: 'space',
+          name: this.$t('themes.space.name'),
+          nameEn: this.$t('themes.space.nameEn'),
+          icon: '🚀',
+          image: '/party-assets/themes/space-explorer.png',
+          description: this.$t('themes.space.description'),
+          ctaText: this.$t('home.themeCta.space')
+        },
+        {
+          id: 'castle',
+          name: this.$t('themes.castle.name'),
+          nameEn: this.$t('themes.castle.nameEn'),
+          icon: '🏰',
+          image: '/party-assets/themes/castle-princess-full.png',
+          description: this.$t('themes.castle.description'),
+          ctaText: this.$t('home.themeCta.castle')
+        },
+        {
+          id: 'forest',
+          name: this.$t('themes.forest.name'),
+          nameEn: this.$t('themes.forest.nameEn'),
+          icon: '🌲',
+          image: '/party-assets/themes/forest-adventure-full.png',
+          description: this.$t('themes.forest.description'),
+          ctaText: this.$t('home.themeCta.forest')
+        }
+      ];
+    },
 
-      investorActions: [
+    investorActions() {
+      return [
         {
           icon: '🎨',
-          label: '自己来策划',
+          label: this.$t('home.planYourself'),
           to: '/themes',
           primary: true
         },
         {
           icon: '🤖',
-          label: 'AI 帮我推荐',
+          label: this.$t('home.aiRecommend'),
           to: '/ai-voice-intake',
           primary: false
         }
-      ],
-      
-      steps: [
+      ];
+    },
+
+    steps() {
+      return [
         {
           icon: '🎯',
-          title: '选择主题',
-          description: '从三大沉浸式主题中选择你喜欢的派对风格'
+          title: this.$t('steps.chooseTheme.title'),
+          description: this.$t('steps.chooseTheme.description')
         },
         {
           icon: '🤖',
-          title: 'AI策划',
-          description: '智能助手为你量身定制专属派对方案'
+          title: this.$t('steps.aiPlan.title'),
+          description: this.$t('steps.aiPlan.description')
         },
         {
           icon: '🏛️',
-          title: '挑选场地',
-          description: '浏览精选场地，找到最适合的派对空间'
+          title: this.$t('steps.venue.title'),
+          description: this.$t('steps.venue.description')
         },
         {
           icon: '🎊',
-          title: '开启派对',
-          description: '一切准备就绪，享受难忘的派对时光'
+          title: this.$t('steps.party.title'),
+          description: this.$t('steps.party.description')
         }
-      ]
-    };
-  },
-  
-  computed: {
+      ];
+    },
+
     currentThemeConfig() {
       return getTheme(this.currentTheme);
+    },
+
+    currentThemeCtaText() {
+      return this.$t(`home.themeCta.${this.currentTheme}`);
     },
 
     visualAssetsForTheme() {
@@ -504,6 +518,16 @@ export default {
       };
       return labels[type] || type;
     },
+
+    formatTier(tier) {
+      const normalized = String(tier || '').trim().toLowerCase();
+      const labels = {
+        basic: this.$t('tiers.basic'),
+        standard: this.$t('tiers.standard'),
+        premium: this.$t('tiers.premium')
+      };
+      return labels[normalized] || tier;
+    },
     
     handleStartPlanning(themeId) {
       this.$router.push(`/planner?theme=${themeId}`);
@@ -591,6 +615,13 @@ export default {
   gap: 32px;
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+}
+
 .nav-link {
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
@@ -635,6 +666,11 @@ export default {
 .investor-hero-content {
   max-width: 720px;
   margin-left: max(0px, calc((100vw - 1200px) / 2));
+}
+
+:global([dir='rtl']) .investor-hero-content {
+  margin-left: 0;
+  margin-right: max(0px, calc((100vw - 1200px) / 2));
 }
 
 .investor-kicker {
@@ -1173,6 +1209,18 @@ export default {
 
   .nav-links {
     display: none;
+  }
+
+  .nav-container {
+    padding: 0 14px;
+  }
+
+  .nav-actions {
+    gap: 8px;
+  }
+
+  .nav-cta {
+    padding: 9px 14px;
   }
   
   .themes-section,

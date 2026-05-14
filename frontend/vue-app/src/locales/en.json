@@ -1,0 +1,162 @@
+{
+  "language": {
+    "label": "Language",
+    "zh": "中文",
+    "en": "English",
+    "ko": "한국어",
+    "ar": "العربية"
+  },
+  "nav": {
+    "home": "Home",
+    "venues": "Venues",
+    "aiGuide": "AI Guide",
+    "party3d": "3D Preview",
+    "aiPlanner": "AI Planner",
+    "designer3d": "3D Design",
+    "quote": "Quote",
+    "suppliers": "Suppliers",
+    "partnerApply": "Partner Apply",
+    "partnerStatus": "Partner Status",
+    "myInquiries": "My Inquiries",
+    "myQuotes": "My Quotes",
+    "myOrders": "My Orders",
+    "myRewards": "My Rewards",
+    "investorDemo": "Investor Demo",
+    "localDemo": "Local Demo",
+    "leadReview": "Lead Review",
+    "quoteReview": "Quote Review",
+    "orderReview": "Order Review",
+    "rewardsReview": "Rewards Review",
+    "notifyDryRun": "Notify Dry Run",
+    "partnerReview": "Partner Review",
+    "profile": "Profile",
+    "localCustomer": "Local Customer",
+    "login": "Log in / Sign up",
+    "logout": "Log out",
+    "logoutConfirm": "Log out now?",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "loggedOut": "Logged out",
+    "localCustomerReady": "Local/staging customer demo enabled: customer-local-41"
+  },
+  "home": {
+    "navThemes": "Themes",
+    "navProcess": "Flow",
+    "navVenues": "Venues",
+    "navCta": "Start planning",
+    "kicker": "Welcome · AI Party Concierge",
+    "title": "Welcome to PartyOnce, where every party is visible before it happens",
+    "intro": "Preview castle, space, and forest themes, compare dining layouts and package levels, then let AI turn the idea into a clear quote request.",
+    "planYourself": "Plan myself",
+    "aiRecommend": "AI recommends",
+    "visualMeta": "Warm customer preview",
+    "visualMetaStrong": "AI · Themes · Restaurant A · Quote",
+    "themesTitle": "Choose your party theme",
+    "themesSubtitle": "Three immersive theme worlds, each designed as a distinct experience.",
+    "themeCta": {
+      "space": "Start space mission",
+      "castle": "Enter the castle",
+      "forest": "Explore the forest"
+    },
+    "assetKicker": "Investor preview assets",
+    "assetTitle": "Visual showcase assets restored",
+    "assetCopy": "Castle Princess, Space Explorer, Forest Adventure, dining layouts, package matrix, and app mockups are available here.",
+    "packageKicker": "Three themes · nine package visuals",
+    "packageTitle": "Three-theme, nine-package system",
+    "packageCopy": "Each theme is mapped to Basic, Standard, and Premium decor, materials, pricing levels, and venue fit notes.",
+    "restaurantKicker": "Restaurant A rendering sample",
+    "restaurantTitle": "Original dining room + theme decor layer",
+    "restaurantCopy": "Restaurant A keeps tables, chairs, and spatial structure unchanged while balloons, linens, backdrop, dessert table, and lighting change.",
+    "stepsTitle": "Four simple steps to a ready party",
+    "finalTitle": "Ready to start your party journey?",
+    "footerTagline": "Make every party one of a kind",
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy"
+  },
+  "themes": {
+    "space": {
+      "name": "Space Explorer",
+      "nameEn": "Space Explorer",
+      "description": "Travel through the stars, explore unknown worlds, and start a sci-fi birthday adventure."
+    },
+    "castle": {
+      "name": "Castle Princess",
+      "nameEn": "Castle Princess",
+      "description": "Step into a fairytale castle and bring a princess or prince celebration to life."
+    },
+    "forest": {
+      "name": "Forest Adventure",
+      "nameEn": "Forest Adventure",
+      "description": "Enter a magical forest, meet nature up close, and discover hidden surprises."
+    }
+  },
+  "tiers": {
+    "basic": "Basic",
+    "standard": "Standard",
+    "premium": "Premium"
+  },
+  "steps": {
+    "chooseTheme": {
+      "title": "Choose a theme",
+      "description": "Pick the party world that best matches your child and occasion."
+    },
+    "aiPlan": {
+      "title": "AI planning",
+      "description": "The assistant turns your preferences into a focused party plan."
+    },
+    "venue": {
+      "title": "Select a venue",
+      "description": "Browse suitable venues and find the right room for the experience."
+    },
+    "party": {
+      "title": "Enjoy the party",
+      "description": "Everything is organized so the celebration can feel effortless."
+    }
+  },
+  "empty": {
+    "loading": "Loading content...",
+    "noQuotes": "No quotes yet",
+    "noOrders": "No orders yet",
+    "noAssets": "No visual assets yet"
+  },
+  "quote": {
+    "entry": "Get quote",
+    "request": "Create quote request",
+    "view": "View quote"
+  },
+  "ai": {
+    "eyebrow": "AI Concierge · local/staging only",
+    "title": "Let AI Concierge turn your party needs into a quote request",
+    "intro": "One question at a time. AI uses age, guest count, budget, theme preference, and venue status to recommend Castle, Space, or Forest, choose a package tier, use Restaurant A as a sample, and pre-fill the quote request.",
+    "quickDemo": "Quick demo recommendation",
+    "sampleToQuote": "Use sample and go Quote",
+    "listen": "Listen to current question",
+    "soundOn": "Turn sound on",
+    "soundOff": "Turn sound off",
+    "restart": "Restart",
+    "safetyNote": "No paid TTS, no real voice upload, and no payment, webhook, n8n, or outbound message is triggered.",
+    "visualCues": "Visual cues",
+    "compareThemes": "I compare the three themes with the same package logic"
+  },
+  "quotePage": {
+    "back": "Back to packages",
+    "title": "Quote summary",
+    "subtitle": "Confirm your party plan",
+    "summaryKicker": "Start here · customer summary",
+    "steps": {
+      "summary": "Plan summary",
+      "rendering": "Dining rendering",
+      "package": "Package differences",
+      "pricing": "Pricing structure",
+      "inquiry": "Submit inquiry"
+    },
+    "currentSelection": "Current selection",
+    "theme": "Theme",
+    "scene": "Scene",
+    "package": "Package",
+    "edit": "Edit",
+    "priceDetails": "Price details",
+    "estimatedTotal": "Estimated total"
+  }
+}

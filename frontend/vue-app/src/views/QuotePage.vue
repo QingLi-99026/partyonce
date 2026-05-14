@@ -3,14 +3,14 @@
     <!-- 返回导航 -->
     <nav class="back-nav">
       <button class="back-btn" @click="goBack">
-        <span>←</span> 返回套餐
+        <span>←</span> {{ $t('quotePage.back') }}
       </button>
     </nav>
 
     <!-- 页面标题 -->
     <header class="page-header">
-      <h1 class="page-title" :style="titleStyle">报价汇总</h1>
-      <p class="page-subtitle">确认您的派对方案</p>
+      <h1 class="page-title" :style="titleStyle">{{ $t('quotePage.title') }}</h1>
+      <p class="page-subtitle">{{ $t('quotePage.subtitle') }}</p>
     </header>
 
     <section v-if="aiPrefillNotice" class="ai-prefill-notice">
@@ -27,16 +27,16 @@
       <div class="section-container">
         <div class="quote-flow-card" :style="cardStyle">
           <div>
-            <span class="visual-kicker">Start here · customer summary</span>
+            <span class="visual-kicker">{{ $t('quotePage.summaryKicker') }}</span>
             <h2>{{ quoteFlowSummary.title }}</h2>
             <p>{{ quoteFlowSummary.body }}</p>
           </div>
           <div class="quote-flow-steps">
-            <span>1. 方案摘要</span>
-            <span>2. 餐厅渲染</span>
-            <span>3. 套餐差异</span>
-            <span>4. 报价组成</span>
-            <span>5. 提交 inquiry</span>
+            <span>1. {{ $t('quotePage.steps.summary') }}</span>
+            <span>2. {{ $t('quotePage.steps.rendering') }}</span>
+            <span>3. {{ $t('quotePage.steps.package') }}</span>
+            <span>4. {{ $t('quotePage.steps.pricing') }}</span>
+            <span>5. {{ $t('quotePage.steps.inquiry') }}</span>
           </div>
         </div>
       </div>
@@ -45,31 +45,31 @@
     <!-- 当前选择结果 -->
     <section class="current-selection">
       <div class="section-container">
-        <h2 class="section-title" :style="titleStyle">当前选择</h2>
+        <h2 class="section-title" :style="titleStyle">{{ $t('quotePage.currentSelection') }}</h2>
         <div class="selection-grid">
           <div class="selection-item" :style="selectionItemStyle">
-            <div class="item-label">主题</div>
+            <div class="item-label">{{ $t('quotePage.theme') }}</div>
             <div class="item-value">
               <span class="item-icon">{{ themeConfig.icon }}</span>
               <span>{{ themeConfig.name }}</span>
             </div>
-            <button class="edit-btn" @click="editTheme">修改</button>
+            <button class="edit-btn" @click="editTheme">{{ $t('quotePage.edit') }}</button>
           </div>
           <div class="selection-item" :style="selectionItemStyle">
-            <div class="item-label">场景</div>
+            <div class="item-label">{{ $t('quotePage.scene') }}</div>
             <div class="item-value">
               <span class="item-icon">{{ sceneData.icon }}</span>
               <span>{{ sceneData.name }}</span>
             </div>
-            <button class="edit-btn" @click="editScene">修改</button>
+            <button class="edit-btn" @click="editScene">{{ $t('quotePage.edit') }}</button>
           </div>
           <div class="selection-item" :style="selectionItemStyle">
-            <div class="item-label">套餐</div>
+            <div class="item-label">{{ $t('quotePage.package') }}</div>
             <div class="item-value">
               <span class="item-icon">{{ packageData.icon }}</span>
               <span>{{ packageData.name }}</span>
             </div>
-            <button class="edit-btn" @click="editPackage">修改</button>
+            <button class="edit-btn" @click="editPackage">{{ $t('quotePage.edit') }}</button>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@
     <!-- 价格明细 -->
     <section class="price-section">
       <div class="section-container">
-        <h2 class="section-title" :style="titleStyle">价格明细</h2>
+        <h2 class="section-title" :style="titleStyle">{{ $t('quotePage.priceDetails') }}</h2>
         <div class="price-card" :style="cardStyle">
           <div
             v-for="group in lineItemSummary.groups"
@@ -91,7 +91,7 @@
           </div>
           <div class="price-divider"></div>
           <div class="price-row is-total">
-            <span>预估总价</span>
+            <span>{{ $t('quotePage.estimatedTotal') }}</span>
             <span class="total-price">{{ formatPrice(finalTotal) }}</span>
           </div>
         </div>

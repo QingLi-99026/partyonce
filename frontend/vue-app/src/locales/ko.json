@@ -1,0 +1,162 @@
+{
+  "language": {
+    "label": "언어",
+    "zh": "中文",
+    "en": "English",
+    "ko": "한국어",
+    "ar": "العربية"
+  },
+  "nav": {
+    "home": "홈",
+    "venues": "장소",
+    "aiGuide": "AI 가이드",
+    "party3d": "3D 미리보기",
+    "aiPlanner": "AI 플래너",
+    "designer3d": "3D 디자인",
+    "quote": "견적",
+    "suppliers": "공급사",
+    "partnerApply": "파트너 신청",
+    "partnerStatus": "신청 상태",
+    "myInquiries": "내 문의",
+    "myQuotes": "내 견적",
+    "myOrders": "내 주문",
+    "myRewards": "내 리워드",
+    "investorDemo": "투자자 데모",
+    "localDemo": "로컬 데모",
+    "leadReview": "리드 검토",
+    "quoteReview": "견적 검토",
+    "orderReview": "주문 검토",
+    "rewardsReview": "리워드 검토",
+    "notifyDryRun": "알림 Dry Run",
+    "partnerReview": "파트너 검토",
+    "profile": "프로필",
+    "localCustomer": "로컬 고객",
+    "login": "로그인 / 가입",
+    "logout": "로그아웃",
+    "logoutConfirm": "로그아웃할까요?",
+    "confirm": "확인",
+    "cancel": "취소",
+    "loggedOut": "로그아웃되었습니다",
+    "localCustomerReady": "local/staging 고객 데모가 활성화되었습니다: customer-local-41"
+  },
+  "home": {
+    "navThemes": "테마",
+    "navProcess": "진행 방식",
+    "navVenues": "장소",
+    "navCta": "기획 시작",
+    "kicker": "Welcome · AI Party Concierge",
+    "title": "PartyOnce에서 파티를 먼저 눈으로 확인하세요",
+    "intro": "캐슬, 우주, 숲 테마와 레스토랑 구성, 패키지 차이를 먼저 보고 AI가 명확한 견적 요청으로 정리합니다.",
+    "planYourself": "직접 기획하기",
+    "aiRecommend": "AI 추천받기",
+    "visualMeta": "따뜻한 고객 미리보기",
+    "visualMetaStrong": "AI · 테마 · Restaurant A · 견적",
+    "themesTitle": "파티 테마 선택",
+    "themesSubtitle": "세 가지 몰입형 테마 월드가 각기 다른 경험을 제공합니다.",
+    "themeCta": {
+      "space": "우주 미션 시작",
+      "castle": "캐슬 입장",
+      "forest": "숲 탐험"
+    },
+    "assetKicker": "투자자 미리보기 에셋",
+    "assetTitle": "비주얼 쇼케이스 에셋 복원 완료",
+    "assetCopy": "Castle Princess, Space Explorer, Forest Adventure, 다이닝 레이아웃, 패키지 매트릭스, 앱 목업을 여기서 확인할 수 있습니다.",
+    "packageKicker": "세 테마 · 아홉 패키지 비주얼",
+    "packageTitle": "세 테마 아홉 패키지 체계",
+    "packageCopy": "각 테마는 Basic, Standard, Premium 장식, 소재, 가격대, 적합한 장소 설명과 연결되어 있습니다.",
+    "restaurantKicker": "Restaurant A 렌더링 샘플",
+    "restaurantTitle": "기존 다이닝룸 + 테마 장식 레이어",
+    "restaurantCopy": "Restaurant A는 테이블, 의자, 공간 구조를 유지하고 풍선, 린넨, 배경판, 디저트 테이블, 조명만 바꿉니다.",
+    "stepsTitle": "네 단계로 완성하는 파티",
+    "finalTitle": "파티 여정을 시작할 준비가 되었나요?",
+    "footerTagline": "모든 파티를 특별하게",
+    "about": "소개",
+    "contact": "문의",
+    "privacy": "개인정보"
+  },
+  "themes": {
+    "space": {
+      "name": "Space Explorer",
+      "nameEn": "Space Explorer",
+      "description": "별 사이를 여행하고 미지의 우주를 탐험하는 SF 파티 모험입니다."
+    },
+    "castle": {
+      "name": "Castle Princess",
+      "nameEn": "Castle Princess",
+      "description": "동화 속 성으로 들어가 공주와 왕자의 생일 축하를 현실로 만듭니다."
+    },
+    "forest": {
+      "name": "Forest Adventure",
+      "nameEn": "Forest Adventure",
+      "description": "신비로운 숲으로 들어가 자연과 가까워지고 숨겨진 마법을 발견합니다."
+    }
+  },
+  "tiers": {
+    "basic": "Basic",
+    "standard": "Standard",
+    "premium": "Premium"
+  },
+  "steps": {
+    "chooseTheme": {
+      "title": "테마 선택",
+      "description": "아이와 행사에 가장 잘 맞는 파티 월드를 고릅니다."
+    },
+    "aiPlan": {
+      "title": "AI 기획",
+      "description": "AI가 선호도를 바탕으로 집중된 파티 플랜을 만듭니다."
+    },
+    "venue": {
+      "title": "장소 선택",
+      "description": "적합한 장소를 살펴보고 경험에 맞는 공간을 찾습니다."
+    },
+    "party": {
+      "title": "파티 시작",
+      "description": "준비가 정리되어 축하에만 집중할 수 있습니다."
+    }
+  },
+  "empty": {
+    "loading": "콘텐츠를 불러오는 중...",
+    "noQuotes": "아직 견적이 없습니다",
+    "noOrders": "아직 주문이 없습니다",
+    "noAssets": "아직 비주얼 에셋이 없습니다"
+  },
+  "quote": {
+    "entry": "견적 받기",
+    "request": "견적 요청 만들기",
+    "view": "견적 보기"
+  },
+  "ai": {
+    "eyebrow": "AI Concierge · local/staging only",
+    "title": "AI Concierge가 파티 요구사항을 견적 문의로 정리합니다",
+    "intro": "한 번에 하나의 질문만 합니다. AI는 나이, 인원, 예산, 테마 선호, 장소 상태를 바탕으로 Castle / Space / Forest 테마와 패키지 단계, Restaurant A 샘플을 추천하고 quote request를 미리 채웁니다.",
+    "quickDemo": "빠른 데모 추천",
+    "sampleToQuote": "샘플로 견적 이동",
+    "listen": "현재 질문 듣기",
+    "soundOn": "소리 켜기",
+    "soundOff": "소리 끄기",
+    "restart": "다시 시작",
+    "safetyNote": "유료 TTS, 실제 음성 업로드, 결제, webhook, n8n, 외부 메시지를 실행하지 않습니다.",
+    "visualCues": "비주얼 힌트",
+    "compareThemes": "같은 패키지 로직으로 세 가지 테마를 비교합니다"
+  },
+  "quotePage": {
+    "back": "패키지로 돌아가기",
+    "title": "견적 요약",
+    "subtitle": "파티 플랜을 확인하세요",
+    "summaryKicker": "여기서 시작 · 고객 요약",
+    "steps": {
+      "summary": "플랜 요약",
+      "rendering": "다이닝 렌더링",
+      "package": "패키지 차이",
+      "pricing": "가격 구성",
+      "inquiry": "문의 제출"
+    },
+    "currentSelection": "현재 선택",
+    "theme": "테마",
+    "scene": "장면",
+    "package": "패키지",
+    "edit": "수정",
+    "priceDetails": "가격 상세",
+    "estimatedTotal": "예상 총액"
+  }
+}

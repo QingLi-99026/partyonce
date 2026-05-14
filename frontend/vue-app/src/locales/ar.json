@@ -1,0 +1,162 @@
+{
+  "language": {
+    "label": "اللغة",
+    "zh": "中文",
+    "en": "English",
+    "ko": "한국어",
+    "ar": "العربية"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "venues": "القاعات",
+    "aiGuide": "إرشاد AI",
+    "party3d": "معاينة 3D",
+    "aiPlanner": "مخطط AI",
+    "designer3d": "تصميم 3D",
+    "quote": "عرض سعر",
+    "suppliers": "الموردون",
+    "partnerApply": "طلب شراكة",
+    "partnerStatus": "حالة الطلب",
+    "myInquiries": "استفساراتي",
+    "myQuotes": "عروضي",
+    "myOrders": "طلباتي",
+    "myRewards": "مكافآتي",
+    "investorDemo": "عرض المستثمر",
+    "localDemo": "عرض محلي",
+    "leadReview": "مراجعة العملاء",
+    "quoteReview": "مراجعة العروض",
+    "orderReview": "مراجعة الطلبات",
+    "rewardsReview": "مراجعة المكافآت",
+    "notifyDryRun": "تجربة الإشعار",
+    "partnerReview": "مراجعة الشركاء",
+    "profile": "الملف الشخصي",
+    "localCustomer": "عميل محلي",
+    "login": "دخول / تسجيل",
+    "logout": "تسجيل الخروج",
+    "logoutConfirm": "هل تريد تسجيل الخروج؟",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "loggedOut": "تم تسجيل الخروج",
+    "localCustomerReady": "تم تفعيل عميل local/staging التجريبي: customer-local-41"
+  },
+  "home": {
+    "navThemes": "الثيمات",
+    "navProcess": "الخطوات",
+    "navVenues": "القاعات",
+    "navCta": "ابدأ التخطيط",
+    "kicker": "Welcome · AI Party Concierge",
+    "title": "مرحباً بك في PartyOnce، شاهد الحفل قبل تنفيذه",
+    "intro": "استعرض ثيم القصر والفضاء والغابة، وقارن تخطيط المطعم وباقات الحفل، ثم دع AI يحول الفكرة إلى طلب عرض سعر واضح.",
+    "planYourself": "أخطط بنفسي",
+    "aiRecommend": "AI يقترح لي",
+    "visualMeta": "معاينة دافئة للعميل",
+    "visualMetaStrong": "AI · ثيمات · Restaurant A · عرض سعر",
+    "themesTitle": "اختر ثيم الحفل",
+    "themesSubtitle": "ثلاثة عوالم غامرة، وكل عالم يقدم تجربة مختلفة.",
+    "themeCta": {
+      "space": "ابدأ مهمة الفضاء",
+      "castle": "ادخل القصر",
+      "forest": "استكشف الغابة"
+    },
+    "assetKicker": "مواد عرض المستثمر",
+    "assetTitle": "تمت استعادة مواد العرض المرئية",
+    "assetCopy": "يمكن فتح ثيمات Castle Princess و Space Explorer و Forest Adventure وتخطيطات المطعم ومصفوفة الباقات ونموذج التطبيق من هنا.",
+    "packageKicker": "ثلاثة ثيمات · تسعة عروض باقات",
+    "packageTitle": "نظام ثلاث ثيمات وتسع باقات",
+    "packageCopy": "كل ثيم مرتبط بمستويات Basic و Standard و Premium مع الديكور والمواد والسعر وملاءمة القاعة.",
+    "restaurantKicker": "عينة عرض Restaurant A",
+    "restaurantTitle": "غرفة الطعام الأصلية + طبقة ديكور الثيم",
+    "restaurantCopy": "يبقى ترتيب الطاولات والكراسي والمساحة كما هو، وتتغير البالونات والمفارش والخلفية وطاولة الحلويات والإضاءة.",
+    "stepsTitle": "أربع خطوات بسيطة لحفل جاهز",
+    "finalTitle": "هل أنت جاهز لبدء رحلة الحفل؟",
+    "footerTagline": "اجعل كل حفل مختلفاً",
+    "about": "من نحن",
+    "contact": "تواصل",
+    "privacy": "الخصوصية"
+  },
+  "themes": {
+    "space": {
+      "name": "Space Explorer",
+      "nameEn": "Space Explorer",
+      "description": "رحلة بين النجوم لاستكشاف عوالم مجهولة وبدء مغامرة خيال علمي."
+    },
+    "castle": {
+      "name": "Castle Princess",
+      "nameEn": "Castle Princess",
+      "description": "ادخل إلى قصر من القصص واجعل احتفال الأمير أو الأميرة حقيقة."
+    },
+    "forest": {
+      "name": "Forest Adventure",
+      "nameEn": "Forest Adventure",
+      "description": "ادخل غابة ساحرة، اقترب من الطبيعة، واكتشف مفاجآت مخفية."
+    }
+  },
+  "tiers": {
+    "basic": "Basic",
+    "standard": "Standard",
+    "premium": "Premium"
+  },
+  "steps": {
+    "chooseTheme": {
+      "title": "اختر الثيم",
+      "description": "اختر عالم الحفل الأنسب للطفل والمناسبة."
+    },
+    "aiPlan": {
+      "title": "تخطيط AI",
+      "description": "يحول المساعد تفضيلاتك إلى خطة حفل واضحة."
+    },
+    "venue": {
+      "title": "اختر القاعة",
+      "description": "استعرض القاعات المناسبة واختر المساحة الملائمة."
+    },
+    "party": {
+      "title": "ابدأ الحفل",
+      "description": "كل شيء منظم لتستمتعوا بالاحتفال بسهولة."
+    }
+  },
+  "empty": {
+    "loading": "جار تحميل المحتوى...",
+    "noQuotes": "لا توجد عروض بعد",
+    "noOrders": "لا توجد طلبات بعد",
+    "noAssets": "لا توجد مواد مرئية بعد"
+  },
+  "quote": {
+    "entry": "احصل على عرض سعر",
+    "request": "إنشاء طلب عرض",
+    "view": "عرض السعر"
+  },
+  "ai": {
+    "eyebrow": "AI Concierge · local/staging only",
+    "title": "دع AI Concierge يحول احتياجات الحفل إلى طلب عرض سعر",
+    "intro": "سؤال واحد في كل خطوة. يستخدم AI العمر وعدد الضيوف والميزانية والثيم وحالة القاعة لاقتراح Castle أو Space أو Forest واختيار الباقة واستخدام Restaurant A كنموذج وملء طلب العرض.",
+    "quickDemo": "توصية تجريبية سريعة",
+    "sampleToQuote": "استخدم العينة وانتقل للعرض",
+    "listen": "استمع للسؤال الحالي",
+    "soundOn": "تشغيل الصوت",
+    "soundOff": "إيقاف الصوت",
+    "restart": "البدء من جديد",
+    "safetyNote": "لا يتم تشغيل TTS مدفوع، ولا رفع صوت حقيقي، ولا دفع أو webhook أو n8n أو رسائل خارجية.",
+    "visualCues": "إشارات مرئية",
+    "compareThemes": "أقارن الثيمات الثلاثة بنفس منطق الباقات"
+  },
+  "quotePage": {
+    "back": "العودة إلى الباقات",
+    "title": "ملخص عرض السعر",
+    "subtitle": "أكد خطة الحفل",
+    "summaryKicker": "ابدأ هنا · ملخص العميل",
+    "steps": {
+      "summary": "ملخص الخطة",
+      "rendering": "عرض المطعم",
+      "package": "اختلاف الباقات",
+      "pricing": "تكوين السعر",
+      "inquiry": "إرسال الاستفسار"
+    },
+    "currentSelection": "الاختيار الحالي",
+    "theme": "الثيم",
+    "scene": "المشهد",
+    "package": "الباقة",
+    "edit": "تعديل",
+    "priceDetails": "تفاصيل السعر",
+    "estimatedTotal": "الإجمالي التقديري"
+  }
+}

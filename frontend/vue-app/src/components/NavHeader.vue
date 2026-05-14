@@ -13,31 +13,32 @@
         :ellipsis="false"
         router
       >
-        <el-menu-item index="/"><el-icon><HomeFilled /></el-icon>首页</el-menu-item>
-        <el-menu-item index="/venues"><el-icon><OfficeBuilding /></el-icon>场地</el-menu-item>
-        <el-menu-item index="/ai-voice-intake"><el-icon><MagicStick /></el-icon>AI引导</el-menu-item>
-        <el-menu-item index="/experimental/party-3d"><el-icon><View /></el-icon>3D Preview</el-menu-item>
-        <el-menu-item index="/ai-planner"><el-icon><MagicStick /></el-icon>AI策划</el-menu-item>
-        <el-menu-item index="/3d-designer"><el-icon><View /></el-icon>3D设计</el-menu-item>
-        <el-menu-item index="/quotation"><el-icon><Document /></el-icon>报价</el-menu-item>
-        <el-menu-item index="/suppliers">Suppliers</el-menu-item>
-        <el-menu-item index="/partner/apply">Partner Apply</el-menu-item>
-        <el-menu-item index="/partner/status">Partner Status</el-menu-item>
-        <el-menu-item index="/my/inquiries">My Inquiries</el-menu-item>
-        <el-menu-item index="/my/quotes">My Quotes</el-menu-item>
-        <el-menu-item index="/my/orders">My Orders</el-menu-item>
-        <el-menu-item index="/my/rewards">My Rewards</el-menu-item>
-        <el-menu-item index="/investor-demo">Investor Demo</el-menu-item>
-        <el-menu-item index="/local-demo">Local Demo Hub</el-menu-item>
-        <el-menu-item index="/admin/local-leads">Lead Review</el-menu-item>
-        <el-menu-item index="/admin/quotes">Quote Review</el-menu-item>
-        <el-menu-item index="/admin/orders">Order Review</el-menu-item>
-        <el-menu-item index="/admin/social-rewards">Rewards Review</el-menu-item>
-        <el-menu-item index="/admin/notifications/dry-run">Notify Dry Run</el-menu-item>
-        <el-menu-item index="/admin/partners">Partner Review</el-menu-item>
+        <el-menu-item index="/"><el-icon><HomeFilled /></el-icon>{{ t('nav.home') }}</el-menu-item>
+        <el-menu-item index="/venues"><el-icon><OfficeBuilding /></el-icon>{{ t('nav.venues') }}</el-menu-item>
+        <el-menu-item index="/ai-voice-intake"><el-icon><MagicStick /></el-icon>{{ t('nav.aiGuide') }}</el-menu-item>
+        <el-menu-item index="/experimental/party-3d"><el-icon><View /></el-icon>{{ t('nav.party3d') }}</el-menu-item>
+        <el-menu-item index="/ai-planner"><el-icon><MagicStick /></el-icon>{{ t('nav.aiPlanner') }}</el-menu-item>
+        <el-menu-item index="/3d-designer"><el-icon><View /></el-icon>{{ t('nav.designer3d') }}</el-menu-item>
+        <el-menu-item index="/quotation"><el-icon><Document /></el-icon>{{ t('nav.quote') }}</el-menu-item>
+        <el-menu-item index="/suppliers">{{ t('nav.suppliers') }}</el-menu-item>
+        <el-menu-item index="/partner/apply">{{ t('nav.partnerApply') }}</el-menu-item>
+        <el-menu-item index="/partner/status">{{ t('nav.partnerStatus') }}</el-menu-item>
+        <el-menu-item index="/my/inquiries">{{ t('nav.myInquiries') }}</el-menu-item>
+        <el-menu-item index="/my/quotes">{{ t('nav.myQuotes') }}</el-menu-item>
+        <el-menu-item index="/my/orders">{{ t('nav.myOrders') }}</el-menu-item>
+        <el-menu-item index="/my/rewards">{{ t('nav.myRewards') }}</el-menu-item>
+        <el-menu-item index="/investor-demo">{{ t('nav.investorDemo') }}</el-menu-item>
+        <el-menu-item index="/local-demo">{{ t('nav.localDemo') }}</el-menu-item>
+        <el-menu-item index="/admin/local-leads">{{ t('nav.leadReview') }}</el-menu-item>
+        <el-menu-item index="/admin/quotes">{{ t('nav.quoteReview') }}</el-menu-item>
+        <el-menu-item index="/admin/orders">{{ t('nav.orderReview') }}</el-menu-item>
+        <el-menu-item index="/admin/social-rewards">{{ t('nav.rewardsReview') }}</el-menu-item>
+        <el-menu-item index="/admin/notifications/dry-run">{{ t('nav.notifyDryRun') }}</el-menu-item>
+        <el-menu-item index="/admin/partners">{{ t('nav.partnerReview') }}</el-menu-item>
       </el-menu>
       
       <div class="user-actions">
+        <LanguageSwitcher compact />
         <template v-if="userStore.isLoggedIn">
           <el-dropdown @command="handleCommand">
             <span class="user-info">
@@ -47,20 +48,20 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="/user"><el-icon><User /></el-icon>个人中心</el-dropdown-item>
-                <el-dropdown-item command="/my/inquiries"><el-icon><List /></el-icon>我的咨询</el-dropdown-item>
-                <el-dropdown-item command="/my/quotes"><el-icon><Document /></el-icon>我的报价</el-dropdown-item>
-                <el-dropdown-item command="/my/orders"><el-icon><List /></el-icon>我的订单</el-dropdown-item>
-                <el-dropdown-item command="/my/rewards"><el-icon><Present /></el-icon>我的奖励</el-dropdown-item>
-                <el-dropdown-item command="bootstrap-customer"><el-icon><User /></el-icon>本地客户身份</el-dropdown-item>
-                <el-dropdown-item divided command="logout"><el-icon><SwitchButton /></el-icon>退出登录</el-dropdown-item>
+                <el-dropdown-item command="/user"><el-icon><User /></el-icon>{{ t('nav.profile') }}</el-dropdown-item>
+                <el-dropdown-item command="/my/inquiries"><el-icon><List /></el-icon>{{ t('nav.myInquiries') }}</el-dropdown-item>
+                <el-dropdown-item command="/my/quotes"><el-icon><Document /></el-icon>{{ t('nav.myQuotes') }}</el-dropdown-item>
+                <el-dropdown-item command="/my/orders"><el-icon><List /></el-icon>{{ t('nav.myOrders') }}</el-dropdown-item>
+                <el-dropdown-item command="/my/rewards"><el-icon><Present /></el-icon>{{ t('nav.myRewards') }}</el-dropdown-item>
+                <el-dropdown-item command="bootstrap-customer"><el-icon><User /></el-icon>{{ t('nav.localCustomer') }}</el-dropdown-item>
+                <el-dropdown-item divided command="logout"><el-icon><SwitchButton /></el-icon>{{ t('nav.logout') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </template>
         <template v-else>
-          <el-button plain @click="bootstrapCustomer">本地客户身份</el-button>
-          <el-button type="primary" @click="showLogin">登录 / 注册</el-button>
+          <el-button plain @click="bootstrapCustomer">{{ t('nav.localCustomer') }}</el-button>
+          <el-button type="primary" @click="showLogin">{{ t('nav.login') }}</el-button>
         </template>
       </div>
     </div>
@@ -69,10 +70,12 @@
 
 <script setup>
 import { inject } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { bootstrapLocalCustomerFixture } from '@/services/customerExperienceService'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {
   ArrowDown,
   Document,
@@ -90,6 +93,7 @@ import {
 const router = useRouter()
 const userStore = useUserStore()
 const showLoginModal = inject('showLogin')
+const { t } = useI18n()
 
 const showLogin = () => {
   showLoginModal.value = true
@@ -99,19 +103,19 @@ const bootstrapCustomer = () => {
   const fixture = bootstrapLocalCustomerFixture()
   userStore.logout()
   userStore.setUserInfo(fixture)
-  ElMessage.success('已启用 local/staging 客户 demo 身份：customer-local-41')
+  ElMessage.success(t('nav.localCustomerReady'))
   router.push('/my/quotes')
 }
 
 const handleCommand = (command) => {
   if (command === 'logout') {
-    ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    ElMessageBox.confirm(t('nav.logoutConfirm'), t('nav.logout'), {
+      confirmButtonText: t('nav.confirm'),
+      cancelButtonText: t('nav.cancel'),
       type: 'warning'
     }).then(() => {
       userStore.logout()
-      ElMessage.success('已退出登录')
+      ElMessage.success(t('nav.loggedOut'))
       router.push('/')
     })
   } else if (command === 'bootstrap-customer') {
@@ -168,7 +172,8 @@ const handleCommand = (command) => {
 .user-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .user-info {
@@ -190,5 +195,10 @@ const handleCommand = (command) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+:global([dir='rtl']) .user-info,
+:global([dir='rtl']) .logo {
+  flex-direction: row-reverse;
 }
 </style>

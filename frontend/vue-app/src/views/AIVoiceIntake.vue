@@ -2,20 +2,19 @@
   <main class="ai-intake-page">
     <section class="intake-hero">
       <div class="hero-copy">
-        <p class="eyebrow">AI Concierge · local/staging only</p>
-        <h1>让 AI Concierge 帮你把派对需求整理成报价咨询</h1>
+        <p class="eyebrow">{{ $t('ai.eyebrow') }}</p>
+        <h1>{{ $t('ai.title') }}</h1>
         <p>
-          每一步只问一个问题。AI 会根据年龄、人数、预算、主题偏好和场地状态，
-          推荐 Castle / Space / Forest 主题、套餐层级和 Restaurant A 样板，并自动预填 quote request。
+          {{ $t('ai.intro') }}
         </p>
         <div class="hero-actions">
-          <button class="primary-action" @click="useQuickDemo">Quick demo recommendation</button>
-          <button class="secondary-action" @click="quickDemoToQuote">Use sample and go Quote</button>
-          <button class="primary-action" @click="speak(activePrompt)">听当前问题</button>
+          <button class="primary-action" @click="useQuickDemo">{{ $t('ai.quickDemo') }}</button>
+          <button class="secondary-action" @click="quickDemoToQuote">{{ $t('ai.sampleToQuote') }}</button>
+          <button class="primary-action" @click="speak(activePrompt)">{{ $t('ai.listen') }}</button>
           <button class="secondary-action" @click="toggleVoice">
-            {{ voiceEnabled ? '关闭声音' : '打开声音' }}
+            {{ voiceEnabled ? $t('ai.soundOff') : $t('ai.soundOn') }}
           </button>
-          <button class="secondary-action" @click="resetFlow">重新开始</button>
+          <button class="secondary-action" @click="resetFlow">{{ $t('ai.restart') }}</button>
         </div>
       </div>
 
@@ -23,7 +22,7 @@
         <div class="bot-avatar">AI</div>
         <strong>PartyOnce AI Concierge</strong>
         <span>{{ conciergeMessage }}</span>
-        <small>不接付费 TTS，不上传真人声音，不触发付款、webhook、n8n 或外发消息。</small>
+        <small>{{ $t('ai.safetyNote') }}</small>
       </div>
     </section>
 
@@ -80,8 +79,8 @@
 
     <section class="theme-preview-band" aria-label="AI theme previews">
       <div class="preview-copy">
-        <p class="eyebrow">Visual cues</p>
-        <h2>我会用同一套餐逻辑比较三种主题</h2>
+        <p class="eyebrow">{{ $t('ai.visualCues') }}</p>
+        <h2>{{ $t('ai.compareThemes') }}</h2>
       </div>
       <div class="theme-preview-grid">
         <article v-for="card in themePreviewCards" :key="card.theme" class="theme-preview-card">

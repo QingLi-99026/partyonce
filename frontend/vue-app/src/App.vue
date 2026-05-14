@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" :lang="locale" :dir="direction">
     <NavHeader />
     <main class="main-content">
       <router-view v-slot="{ Component }">
@@ -14,13 +14,37 @@
 </template>
 
 <script setup>
-import { ref, provide } from 'vue'
+import { computed, onMounted, provide, ref, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
 import NavHeader from './components/NavHeader.vue'
 import AppFooter from './components/AppFooter.vue'
 import LoginModal from './components/LoginModal.vue'
+import { getLocaleDirection } from './i18n'
 
 const showLogin = ref(false)
 provide('showLogin', showLogin)
+
+const { locale } = useI18n()
+const direction = computed(() => getLocaleDirection(locale.value))
+
+const syncLocaleAttributes = () => {
+  document.documentElement.lang = locale.value
+  document.documentElement.dir = direction.value
+
+  const appRoot = document.getElementById('app')
+  if (appRoot) {
+    appRoot.setAttribute('lang', locale.value)
+    appRoot.setAttribute('dir', direction.value)
+  }
+}
+
+watchEffect(() => {
+  syncLocaleAttributes()
+})
+
+onMounted(() => {
+  syncLocaleAttributes()
+})
 </script>
 
 <style>
