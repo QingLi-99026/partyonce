@@ -18,13 +18,13 @@
 
     <section
       class="investor-hero"
-      :style="{ backgroundImage: `linear-gradient(90deg, rgba(5, 8, 20, 0.92), rgba(5, 8, 20, 0.58), rgba(5, 8, 20, 0.26)), url(${investorHero.image})` }"
+      :style="{ backgroundImage: `linear-gradient(90deg, rgba(42, 23, 38, 0.78), rgba(126, 71, 96, 0.48), rgba(255, 230, 238, 0.24)), url(${investorHero.image})` }"
     >
       <div class="investor-hero-content">
-        <span class="investor-kicker">Investor Preview · Visual Story Mode</span>
-        <h1 class="investor-title">把派对主题变成可预览、可报价、可交付的视觉方案</h1>
+        <span class="investor-kicker">Welcome · AI Party Concierge</span>
+        <h1 class="investor-title">欢迎来到 PartyOnce，让孩子的派对先被看见</h1>
         <p class="investor-copy">
-          Castle Princess、Space Explorer、Forest Adventure、餐厅场景、套餐矩阵和 App mockup 已正式纳入 public assets，Preview 远程环境可直接加载。
+          从梦幻城堡、星际探险到森林奇境，先看主题、餐厅布置和套餐差异，再让 AI 帮你整理成清楚的 quote request。
         </p>
 
         <div class="investor-actions">
@@ -44,8 +44,8 @@
       <div class="investor-visual-stack">
         <img :src="investorHero.image" :alt="investorHero.alt" class="hero-mockup-image">
         <div class="visual-stack-meta">
-          <span>Live Preview Assets</span>
-          <strong>Hero · Themes · Dining · Packages</strong>
+          <span>Warm customer preview</span>
+          <strong>AI · Themes · Restaurant A · Quote</strong>
         </div>
       </div>
     </section>
@@ -142,7 +142,7 @@
             </div>
             <div class="mini-visual-grid">
               <div v-for="item in packageVisualsForTheme" :key="item.id" class="mini-visual-card">
-                <img :src="item.image_path" :alt="item.title" loading="lazy">
+                <img :src="item.image_path" :alt="item.title">
                 <div>
                   <strong>{{ item.tierLabel }} · {{ item.priceHint }}</strong>
                   <span>{{ item.scope }}</span>
@@ -159,7 +159,7 @@
             </div>
             <div class="mini-visual-grid">
               <div v-for="item in restaurantVisualsForTheme" :key="item.id" class="mini-visual-card">
-                <img :src="item.image_path" :alt="item.title" loading="lazy">
+                <img :src="item.image_path" :alt="item.title">
                 <div>
                   <strong>{{ item.title }}</strong>
                   <span>{{ item.decorationLayer }}</span>
@@ -260,7 +260,7 @@ export default {
   
   data() {
     return {
-      currentTheme: this.$route.query.theme || 'space',
+      currentTheme: this.$route.query.theme || 'castle',
       isScrolled: false,
       
       themeCards: [

@@ -290,6 +290,14 @@ const bulkNextAction = ref('')
 const bulkStatus = ref('')
 const bulkLoading = ref(false)
 
+const shouldUseStaticPreviewFallback = () => {
+  if (typeof window === 'undefined') return false
+  if (import.meta.env.VITE_ENABLE_REMOTE_QUOTE_API === 'true') return false
+  const isVercelPreview = /vercel\\.app$/i.test(window.location.hostname)
+  const isViteStaticPreview = /^417\d$/.test(window.location.port)
+  return isVercelPreview || isViteStaticPreview
+}
+
 const statusGuide = [
   { status: 'draft', label: '后台准备报价，客户侧只读显示准备中。' },
   { status: 'sent', label: '报价已发送，运营需关注有效期和客户确认。' },
@@ -355,6 +363,14 @@ const loadQuotes = async () => {
   loading.value = true
   message.value = ''
   try {
+    if (shouldUseStaticPreviewFallback()) {
+      quotes.value = []
+      quoteTotal.value = 0
+      message.value = 'Static Preview mode: Quote Review is using a controlled empty skeleton state to avoid remote API auth/network noise. Use Lead Review or Investor Demo to seed local/staging data.'
+      messageType.value = 'warning'
+      return
+    }
+
     const params = {
       limit: 100,
       offset: 0

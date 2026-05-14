@@ -16,7 +16,7 @@ const shouldUseStaticPreviewFallback = () => {
   if (typeof window === 'undefined') return false
   if (import.meta.env.VITE_ENABLE_REMOTE_ORDER_API === 'true') return false
   const isVercelPreview = /vercel\.app$/i.test(window.location.hostname)
-  const isViteStaticPreview = ['4173', '4174'].includes(window.location.port)
+  const isViteStaticPreview = /^417\d$/.test(window.location.port)
   return isVercelPreview || isViteStaticPreview
 }
 

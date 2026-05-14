@@ -109,9 +109,21 @@
       </article>
     </section>
 
-    <el-empty v-if="!loading && filteredQuotes.length === 0" description="No quotes yet">
-      <el-button type="primary" @click="router.push('/my/inquiries')">Open My Inquiries</el-button>
-    </el-empty>
+    <section v-if="!loading && filteredQuotes.length === 0" class="demo-empty-state">
+      <div>
+        <p class="eyebrow">No quote visible for this local identity</p>
+        <h2>这不是系统坏了，是当前 Preview 没有匹配的客户报价</h2>
+        <p>
+          先从 AI Concierge 生成 inquiry / quote request，或进入 Investor Demo 启动演示样例。
+          正式客户报价会在这里显示主题、Restaurant A 渲染图、报价组成和下一步状态。
+        </p>
+      </div>
+      <div class="empty-actions">
+        <el-button type="primary" @click="router.push('/ai-voice-intake')">AI 帮我生成需求</el-button>
+        <el-button @click="router.push('/investor-demo')">打开 Investor Demo</el-button>
+        <el-button @click="router.push('/my/inquiries')">Open My Inquiries</el-button>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -239,6 +251,36 @@ h1 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
+}
+
+.demo-empty-state {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  margin-top: 34px;
+  padding: 24px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #eff6ff, #fff7ed);
+}
+
+.demo-empty-state h2 {
+  margin: 0 0 8px;
+  color: #0f172a;
+}
+
+.demo-empty-state p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .customer-card {

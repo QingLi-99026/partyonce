@@ -5,7 +5,7 @@
       <div class="location-input">
         <input 
           v-model="searchLocation" 
-          placeholder="输入区名或地址，例如：North Sydney"
+          placeholder="All Sydney demo areas · 可输入 North Sydney"
           @keyup.enter="searchNearby"
         />
         <button @click="getCurrentLocation">📍 定位</button>
@@ -41,7 +41,19 @@
     <div class="content-split">
       <!-- 左侧地图 -->
       <div class="map-section">
-        <div ref="mapContainer" class="map-container"></div>
+        <div ref="mapContainer" class="map-container">
+          <div class="map-placeholder">
+            <span class="map-kicker">Local/staging supplier board</span>
+            <h2>供应商与场地不是实时地图</h2>
+            <p>
+              当前 Preview 展示的是可演示的本地 fixture：场地、花艺、气球、蛋糕、儿童娱乐、摄影和搭建角色。
+              不会真实联系供应商，也不会发送消息。
+            </p>
+            <div class="role-grid">
+              <span v-for="role in supplierRoles" :key="role">{{ role }}</span>
+            </div>
+          </div>
+        </div>
         <div class="map-controls">
           <button @click="zoomIn">+</button>
           <button @click="zoomOut">-</button>
@@ -107,7 +119,7 @@ import { listSupplierDisplayItems } from '@/services/supplierLightService'
 const router = useRouter()
 const mapContainer = ref(null)
 
-const searchLocation = ref('North Sydney')
+const searchLocation = ref('')
 const filterCategory = ref('')
 const filterPrice = ref('')
 const weekendOnly = ref(false)
@@ -117,6 +129,10 @@ const selectedId = ref(null)
 const dataSource = ref('not loaded')
 
 const sortedSuppliers = computed(() => suppliers.value)
+const supplierRoles = computed(() => {
+  const labels = suppliers.value.map((supplier) => supplier.category_level_1 || supplier.category).filter(Boolean)
+  return Array.from(new Set(labels)).slice(0, 8)
+})
 
 const formatPrice = (level) => {
   const map = { '低': '$', '中': '$$', '高': '$$$', '豪华': '$$$$' }
@@ -135,7 +151,7 @@ const selectSupplier = (s) => {
 const searchNearby = async () => {
   const result = await listSupplierDisplayItems({
     category: filterCategory.value,
-    suburb: searchLocation.value,
+    suburb: searchLocation.value.trim(),
     price_level: filterPrice.value
   })
   dataSource.value = result.source
@@ -254,7 +270,57 @@ const resetMap = () => {}
 .map-container {
   width: 100%;
   height: 100%;
-  background: #d0d0d0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.18), transparent 28%),
+    radial-gradient(circle at 80% 24%, rgba(14, 165, 233, 0.16), transparent 26%),
+    linear-gradient(135deg, #f8fafc, #eef2ff);
+}
+
+.map-placeholder {
+  width: min(78%, 680px);
+  padding: 28px;
+  border: 2px solid rgba(51, 51, 51, 0.18);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.88);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.12);
+}
+
+.map-kicker {
+  display: inline-flex;
+  margin-bottom: 10px;
+  color: #7c3aed;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.map-placeholder h2 {
+  margin: 0 0 10px;
+  color: #111827;
+  font-size: 28px;
+}
+
+.map-placeholder p {
+  margin: 0 0 18px;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.role-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.role-grid span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-weight: 800;
+  font-size: 12px;
 }
 
 .map-controls {

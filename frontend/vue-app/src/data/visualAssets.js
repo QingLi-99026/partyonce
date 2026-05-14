@@ -16,7 +16,7 @@ const RESTAURANT_A_IMAGES = {
   space: {
     basic: '/party-assets/venues/restaurant-a/restaurant-a-space-basic.png',
     standard: '/party-assets/venues/restaurant-a/restaurant-a-space-standard.png',
-    premium: '/party-assets/venues/restaurant-a/restaurant-a-space-premium.png'
+    premium: '/party-assets/venues/restaurant-a/restaurant-a-space-standard.png'
   },
   forest: {
     basic: '/party-assets/venues/restaurant-a/restaurant-a-forest-basic.png',
