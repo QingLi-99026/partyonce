@@ -152,7 +152,18 @@ Flow smoke：
 
 ## 11. Preview redeploy 结果
 
-待本轮白名单 commit 并 push release candidate branch 后，由 Vercel Preview 自动 redeploy。
+本轮已白名单 commit，并 push release candidate branch：
+
+- Branch：`eye-lite-v2-release-candidate-20260512`
+- Commit：`1ea1fb70`
+
+固定 Preview URL 远程 smoke：
+
+- `/`：200
+- `/ai-voice-intake`：200
+- `/quote`：200
+
+缓存绕过后检查 `/ai-voice-intake`：页面可访问，console error = 0，broken images = 0；但固定 Preview URL 暂未显示本轮新增的 `Visual cues` / `Customer brief` 文案，说明 Vercel 最新 deployment / branch alias 是否已切换仍需在 Vercel Dashboard 确认。
 
 目标 Preview URL：
 
