@@ -86,10 +86,19 @@
             </template>
           </el-table-column>
           <el-table-column prop="description" label="Basis" min-width="260" />
+          <el-table-column label="Why this amount" min-width="260">
+            <template #default="{ row }">
+              <span>{{ row.items.map((item) => item.amount_basis).filter(Boolean).join(' / ') || row.description }}</span>
+            </template>
+          </el-table-column>
           <el-table-column label="Amount" width="160" align="right">
             <template #default="{ row }">{{ formatCustomerMoney(row.amount, quote.currency) }}</template>
           </el-table-column>
         </el-table>
+        <p class="line-item-note">
+          Deposit readiness placeholder: {{ formatCustomerMoney(quoteLineItemSummary.deposit_placeholder, quote.currency) }}.
+          This does not create Stripe payment or mark a deposit as paid.
+        </p>
       </section>
 
       <section class="next-step">
@@ -262,6 +271,12 @@ h2 {
 
 .panel-intro {
   margin: 0 0 14px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.line-item-note {
+  margin: 14px 0 0;
   color: #64748b;
   line-height: 1.6;
 }

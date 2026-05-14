@@ -88,8 +88,12 @@
               <strong>{{ group.labelZh }}</strong>
               <span>{{ formatPrice(group.amount) }}</span>
               <p>{{ group.description }}</p>
+              <small>{{ group.items.map((item) => item.amount_basis).filter(Boolean).join(' / ') }}</small>
             </article>
           </div>
+          <p class="pricing-explainer-note">
+            Deposit readiness placeholder: {{ formatPrice(lineItemSummary.deposit_placeholder) }} · {{ lineItemSummary.deposit_note }}
+          </p>
         </div>
 
         <div class="pricing-explainer" :style="cardStyle">
@@ -409,7 +413,7 @@ export default {
       return getUpgradeExplanation(this.packageId);
     },
 
-    partySceneConfig() {
+        partySceneConfig() {
       return this.aiPrefill?.party_scene_config
         || this.aiPrefill?.selection?.party_scene_config
         || this.aiPrefill?.aiRecommendation?.party_scene_config
@@ -439,6 +443,7 @@ export default {
         addons: this.addons,
         visualContext: this.visualContext,
         packageExplanation: this.packageExplanation,
+        partySceneConfig: this.partySceneConfig,
         currency: 'AUD'
       });
     },
@@ -645,6 +650,12 @@ export default {
           finalTotal: this.finalTotal,
           lineItems: this.standardizedLineItems,
           lineItemSummary: this.lineItemSummary,
+          lineItemSchemaVersion: this.lineItemSummary.schema_version,
+          depositReadiness: {
+            placeholderAmount: this.lineItemSummary.deposit_placeholder,
+            basis: this.lineItemSummary.deposit_note,
+            enabled: false
+          },
           party_scene_config: this.partySceneConfig,
           packageExplanation: this.packageExplanation,
           upgradeExplanation: this.upgradeExplanation,
@@ -1090,6 +1101,13 @@ export default {
   margin: 8px 0 0;
   color: rgba(255, 255, 255, 0.74);
   line-height: 1.55;
+}
+
+.line-item-grid small {
+  display: block;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.45;
 }
 
 .pricing-explainer-header h3 {

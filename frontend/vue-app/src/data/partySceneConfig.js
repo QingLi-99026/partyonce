@@ -1,5 +1,6 @@
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets';
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation';
+import { QUOTE_LINE_ITEM_SCHEMA_VERSION, quoteLineItemOrder, quoteLineItemTypes } from '@/data/quoteLineItems';
 
 export const PARTY_SCENE_CONFIG_VERSION = 'v1';
 
@@ -204,10 +205,22 @@ export function buildPartySceneConfig(answers = {}, recommendation = {}) {
       status: supplier.status
     })),
     pricingExplanation: {
+      lineItemSchemaVersion: QUOTE_LINE_ITEM_SCHEMA_VERSION,
       recommendedBecause: recommendation.reasonHeadline || packageExplanation.whyRecommend,
       includedItems: packageExplanation.includes,
       upgradeNotes: upgradeExplanation.items,
       lineItemHints: packageExplanation.priceDrivers,
+      lineItemTypeHints: quoteLineItemOrder.map((type) => ({
+        type,
+        labelZh: quoteLineItemTypes[type].labelZh,
+        scenePath: type === 'venue_fee' ? 'venue'
+          : type === 'decor_fee' ? 'decor'
+            : type === 'supplier_fee' ? 'suppliers'
+              : type === 'labor_fee' ? 'layout'
+                : type === 'transport_fee' ? 'venue'
+                  : type === 'service_fee' ? 'pricingExplanation'
+                    : 'optionalUpgrades'
+      })),
       packageFit: packageExplanation.customerFit,
       quoteExplanation: packageExplanation.quoteExplanation
     },

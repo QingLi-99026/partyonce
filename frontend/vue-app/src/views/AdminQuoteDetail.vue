@@ -202,26 +202,39 @@
 
         <section class="panel">
           <h2>Standardized Line Items Snapshot</h2>
-          <el-table v-if="lineItems.length > 0" :data="lineItems" row-key="name" style="width: 100%">
-            <el-table-column label="Type" width="170">
-              <template #default="{ row }">
-                <strong>{{ row.type_label_zh }}</strong>
-                <small>{{ row.customer_label }}</small>
-              </template>
-            </el-table-column>
-            <el-table-column label="Name / Basis" min-width="260">
-              <template #default="{ row }">
-                <span>{{ row.name || '-' }}</span>
-                <small>{{ row.description }}</small>
-              </template>
-            </el-table-column>
-            <el-table-column label="Amount" width="160" align="right">
-              <template #default="{ row }">{{ formatMoney(row.amount, quote.currency) }}</template>
-            </el-table-column>
-            <el-table-column label="Source" min-width="200">
-              <template #default="{ row }">{{ row.source || 'snapshot' }}</template>
-            </el-table-column>
-          </el-table>
+          <template v-if="lineItems.length > 0">
+            <el-table :data="lineItems" row-key="name" style="width: 100%">
+              <el-table-column label="Type" width="170">
+                <template #default="{ row }">
+                  <strong>{{ row.type_label_zh }}</strong>
+                  <small>{{ row.customer_label }}</small>
+                </template>
+              </el-table-column>
+              <el-table-column label="Name / Basis" min-width="260">
+                <template #default="{ row }">
+                  <span>{{ row.name || '-' }}</span>
+                  <small>{{ row.description }}</small>
+                </template>
+              </el-table-column>
+              <el-table-column label="Amount" width="160" align="right">
+                <template #default="{ row }">{{ formatMoney(row.amount, quote.currency) }}</template>
+              </el-table-column>
+              <el-table-column label="Source" min-width="200">
+                <template #default="{ row }">{{ row.source || 'snapshot' }}</template>
+              </el-table-column>
+              <el-table-column label="Amount Basis / Edit Hint" min-width="320">
+                <template #default="{ row }">
+                  <span>{{ row.amount_basis }}</span>
+                  <small>{{ row.admin_edit_hint }}</small>
+                </template>
+              </el-table-column>
+            </el-table>
+            <p class="control-note">
+              Schema: {{ lineItemSummary.schema_version }} · Deposit placeholder:
+              {{ formatMoney(lineItemSummary.deposit_placeholder, quote.currency) }}.
+              This is readiness-only and does not create payment.
+            </p>
+          </template>
           <el-empty v-else description="No line item snapshot is available." />
         </section>
 

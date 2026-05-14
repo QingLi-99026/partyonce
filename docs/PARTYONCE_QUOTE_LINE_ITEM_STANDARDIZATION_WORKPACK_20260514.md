@@ -1,205 +1,265 @@
 # PartyOnce Quote Line Item Standardization Workpack
 
 Date: 2026-05-14
-Branch: eye-lite-v2-release-candidate-20260512
+
+Branch: `eye-lite-v2-release-candidate-20260512`
+
+Baseline HEAD before workpack: `2a2614ae`
 
 ## 1. 本轮目标
 
-本轮目标是把 Quote 构成从“笼统套餐价 / 场景费 / 附加项”推进到稳定 line item 类型，为后续正式报价能力打基础。
+Standardize quote composition into stable line item types so AI recommendation, customer quote explanation, admin quote operations, future PDF quotes, and future deposit calculation can all reference the same pricing structure.
 
-标准类型包括：
+Required stable types:
 
-- 场地费 `venue_fee`
-- 装饰费 `decor_fee`
-- 供应商费 `supplier_fee`
-- 人工费 `labor_fee`
-- 运输费 `transport_fee`
-- 服务费 `service_fee`
-- 可选升级项 `optional_upgrade`
+- `venue_fee` / 场地费
+- `decor_fee` / 装饰费
+- `supplier_fee` / 供应商费
+- `labor_fee` / 人工费
+- `transport_fee` / 运输费
+- `service_fee` / 服务费
+- `optional_upgrade` / 可选升级项
 
-这一步仍是 local/staging skeleton，不接真实 payment，不生成正式 PDF，不做 production deploy。
-
-## 2. 修改 / 新增文件
+## 2. 修改/新增文件
 
 - `frontend/vue-app/src/data/quoteLineItems.js`
+- `frontend/vue-app/src/data/partySceneConfig.js`
+- `frontend/vue-app/src/data/recommendationRules.js`
+- `frontend/vue-app/src/services/investorDemoService.js`
 - `frontend/vue-app/src/views/QuotePage.vue`
 - `frontend/vue-app/src/views/MyQuoteDetail.vue`
-- `frontend/vue-app/src/views/MyOrderDetail.vue`
 - `frontend/vue-app/src/views/AdminQuoteDetail.vue`
 - `frontend/vue-app/src/views/AdminOrderDetail.vue`
-- `frontend/vue-app/src/services/customerExperienceService.js`
-- `frontend/vue-app/src/services/adminOrderService.js`
-- `frontend/vue-app/src/services/investorDemoService.js`
-- `frontend/vue-app/src/mock/adminOrders.js`
 - `docs/PARTYONCE_QUOTE_LINE_ITEM_STANDARDIZATION_WORKPACK_20260514.md`
 
-## 3. 标准 line item 数据层
+## 3. 稳定 line item 类型
 
-新增 `quoteLineItems.js`，提供：
+`quoteLineItems.js` now exposes `QUOTE_LINE_ITEM_SCHEMA_VERSION = quote_line_items_v1` and a stable type registry.
 
-- `quoteLineItemTypes`
-- `quoteLineItemOrder`
-- `normalizeQuoteLineItemType`
-- `normalizeQuoteLineItem`
-- `normalizeQuoteLineItems`
-- `summarizeQuoteLineItems`
-- `buildQuoteLineItemsFromSelection`
+Every normalized line item now carries:
 
-该层统一处理旧字段别名，例如：
+```text
+schema_version
+id
+type
+line_item_type
+type_label
+type_label_zh
+customer_label
+name
+description
+amount
+amount_basis
+calculation_note
+customer_explanation
+admin_edit_hint
+source
+party_scene_config_path
+deposit_basis
+customer_visible
+editable
+```
 
-- `venue_package` / `scene_fee` -> `venue_fee`
-- `decor` / `styling` -> `decor_fee`
-- `vendor` / `cake` / `photo` -> `supplier_fee`
-- `setup` -> `labor_fee`
-- `addon` / `upgrade` -> `optional_upgrade`
+This turns each quote row from a loose display item into a pricing object that can later be edited, audited, exported to PDF, or used for deposit calculation.
 
-## 4. Quote Request 接入
+## 4. party_scene_config 打通结果
 
-`QuotePage.vue` 已把价格明细改为标准类型汇总：
+`buildQuoteLineItemsFromSelection()` now accepts `partySceneConfig`.
 
-- 场地费
-- 装饰费
-- 供应商费
-- 人工费
-- 运输费
-- 服务费
-- 可选升级项
+The line items reference scene config paths:
 
-同时新增 “Standardized line items” 说明卡，明确这些类型后续用于：
+```text
+venue_fee -> venue
+decor_fee -> decor
+supplier_fee -> suppliers
+labor_fee -> layout
+transport_fee -> venue
+service_fee -> pricingExplanation
+optional_upgrade -> optionalUpgrades
+```
 
-- 后台编辑报价依据
-- 客户侧简化报价组成
-- Quote PDF / 正式报价单
-- future deposit calculation
+`partySceneConfig.pricingExplanation` now includes:
 
-提交 inquiry 时，`pricing` snapshot 新增：
+- `lineItemSchemaVersion`
+- `lineItemTypeHints`
+- package recommendation explanation
+- upgrade notes
+- line item hints
+
+This connects AI scene planning, visual rendering, supplier suggestions, and quote explanation into one structure.
+
+## 5. Quote prefill / inquiry payload
+
+`QuotePage.vue` now builds line items with `partySceneConfig`.
+
+The inquiry pricing payload now includes:
 
 - `lineItems`
 - `lineItemSummary`
+- `lineItemSchemaVersion`
+- `depositReadiness.placeholderAmount`
+- `depositReadiness.basis`
+- `depositReadiness.enabled = false`
 
-说明：本轮保持原有前端估算总价逻辑，不接 server-side pricing validation。
+This remains staging-safe and does not create a quote, order, PaymentIntent, webhook, or outbound message.
 
-## 5. 客户侧接入
+## 6. 客户侧展示
 
-`MyQuoteDetail.vue`：
+Customer Quote Detail now shows:
 
-- `Quote Items` 改为 `简化报价组成`
-- 按标准类型展示客户可理解的报价组成
-- 展示类型中文名、客户标签、依据说明、金额
+- simplified grouped quote composition
+- stable type labels
+- amount basis
+- deposit readiness placeholder
 
-`MyOrderDetail.vue`：
+The customer can see why the quote is not just one opaque total.
 
-- `Order Items` 改为 `简化订单组成`
-- 订单详情沿用标准报价类型
-- 保留 payment blocked / pending_deposit placeholder 边界
+## 7. 后台运营展示
 
-## 6. 后台运营接入
+Admin Quote Detail and Admin Order Detail now show:
 
-`AdminQuoteDetail.vue`：
+- line item type
+- name / basis
+- amount
+- source
+- amount basis
+- admin edit hint
+- schema version
+- deposit placeholder as readiness-only
 
-- `Line Items Snapshot` 改为 `Standardized Line Items Snapshot`
-- 显示标准类型、客户标签、basis、amount、source
-- Ops Pricing Explanation 的价格依据改为按标准类型汇总
+This gives operations a direct explanation script and a clear place to verify future editable pricing fields.
 
-`AdminOrderDetail.vue`：
+## 8. AI 推荐价格依据
 
-- `Line Items` 改为 `Standardized Line Items`
-- fallback / API order line items 均会 normalize 到稳定类型
-- Ops Pricing Explanation 使用标准 line item summary 做报价依据
+AI quote prefill now carries the standard line item type registry in `pricing.standardLineItemTypes`.
 
-## 7. Fixture / Demo 数据接入
+The customer-facing quote page uses this to show:
 
-`customerExperienceService.js`：
+```text
+场地费
+装饰费
+供应商费
+人工费
+运输费
+服务费
+可选升级项
+```
 
-- 客户 quote fixtures 改为标准 line item 类型
-- 从 local inquiry 生成 quote 时优先使用 `pricing.lineItems`
-- 旧 inquiry 没有 lineItems 时做兼容 fallback
-- Quote / Order normalize 时统一标准化 line items
+Each type has a customer explanation and an admin edit hint.
 
-`adminOrderService.js`：
+## 9. Future payment / deposit readiness
 
-- Admin Order API / fallback normalize 时统一标准化 line items
+The line item summary now returns:
 
-`adminOrders.js`：
+```text
+total
+customer_visible_total
+deposit_placeholder
+deposit_note
+```
 
-- Admin Order fallback seed 改为标准 line item 类型
+The placeholder is currently 20% of the grouped total.
 
-`investorDemoService.js`：
+Important boundary:
 
-- Guided Demo inquiry pricing snapshot 写入标准 line items 和 summary
+```text
+This does not create PaymentIntent, checkout, Stripe status, deposit_paid, webhook, n8n, or real collection.
+```
 
-## 8. 本地验证结果
+It only prepares a clear amount basis for a later payment workpack.
 
-### Static checks
+## 10. 本地验证结果
 
-通过：
+Static checks passed:
 
-- `node --check frontend/vue-app/src/data/quoteLineItems.js`
-- `node --check frontend/vue-app/src/services/investorDemoService.js`
-- `node --check frontend/vue-app/src/services/customerExperienceService.js`
-- `node --check frontend/vue-app/src/services/adminOrderService.js`
+```bash
+node --check src/data/quoteLineItems.js
+node --check src/data/partySceneConfig.js
+node --check src/data/recommendationRules.js
+node --check src/services/customerExperienceService.js
+node --check src/services/investorDemoService.js
+```
 
-### Vue SFC parse
+Vue SFC parse passed:
 
-通过：
+```text
+src/views/QuotePage.vue
+src/views/MyQuoteDetail.vue
+src/views/AdminQuoteDetail.vue
+src/views/AdminOrderDetail.vue
+```
 
-- `src/views/QuotePage.vue`
-- `src/views/MyQuoteDetail.vue`
-- `src/views/MyOrderDetail.vue`
-- `src/views/AdminQuoteDetail.vue`
-- `src/views/AdminOrderDetail.vue`
-
-### Build
-
-命令：
+Build passed:
 
 ```bash
 cd frontend/vue-app
-npm run build -- --outDir /tmp/partyonce_line_item_standardization_build_final --emptyOutDir
+npm run build -- --outDir /tmp/partyonce_quote_line_items_build --emptyOutDir
 ```
 
-结果：通过。
+Route smoke passed:
 
-说明：仅输出到 `/tmp/partyonce_line_item_standardization_build_final`，未写入或提交 `frontend/vue-app/dist`。
+```text
+/ 200
+/ai-voice-intake 200
+/quote?theme=castle&package=standard&scene=restaurant-a 200
+/my/quotes 200
+/my/orders 200
+/admin/quotes 200
+/admin/orders 200
+/payment/deposit 200
+```
 
-### Route smoke
+Quote page checks:
 
-本地 frontend `127.0.0.1:5185`：
+```text
+stable types visible: true
+optional upgrade visible: true
+deposit placeholder visible: true
+amount basis visible: true
+broken images: 0
+console errors: 0
+```
 
-- `/quote?theme=castle&package=standard&scene=restaurant-a`：200，非空白，标准 line item 类型可见，broken images = 0
-- `/my/quotes/quote-local-501`：200，非空白，简化报价组成可见，broken images = 0
-- `/my/orders/order-local-1001`：200，非空白，简化订单组成可见，broken images = 0
+## 11. 是否读取/修改 .env.production
 
-本地 safe backend profile + staging admin fixture：
+No.
 
-- `/admin/quotes/1`：200，非空白，Standardized Line Items Snapshot 可见，Ops Pricing Explanation 可见，broken images = 0
-- `/admin/orders/1`：200，非空白，Standardized Line Items 可见，Ops Pricing Explanation 可见，broken images = 0
+`.env.production` was not read or modified.
 
-## 9. 安全边界
+## 12. 是否提交 dist
 
-- 是否读取 / 修改 `.env.production`：否
-- 是否提交 `frontend/vue-app/dist`：否
-- 是否 production deploy：否
-- 是否触发真实 payment / Stripe / PaymentIntent：否
-- 是否触发 webhook / n8n：否
-- 是否外发 email / SMS / WhatsApp：否
-- 是否连接 production DB：否
-- 是否运行 production migration：否
+No.
 
-## 10. 当前限制
+Build output was written to `/tmp/partyonce_quote_line_items_build`.
 
-- 标准 line items 仍是 frontend/local-staging skeleton，不是最终后端 pricing engine。
-- 后端 Quote / Order DB schema 尚未持久化 item type 字段为一等结构；当前 API snapshot 可兼容读取。
-- PDF / 正式报价单尚未生成。
-- Deposit calculation 仍未进入 payment scope。
+## 13. 是否 production deploy
 
-## 11. 下一步建议
+No.
 
-下一步建议进入 “Admin Quote Line Item Editing V1”：
+No production deploy, production DB connection, or production migration was performed.
 
-- Admin Quote Detail 可编辑 line item 类型、名称、金额、是否客户可见
-- 保存到 local/staging SQLite Quote snapshot 或 quote_items skeleton
-- 客户 Quote Detail 只显示 customer-visible 简化组成
-- 为 Quote PDF 和 deposit 计算预留字段
+## 14. 是否触发 payment / webhook / n8n / 外发
 
-Production 仍保持 No-Go。
+No.
+
+Payment readiness remains placeholder-only.
+
+## 15. blocker
+
+No local/staging implementation blocker.
+
+Remaining production blockers:
+
+- Backend should later persist first-class `party_scene_config_json` and structured `line_items_json` with schema version.
+- Admin editable line item UI is not yet implemented; this workpack prepares the display and edit-hint structure.
+- Payment/deposit remains intentionally blocked until a dedicated Stripe test-mode workpack.
+
+## 16. 下一步建议
+
+Next workpack:
+
+```text
+Admin editable quote line item draft mode
+```
+
+This should let operations adjust amount, basis, and optional upgrades in local/staging before formal Quote PDF and Stripe test-mode deposit work.

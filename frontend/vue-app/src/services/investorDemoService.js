@@ -92,7 +92,8 @@ export function seedInvestorAiInquiry() {
       { id: 'activity', name: 'Kids activity host', price: 320 }
     ],
     visualContext: recommendation.visualContext,
-    packageExplanation: recommendation.packageExplanation
+    packageExplanation: recommendation.packageExplanation,
+    partySceneConfig: recommendation.party_scene_config
   });
   const demoLineItemSummary = summarizeQuoteLineItems(demoLineItems);
   window.localStorage.setItem(AI_CONCIERGE_STORAGE_KEY, JSON.stringify({
@@ -123,8 +124,15 @@ export function seedInvestorAiInquiry() {
       finalTotal: demoLineItemSummary.total,
       lineItems: demoLineItems,
       lineItemSummary: demoLineItemSummary,
+      lineItemSchemaVersion: demoLineItemSummary.schema_version,
+      depositReadiness: {
+        placeholderAmount: demoLineItemSummary.deposit_placeholder,
+        basis: demoLineItemSummary.deposit_note,
+        enabled: false
+      },
       aiEstimate: quotePrefill.pricing
     },
+    party_scene_config: quotePrefill.party_scene_config,
     aiRecommendation: quotePrefill.aiRecommendation,
     submitTime: new Date().toISOString(),
     status: 'pending'

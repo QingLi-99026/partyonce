@@ -312,7 +312,18 @@
               <el-table-column label="Amount" width="150" align="right">
                 <template #default="{ row }">{{ formatMoney(row.amount, order.currency) }}</template>
               </el-table-column>
+              <el-table-column label="Amount Basis / Edit Hint" min-width="300">
+                <template #default="{ row }">
+                  <span>{{ row.amount_basis }}</span>
+                  <small>{{ row.admin_edit_hint }}</small>
+                </template>
+              </el-table-column>
             </el-table>
+            <p class="control-note">
+              Deposit placeholder:
+              {{ formatMoney(orderLineItemSummary.deposit_placeholder, order.currency) }}.
+              This is readiness-only and does not create payment.
+            </p>
           </article>
         </section>
       </template>
@@ -378,11 +389,10 @@ const orderPartySceneConfig = computed(() => order.value?.party_scene_config || 
   reasonHeadline: orderPackageExplanation.value.whyRecommend
 }))
 const orderSceneConfigSummary = computed(() => summarizePartySceneConfig(orderPartySceneConfig.value))
+const orderLineItemSummary = computed(() => summarizeQuoteLineItems(normalizeQuoteLineItems(order.value?.line_items)))
 const orderPriceBasis = computed(() => {
   const context = orderVisualContext.value
   const explanation = orderPackageExplanation.value
-  const lineItems = normalizeQuoteLineItems(order.value?.line_items)
-  const summary = summarizeQuoteLineItems(lineItems)
   return [
     `套餐层级：${explanation.label} · ${explanation.positioning}`,
     `装饰项：${context.packageVisual.scope}`,
@@ -390,7 +400,7 @@ const orderPriceBasis = computed(() => {
     `渲染范围：${context.restaurant.decorationLayer}`,
     ...context.suppliers.map((supplier) => `供应商：${supplier.name} (${supplier.category}) · ${supplier.priceRange}`),
     ...explanation.priceDrivers.map((driver) => `价格驱动：${driver}`),
-    ...summary.groups.map((group) => `${group.labelZh}：${formatMoney(group.amount, order.value?.currency)} · ${group.description}`)
+    ...orderLineItemSummary.value.groups.map((group) => `${group.labelZh}：${formatMoney(group.amount, order.value?.currency)} · ${group.description}`)
   ].filter(Boolean)
 })
 const orderCustomerScript = computed(() => {

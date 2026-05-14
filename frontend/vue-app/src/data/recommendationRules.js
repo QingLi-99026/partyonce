@@ -2,6 +2,7 @@ import { getVisualContext } from '@/data/visualAssets';
 import { aiConciergeQuestions } from '@/data/aiConciergeQuestions';
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation';
 import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig';
+import { QUOTE_LINE_ITEM_SCHEMA_VERSION, quoteLineItemOrder, quoteLineItemTypes } from '@/data/quoteLineItems';
 
 const THEME_LABELS = {
   castle: 'Castle Princess',
@@ -194,6 +195,13 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
     },
     party_scene_config: result.party_scene_config,
     pricing: {
+      lineItemSchemaVersion: QUOTE_LINE_ITEM_SCHEMA_VERSION,
+      standardLineItemTypes: quoteLineItemOrder.map((type) => ({
+        type,
+        labelZh: quoteLineItemTypes[type].labelZh,
+        customerLabel: quoteLineItemTypes[type].customerLabel,
+        description: quoteLineItemTypes[type].description
+      })),
       packageTier: result.tier,
       priceHint: packageVisual.priceHint,
       estimatedLevel: result.tier,
