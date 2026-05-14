@@ -190,6 +190,60 @@
         </section>
 
         <section class="panel-grid">
+          <article class="panel ops-explainer-panel">
+            <h2>Ops Pricing Explanation</h2>
+            <p class="body-text">
+              {{ orderPackageExplanation.positioning }}
+            </p>
+            <div class="explanation-block">
+              <h3>客户为什么适合这个套餐</h3>
+              <p>{{ orderPackageExplanation.customerFit }}</p>
+              <p>{{ orderPackageExplanation.whyRecommend }}</p>
+            </div>
+            <div class="explanation-block">
+              <h3>价格由哪些部分构成</h3>
+              <ul class="blocked-list">
+                <li v-for="item in orderPriceBasis" :key="item">{{ item }}</li>
+              </ul>
+            </div>
+            <div class="explanation-block">
+              <h3>{{ orderUpgradeExplanation.title }}</h3>
+              <ul class="blocked-list">
+                <li v-for="item in orderUpgradeExplanation.items" :key="item">{{ item }}</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="panel ops-explainer-panel">
+            <h2>Customer Explanation Script</h2>
+            <p class="control-note">
+              用于订单跟进时解释报价依据；本段只显示在后台，不会外发。
+            </p>
+            <div class="quote-script">
+              {{ orderCustomerScript }}
+            </div>
+            <dl class="ops-basis-list">
+              <div>
+                <dt>Venue / 场地</dt>
+                <dd>{{ orderVisualContext.primaryVenue.name }} · {{ orderVisualContext.primaryVenue.priceRange }}</dd>
+              </div>
+              <div>
+                <dt>Rendering / 渲染</dt>
+                <dd>{{ orderVisualContext.restaurant.title }}</dd>
+              </div>
+              <div>
+                <dt>Suppliers / 供应商</dt>
+                <dd>{{ orderVisualContext.suppliers.map((item) => `${item.name} · ${item.priceRange}`).join(' / ') }}</dd>
+              </div>
+              <div>
+                <dt>Decor / 装饰</dt>
+                <dd>{{ orderVisualContext.packageVisual.scope }}</dd>
+              </div>
+            </dl>
+          </article>
+        </section>
+
+        <section class="panel-grid">
           <article class="panel">
             <h2>Next Action</h2>
             <el-input
@@ -258,6 +312,7 @@ import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { blockedOrderActions, orderStatuses } from '@/mock/adminOrders'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
+import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
 import {
   ORDER_SOURCE_API,
   fetchAdminOrderDetail,
@@ -297,6 +352,34 @@ const orderVisualContext = computed(() => getVisualContext(
   normalizeThemeId(order.value?.event?.theme || order.value?.theme),
   normalizeTierId(order.value?.event?.package_tier || order.value?.package_tier)
 ))
+const orderPackageTier = computed(() => normalizeTierId(order.value?.event?.package_tier || order.value?.package_tier))
+const orderPackageExplanation = computed(() => getPackageExplanation(orderPackageTier.value))
+const orderUpgradeExplanation = computed(() => getUpgradeExplanation(orderPackageTier.value))
+const orderPriceBasis = computed(() => {
+  const context = orderVisualContext.value
+  const explanation = orderPackageExplanation.value
+  const lineItems = Array.isArray(order.value?.line_items) ? order.value.line_items : []
+  return [
+    `套餐层级：${explanation.label} · ${explanation.positioning}`,
+    `装饰项：${context.packageVisual.scope}`,
+    `餐厅 / 场地：${context.primaryVenue.name} · ${context.primaryVenue.priceRange}`,
+    `渲染范围：${context.restaurant.decorationLayer}`,
+    ...context.suppliers.map((supplier) => `供应商：${supplier.name} (${supplier.category}) · ${supplier.priceRange}`),
+    ...explanation.priceDrivers.map((driver) => `价格驱动：${driver}`),
+    ...lineItems.slice(0, 4).map((item) => `${item.name || item.item_name || 'Line item'} · ${formatMoney(item.amount || item.price || item.total || 0, order.value?.currency)}`)
+  ].filter(Boolean)
+})
+const orderCustomerScript = computed(() => {
+  const context = orderVisualContext.value
+  const explanation = orderPackageExplanation.value
+  return [
+    `当前订单沿用 ${context.packageVisual.title}，因为${explanation.whyRecommend}`,
+    `${explanation.customerFit}`,
+    `价格主要来自 ${context.primaryVenue.name} 场地样板、${context.packageVisual.scope}、${context.suppliers.map((item) => item.category).join(' / ')} 供应商建议和现场布置人工。`,
+    `${explanation.quoteExplanation}`,
+    `${orderUpgradeExplanation.value.title}：${orderUpgradeExplanation.value.items.join('；')}`
+  ].join('\n\n')
+})
 
 const syncOpsForm = () => {
   opsForm.value = {
@@ -595,6 +678,46 @@ dd {
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #e9ecef;
+}
+
+.ops-explainer-panel {
+  border-color: #c3fae8;
+  background: #fbfffd;
+}
+
+.explanation-block {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #d8f5e5;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.explanation-block h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #087f5b;
+}
+
+.explanation-block p {
+  margin: 0 0 8px;
+  color: #343a40;
+  line-height: 1.6;
+}
+
+.quote-script {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #c3fae8;
+  border-radius: 8px;
+  background: #ebfbee;
+  color: #212529;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.ops-basis-list {
+  margin-top: 14px;
 }
 
 @media (max-width: 900px) {

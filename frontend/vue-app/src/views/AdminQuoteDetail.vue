@@ -256,6 +256,60 @@
         </section>
 
         <section class="panel-grid">
+          <article class="panel ops-explainer-panel">
+            <h2>Ops Pricing Explanation</h2>
+            <p class="body-text">
+              {{ quotePackageExplanation.positioning }}
+            </p>
+            <div class="explanation-block">
+              <h3>客户为什么被推荐这个套餐</h3>
+              <p>{{ quotePackageExplanation.whyRecommend }}</p>
+              <p>{{ quotePackageExplanation.customerFit }}</p>
+            </div>
+            <div class="explanation-block">
+              <h3>价格由哪些部分构成</h3>
+              <ul class="blocked-list">
+                <li v-for="item in quotePriceBasis" :key="item">{{ item }}</li>
+              </ul>
+            </div>
+            <div class="explanation-block">
+              <h3>{{ quoteUpgradeExplanation.title }}</h3>
+              <ul class="blocked-list">
+                <li v-for="item in quoteUpgradeExplanation.items" :key="item">{{ item }}</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="panel ops-explainer-panel">
+            <h2>Customer Explanation Script</h2>
+            <p class="control-note">
+              运营人员可以直接引用这段口径解释报价；本段不会自动外发。
+            </p>
+            <div class="quote-script">
+              {{ quoteCustomerScript }}
+            </div>
+            <dl class="ops-basis-list">
+              <div>
+                <dt>Venue / 场地</dt>
+                <dd>{{ quoteVisualContext.primaryVenue.name }} · {{ quoteVisualContext.primaryVenue.priceRange }}</dd>
+              </div>
+              <div>
+                <dt>Rendering / 渲染</dt>
+                <dd>{{ quoteVisualContext.restaurant.title }}</dd>
+              </div>
+              <div>
+                <dt>Suppliers / 供应商</dt>
+                <dd>{{ quoteVisualContext.suppliers.map((item) => `${item.name} · ${item.priceRange}`).join(' / ') }}</dd>
+              </div>
+              <div>
+                <dt>Decor / 装饰</dt>
+                <dd>{{ quoteVisualContext.packageVisual.scope }}</dd>
+              </div>
+            </dl>
+          </article>
+        </section>
+
+        <section class="panel-grid">
           <article class="panel">
             <h2>Selection Snapshot</h2>
             <pre>{{ formatJson(quote.selection_snapshot) }}</pre>
@@ -280,6 +334,7 @@ import { ElMessage } from 'element-plus'
 import apiClient from '@/api'
 import { createDraftOrderFromQuote } from '@/services/adminOrderService'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
+import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
 
 const route = useRoute()
 const router = useRouter()
@@ -305,6 +360,39 @@ const quoteVisualContext = computed(() => {
     normalizeThemeId(selection.theme || selection.themeName || quote.value?.theme),
     normalizeTierId(selection.package || selection.packageName || quote.value?.package_tier)
   )
+})
+const quotePackageTier = computed(() => {
+  const selection = quote.value?.selection_snapshot || {}
+  return normalizeTierId(selection.package || selection.packageTier || selection.packageName || quote.value?.package_tier)
+})
+const quotePackageExplanation = computed(() => getPackageExplanation(quotePackageTier.value))
+const quoteUpgradeExplanation = computed(() => getUpgradeExplanation(quotePackageTier.value))
+const quotePriceBasis = computed(() => {
+  const context = quoteVisualContext.value
+  const explanation = quotePackageExplanation.value
+  const lineItemBasis = lineItems.value
+    .slice(0, 4)
+    .map((item) => `${item.name || item.item_name || item.type || 'Line item'} · ${formatMoney(item.amount || item.price || item.total || 0, quote.value?.currency)}`)
+  return [
+    `套餐层级：${explanation.label} · ${explanation.positioning}`,
+    `装饰项：${context.packageVisual.scope}`,
+    `餐厅 / 场地：${context.primaryVenue.name} · ${context.primaryVenue.priceRange}`,
+    `渲染范围：${context.restaurant.decorationLayer}`,
+    ...context.suppliers.map((supplier) => `供应商：${supplier.name} (${supplier.category}) · ${supplier.priceRange}`),
+    ...explanation.priceDrivers.map((driver) => `价格驱动：${driver}`),
+    ...lineItemBasis
+  ].filter(Boolean)
+})
+const quoteCustomerScript = computed(() => {
+  const context = quoteVisualContext.value
+  const explanation = quotePackageExplanation.value
+  return [
+    `我们推荐 ${context.packageVisual.title}，因为${explanation.whyRecommend}`,
+    `${explanation.customerFit}`,
+    `这份报价主要由 ${context.primaryVenue.name} 场地样板、${context.packageVisual.scope}、${context.suppliers.map((item) => item.category).join(' / ')} 供应商建议和现场布置人工构成。`,
+    `${explanation.quoteExplanation}`,
+    `${quoteUpgradeExplanation.value.title}：${quoteUpgradeExplanation.value.items.join('；')}`
+  ].join('\n\n')
 })
 const quoteOpsAlerts = computed(() => {
   if (!quote.value) return ['Quote detail is still loading.']
@@ -650,6 +738,46 @@ pre {
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #e9ecef;
+}
+
+.ops-explainer-panel {
+  border-color: #d0bfff;
+  background: #fffaff;
+}
+
+.explanation-block {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #f1e8ff;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.explanation-block h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #5f3dc4;
+}
+
+.explanation-block p {
+  margin: 0 0 8px;
+  color: #343a40;
+  line-height: 1.6;
+}
+
+.quote-script {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #e5dbff;
+  border-radius: 8px;
+  background: #f8f0ff;
+  color: #212529;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.ops-basis-list {
+  margin-top: 14px;
 }
 
 @media (max-width: 900px) {
