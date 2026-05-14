@@ -25,6 +25,35 @@ const TIER_REASONS = {
   premium: '适合沉浸式效果和投资人级展示，需要完整场景包装。'
 };
 
+const BUDGET_MATCH = {
+  basic: 'Basic 会优先控制预算，把钱花在主题识别、桌面氛围和基础拍照点上。',
+  standard: 'Standard 在预算和效果之间最平衡，适合多数家庭先做完整生日体验。',
+  premium: 'Premium 适合希望现场更有沉浸感和仪式感的家庭，预算会更多留给灯光、拱门和定制板。'
+};
+
+const PACKAGE_INCLUDES = {
+  basic: [
+    '基础主题桌布和桌面摆件',
+    '少量主题气球',
+    '小型欢迎牌',
+    '轻量拍照角'
+  ],
+  standard: [
+    '主题色桌布和桌面花艺',
+    '中型气球拱门',
+    '主题背景板',
+    '甜品台建议',
+    '供应商组合建议'
+  ],
+  premium: [
+    '大型沉浸式主题拱门',
+    '主题灯光层',
+    '定制 KT 板',
+    '完整拍照区',
+    '现场协调建议'
+  ]
+};
+
 const optionFor = (questionId, value) => {
   const question = aiConciergeQuestions.find((item) => item.id === questionId);
   return question?.options?.find((item) => item.value === value) || null;
@@ -37,6 +66,25 @@ const addWeights = (scores, weights = {}) => {
     scores[theme] = (scores[theme] || 0) + score;
   });
 };
+
+export function buildCustomerBrief(answers = {}, recommendation) {
+  const result = recommendation || {};
+  const summary = result.summary || {};
+  const themeLabel = result.themeLabel || THEME_LABELS[result.theme] || 'recommended theme';
+  const tierLabel = result.tierLabel || TIER_LABELS[result.tier] || 'recommended package';
+  const venue = result.visualContext?.primaryVenue?.name || 'Restaurant A';
+
+  return [
+    `Customer is planning a ${summary.childAge || 'child'} birthday party`,
+    `for around ${summary.guestCount || 'the expected guest count'}`,
+    `in ${summary.area || 'the preferred area'}`,
+    `with a ${summary.budgetRange || 'selected'} budget.`,
+    `They prefer ${summary.themePreference || 'an open theme preference'}`,
+    `and ${summary.indoorOutdoor || 'a flexible venue setting'}.`,
+    `Venue status: ${summary.venueStatus || 'not confirmed'}.`,
+    `Recommended package: ${themeLabel} ${tierLabel} using ${venue} as the staging sample.`
+  ].join(' ');
+}
 
 export function recommendThemeAndPackage(answers = {}) {
   const themeScores = { castle: 0, space: 0, forest: 0 };
@@ -57,7 +105,7 @@ export function recommendThemeAndPackage(answers = {}) {
       ? 'Customer-owned venue / restaurant'
       : 'Flexible venue search';
 
-  return {
+  const result = {
     theme,
     themeLabel: THEME_LABELS[theme],
     tier,
@@ -73,6 +121,10 @@ export function recommendThemeAndPackage(answers = {}) {
         ? '你偏向室外/花园，因此会优先保留自然光和天气备选方案。'
         : '你偏向室内或灵活安排，因此 Restaurant A 样板可作为稳定报价参考。'
     ],
+    reasonHeadline: `Based on ${labelFor('childAge', answers.childAge)}, ${labelFor('indoorOutdoor', answers.indoorOutdoor)} and ${labelFor('budgetRange', answers.budgetRange)}, ${THEME_LABELS[theme]} ${TIER_LABELS[tier]} is the clearest starting point.`,
+    budgetMatch: BUDGET_MATCH[tier],
+    packageIncludes: PACKAGE_INCLUDES[tier],
+    nextStepSuggestion: '进入 quote request，确认联系人、日期和备注后提交 inquiry。团队会再人工确认场地、供应商可用性和最终报价。',
     summary: {
       childAge: labelFor('childAge', answers.childAge),
       eventDate: answers.eventDate || '-',
@@ -86,6 +138,9 @@ export function recommendThemeAndPackage(answers = {}) {
       customerContact: answers.customerContact || ''
     }
   };
+
+  result.customerBrief = buildCustomerBrief(answers, result);
+  return result;
 }
 
 export function buildQuotePrefillPayload(answers = {}, recommendation) {
@@ -102,13 +157,17 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
       contact: answers.customerContact || '',
       preferredDate: answers.eventDate || '',
       notes: [
+        result.customerBrief,
+        '',
         `AI Concierge summary: ${result.themeLabel} / ${result.tierLabel}`,
         `Child age: ${result.summary.childAge}`,
         `Guests: ${result.summary.guestCount}`,
         `Area: ${result.summary.area}`,
         `Venue: ${result.summary.venueStatus}`,
+        `Budget match: ${result.budgetMatch}`,
         `AI reason: ${result.reason.join(' ')}`
       ].join('\n'),
+      customerBrief: result.customerBrief,
       guestCount: result.summary.guestCount,
       budgetRange: result.summary.budgetRange,
       area: result.summary.area,
@@ -116,9 +175,12 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
     },
     selection: {
       themeId: result.theme,
+      theme: result.themeLabel,
       themeName: result.themeLabel,
+      packageTier: result.tier,
       packageId: result.tier,
       packageName: `${result.themeLabel} ${result.tierLabel}`,
+      budgetRange: result.summary.budgetRange,
       venueType: result.venueType,
       venueId: venue.id,
       venueName: venue.name,
@@ -132,7 +194,9 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
       supplierSuggestions: suppliers.map((item) => ({
         id: item.id,
         name: item.name,
-        category: item.category
+        category: item.category,
+        role: item.quoteRole,
+        priceRange: item.priceRange
       }))
     },
     pricing: {
@@ -145,6 +209,15 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
       theme: result.theme,
       tier: result.tier,
       reason: result.reason,
+      reasonHeadline: result.reasonHeadline,
+      budgetMatch: result.budgetMatch,
+      packageIncludes: result.packageIncludes,
+      customerBrief: result.customerBrief,
+      venueRecommendation: {
+        id: venue.id,
+        name: venue.name,
+        capacity: venue.capacity
+      },
       score: result.score,
       generated_at: new Date().toISOString()
     }

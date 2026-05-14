@@ -6,7 +6,7 @@ export const aiConciergeIntro = {
   greeting:
     "Hi, welcome to Party Event. I can help you plan your child's party step by step.",
   subGreeting:
-    '我会先问几个很轻的问题，然后推荐主题、套餐和 Restaurant A 样板，再帮你带入报价咨询。'
+    '我会像派对顾问一样先问几个轻问题，再推荐主题、套餐和 Restaurant A 样板，并帮你带入报价咨询。'
 };
 
 export const aiConciergeQuestions = [
@@ -14,7 +14,7 @@ export const aiConciergeQuestions = [
     id: 'childAge',
     label: '孩子年龄',
     prompt: '小主角今年几岁？',
-    helper: '年龄会影响主题、活动强度和布置风格。',
+    helper: '我会根据年龄先判断主题气质和布置强度。',
     type: 'choice',
     required: true,
     options: [
@@ -27,7 +27,7 @@ export const aiConciergeQuestions = [
     id: 'eventDate',
     label: '活动日期',
     prompt: '你希望哪一天办活动？',
-    helper: '如果日期未最终确认，可以先选择大概日期，后续顾问会人工确认。',
+    helper: '不确定也没关系，先选一个大概日期，顾问后续会人工确认。',
     type: 'date',
     required: true
   },
@@ -35,7 +35,7 @@ export const aiConciergeQuestions = [
     id: 'guestCount',
     label: '预计人数',
     prompt: '大概会有多少位孩子和家长参加？',
-    helper: '人数会影响餐厅容量、桌椅布局和现场服务配置。',
+    helper: '人数会影响 Restaurant A 是否合适，以及桌椅和服务配置。',
     type: 'choice',
     required: true,
     options: [
@@ -48,7 +48,7 @@ export const aiConciergeQuestions = [
     id: 'budgetRange',
     label: '预算范围',
     prompt: '你希望先按哪个预算层级规划？',
-    helper: '这里只是预估层级，不会触发付款。',
+    helper: '这里只是规划层级，不会触发付款，也不会创建 PaymentIntent。',
     type: 'choice',
     required: true,
     options: [
@@ -87,7 +87,7 @@ export const aiConciergeQuestions = [
     id: 'themePreference',
     label: '主题偏好',
     prompt: '孩子最容易被哪种主题吸引？',
-    helper: '如果没有明确偏好，可以选“帮我推荐”。',
+    helper: '如果还没有想法，选“帮我推荐”，我会根据前面的答案判断。',
     type: 'choice',
     required: true,
     options: [
@@ -101,7 +101,7 @@ export const aiConciergeQuestions = [
     id: 'venueStatus',
     label: '场地状态',
     prompt: '你现在已经有场地了吗？',
-    helper: '没有场地也没关系，本轮可以先用 Restaurant A 样板做报价咨询。',
+    helper: '没有场地也没关系，可以先用 Restaurant A 样板进入报价咨询。',
     type: 'choice',
     required: true,
     options: [

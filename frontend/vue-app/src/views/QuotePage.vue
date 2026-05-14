@@ -157,6 +157,23 @@
       <span>{{ submitMessage }}</span>
     </div>
 
+    <section v-if="submittedNextSteps" class="post-inquiry-section">
+      <div class="section-container">
+        <div class="post-inquiry-card" :style="cardStyle">
+          <span class="visual-kicker">Inquiry received · staging preview</span>
+          <h2>{{ submittedNextSteps.title }}</h2>
+          <p>{{ submittedNextSteps.summary }}</p>
+          <ul>
+            <li v-for="item in submittedNextSteps.items" :key="item">{{ item }}</li>
+          </ul>
+          <div class="post-inquiry-actions">
+            <button class="btn-secondary" @click="$router.push('/my/quotes')">查看 My Quotes</button>
+            <button class="btn-secondary" @click="$router.push('/my/orders')">查看 My Orders</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 提交错误提示 -->
     <div v-if="submitError" class="submit-error">
       <span class="error-icon">!</span>
@@ -251,6 +268,7 @@ export default {
       submitError: false,
       submitMessage: '',
       isSubmittingInquiry: false,
+      submittedNextSteps: null,
       aiPrefill: null,
       quoteSource: this.$route.query.source || 'web_quote'
     };
@@ -419,6 +437,7 @@ export default {
         },
         preferred_event_date: inquiryData.customerInfo.preferredDate || null,
         intake_notes: inquiryData.customerInfo.notes || null,
+        customer_brief: inquiryData.customerInfo.customerBrief || null,
         selection: inquiryData.selection || {},
         pricing_snapshot: inquiryData.pricing || {},
         source: inquiryData.source || 'web_quote'
@@ -476,6 +495,7 @@ export default {
       this.isSubmittingInquiry = true;
       this.submitError = false;
       this.submitSuccess = false;
+      this.submittedNextSteps = null;
 
       // 构建完整的咨询数据
       const inquiryData = {
@@ -484,6 +504,7 @@ export default {
           contact: this.inquiryForm.contact,
           preferredDate: this.inquiryForm.date,
           notes: this.inquiryForm.notes,
+          customerBrief: this.aiPrefill?.customerInfo?.customerBrief || null,
           guestCount: this.aiPrefill?.customerInfo?.guestCount || null,
           budgetRange: this.aiPrefill?.customerInfo?.budgetRange || null,
           area: this.aiPrefill?.customerInfo?.area || null,
@@ -491,9 +512,11 @@ export default {
         },
         selection: {
           themeId: this.themeId,
+          theme: this.aiPrefill?.selection?.theme || this.themeConfig.name,
           themeName: this.themeConfig.name,
           sceneId: this.sceneId,
           sceneName: this.sceneData.name,
+          packageTier: this.aiPrefill?.selection?.packageTier || this.packageId,
           packageId: this.packageId,
           packageName: this.packageData.name,
           source: this.quoteSource,
@@ -520,6 +543,7 @@ export default {
           sceneFee: this.sceneData.basePrice * 0.1,
           addonsTotal: this.addonsTotal,
           finalTotal: this.finalTotal,
+          snapshot_note: this.aiPrefill?.pricing?.snapshot_note || 'Frontend staging estimate; final quote requires human review.',
           aiEstimate: this.aiPrefill?.pricing || null
         },
         source: this.quoteSource,
@@ -554,6 +578,7 @@ export default {
         } else {
           this.submitMessage = '咨询提交成功！我们的策划师将在24小时内与您联系。';
         }
+        this.submittedNextSteps = this.buildPostInquiryNextSteps(backendLead, backendSyncFailed);
         this.showForm = false;
 
         // 重置表单
@@ -572,6 +597,26 @@ export default {
       } finally {
         this.isSubmittingInquiry = false;
       }
+    },
+
+    buildPostInquiryNextSteps(backendLead, backendSyncFailed) {
+      const syncLine = backendLead?.id
+        ? `Local/staging Lead skeleton 已记录：${backendLead.id}。`
+        : backendSyncFailed
+          ? '浏览器本地已保存，Lead API skeleton 暂未同步；演示仍可继续。'
+          : '浏览器本地已保存，适合 staging 演示和客户路径说明。';
+
+      return {
+        title: '我们已收到你的派对需求',
+        summary: '团队会根据场地、主题和供应商可用性人工确认方案，并把报价进度展示在客户侧页面。',
+        items: [
+          '团队会根据 Restaurant A 样板、主题视觉和供应商建议确认方案。',
+          '你可以在 My Quotes 查看报价进度和状态说明。',
+          '你可以在 My Orders 查看后续订单状态。',
+          '当前为 staging preview，不会触发真实支付、PaymentIntent、webhook、n8n 或外发消息。',
+          syncLine
+        ]
+      };
     },
 
     loadSavedQuote() {
@@ -1039,6 +1084,47 @@ export default {
 
 .success-icon, .error-icon {
   font-size: 1.25rem;
+}
+
+.post-inquiry-section {
+  padding: 18px 0 10px;
+}
+
+.post-inquiry-card {
+  display: grid;
+  gap: 14px;
+  color: #e5f7ff;
+}
+
+.post-inquiry-card h2 {
+  margin: 0;
+  color: #fff;
+}
+
+.post-inquiry-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.7;
+}
+
+.post-inquiry-card ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.post-inquiry-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.post-inquiry-actions .btn-secondary {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
 }
 
 /* 操作按钮 */

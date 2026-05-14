@@ -76,11 +76,32 @@
       </article>
     </section>
 
+    <section class="theme-preview-band" aria-label="AI theme previews">
+      <div class="preview-copy">
+        <p class="eyebrow">Visual cues</p>
+        <h2>我会用同一套餐逻辑比较三种主题</h2>
+      </div>
+      <div class="theme-preview-grid">
+        <article v-for="card in themePreviewCards" :key="card.theme" class="theme-preview-card">
+          <img :src="card.packageVisual.image_path" :alt="card.packageVisual.title">
+          <div>
+            <strong>{{ card.packageVisual.themeName }}</strong>
+            <span>{{ card.packageVisual.suitableAge }} 岁 · {{ card.packageVisual.suitableVenue }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <section v-if="recommendation" class="recommendation-panel">
       <div class="recommendation-copy">
         <p class="eyebrow">AI recommendation</p>
         <h2>{{ recommendation.themeLabel }} · {{ recommendation.tierLabel }}</h2>
-        <p>{{ recommendation.reason.join(' ') }}</p>
+        <p>{{ recommendation.reasonHeadline }}</p>
+
+        <div class="brief-box">
+          <strong>Customer brief</strong>
+          <p>{{ recommendation.customerBrief }}</p>
+        </div>
 
         <dl>
           <div>
@@ -92,18 +113,44 @@
             <dd>{{ recommendation.tierLabel }} · {{ recommendation.visualContext.packageVisual.priceHint }}</dd>
           </div>
           <div>
-            <dt>适合人数</dt>
-            <dd>{{ recommendation.summary.guestCount }}</dd>
+            <dt>推荐场地 / Restaurant A</dt>
+            <dd>{{ recommendation.visualContext.primaryVenue.name }} · {{ recommendation.visualContext.primaryVenue.capacity }}</dd>
           </div>
           <div>
-            <dt>适合场地</dt>
-            <dd>{{ recommendation.venueType }}</dd>
+            <dt>推荐理由</dt>
+            <dd>
+              <ul class="compact-list">
+                <li v-for="item in recommendation.reason" :key="item">{{ item }}</li>
+              </ul>
+            </dd>
+          </div>
+          <div>
+            <dt>适合年龄 / 人数</dt>
+            <dd>{{ recommendation.visualContext.packageVisual.suitableAge }} 岁 · {{ recommendation.summary.guestCount }}</dd>
+          </div>
+          <div>
+            <dt>预算匹配说明</dt>
+            <dd>{{ recommendation.budgetMatch }}</dd>
+          </div>
+          <div>
+            <dt>套餐包含内容</dt>
+            <dd>
+              <ul class="compact-list">
+                <li v-for="item in recommendation.packageIncludes" :key="item">{{ item }}</li>
+              </ul>
+            </dd>
           </div>
           <div>
             <dt>下一步</dt>
-            <dd>进入 quote request，确认联系方式和日期后提交 inquiry。不会创建 Quote / Order，也不会触发 payment。</dd>
+            <dd>{{ recommendation.nextStepSuggestion }} 当前为 staging preview，不会创建 Quote / Order，也不会触发 payment。</dd>
           </div>
         </dl>
+
+        <div class="supplier-strip">
+          <span v-for="supplier in recommendation.visualContext.suppliers" :key="supplier.id">
+            {{ supplier.category }} · {{ supplier.name }}
+          </span>
+        </div>
 
         <div class="next-actions">
           <button class="primary-action" @click="goQuote">确认并继续到 Quote</button>
@@ -133,6 +180,7 @@ import {
   stopSpeaking,
   voiceScripts
 } from '@/services/aiVoiceIntakeService';
+import { getVisualContext } from '@/data/visualAssets';
 
 const router = useRouter();
 const activeIndex = ref(0);
@@ -151,6 +199,10 @@ const conciergeMessage = computed(() => {
   }
   return 'I can recommend a theme and package for you, then pre-fill your quote request.';
 });
+const themePreviewCards = computed(() => ['castle', 'space', 'forest'].map((theme) => ({
+  theme,
+  ...getVisualContext(theme, 'standard')
+})));
 
 function hasAnswer(stepId) {
   return Boolean(answers[stepId]);
@@ -249,6 +301,7 @@ watch(activeIndex, () => {
 
 .intake-hero,
 .question-panel,
+.theme-preview-band,
 .recommendation-panel {
   max-width: 1180px;
   margin: 0 auto 24px;
@@ -433,6 +486,55 @@ button:disabled {
   padding: 28px;
 }
 
+.theme-preview-band {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+  padding: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 16px 46px rgba(15, 23, 42, 0.08);
+}
+
+.preview-copy h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.theme-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.theme-preview-card {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.theme-preview-card img {
+  width: 100%;
+  height: 126px;
+  object-fit: cover;
+  display: block;
+}
+
+.theme-preview-card div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.theme-preview-card span {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .question-header {
   justify-content: space-between;
   margin-bottom: 18px;
@@ -493,6 +595,43 @@ dt {
   font-weight: 800;
 }
 
+.brief-box {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #ddd6fe;
+  border-radius: 16px;
+  background: #f8f5ff;
+}
+
+.brief-box p {
+  margin: 6px 0 0;
+}
+
+.compact-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.compact-list li + li {
+  margin-top: 4px;
+}
+
+.supplier-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -4px 0 22px;
+}
+
+.supplier-strip span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .recommendation-visual img {
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -511,12 +650,14 @@ dt {
 @media (max-width: 860px) {
   .intake-hero,
   .question-panel,
+  .theme-preview-band,
   .recommendation-panel {
     grid-template-columns: 1fr;
   }
 
   .option-grid,
-  .input-card {
+  .input-card,
+  .theme-preview-grid {
     grid-template-columns: 1fr;
   }
 }
