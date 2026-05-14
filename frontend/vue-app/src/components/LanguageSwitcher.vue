@@ -1,6 +1,6 @@
 <template>
   <label class="language-switcher" :class="{ 'is-compact': compact }">
-    <span v-if="!compact" class="language-label">{{ t('language.label') }}</span>
+    <span class="language-label">{{ t('language.label') }}</span>
     <select
       class="language-select"
       :value="locale"
@@ -41,7 +41,7 @@ const handleLocaleChange = (event) => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
+  min-width: max-content;
   color: inherit;
 }
 
@@ -52,7 +52,7 @@ const handleLocaleChange = (event) => {
 }
 
 .language-select {
-  min-width: 112px;
+  min-width: 124px;
   height: 34px;
   padding: 0 28px 0 10px;
   border: 1px solid rgba(255, 255, 255, 0.36);
@@ -70,9 +70,13 @@ const handleLocaleChange = (event) => {
 }
 
 .is-compact .language-select {
-  min-width: 104px;
+  min-width: 124px;
   border-color: #dcdfe6;
   background: #ffffff;
+  color: #303133;
+}
+
+.is-compact .language-label {
   color: #303133;
 }
 </style>

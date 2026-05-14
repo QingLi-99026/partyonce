@@ -462,8 +462,12 @@ export default {
     },
     
     switchToTheme(themeId) {
-      this.currentTheme = themeId;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const slugs = {
+        castle: 'castle-princess',
+        space: 'space-explorer',
+        forest: 'forest-adventure'
+      };
+      this.$router.push(`/themes/${slugs[themeId] || 'castle-princess'}`);
     },
     
     getCardStyle(theme) {

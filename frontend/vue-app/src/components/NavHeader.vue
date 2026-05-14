@@ -140,13 +140,15 @@ const handleCommand = (command) => {
 }
 
 .header-content {
-  max-width: 1400px;
+  max-width: 1480px;
   margin: 0 auto;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 14px;
   padding: 0 20px;
+  min-width: 0;
 }
 
 .logo {
@@ -161,12 +163,15 @@ const handleCommand = (command) => {
 
 .nav-menu {
   flex: 1;
-  margin: 0 40px;
+  min-width: 0;
+  margin: 0 18px;
   border-bottom: none;
+  overflow: hidden;
 }
 
 .nav-menu .el-menu-item {
-  font-size: 15px;
+  font-size: 14px;
+  padding: 0 12px;
 }
 
 .user-actions {
@@ -174,6 +179,9 @@ const handleCommand = (command) => {
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  min-width: max-content;
+  padding-left: 8px;
+  background: #fff;
 }
 
 .user-info {
@@ -200,5 +208,19 @@ const handleCommand = (command) => {
 :global([dir='rtl']) .user-info,
 :global([dir='rtl']) .logo {
   flex-direction: row-reverse;
+}
+
+@media (max-width: 980px) {
+  .nav-menu {
+    display: none;
+  }
+
+  .header-content {
+    padding: 0 12px;
+  }
+
+  .user-actions {
+    gap: 6px;
+  }
 }
 </style>

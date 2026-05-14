@@ -30,8 +30,14 @@ const routes = [
   {
     path: '/themes',
     name: 'Themes',
-    component: () => import('@/views/HomePage.vue'),
+    component: () => import('@/views/Themes.vue'),
     meta: { title: '选择主题' }
+  },
+  {
+    path: '/themes/:slug',
+    name: 'ThemeDetail',
+    component: () => import('@/views/ThemeDetail.vue'),
+    meta: { title: '主题详情' }
   },
   {
     path: '/venues',
