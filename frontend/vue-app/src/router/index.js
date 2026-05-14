@@ -145,6 +145,12 @@ const routes = [
     component: () => import('@/views/MyOrderDetail.vue'),
     meta: { title: '订单详情', customerFixture: true }
   },
+  {
+    path: '/my/rewards',
+    name: 'MyRewards',
+    component: () => import('@/views/MyRewards.vue'),
+    meta: { title: '我的分享奖励', customerFixture: true }
+  },
   
   // ========== Partner Portal 供应商端 ==========
   {
@@ -234,6 +240,12 @@ const routes = [
     name: 'AdminNotificationDryRun',
     component: () => import('@/views/AdminNotificationDryRun.vue'),
     meta: { title: 'Notification dry-run', requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/social-rewards',
+    name: 'AdminSocialRewards',
+    component: () => import('@/views/AdminSocialRewards.vue'),
+    meta: { title: 'Social Rewards Review', requiresAuth: true, requiresAdmin: true }
   },
   {
     path: '/admin/suppliers',

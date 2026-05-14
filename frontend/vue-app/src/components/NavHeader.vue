@@ -25,11 +25,13 @@
         <el-menu-item index="/my/inquiries">My Inquiries</el-menu-item>
         <el-menu-item index="/my/quotes">My Quotes</el-menu-item>
         <el-menu-item index="/my/orders">My Orders</el-menu-item>
+        <el-menu-item index="/my/rewards">My Rewards</el-menu-item>
         <el-menu-item index="/investor-demo">Investor Demo</el-menu-item>
         <el-menu-item index="/local-demo">Local Demo Hub</el-menu-item>
         <el-menu-item index="/admin/local-leads">Lead Review</el-menu-item>
         <el-menu-item index="/admin/quotes">Quote Review</el-menu-item>
         <el-menu-item index="/admin/orders">Order Review</el-menu-item>
+        <el-menu-item index="/admin/social-rewards">Rewards Review</el-menu-item>
         <el-menu-item index="/admin/notifications/dry-run">Notify Dry Run</el-menu-item>
         <el-menu-item index="/admin/partners">Partner Review</el-menu-item>
       </el-menu>
@@ -48,6 +50,7 @@
                 <el-dropdown-item command="/my/inquiries"><el-icon><List /></el-icon>我的咨询</el-dropdown-item>
                 <el-dropdown-item command="/my/quotes"><el-icon><Document /></el-icon>我的报价</el-dropdown-item>
                 <el-dropdown-item command="/my/orders"><el-icon><List /></el-icon>我的订单</el-dropdown-item>
+                <el-dropdown-item command="/my/rewards"><el-icon><Present /></el-icon>我的奖励</el-dropdown-item>
                 <el-dropdown-item command="bootstrap-customer"><el-icon><User /></el-icon>本地客户身份</el-dropdown-item>
                 <el-dropdown-item divided command="logout"><el-icon><SwitchButton /></el-icon>退出登录</el-dropdown-item>
               </el-dropdown-menu>

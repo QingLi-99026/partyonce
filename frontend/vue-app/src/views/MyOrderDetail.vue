@@ -142,6 +142,31 @@
         <h2>{{ customerInteractionBoundary.contactTitle }}</h2>
         <p>Order updates are captured locally for staging review only. No email, SMS, WhatsApp, payment, webhook, or n8n action is triggered.</p>
       </section>
+
+      <section class="panel rewards-panel">
+        <h2>Share & Rewards</h2>
+        <p class="panel-intro">
+          Share your party story for local/staging review. Points and vouchers are placeholders until production reward rules are approved.
+        </p>
+        <div class="reward-summary">
+          <div><span>Approved points</span><strong>{{ rewardSummary.approvedPoints }}</strong></div>
+          <div><span>Pending points</span><strong>{{ rewardSummary.pendingPoints }}</strong></div>
+          <div><span>Submissions</span><strong>{{ rewardSummary.submissions.length }}</strong></div>
+        </div>
+        <el-input
+          v-model="shareCaption"
+          type="textarea"
+          :rows="3"
+          maxlength="500"
+          show-word-limit
+          :placeholder="buildDemoShareText(order)"
+        />
+        <div class="blocked-actions">
+          <el-button type="primary" @click="submitShareReward">Submit share for reward review</el-button>
+          <el-button @click="router.push('/my/rewards')">Open My Rewards</el-button>
+        </div>
+        <small>No social post, email, SMS, WhatsApp, webhook, n8n, or payment action is triggered.</small>
+      </section>
     </template>
   </main>
 </template>
@@ -162,6 +187,12 @@ import {
 } from '@/services/customerExperienceService'
 import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
+import {
+  buildDemoShareText,
+  createRewardSubmission,
+  getRewardSummary,
+  seedRewardDemoIfEmpty
+} from '@/services/socialRewardsService'
 
 const route = useRoute()
 const router = useRouter()
@@ -172,7 +203,13 @@ const apiNotice = ref('')
 const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
 const interaction = ref({})
 const supplementNote = ref('')
+const shareCaption = ref('')
+const rewardRefresh = ref(0)
 const orderLineItemSummary = computed(() => summarizeQuoteLineItems(order.value?.line_items || []))
+const rewardSummary = computed(() => {
+  rewardRefresh.value
+  return getRewardSummary(identity.value?.id || 'customer-local-41')
+})
 const orderVisualContext = computed(() => getVisualContext(
   normalizeThemeId(order.value?.theme || order.value?.selection_snapshot?.theme),
   normalizeTierId(order.value?.package || order.value?.package_tier || order.value?.selection_snapshot?.package)
@@ -217,7 +254,28 @@ const saveSupplement = () => {
   ElMessage.success('Order update note saved locally for staging review.')
 }
 
+const submitShareReward = () => {
+  if (!order.value?.id) return
+  createRewardSubmission({
+    customer_id: identity.value?.id || 'customer-local-41',
+    customer_name: identity.value?.name || 'Local Demo Customer',
+    order_id: order.value.id,
+    order_number: order.value.order_number,
+    channel: 'instagram',
+    caption: shareCaption.value || buildDemoShareText(order.value),
+    permission_to_reuse: true,
+    includes_partyonce_tag: true,
+    includes_venue_or_theme: true
+  })
+  shareCaption.value = ''
+  rewardRefresh.value += 1
+  ElMessage.success('Share submitted for reward review. No external action was triggered.')
+}
+
 onMounted(loadOrder)
+onMounted(() => {
+  seedRewardDemoIfEmpty()
+})
 </script>
 
 <style scoped>
@@ -380,6 +438,32 @@ dd {
   gap: 10px;
   margin-top: 12px;
   flex-wrap: wrap;
+}
+
+.reward-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.reward-summary div {
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.reward-summary span,
+.rewards-panel small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.reward-summary strong {
+  display: block;
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 20px;
 }
 
 .saved-note {
