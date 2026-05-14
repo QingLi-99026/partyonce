@@ -141,18 +141,20 @@ AI quick mode smoke:
 
 ## 9. Preview Redeploy 结果
 
-Pending until this commit is pushed to the release candidate branch.
+Completed after pushing the release candidate branch.
 
-Expected Preview:
+Preview:
 
 `https://partyonce-git-eye-lite-v2-release-2af646-qingli-99026s-projects.vercel.app/`
 
-After push, verify:
+Remote Preview smoke:
 
-- `/ai-voice-intake`
-- `/quote`
-- `/admin/orders`
-- `/experimental/party-3d`
+| Route | Result | Console Errors | Broken Images | P1 Signal |
+| --- | --- | --- | --- | --- |
+| `/ai-voice-intake` | 200, non-blank | 0 | 0 | Quick demo copy visible |
+| `/quote` | 200, non-blank | 0 | 0 | Quote route healthy |
+| `/admin/orders` | 200, non-blank | 0 | 0 | Static Preview fallback copy visible |
+| `/experimental/party-3d` | 200, non-blank | 0 | 0 | Non-construction warning visible |
 
 ## 10. 是否读取/修改 `.env.production`
 
