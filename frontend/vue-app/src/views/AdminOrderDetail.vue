@@ -238,7 +238,7 @@
               </div>
               <div>
                 <dt>Suppliers / 供应商</dt>
-                <dd>{{ orderVisualContext.suppliers.map((item) => `${item.name} · ${item.priceRange}`).join(' / ') }}</dd>
+                <dd>{{ orderVisualContext.suppliers.map((item) => `${item.name} · ${item.categoryLabel || item.category} · ${item.priceRange}`).join(' / ') }}</dd>
               </div>
               <div>
                 <dt>Decor / 装饰</dt>
@@ -398,7 +398,7 @@ const orderPriceBasis = computed(() => {
     `装饰项：${context.packageVisual.scope}`,
     `餐厅 / 场地：${context.primaryVenue.name} · ${context.primaryVenue.priceRange}`,
     `渲染范围：${context.restaurant.decorationLayer}`,
-    ...context.suppliers.map((supplier) => `供应商：${supplier.name} (${supplier.category}) · ${supplier.priceRange}`),
+    ...context.suppliers.map((supplier) => `供应商：${supplier.name} (${supplier.categoryLabel || supplier.category}) · ${supplier.priceRange} · ${supplier.responsibility || supplier.operationsRole}`),
     ...explanation.priceDrivers.map((driver) => `价格驱动：${driver}`),
     ...orderLineItemSummary.value.groups.map((group) => `${group.labelZh}：${formatMoney(group.amount, order.value?.currency)} · ${group.description}`)
   ].filter(Boolean)
@@ -409,7 +409,7 @@ const orderCustomerScript = computed(() => {
   return [
     `当前订单沿用 ${context.packageVisual.title}，因为${explanation.whyRecommend}`,
     `${explanation.customerFit}`,
-    `价格主要来自 ${context.primaryVenue.name} 场地样板、${context.packageVisual.scope}、${context.suppliers.map((item) => item.category).join(' / ')} 供应商建议和现场布置人工。`,
+    `价格主要来自 ${context.primaryVenue.name} 场地样板、${context.packageVisual.scope}、${context.suppliers.map((item) => item.categoryLabel || item.category).join(' / ')} 供应商建议和现场布置人工。`,
     `${explanation.quoteExplanation}`,
     `${orderUpgradeExplanation.value.title}：${orderUpgradeExplanation.value.items.join('；')}`
   ].join('\n\n')

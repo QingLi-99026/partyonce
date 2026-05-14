@@ -7,9 +7,14 @@ const SOURCE_REMOTE = 'remote staging supplier API'
 
 const categoryLabels = {
   venue: '场地租赁',
+  florist: '花艺 / 桌花',
+  balloon_decorator: '气球 / 拱门',
+  cake_dessert: '蛋糕 / 甜品台',
+  kids_entertainment: '儿童娱乐',
+  photography: '摄影 / 记录',
+  setup_service: '搭建 / 现场执行',
   catering: '餐饮服务',
   decoration: '装饰布置',
-  photography: '摄影摄像',
   entertainment: '娱乐表演',
   other: '其他服务'
 }
@@ -34,6 +39,7 @@ const demoSuppliers = [
     company_name: venue.name,
     category_level_1: '场地类',
     category: 'venue',
+    category_label: categoryLabels.venue,
     suburb: index === 0 ? 'North Sydney' : 'Sydney',
     rating: 4.6 + (index * 0.1),
     review_count: 48 + (index * 16),
@@ -42,14 +48,24 @@ const demoSuppliers = [
     distance_km: 0.8 + index * 2.1,
     service_tags: ['AI推荐场地', ...(venue.themeFit || []), venue.aiRecommendationRole].filter(Boolean),
     cover_image_url: venue.image_path,
+    service_area: venue.location || 'Sydney demo area',
+    supported_themes: venue.themeFit || [],
+    supported_package_tiers: venue.bestPackageTiers || [],
+    materials_or_services: `${venue.tables} · ${venue.chairs} · theme rendering reference`,
+    lead_time: 'Confirm venue hold before customer send',
+    contact_placeholder: venue.contact || 'Local/staging placeholder only',
+    status: 'demo_active',
+    price_range: venue.priceRange,
+    responsibilities: ['Venue hold', 'Room layout confirmation', 'Setup access window'],
     visual_context: venue
   })),
   ...supplierDisplaySeeds.map((supplier, index) => ({
     supplier_id: supplier.id,
     name: supplier.name,
     company_name: supplier.name,
-    category_level_1: supplier.category,
+    category_level_1: supplier.categoryLabel || categoryLabels[supplier.category] || supplier.category,
     category: supplier.category,
+    category_label: supplier.categoryLabel || categoryLabels[supplier.category] || supplier.category,
     suburb: supplier.serviceArea?.split(' ')?.[0] || 'Sydney',
     rating: 4.7,
     review_count: 54 + index * 11,
@@ -58,6 +74,15 @@ const demoSuppliers = [
     distance_km: 3.2 + index,
     service_tags: [supplier.quoteRole, ...(supplier.supportedThemes || []), ...(supplier.supportedTiers || [])].filter(Boolean),
     cover_image_url: supplier.image_path,
+    service_area: supplier.serviceArea,
+    price_range: supplier.priceRange,
+    supported_themes: supplier.supportedThemes || supplier.supported_themes || [],
+    supported_package_tiers: supplier.supportedTiers || supplier.supported_package_tiers || [],
+    materials_or_services: supplier.materials_or_services || supplier.serviceContent,
+    lead_time: supplier.lead_time,
+    contact_placeholder: supplier.contact_placeholder || 'Local/staging placeholder only',
+    status: supplier.status,
+    responsibilities: [supplier.responsibility || supplier.operationsRole].filter(Boolean),
     visual_context: supplier
   }))
 ]
@@ -152,6 +177,23 @@ export const listSupplierDisplayItems = async (params = {}) => {
     // Fall back to local/staging fixture so preview smoke remains inspectable if the API is unavailable.
   }
   return listLocalSupplierDisplayItems(params)
+}
+
+export const getSupplierDisplayItem = async (supplierId) => {
+  const normalizedId = String(supplierId || '')
+  const local = listLocalSupplierDisplayItems().items.find((item) => String(item.supplier_id) === normalizedId)
+  if (local) return { source: SOURCE_LOCAL, item: clone(local) }
+
+  const enableRemoteSupplierApi = import.meta.env.VITE_SUPPLIER_REMOTE_API === 'true'
+  if (enableRemoteSupplierApi) {
+    try {
+      const response = await apiClient.get(`/suppliers/${normalizedId}`)
+      if (response) return { source: SOURCE_REMOTE, item: response }
+    } catch (error) {
+      // Keep local/staging detail fallback deterministic.
+    }
+  }
+  return { source: SOURCE_LOCAL, item: null }
 }
 
 export const createSupplierApplication = async (form) => {

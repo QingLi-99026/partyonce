@@ -92,6 +92,22 @@
         </el-table>
       </section>
 
+      <section class="panel venue-supplier-panel">
+        <h2>场地与供应商上下文</h2>
+        <p class="panel-intro">
+          订单仍处于 staging skeleton；以下场地和供应商职责用于理解交付方案，不会自动派单。
+        </p>
+        <div class="context-grid">
+          <img :src="orderVisualContext.restaurant.image_path" :alt="orderVisualContext.restaurant.title" />
+          <dl class="detail-list">
+            <div><dt>Recommended venue</dt><dd>{{ orderVisualContext.primaryVenue.name }} · {{ orderVisualContext.primaryVenue.capacity }}</dd></div>
+            <div><dt>Rendering</dt><dd>{{ orderVisualContext.restaurant.title }}</dd></div>
+            <div><dt>Suppliers</dt><dd>{{ orderVisualContext.suppliers.map((item) => `${item.categoryLabel || item.category}: ${item.name}`).join(' / ') }}</dd></div>
+            <div><dt>Supplier roles</dt><dd>{{ orderVisualContext.suppliers.map((item) => item.responsibility || item.operationsRole).join(' / ') }}</dd></div>
+          </dl>
+        </div>
+      </section>
+
       <section class="next-step">
         <span>Next step</span>
         <p>{{ order.next_step }}</p>
@@ -145,6 +161,7 @@ import {
   saveCustomerSupplementRequest
 } from '@/services/customerExperienceService'
 import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
+import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 
 const route = useRoute()
 const router = useRouter()
@@ -156,6 +173,10 @@ const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading
 const interaction = ref({})
 const supplementNote = ref('')
 const orderLineItemSummary = computed(() => summarizeQuoteLineItems(order.value?.line_items || []))
+const orderVisualContext = computed(() => getVisualContext(
+  normalizeThemeId(order.value?.theme || order.value?.selection_snapshot?.theme),
+  normalizeTierId(order.value?.package || order.value?.package_tier || order.value?.selection_snapshot?.package)
+))
 
 const orderTagType = (status) => ({
   draft: 'info',
@@ -240,6 +261,25 @@ h2 {
   margin: 0 0 14px;
   color: #64748b;
   line-height: 1.6;
+}
+
+.context-grid {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.context-grid img {
+  width: 100%;
+  min-height: 220px;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.context-grid .detail-list {
+  margin: 0;
 }
 
 :deep(.el-table small) {
@@ -359,7 +399,8 @@ dd {
 
 @media (max-width: 820px) {
   .page-hero,
-  .content-grid {
+  .content-grid,
+  .context-grid {
     display: block;
   }
 }

@@ -8,11 +8,11 @@
     <!-- 统计卡片 -->
     <div class="stats-bar">
       <div class="stat-card">
-        <div class="number">4</div>
+        <div class="number">{{ suppliers.length }}</div>
         <div class="label">全部供应商</div>
       </div>
       <div class="stat-card">
-        <div class="number" style="color: #059669">3</div>
+        <div class="number" style="color: #059669">{{ activeSupplierCount }}</div>
         <div class="label">正式合作</div>
       </div>
     </div>
@@ -23,7 +23,12 @@
       <select v-model="filterCategory">
         <option value="">全部分类</option>
         <option value="场地类">场地类</option>
-        <option value="物料类">物料类</option>
+        <option value="florist">花艺 / 桌花</option>
+        <option value="balloon_decorator">气球 / 拱门</option>
+        <option value="cake_dessert">蛋糕 / 甜品台</option>
+        <option value="kids_entertainment">儿童娱乐</option>
+        <option value="photography">摄影 / 记录</option>
+        <option value="setup_service">搭建 / 现场执行</option>
       </select>
     </div>
 
@@ -46,6 +51,7 @@
               <img :src="s.cover_image_url || '/placeholder.jpg'" class="avatar" />
               <div class="info">
                 <div class="name">{{ s.name }}</div>
+                <small>{{ s.responsibility }}</small>
               </div>
             </td>
             <td>
@@ -56,7 +62,7 @@
             <td>
               <div class="visual-supplier-cell">
                 <img :src="s.cover_image_url || '/party-assets/packages/package-tier-matrix.png'" :alt="s.name" />
-                <span>{{ s.theme_support || 'Castle / Space / Forest' }}</span>
+                <span>{{ s.theme_support || 'Castle / Space / Forest' }} · {{ s.package_support }}</span>
               </div>
             </td>
             <td class="actions">
@@ -71,21 +77,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supplierDisplaySeeds } from '@/data/visualAssets'
 
 const router = useRouter()
 
 const suppliers = ref(supplierDisplaySeeds.map((item, index) => ({
-  supplier_id: index + 1,
+  supplier_id: item.id || index + 1,
   name: item.name,
-  category_level_1: item.category,
+  category_level_1: item.categoryLabel || item.category,
   suburb: item.serviceArea,
-  contact_name: item.status,
+  contact_name: item.contact_placeholder || item.status,
   cover_image_url: item.image_path,
-  theme_support: item.supportedThemes.join(' / ')
+  theme_support: item.supportedThemes.join(' / '),
+  package_support: item.supportedTiers.join(' / '),
+  responsibility: item.responsibility || item.operationsRole,
+  status: item.status
 })))
+const activeSupplierCount = computed(() => suppliers.value.filter((item) => item.status === 'demo_active').length)
 
 const viewDetail = (s) => router.push(`/suppliers/${s.supplier_id}`)
 const editSupplier = (s) => router.push(`/admin/suppliers/${s.supplier_id}/edit`)

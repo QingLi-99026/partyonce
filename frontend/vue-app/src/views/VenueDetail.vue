@@ -1,433 +1,335 @@
 <template>
-  <div v-if="venue" class="venue-detail-page">
-    <!-- Image Gallery -->
-    <div class="image-gallery">
-      <div class="main-image">
-        <img :src="currentImage || venue.images?.[0]" :alt="venue.name">
+  <main class="venue-detail-page">
+    <button class="back-button" @click="router.push('/venues')">Back to Venues</button>
+
+    <section v-if="venue" class="hero-grid">
+      <div class="hero-media">
+        <img :src="selectedImage" :alt="venue.name" />
       </div>
-      <div class="thumbnail-list">
-        <img
-          v-for="(img, idx) in venue.images || []"
-          :key="idx"
-          :src="img"
-          :class="{ active: currentImage === img }"
-          @click="currentImage = img"
+      <article class="hero-copy">
+        <p class="eyebrow">Local/staging venue asset</p>
+        <h1>{{ venue.name }}</h1>
+        <p class="lead">{{ venue.notes || venue.note }}</p>
+        <div class="fact-grid">
+          <div><span>Type</span><strong>{{ venue.type }}</strong></div>
+          <div><span>Capacity</span><strong>{{ venue.capacity }}</strong></div>
+          <div><span>Tables</span><strong>{{ venue.tables }}</strong></div>
+          <div><span>Chairs</span><strong>{{ venue.chairs }}</strong></div>
+          <div><span>Location</span><strong>{{ venue.location }}</strong></div>
+          <div><span>Price range</span><strong>{{ venue.priceRange }}</strong></div>
+        </div>
+        <div class="cta-row">
+          <button class="primary" @click="router.push('/quote')">Use in Quote Request</button>
+          <button @click="router.push('/suppliers')">View Supplier Match</button>
+        </div>
+      </article>
+    </section>
+
+    <section v-if="venue" class="panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">Theme compatibility</p>
+          <h2>Restaurant A rendering system</h2>
+        </div>
+        <span class="stage-badge">No real booking · staging only</span>
+      </div>
+      <div class="rendering-grid">
+        <button
+          v-for="visual in venueRenderings"
+          :key="visual.id"
+          class="render-card"
+          type="button"
+          @click="selectedImage = visual.image_path"
         >
+          <img :src="visual.image_path" :alt="visual.title" />
+          <strong>{{ visual.title }}</strong>
+          <span>{{ visual.decorationLayer }}</span>
+        </button>
       </div>
-    </div>
+    </section>
 
-    <div class="detail-container">
-      <!-- Main Info -->
-      <div class="main-info">
-        <div class="venue-header">
-          <div class="title-section">
-            <h1>{{ venue.name }}</h1>
-            <div class="badges">
-              <el-tag v-if="venue.venue_type">{{ venue.venue_type }}</el-tag>
-              <el-tag v-if="venue.is_partner" type="success">合作伙伴</el-tag>
-              <el-tag v-if="venue.discount_rate" type="warning">{{ (venue.discount_rate * 100).toFixed(0) }}% 优惠</el-tag>
+    <section v-if="venue" class="content-grid">
+      <article class="panel">
+        <p class="eyebrow">Supported packages</p>
+        <h2>What this venue can support</h2>
+        <div class="tag-row">
+          <span v-for="tier in venue.supported_packages" :key="tier">{{ tier }}</span>
+        </div>
+        <dl class="detail-list">
+          <div>
+            <dt>Theme fit</dt>
+            <dd>{{ venue.themeFit.join(' / ') }}</dd>
+          </div>
+          <div>
+            <dt>Layout image</dt>
+            <dd>{{ venue.layoutImage }}</dd>
+          </div>
+          <div>
+            <dt>Operations note</dt>
+            <dd>{{ venue.operationsNotes?.join(' · ') || venue.note }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="panel">
+        <p class="eyebrow">Supplier match</p>
+        <h2>Recommended supplier roles</h2>
+        <ul class="supplier-list">
+          <li v-for="supplier in recommendedSuppliers" :key="supplier.id">
+            <img :src="supplier.image_path" :alt="supplier.name" />
+            <div>
+              <strong>{{ supplier.name }}</strong>
+              <span>{{ supplier.categoryLabel || supplier.category }} · {{ supplier.priceRange }}</span>
+              <small>{{ supplier.responsibility || supplier.operationsRole }}</small>
             </div>
-          </div>
-          <el-rate v-model="venueRating" disabled show-score />
-        </div>
+          </li>
+        </ul>
+      </article>
+    </section>
 
-        <div class="info-section">
-          <h3>场地介绍</h3>
-          <p>{{ venue.description }}</p>
-        </div>
-
-        <div class="info-section">
-          <h3>基本信息</h3>
-          <el-descriptions :column="2" border>
-            <el-descriptions-item label="地址">
-              <el-icon><Location /></el-icon>
-              {{ venue.address }}, {{ venue.city }}, {{ venue.postcode }}
-            </el-descriptions-item>
-            <el-descriptions-item label="容纳人数">
-              <el-icon><User /></el-icon> {{ venue.capacity }} 人
-            </el-descriptions-item>
-            <el-descriptions-item label="场地类型">{{ venue.venue_type }}</el-descriptions-item>
-            <el-descriptions-item label="价格区间">{{ venue.price_range }}</el-descriptions-item>
-          </el-descriptions>
-        </div>
-
-        <div class="info-section">
-          <h3>设施服务</h3>
-          <div class="amenities-list">
-            <div v-for="amenity in venue.amenities || []" :key="amenity" class="amenity-item">
-              <el-icon><Check /></el-icon>
-              <span>{{ amenity }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="info-section">
-          <h3>位置地图</h3>
-          <div class="map-placeholder">
-            <el-icon><MapLocation /></el-icon>
-            <p>地图加载中... ({{ venue.latitude }}, {{ venue.longitude }})</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Booking Sidebar -->
-      <aside class="booking-sidebar">
-        <div class="price-card">
-          <div class="price-display">
-            <span class="currency">$</span>
-            <span class="amount">{{ venue.regular_price }}</span>
-            <span class="unit">/起</span>
-          </div>
-          
-          <div v-if="venue.is_partner" class="discount-info">
-            <el-tag type="success" size="small"><el-icon><Discount /></el-icon> 合作伙伴优惠 {{ (venue.discount_rate * 100).toFixed(0) }}%</el-tag>
-          </div>
-          
-          <el-divider />
-          
-          <div class="booking-form">
-            <el-form label-position="top">
-              <el-form-item label="活动日期">
-                <el-date-picker
-                  v-model="bookingForm.date"
-                  type="date"
-                  placeholder="选择日期"
-                  style="width: 100%"
-                />
-              </el-form-item>
-              
-              <el-form-item label="预计人数">
-                <el-input-number
-                  v-model="bookingForm.guestCount"
-                  :min="10"
-                  :max="venue.capacity"
-                  style="width: 100%"
-                />
-              </el-form-item>
-              
-              <el-form-item label="联系人姓名">
-                <el-input v-model="bookingForm.contactName" placeholder="请输入姓名" />
-              </el-form-item>
-              
-              <el-form-item label="联系电话">
-                <el-input v-model="bookingForm.contactPhone" placeholder="请输入电话" />
-              </el-form-item>
-              
-              <el-form-item label="备注需求">
-                <el-input
-                  v-model="bookingForm.notes"
-                  type="textarea"
-                  rows="3"
-                  placeholder="请描述您的特殊需求..."
-                />
-              </el-form-item>
-            </el-form>
-            
-            <el-button type="primary" size="large" style="width: 100%" @click="handleBooking">
-              立即预订
-            </el-button>
-            
-            <el-button size="large" style="width: 100%; margin-top: 12px" @click="handleQuote">
-              获取报价
-            </el-button>
-          </div>
-        </div>
-
-        <div class="contact-card">
-          <h4>联系场地</h4>
-          <p><el-icon><Phone /></el-icon> {{ venue.contact_phone }}</p>
-          <p><el-icon><Message /></el-icon> {{ venue.contact_email }}</p>
-          <p v-if="venue.website"><el-icon><Link /></el-icon> <a :href="venue.website" target="_blank">访问官网</a></p>
-        </div>
-      </aside>
-    </div>
-  </div>
-
-  <div v-else class="loading-container">
-    <el-skeleton :rows="10" animated />
-  </div>
+    <section v-else class="panel">
+      <h1>Venue not found</h1>
+      <p>This local/staging venue asset is not available.</p>
+    </section>
+  </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Location, User, Check, MapLocation, Discount, Phone, Message, Link } from '@element-plus/icons-vue'
-import { venueAPI } from '@/api/modules'
-import { ElMessage } from 'element-plus'
+import { getRecommendedSuppliers, restaurantAVisuals, venueDisplaySeeds } from '@/data/visualAssets'
 
 const route = useRoute()
 const router = useRouter()
-const venue = ref(null)
-const currentImage = ref('')
-const venueRating = ref(4.5)
 
-const bookingForm = ref({
-  date: '',
-  guestCount: 50,
-  contactName: '',
-  contactPhone: '',
-  notes: ''
+const venue = computed(() => venueDisplaySeeds.find((item) => String(item.id) === String(route.params.id)) || null)
+const selectedImage = ref(venue.value?.image_path || '')
+
+const venueRenderings = computed(() => {
+  if (!venue.value) return []
+  if (venue.value.id === 'restaurant-a') return restaurantAVisuals
+  return [
+    {
+      id: `${venue.value.id}-original`,
+      title: `${venue.value.name} reference`,
+      image_path: venue.value.image_path,
+      decorationLayer: venue.value.note
+    }
+  ]
 })
 
-const fetchVenueDetail = async () => {
-  try {
-    const data = await venueAPI.getVenue(route.params.id)
-    venue.value = { ...data, rating: 4.5 }
-    currentImage.value = venue.value.images?.[0] || ''
-  } catch (error) {
-    // 使用模拟数据
-    venue.value = {
-      id: route.params.id,
-      name: '云端宴会厅',
-      address: '123 市中心大道',
-      city: '悉尼',
-      postcode: '2000',
-      venue_type: '酒店宴会厅',
-      capacity: 200,
-      regular_price: 2500,
-      price_range: '高',
-      is_partner: true,
-      discount_rate: 0.15,
-      description: '云端宴会厅位于悉尼市中心，拥有无柱式设计，可容纳200人。配备顶级音响灯光系统，专业舞台，是举办婚礼、企业年会、生日派对的理想场所。场地提供一站式策划服务，让您的派对省心省力。',
-      images: [
-        'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800',
-        'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400',
-        'https://images.unsplash.com/photo-1510076857177-7470076d4098?w=400',
-        'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400'
-      ],
-      amenities: ['免费WiFi', '停车位', '餐饮配套', '专业音响', 'LED大屏', '舞台灯光', '化妆间', 'VIP休息室'],
-      latitude: -33.8688,
-      longitude: 151.2093,
-      contact_phone: '+61 2 1234 5678',
-      contact_email: 'events@cloudbanquet.com',
-      website: 'https://example.com'
-    }
-    currentImage.value = venue.value.images[0]
-  }
-}
-
-const handleBooking = () => {
-  if (!bookingForm.value.date) {
-    ElMessage.warning('请选择活动日期')
-    return
-  }
-  if (!bookingForm.value.contactName || !bookingForm.value.contactPhone) {
-    ElMessage.warning('请填写联系人信息')
-    return
-  }
-  ElMessage.success('预订申请已提交，我们将尽快联系您')
-}
-
-const handleQuote = () => {
-  router.push('/quotation')
-}
-
-onMounted(fetchVenueDetail)
+const recommendedSuppliers = computed(() => {
+  const theme = venue.value?.themeFit?.[0] || 'castle'
+  const tier = venue.value?.bestPackageTiers?.includes('standard') ? 'standard' : venue.value?.bestPackageTiers?.[0] || 'basic'
+  return getRecommendedSuppliers(theme, tier)
+})
 </script>
 
 <style scoped>
 .venue-detail-page {
-  padding-bottom: 60px;
-}
-
-.loading-container {
-  max-width: 1200px;
+  max-width: 1220px;
   margin: 0 auto;
-  padding: 40px;
+  padding: 96px 24px 56px;
+  color: #172033;
 }
 
-.image-gallery {
-  background: #000;
-}
-
-.main-image {
-  height: 500px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.main-image img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.thumbnail-list {
-  display: flex;
-  gap: 8px;
-  padding: 16px;
-  background: #1a1a1a;
-  overflow-x: auto;
-}
-
-.thumbnail-list img {
-  width: 100px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 4px;
+.back-button,
+button {
+  border: 1px solid #d8deea;
+  border-radius: 8px;
+  background: #fff;
+  color: #172033;
+  font-weight: 700;
+  padding: 10px 14px;
   cursor: pointer;
-  opacity: 0.7;
-  transition: all 0.3s;
 }
 
-.thumbnail-list img:hover,
-.thumbnail-list img.active {
-  opacity: 1;
-  box-shadow: 0 0 0 2px #409EFF;
+.back-button {
+  margin-bottom: 18px;
 }
 
-.detail-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
+.hero-grid,
+.content-grid {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 40px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 22px;
+  margin-bottom: 22px;
 }
 
-.main-info {
-  min-width: 0;
+.hero-media,
+.panel,
+.hero-copy {
+  background: #fff;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(31, 42, 68, 0.08);
 }
 
-.venue-header {
-  margin-bottom: 30px;
+.hero-media {
+  overflow: hidden;
+  min-height: 420px;
 }
 
-.title-section h1 {
-  font-size: 32px;
-  margin-bottom: 12px;
+.hero-media img,
+.render-card img,
+.supplier-list img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.badges {
+.hero-copy,
+.panel {
+  padding: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #7c3aed;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1,
+h2 {
+  margin: 0 0 12px;
+}
+
+.lead {
+  color: #5c667a;
+  line-height: 1.7;
+}
+
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.fact-grid div,
+.detail-list div {
+  background: #f7f9fc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.fact-grid span,
+dt {
+  display: block;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.fact-grid strong,
+dd {
+  margin: 0;
+  color: #172033;
+  font-weight: 800;
+}
+
+.cta-row,
+.tag-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.info-section {
-  margin-bottom: 40px;
+.primary {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #fff;
 }
 
-.info-section h3 {
-  font-size: 20px;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #409EFF;
-  display: inline-block;
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
 }
 
-.info-section p {
-  line-height: 1.8;
-  color: #606266;
+.stage-badge,
+.tag-row span {
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 10px;
 }
 
-.amenities-list {
+.rendering-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 
-.amenity-item {
-  display: flex;
+.render-card {
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+}
+
+.render-card img {
+  height: 130px;
+}
+
+.render-card strong,
+.render-card span {
+  display: block;
+  padding: 8px 10px 0;
+}
+
+.render-card span {
+  padding-bottom: 10px;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.detail-list,
+.supplier-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.supplier-list li {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 12px;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background: #f5f7fa;
+  border: 1px solid #e4e9f2;
   border-radius: 8px;
+  padding: 10px;
 }
 
-.amenity-item .el-icon {
-  color: #67c23a;
+.supplier-list img {
+  height: 64px;
+  border-radius: 6px;
 }
 
-.map-placeholder {
-  height: 300px;
-  background: #f5f7fa;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #909399;
+.supplier-list span,
+.supplier-list small {
+  display: block;
+  color: #667085;
+  margin-top: 4px;
 }
 
-.map-placeholder .el-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.booking-sidebar {
-  position: sticky;
-  top: 84px;
-  height: fit-content;
-}
-
-.price-card {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  margin-bottom: 20px;
-}
-
-.price-display {
-  margin-bottom: 12px;
-}
-
-.price-display .currency {
-  font-size: 24px;
-  font-weight: bold;
-  color: #f56c6c;
-}
-
-.price-display .amount {
-  font-size: 36px;
-  font-weight: bold;
-  color: #f56c6c;
-}
-
-.price-display .unit {
-  font-size: 14px;
-  color: #909399;
-}
-
-.discount-info {
-  margin-bottom: 8px;
-}
-
-.contact-card {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-
-.contact-card h4 {
-  margin-bottom: 16px;
-  font-size: 16px;
-}
-
-.contact-card p {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  color: #606266;
-}
-
-.contact-card a {
-  color: #409EFF;
-  text-decoration: none;
-}
-
-@media (max-width: 1024px) {
-  .detail-container {
+@media (max-width: 900px) {
+  .hero-grid,
+  .content-grid {
     grid-template-columns: 1fr;
   }
-  
-  .booking-sidebar {
-    position: static;
+
+  .rendering-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 </style>

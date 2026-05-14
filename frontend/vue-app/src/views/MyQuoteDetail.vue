@@ -101,6 +101,22 @@
         </p>
       </section>
 
+      <section class="panel venue-supplier-panel">
+        <h2>场地与供应商上下文</h2>
+        <p class="panel-intro">
+          这些是当前 staging quote 使用的运营建议，帮助你理解方案会如何落地；不会自动联系供应商。
+        </p>
+        <div class="context-grid">
+          <img :src="quoteVisualContext.restaurant.image_path" :alt="quoteVisualContext.restaurant.title" />
+          <dl class="detail-list">
+            <div><dt>Recommended venue</dt><dd>{{ quoteVisualContext.primaryVenue.name }} · {{ quoteVisualContext.primaryVenue.capacity }}</dd></div>
+            <div><dt>Rendering</dt><dd>{{ quoteVisualContext.restaurant.title }}</dd></div>
+            <div><dt>Suppliers</dt><dd>{{ quoteVisualContext.suppliers.map((item) => `${item.categoryLabel || item.category}: ${item.name}`).join(' / ') }}</dd></div>
+            <div><dt>Why it fits</dt><dd>{{ quoteVisualContext.packageVisual.buyerCue }}</dd></div>
+          </dl>
+        </div>
+      </section>
+
       <section class="next-step">
         <span>Next step</span>
         <p>{{ quote.next_step }}</p>
@@ -171,6 +187,7 @@ import {
   saveQuoteConfirmationPlaceholder
 } from '@/services/customerExperienceService'
 import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
+import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 
 const route = useRoute()
 const router = useRouter()
@@ -184,6 +201,13 @@ const supplementNote = ref('')
 
 const canConfirmQuote = computed(() => ['sent', 'accepted'].includes(quote.value?.status))
 const quoteLineItemSummary = computed(() => summarizeQuoteLineItems(quote.value?.line_items || []))
+const quoteVisualContext = computed(() => {
+  const selection = quote.value?.selection_snapshot || {}
+  return getVisualContext(
+    normalizeThemeId(selection.theme || selection.themeName),
+    normalizeTierId(selection.package || selection.packageTier || selection.packageName)
+  )
+})
 const customerQuoteGroups = computed(() => {
   const groups = quoteLineItemSummary.value.groups
   const byType = (types) => groups.filter((group) => types.includes(group.type))
@@ -302,6 +326,25 @@ h2 {
   line-height: 1.6;
 }
 
+.context-grid {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.context-grid img {
+  width: 100%;
+  min-height: 220px;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.context-grid .detail-list {
+  margin: 0;
+}
+
 :deep(.el-table small) {
   display: block;
   margin-top: 4px;
@@ -418,7 +461,8 @@ dd {
 
 @media (max-width: 820px) {
   .page-hero,
-  .content-grid {
+  .content-grid,
+  .context-grid {
     display: block;
   }
 }

@@ -1,350 +1,300 @@
 <template>
-  <div class="supplier-detail-page">
-    <div class="header-bar">
-      <button class="back-btn" @click="$router.back()">← 返回列表</button>
-      <div class="actions">
-        <button class="btn-secondary" @click="editSupplier">✏️ 编辑</button>
-        <button class="btn-primary" @click="contactSupplier">📞 联系商家</button>
-      </div>
-    </div>
+  <main class="supplier-detail-page">
+    <button class="back-button" @click="router.push('/suppliers')">Back to Suppliers</button>
 
-    <div v-if="supplier" class="detail-content">
-      <!-- 图片画廊 -->
-      <div class="gallery-section">
-        <div class="main-image">
-          <img :src="currentImage || supplier.cover_image_url || '/placeholder-venue.jpg'" :alt="supplier.name" />
-        </div>
+    <section v-if="supplier" class="hero-grid">
+      <div class="hero-media">
+        <img :src="supplier.cover_image_url || '/party-assets/packages/package-tier-matrix.png'" :alt="supplier.name" />
       </div>
-
-      <!-- 基本信息 -->
-      <div class="info-section">
-        <div class="title-row">
-          <span class="category-badge">{{ supplier.category_level_1 }}</span>
-        </div>
-        
+      <article class="hero-copy">
+        <p class="eyebrow">Local/staging supplier asset</p>
         <h1>{{ supplier.name }}</h1>
-        
-        <div class="rating-row">
-          <span class="stars">★★★★★</span>
-          <span class="rating-text">{{ supplier.rating || 5 }} 分</span>
-          <span class="reviews">({{ supplier.review_count || 0 }} 条评价)</span>
+        <p class="lead">
+          {{ supplier.materials_or_services || supplier.visual_context?.serviceContent || 'Supplier service details are held as local/staging operating data.' }}
+        </p>
+        <div class="fact-grid">
+          <div><span>Category</span><strong>{{ supplier.category_label || supplier.category_level_1 }}</strong></div>
+          <div><span>Service area</span><strong>{{ supplier.service_area || supplier.suburb }}</strong></div>
+          <div><span>Price range</span><strong>{{ supplier.price_range || supplier.price_level }}</strong></div>
+          <div><span>Lead time</span><strong>{{ supplier.lead_time || 'Confirm before quote send' }}</strong></div>
+          <div><span>Status</span><strong>{{ supplier.status || 'demo_active' }}</strong></div>
+          <div><span>Contact</span><strong>{{ supplier.contact_placeholder || 'Local/staging placeholder only' }}</strong></div>
         </div>
+        <div class="cta-row">
+          <button class="primary" @click="router.push('/quote')">Use in Quote Context</button>
+          <button @click="router.push('/admin/suppliers')">Admin Supplier View</button>
+        </div>
+      </article>
+    </section>
 
-        <div class="location-row">
-          <span>📍 {{ supplier.suburb }}, {{ supplier.city || 'Sydney' }}</span>
-        </div>
-      </div>
-
-      <!-- 关键信息卡片 -->
-      <div class="key-info-grid">
-        <div class="info-card">
-          <div class="label">价格档位</div>
-          <div class="value price">{{ supplier.price_level || '中' }}</div>
-        </div>
-        
-        <div class="info-card">
-          <div class="label">容纳人数</div>
-          <div class="value">{{ supplier.max_capacity || '不限' }}</div>
-        </div>
-        
-        <div class="info-card">
-          <div class="label">服务半径</div>
-          <div class="value">{{ supplier.service_radius_km || 10 }}km</div>
-        </div>
-        
-        <div class="info-card">
-          <div class="label">周末服务</div>
-          <div class="value">{{ supplier.weekend_available ? '✅ 支持' : '❌ 不支持' }}</div>
-        </div>
-      </div>
-
-      <!-- 联系方式 -->
-      <div class="contact-section">
-        <h3>联系方式</h3>
-        <div class="contact-list">
-          <div class="contact-item">
-            <span class="label">联系人：</span>
-            <span class="value">{{ supplier.contact_name || '-' }}</span>
+    <section v-if="supplier" class="content-grid">
+      <article class="panel">
+        <p class="eyebrow">Theme / package fit</p>
+        <h2>Where this supplier fits</h2>
+        <dl class="detail-list">
+          <div>
+            <dt>Supported themes</dt>
+            <dd>{{ supplier.supported_themes?.join(' / ') || '-' }}</dd>
           </div>
-          
-          <div class="contact-item">
-            <span class="label">电话：</span>
-            <span class="value">{{ supplier.phone || '-' }}</span>
+          <div>
+            <dt>Supported package tiers</dt>
+            <dd>{{ supplier.supported_package_tiers?.join(' / ') || '-' }}</dd>
           </div>
-          
-          <div class="contact-item">
-            <span class="label">邮箱：</span>
-            <span class="value">{{ supplier.email || '-' }}</span>
+          <div>
+            <dt>Quote role</dt>
+            <dd>{{ supplier.visual_context?.quoteRole || supplier.service_tags?.[0] || '-' }}</dd>
           </div>
-        </div>
-      </div>
+          <div>
+            <dt>Operational responsibility</dt>
+            <dd>{{ responsibilityText }}</dd>
+          </div>
+        </dl>
+      </article>
 
-      <!-- 操作按钮 -->
-      <div class="action-section">
-        <button class="btn-primary large" @click="requestQuote">📋 获取报价方案</button>
+      <article class="panel">
+        <p class="eyebrow">Quote line item relationship</p>
+        <h2>How operations should use this</h2>
+        <ul class="ops-list">
+          <li v-for="item in quoteLineItemLinks" :key="item">{{ item }}</li>
+        </ul>
+        <p class="boundary">
+          This supplier record is a local/staging operating asset. It does not contact the supplier, reserve inventory, trigger webhook/n8n, or send outbound messages.
+        </p>
+      </article>
+    </section>
+
+    <section v-if="supplier" class="panel">
+      <p class="eyebrow">Compatible Restaurant A scenes</p>
+      <h2>Visual contexts this supplier can support</h2>
+      <div class="scene-grid">
+        <article v-for="scene in compatibleScenes" :key="scene.id">
+          <img :src="scene.image_path" :alt="scene.title" />
+          <strong>{{ scene.title }}</strong>
+          <span>{{ scene.decorationLayer }}</span>
+        </article>
       </div>
-    </div>
-  </div>
+    </section>
+
+    <section v-else class="panel">
+      <h1>Supplier not found</h1>
+      <p>This local/staging supplier asset is not available.</p>
+    </section>
+  </main>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { getSupplierDisplayItem } from '@/services/supplierLightService'
+import { restaurantAVisuals } from '@/data/visualAssets'
 
 const route = useRoute()
 const router = useRouter()
+const supplier = ref(null)
 
-const supplier = ref({
-  name: '悉尼儿童派对中心',
-  category_level_1: '场地类',
-  suburb: 'North Sydney',
-  city: 'Sydney',
-  rating: 4.8,
-  review_count: 127,
-  price_level: '中',
-  max_capacity: 50,
-  service_radius_km: 20,
-  weekend_available: true,
-  contact_name: 'Sarah Chen',
-  phone: '0412 345 678',
-  email: 'sarah@kidsparty.com',
-  cover_image_url: 'https://images.unsplash.com/photo-1530103862676-de3c9a59aa38?w=800'
+const responsibilityText = computed(() => {
+  const roles = supplier.value?.responsibilities || [supplier.value?.visual_context?.responsibility, supplier.value?.visual_context?.operationsRole].filter(Boolean)
+  return roles?.join(' / ') || '-'
 })
 
-const currentImage = ref('')
+const quoteLineItemLinks = computed(() => {
+  const category = supplier.value?.category
+  const map = {
+    venue: ['Maps to venue_fee for room hire or private dining room hold.', 'Admin should confirm capacity, access window, and setup restrictions.'],
+    florist: ['Maps to decor_fee or optional_upgrade depending on package tier.', 'Useful for Castle and Forest table styling.'],
+    balloon_decorator: ['Maps to decor_fee for arch, clusters, and entrance visual layer.', 'Standard/Premium packages should itemize this separately when needed.'],
+    cake_dessert: ['Maps to supplier_fee or optional_upgrade for cake and dessert table.', 'Customer-facing quote should describe it as supplier service, not payment-ready checkout.'],
+    kids_entertainment: ['Maps to supplier_fee for host or activity vendor.', 'Admin should confirm theme script and child age fit.'],
+    photography: ['Maps to optional_upgrade unless included in Premium package.', 'Do not imply automatic booking in staging.'],
+    setup_service: ['Maps to labor_fee, transport_fee, or service_fee.', 'Important for final delivery planning and venue handover.']
+  }
+  return map[category] || ['Use this supplier as a local/staging quote context item.']
+})
 
-const editSupplier = () => router.push('/admin/suppliers/1/edit')
-const contactSupplier = () => {}
-const requestQuote = () => router.push('/quotation')
+const compatibleScenes = computed(() => {
+  const themes = supplier.value?.supported_themes || []
+  const tiers = supplier.value?.supported_package_tiers || []
+  return restaurantAVisuals.filter((scene) => (
+    scene.theme === 'all'
+    || (themes.includes(scene.theme) && (!tiers.length || tiers.includes(scene.tier)))
+  )).slice(0, 6)
+})
+
+onMounted(async () => {
+  const result = await getSupplierDisplayItem(route.params.id)
+  supplier.value = result.item
+})
 </script>
 
 <style scoped>
 .supplier-detail-page {
-  max-width: 800px;
+  max-width: 1220px;
   margin: 0 auto;
-  padding: 20px;
-  background: #ffffff;
-  min-height: 100vh;
+  padding: 96px 24px 56px;
+  color: #172033;
 }
 
-.header-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid #333333;
-}
-
-.back-btn {
-  padding: 12px 20px;
-  background: #f0f0f0;
-  border: 2px solid #333333;
+.back-button,
+button {
+  border: 1px solid #d8deea;
   border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
+  background: #fff;
+  color: #172033;
   font-weight: 700;
-  color: #000000;
+  padding: 10px 14px;
+  cursor: pointer;
 }
 
-.actions {
-  display: flex;
-  gap: 12px;
+.back-button {
+  margin-bottom: 18px;
 }
 
-.btn-primary, .btn-secondary {
-  padding: 12px 24px;
+.hero-grid,
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.9fr);
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+.hero-media,
+.hero-copy,
+.panel {
+  background: #fff;
+  border: 1px solid #e4e9f2;
   border-radius: 8px;
-  border: 2px solid #333333;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 700;
+  box-shadow: 0 14px 34px rgba(31, 42, 68, 0.08);
 }
 
-.btn-primary {
-  background: #7c3aed;
-  color: #ffffff;
-  border-color: #5b21b6;
-}
-
-.btn-secondary {
-  background: #f0f0f0;
-  color: #000000;
-}
-
-.btn-primary.large {
-  padding: 18px 36px;
-  font-size: 17px;
-  width: 100%;
-}
-
-/* 图片区 */
-.gallery-section {
-  background: #ffffff;
-  border-radius: 12px;
+.hero-media {
   overflow: hidden;
-  margin-bottom: 24px;
-  border: 3px solid #333333;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  min-height: 420px;
 }
 
-.main-image {
-  height: 400px;
-  background: #e0e0e0;
-}
-
-.main-image img {
+.hero-media img,
+.scene-grid img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-/* 信息区 */
-.info-section {
-  background: #ffffff;
+.hero-copy,
+.panel {
   padding: 24px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  border: 3px solid #333333;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.title-row {
-  margin-bottom: 12px;
-}
-
-.category-badge {
-  padding: 6px 14px;
-  background: #7c3aed;
-  color: #ffffff;
-  border-radius: 6px;
-  font-size: 13px;
+.eyebrow {
+  margin: 0 0 8px;
+  color: #7c3aed;
+  font-size: 12px;
   font-weight: 800;
-  border: 2px solid #5b21b6;
+  text-transform: uppercase;
 }
 
-h1 {
-  font-size: 26px;
-  font-weight: 800;
-  color: #000000;
-  margin-bottom: 16px;
+h1,
+h2 {
+  margin: 0 0 12px;
 }
 
-.rating-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
+.lead,
+.boundary {
+  color: #5c667a;
+  line-height: 1.7;
 }
 
-.stars {
-  color: #f59e0b;
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.rating-text {
-  font-weight: 800;
-  font-size: 16px;
-  color: #000000;
-}
-
-.reviews {
-  color: #555555;
-  font-weight: 700;
-}
-
-.location-row {
-  font-size: 16px;
-  color: #333333;
-  font-weight: 700;
-}
-
-/* 信息卡片网格 */
-.key-info-grid {
+.fact-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
 }
 
-.info-card {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  border: 3px solid #333333;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.info-card .label {
-  font-size: 13px;
-  color: #555555;
-  margin-bottom: 10px;
-  font-weight: 700;
-}
-
-.info-card .value {
-  font-size: 22px;
-  font-weight: 800;
-  color: #000000;
-}
-
-.info-card .value.price {
-  color: #059669;
-}
-
-/* 联系方式区 */
-.contact-section {
-  background: #ffffff;
-  padding: 24px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  border: 3px solid #333333;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.contact-section h3 {
-  font-size: 18px;
-  font-weight: 800;
-  color: #000000;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.contact-list {
-  display: grid;
-  gap: 14px;
-}
-
-.contact-item {
-  display: flex;
-  padding: 14px;
-  background: #f8f8f8;
+.fact-grid div,
+.detail-list div {
+  background: #f7f9fc;
   border-radius: 8px;
-  border: 2px solid #d0d0d0;
+  padding: 12px;
 }
 
-.contact-item .label {
-  font-weight: 800;
-  color: #555555;
-  min-width: 80px;
-}
-
-.contact-item .value {
+.fact-grid span,
+dt {
+  display: block;
+  color: #667085;
+  font-size: 12px;
   font-weight: 700;
-  color: #000000;
+  margin-bottom: 4px;
 }
 
-/* 操作区 */
-.action-section {
-  margin-top: 32px;
+.fact-grid strong,
+dd {
+  margin: 0;
+  color: #172033;
+  font-weight: 800;
 }
 
-@media (max-width: 640px) {
-  .key-info-grid {
-    grid-template-columns: repeat(2, 1fr);
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primary {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #fff;
+}
+
+.detail-list,
+.ops-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ops-list li {
+  background: #f7f9fc;
+  border-radius: 8px;
+  padding: 12px;
+  color: #344054;
+}
+
+.scene-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.scene-grid article {
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.scene-grid img {
+  height: 150px;
+}
+
+.scene-grid strong,
+.scene-grid span {
+  display: block;
+  padding: 8px 10px 0;
+}
+
+.scene-grid span {
+  padding-bottom: 10px;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+  .hero-grid,
+  .content-grid,
+  .scene-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

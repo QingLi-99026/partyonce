@@ -171,7 +171,7 @@
             </div>
             <div>
               <dt>Suppliers</dt>
-              <dd>{{ partySceneConfig.suppliers.map((item) => `${item.category}: ${item.name}`).join(' / ') }}</dd>
+              <dd>{{ partySceneConfig.suppliers.map((item) => `${item.categoryLabel || item.category}: ${item.name}`).join(' / ') }}</dd>
             </div>
             <div>
               <dt>Future 3D</dt>
@@ -636,7 +636,9 @@ export default {
             id: item.id,
             name: item.name,
             category: item.category,
-            role: item.quoteRole
+            categoryLabel: item.categoryLabel,
+            role: item.quoteRole,
+            responsibility: item.responsibility || item.operationsRole
           })),
           addons: this.selectedAddons.map(id => {
             const addon = this.addons.find(a => a.id === id);

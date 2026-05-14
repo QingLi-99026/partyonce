@@ -15,10 +15,12 @@
         <select v-model="filterCategory" @change="searchNearby">
           <option value="">全部分类</option>
           <option value="场地类">场地类</option>
-          <option value="物料类">物料类</option>
-          <option value="搭建类">搭建类</option>
-          <option value="现场服务类">现场服务类</option>
-          <option value="餐饮类">餐饮类</option>
+          <option value="florist">花艺 / 桌花</option>
+          <option value="balloon_decorator">气球 / 拱门</option>
+          <option value="cake_dessert">蛋糕 / 甜品台</option>
+          <option value="kids_entertainment">儿童娱乐</option>
+          <option value="photography">摄影 / 记录</option>
+          <option value="setup_service">搭建 / 现场执行</option>
         </select>
         
         <select v-model="filterPrice" @change="searchNearby">

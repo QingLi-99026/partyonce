@@ -333,7 +333,7 @@
               </div>
               <div>
                 <dt>Suppliers</dt>
-                <dd>{{ quoteVisualContext.suppliers.map((item) => `${item.name} (${item.category})`).join(' / ') }}</dd>
+                <dd>{{ quoteVisualContext.suppliers.map((item) => `${item.name} (${item.categoryLabel || item.category})`).join(' / ') }}</dd>
               </div>
             </dl>
           </article>
@@ -344,7 +344,7 @@
               <li>{{ quoteVisualContext.packageVisual.scope }}</li>
               <li>{{ quoteVisualContext.restaurant.decorationLayer }}</li>
               <li v-for="supplier in quoteVisualContext.suppliers" :key="supplier.id">
-                {{ supplier.name }} · {{ supplier.operationsRole }}
+                {{ supplier.name }} · {{ supplier.categoryLabel || supplier.category }} · {{ supplier.responsibility || supplier.operationsRole }}
               </li>
             </ul>
           </article>
@@ -399,7 +399,7 @@
               </div>
               <div>
                 <dt>Suppliers / 供应商</dt>
-                <dd>{{ quoteVisualContext.suppliers.map((item) => `${item.name} · ${item.priceRange}`).join(' / ') }}</dd>
+                <dd>{{ quoteVisualContext.suppliers.map((item) => `${item.name} · ${item.categoryLabel || item.category} · ${item.priceRange}`).join(' / ') }}</dd>
               </div>
               <div>
                 <dt>Decor / 装饰</dt>
@@ -496,7 +496,7 @@ const quotePriceBasis = computed(() => {
     `装饰项：${context.packageVisual.scope}`,
     `餐厅 / 场地：${context.primaryVenue.name} · ${context.primaryVenue.priceRange}`,
     `渲染范围：${context.restaurant.decorationLayer}`,
-    ...context.suppliers.map((supplier) => `供应商：${supplier.name} (${supplier.category}) · ${supplier.priceRange}`),
+    ...context.suppliers.map((supplier) => `供应商：${supplier.name} (${supplier.categoryLabel || supplier.category}) · ${supplier.priceRange} · ${supplier.responsibility || supplier.operationsRole}`),
     ...explanation.priceDrivers.map((driver) => `价格驱动：${driver}`),
     ...lineItemBasis
   ].filter(Boolean)
@@ -507,7 +507,7 @@ const quoteCustomerScript = computed(() => {
   return [
     `我们推荐 ${context.packageVisual.title}，因为${explanation.whyRecommend}`,
     `${explanation.customerFit}`,
-    `这份报价主要由 ${context.primaryVenue.name} 场地样板、${context.packageVisual.scope}、${context.suppliers.map((item) => item.category).join(' / ')} 供应商建议和现场布置人工构成。`,
+    `这份报价主要由 ${context.primaryVenue.name} 场地样板、${context.packageVisual.scope}、${context.suppliers.map((item) => item.categoryLabel || item.category).join(' / ')} 供应商建议和现场布置人工构成。`,
     `${explanation.quoteExplanation}`,
     `${quoteUpgradeExplanation.value.title}：${quoteUpgradeExplanation.value.items.join('；')}`
   ].join('\n\n')

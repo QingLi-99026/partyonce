@@ -189,7 +189,9 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
         id: item.id,
         name: item.name,
         category: item.category,
+        categoryLabel: item.categoryLabel || item.category,
         role: item.quoteRole,
+        responsibility: item.responsibility || item.operationsRole,
         priceRange: item.priceRange
       }))
     },
