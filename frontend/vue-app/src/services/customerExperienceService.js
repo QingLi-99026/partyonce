@@ -184,8 +184,10 @@ const readInquiryQuotes = () => {
         package: inquiry.selection?.packageName || inquiry.selection?.packageId || '-',
         venue: inquiry.selection?.sceneName || '-',
         guest_count: inquiry.customerInfo?.guestCount || '-',
-        event_date: inquiry.customerInfo?.preferredDate || '-'
+        event_date: inquiry.customerInfo?.preferredDate || '-',
+        party_scene_config: inquiry.party_scene_config || inquiry.selection?.party_scene_config || inquiry.aiRecommendation?.party_scene_config || null
       },
+      party_scene_config: inquiry.party_scene_config || inquiry.selection?.party_scene_config || inquiry.aiRecommendation?.party_scene_config || null,
       currency: 'AUD',
       amount: Number(inquiry.pricing?.finalTotal || 0),
       valid_until: '-',
@@ -221,6 +223,7 @@ const normalizeQuote = (quote) => {
       guest_count: snapshot.guestCount || snapshot.guest_count || '-',
       event_date: snapshot.eventDate || snapshot.event_date || snapshot.preferredDate || '-'
     },
+    party_scene_config: quote.party_scene_config || snapshot.party_scene_config || quote.aiRecommendation?.party_scene_config || null,
     currency: quote.currency || 'AUD',
     amount: Number(quote.amount || quote.final_total || quote.total_amount || 0),
     valid_until: quote.valid_until || '-',
@@ -252,6 +255,7 @@ const normalizeOrder = (order) => {
     next_step: order.next_action || orderNextStep[status] || '请联系 PartyOnce 顾问确认下一步。',
     created_at: order.created_at || null,
     updated_at: order.updated_at || null,
+    party_scene_config: order.party_scene_config || order.selection_snapshot?.party_scene_config || order.quote?.party_scene_config || null,
     line_items: normalizeQuoteLineItems(order.line_items)
   }
 }

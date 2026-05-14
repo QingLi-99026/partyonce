@@ -153,6 +153,28 @@
             </dl>
           </div>
         </div>
+        <div v-if="partySceneConfig" class="scene-config-card" :style="cardStyle">
+          <span class="visual-kicker">party_scene_config · {{ partySceneConfig.version }}</span>
+          <h3>AI 场景配置摘要</h3>
+          <dl>
+            <div>
+              <dt>Layout</dt>
+              <dd>{{ partySceneConfig.layout.tables }} tables · {{ partySceneConfig.layout.chairs }} chairs · dessert {{ partySceneConfig.layout.dessertTable }} · photo {{ partySceneConfig.layout.photoZone }}</dd>
+            </div>
+            <div>
+              <dt>Decor</dt>
+              <dd>{{ partySceneConfig.decor.tablecloth }} / {{ partySceneConfig.decor.balloons }} / {{ partySceneConfig.decor.backdropStyle }} / {{ partySceneConfig.decor.lighting }}</dd>
+            </div>
+            <div>
+              <dt>Suppliers</dt>
+              <dd>{{ partySceneConfig.suppliers.map((item) => `${item.category}: ${item.name}`).join(' / ') }}</dd>
+            </div>
+            <div>
+              <dt>Future 3D</dt>
+              <dd>{{ partySceneConfig.future3d.suggestedRoute }} · {{ partySceneConfig.future3d.layoutCoordinateSystem }}</dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </section>
 
@@ -387,6 +409,13 @@ export default {
       return getUpgradeExplanation(this.packageId);
     },
 
+    partySceneConfig() {
+      return this.aiPrefill?.party_scene_config
+        || this.aiPrefill?.selection?.party_scene_config
+        || this.aiPrefill?.aiRecommendation?.party_scene_config
+        || null;
+    },
+
     aiPrefillNotice() {
       if (!this.aiPrefill) return null;
       return {
@@ -596,6 +625,8 @@ export default {
           venueName: this.aiPrefill?.selection?.venueName || this.visualContext.primaryVenue.name,
           venueCapacity: this.aiPrefill?.selection?.venueCapacity || this.visualContext.primaryVenue.capacity,
           venueLayoutImage: this.aiPrefill?.selection?.venueLayoutImage || this.visualContext.primaryVenue.layoutImage || this.visualContext.primaryVenue.image_path,
+          party_scene_config: this.partySceneConfig,
+          sceneConfigSummary: this.aiPrefill?.aiRecommendation?.sceneConfigSummary || null,
           supplierSuggestions: this.aiPrefill?.selection?.supplierSuggestions || this.visualContext.suppliers.map((item) => ({
             id: item.id,
             name: item.name,
@@ -614,12 +645,14 @@ export default {
           finalTotal: this.finalTotal,
           lineItems: this.standardizedLineItems,
           lineItemSummary: this.lineItemSummary,
+          party_scene_config: this.partySceneConfig,
           packageExplanation: this.packageExplanation,
           upgradeExplanation: this.upgradeExplanation,
           snapshot_note: this.aiPrefill?.pricing?.snapshot_note || 'Frontend staging estimate; final quote requires human review.',
           aiEstimate: this.aiPrefill?.pricing || null
         },
         source: this.quoteSource,
+        party_scene_config: this.partySceneConfig,
         aiRecommendation: this.aiPrefill?.aiRecommendation || null,
         submitTime: new Date().toISOString(),
         status: 'pending'
@@ -944,6 +977,41 @@ export default {
   display: grid;
   gap: 12px;
   margin: 18px 0 0;
+}
+
+.scene-config-card {
+  margin-top: 22px;
+  padding: 28px;
+  color: #eaf8ff;
+}
+
+.scene-config-card h3 {
+  margin: 0 0 16px;
+  color: #fff;
+  font-size: 1.35rem;
+}
+
+.scene-config-card dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.scene-config-card div {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.scene-config-card dt {
+  margin-bottom: 4px;
+  color: #fff;
+  font-weight: 800;
+}
+
+.scene-config-card dd {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.55;
 }
 
 .visual-context-copy dt {

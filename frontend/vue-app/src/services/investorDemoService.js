@@ -17,6 +17,8 @@ const demoAnswers = {
   indoorOutdoor: 'indoor',
   themePreference: 'space',
   venueStatus: 'need_restaurant',
+  scenePriorities: 'photo_arch',
+  stylingPreference: 'balanced',
   customerName: 'Investor Demo Parent',
   customerContact: 'demo-parent@example.test'
 };

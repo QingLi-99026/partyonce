@@ -192,6 +192,11 @@
         <section class="panel-grid">
           <article class="panel ops-explainer-panel">
             <h2>Ops Pricing Explanation</h2>
+            <div class="scene-config-admin-summary">
+              <strong>party_scene_config</strong>
+              <p>{{ orderSceneConfigSummary.layout }}</p>
+              <span>{{ orderSceneConfigSummary.decor }}</span>
+            </div>
             <p class="body-text">
               {{ orderPackageExplanation.positioning }}
             </p>
@@ -323,6 +328,7 @@ import { blockedOrderActions, orderStatuses } from '@/mock/adminOrders'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
 import { normalizeQuoteLineItems, summarizeQuoteLineItems } from '@/data/quoteLineItems'
+import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
 import {
   ORDER_SOURCE_API,
   fetchAdminOrderDetail,
@@ -365,6 +371,13 @@ const orderVisualContext = computed(() => getVisualContext(
 const orderPackageTier = computed(() => normalizeTierId(order.value?.event?.package_tier || order.value?.package_tier))
 const orderPackageExplanation = computed(() => getPackageExplanation(orderPackageTier.value))
 const orderUpgradeExplanation = computed(() => getUpgradeExplanation(orderPackageTier.value))
+const orderPartySceneConfig = computed(() => order.value?.party_scene_config || order.value?.selection_snapshot?.party_scene_config || buildPartySceneConfig({}, {
+  theme: orderVisualContext.value.packageVisual.theme,
+  tier: orderPackageTier.value,
+  visualContext: orderVisualContext.value,
+  reasonHeadline: orderPackageExplanation.value.whyRecommend
+}))
+const orderSceneConfigSummary = computed(() => summarizePartySceneConfig(orderPartySceneConfig.value))
 const orderPriceBasis = computed(() => {
   const context = orderVisualContext.value
   const explanation = orderPackageExplanation.value
@@ -732,6 +745,23 @@ dd {
 
 .ops-basis-list {
   margin-top: 14px;
+}
+
+.scene-config-admin-summary {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid #c3fae8;
+  border-radius: 8px;
+  background: #ebfbee;
+}
+
+.scene-config-admin-summary p,
+.scene-config-admin-summary span {
+  margin: 0;
+  color: #495057;
+  line-height: 1.5;
 }
 
 :deep(.el-table small) {

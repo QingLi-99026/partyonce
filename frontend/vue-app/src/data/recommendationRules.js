@@ -1,6 +1,7 @@
 import { getVisualContext } from '@/data/visualAssets';
 import { aiConciergeQuestions } from '@/data/aiConciergeQuestions';
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation';
+import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig';
 
 const THEME_LABELS = {
   castle: 'Castle Princess',
@@ -118,12 +119,16 @@ export function recommendThemeAndPackage(answers = {}) {
       indoorOutdoor: labelFor('indoorOutdoor', answers.indoorOutdoor),
       themePreference: labelFor('themePreference', answers.themePreference),
       venueStatus: labelFor('venueStatus', answers.venueStatus),
+      scenePriorities: labelFor('scenePriorities', answers.scenePriorities),
+      stylingPreference: labelFor('stylingPreference', answers.stylingPreference),
       customerName: answers.customerName || '',
       customerContact: answers.customerContact || ''
     }
   };
 
   result.customerBrief = buildCustomerBrief(answers, result);
+  result.party_scene_config = buildPartySceneConfig(answers, result);
+  result.sceneConfigSummary = summarizePartySceneConfig(result.party_scene_config);
   return result;
 }
 
@@ -148,7 +153,10 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
         `Guests: ${result.summary.guestCount}`,
         `Area: ${result.summary.area}`,
         `Venue: ${result.summary.venueStatus}`,
+        `Scene priority: ${result.summary.scenePriorities}`,
+        `Styling preference: ${result.summary.stylingPreference}`,
         `Budget match: ${result.budgetMatch}`,
+        `Scene config: ${result.sceneConfigSummary?.layout || '-'}`,
         `Price explanation: ${result.quoteExplanation}`,
         `AI reason: ${result.reason.join(' ')}`
       ].join('\n'),
@@ -184,6 +192,7 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
         priceRange: item.priceRange
       }))
     },
+    party_scene_config: result.party_scene_config,
     pricing: {
       packageTier: result.tier,
       priceHint: packageVisual.priceHint,
@@ -210,6 +219,8 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
         name: venue.name,
         capacity: venue.capacity
       },
+      party_scene_config: result.party_scene_config,
+      sceneConfigSummary: result.sceneConfigSummary,
       score: result.score,
       generated_at: new Date().toISOString()
     }

@@ -79,6 +79,12 @@
           <span>升级价值：{{ orderPackageExplanation(order).upgradeAdds.slice(0, 2).join(' / ') }}</span>
         </div>
 
+        <div v-if="sceneConfigSummary(order)" class="scene-config-summary">
+          <strong>AI 场景配置</strong>
+          <p>{{ sceneConfigSummary(order).layout }}</p>
+          <span>{{ sceneConfigSummary(order).decor }}</span>
+        </div>
+
         <div class="next-step">
           <span>Next step</span>
           <p>{{ order.next_step }}</p>
@@ -116,6 +122,7 @@ import {
 } from '@/services/customerExperienceService'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation } from '@/data/packageExplanation'
+import { summarizePartySceneConfig } from '@/data/partySceneConfig'
 
 const router = useRouter()
 const loading = ref(false)
@@ -156,6 +163,7 @@ const orderInteraction = (orderId) => getCustomerInteractionState('order', order
 
 const orderVisual = (order) => getVisualContext(normalizeThemeId(order.theme), normalizeTierId(order.package))
 const orderPackageExplanation = (order) => getPackageExplanation(normalizeTierId(order.package))
+const sceneConfigSummary = (order) => summarizePartySceneConfig(order.party_scene_config)
 
 const loadOrders = async () => {
   loading.value = true
@@ -295,7 +303,8 @@ h1 {
   padding-top: 10px;
 }
 
-.package-explanation {
+.package-explanation,
+.scene-config-summary {
   display: grid;
   gap: 6px;
   margin: 0 0 16px;
@@ -305,12 +314,20 @@ h1 {
   background: #f8faff;
 }
 
-.package-explanation strong {
+.scene-config-summary {
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+}
+
+.package-explanation strong,
+.scene-config-summary strong {
   color: #1e293b;
 }
 
 .package-explanation p,
-.package-explanation span {
+.package-explanation span,
+.scene-config-summary p,
+.scene-config-summary span {
   margin: 0;
   color: #475569;
   font-size: 13px;

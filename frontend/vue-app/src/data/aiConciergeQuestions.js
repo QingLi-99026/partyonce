@@ -111,6 +111,34 @@ export const aiConciergeQuestions = [
     ]
   },
   {
+    id: 'scenePriorities',
+    label: '场景重点',
+    prompt: '这场派对最希望哪个视觉区域出彩？',
+    helper: '我会默认推荐合理布置，你也可以告诉我更重视甜品台、拍照区还是儿童活动区。',
+    type: 'choice',
+    required: true,
+    options: [
+      { label: '甜品台 + 主题背景板', value: 'dessert_backdrop' },
+      { label: '拍照区 + 入口拱门', value: 'photo_arch' },
+      { label: '儿童活动区 + 餐桌氛围', value: 'activity_tables' },
+      { label: '听 AI 默认推荐', value: 'ai_default' }
+    ]
+  },
+  {
+    id: 'stylingPreference',
+    label: '布置风格',
+    prompt: '你更喜欢低调简洁，还是沉浸式布置？',
+    helper: '这会影响拱门、背景板、灯光和道具数量。',
+    type: 'choice',
+    required: true,
+    options: [
+      { label: '低调简洁', value: 'simple' },
+      { label: '完整主题感', value: 'balanced' },
+      { label: '沉浸式打卡感', value: 'immersive' },
+      { label: '按预算自动匹配', value: 'budget_matched' }
+    ]
+  },
+  {
     id: 'customerName',
     label: '联系人',
     prompt: '怎么称呼你？',

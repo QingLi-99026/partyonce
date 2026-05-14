@@ -79,6 +79,12 @@
           <span>价格主要来自：{{ quotePackageExplanation(quote).priceDrivers.slice(0, 3).join(' / ') }}</span>
         </div>
 
+        <div v-if="sceneConfigSummary(quote)" class="scene-config-summary">
+          <strong>AI 场景配置</strong>
+          <p>{{ sceneConfigSummary(quote).layout }}</p>
+          <span>{{ sceneConfigSummary(quote).decor }}</span>
+        </div>
+
         <div class="next-step">
           <span>Next step</span>
           <p>{{ quote.next_step }}</p>
@@ -122,6 +128,7 @@ import {
 } from '@/services/customerExperienceService'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation } from '@/data/packageExplanation'
+import { summarizePartySceneConfig } from '@/data/partySceneConfig'
 
 const router = useRouter()
 const loading = ref(false)
@@ -161,6 +168,7 @@ const quoteInteraction = (quoteId) => getCustomerInteractionState('quote', quote
 
 const quoteVisual = (quote) => getVisualContext(normalizeThemeId(quote.theme), normalizeTierId(quote.package))
 const quotePackageExplanation = (quote) => getPackageExplanation(normalizeTierId(quote.package))
+const sceneConfigSummary = (quote) => summarizePartySceneConfig(quote.party_scene_config || quote.selection_snapshot?.party_scene_config)
 
 const loadQuotes = async () => {
   loading.value = true
@@ -300,7 +308,8 @@ h1 {
   padding-top: 10px;
 }
 
-.package-explanation {
+.package-explanation,
+.scene-config-summary {
   display: grid;
   gap: 6px;
   margin: 0 0 16px;
@@ -310,12 +319,20 @@ h1 {
   background: #f8faff;
 }
 
-.package-explanation strong {
+.scene-config-summary {
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+}
+
+.package-explanation strong,
+.scene-config-summary strong {
   color: #1e293b;
 }
 
 .package-explanation p,
-.package-explanation span {
+.package-explanation span,
+.scene-config-summary p,
+.scene-config-summary span {
   margin: 0;
   color: #475569;
   font-size: 13px;

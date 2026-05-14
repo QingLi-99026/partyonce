@@ -267,6 +267,11 @@
         <section class="panel-grid">
           <article class="panel ops-explainer-panel">
             <h2>Ops Pricing Explanation</h2>
+            <div class="scene-config-admin-summary">
+              <strong>party_scene_config</strong>
+              <p>{{ quoteSceneConfigSummary.layout }}</p>
+              <span>{{ quoteSceneConfigSummary.decor }}</span>
+            </div>
             <p class="body-text">
               {{ quotePackageExplanation.positioning }}
             </p>
@@ -345,6 +350,7 @@ import { createDraftOrderFromQuote } from '@/services/adminOrderService'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
 import { normalizeQuoteLineItems, summarizeQuoteLineItems } from '@/data/quoteLineItems'
+import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
 
 const route = useRoute()
 const router = useRouter()
@@ -378,6 +384,16 @@ const quotePackageTier = computed(() => {
 })
 const quotePackageExplanation = computed(() => getPackageExplanation(quotePackageTier.value))
 const quoteUpgradeExplanation = computed(() => getUpgradeExplanation(quotePackageTier.value))
+const quotePartySceneConfig = computed(() => {
+  const selection = quote.value?.selection_snapshot || {}
+  return selection.party_scene_config || quote.value?.party_scene_config || buildPartySceneConfig({}, {
+    theme: quoteVisualContext.value.packageVisual.theme,
+    tier: quotePackageTier.value,
+    visualContext: quoteVisualContext.value,
+    reasonHeadline: quotePackageExplanation.value.whyRecommend
+  })
+})
+const quoteSceneConfigSummary = computed(() => summarizePartySceneConfig(quotePartySceneConfig.value))
 const quotePriceBasis = computed(() => {
   const context = quoteVisualContext.value
   const explanation = quotePackageExplanation.value
@@ -788,6 +804,23 @@ pre {
 
 .ops-basis-list {
   margin-top: 14px;
+}
+
+.scene-config-admin-summary {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid #e5dbff;
+  border-radius: 8px;
+  background: #f8f0ff;
+}
+
+.scene-config-admin-summary p,
+.scene-config-admin-summary span {
+  margin: 0;
+  color: #495057;
+  line-height: 1.5;
 }
 
 :deep(.el-table small) {

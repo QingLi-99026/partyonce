@@ -164,6 +164,17 @@
             <dt>下一步</dt>
             <dd>{{ recommendation.nextStepSuggestion }} 当前为 staging preview，不会创建 Quote / Order，也不会触发 payment。</dd>
           </div>
+          <div>
+            <dt>party_scene_config</dt>
+            <dd>
+              <ul class="compact-list">
+                <li>Layout: {{ recommendation.sceneConfigSummary.layout }}</li>
+                <li>Decor: {{ recommendation.sceneConfigSummary.decor }}</li>
+                <li>Venue: {{ recommendation.sceneConfigSummary.venue }}</li>
+                <li>Future 3D ready: {{ recommendation.party_scene_config.future3d.engineReady ? 'yes' : 'no' }}</li>
+              </ul>
+            </dd>
+          </div>
         </dl>
 
         <div class="supplier-strip">
