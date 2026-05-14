@@ -8,6 +8,11 @@
       <div class="density-pill">{{ model.density.density }} decor density</div>
     </div>
 
+    <div class="construction-warning" role="note">
+      Visual planning preview only · not a construction drawing, architecture plan, venue measurement, or final supplier execution drawing.
+      仅用于视觉规划 · 不是施工图、建筑图、场地测量图或供应商最终执行图。
+    </div>
+
     <div class="room-stage">
       <div class="back-wall">
         <div class="backdrop">{{ model.config.decor.backdropStyle }}</div>
@@ -137,6 +142,17 @@ h2 {
   border-radius: 999px;
   font-weight: 800;
   white-space: nowrap;
+}
+
+.construction-warning {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--scene-accent) 38%, white);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--scene-light) 58%, white);
+  color: #344054;
+  font-weight: 800;
+  line-height: 1.55;
 }
 
 .room-stage {

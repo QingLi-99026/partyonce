@@ -5,8 +5,9 @@
         <p class="eyebrow">Experimental Sandbox</p>
         <h1>Party Scene 3D Preview</h1>
         <p>
-          This is an experimental 3D preview generated from <code>party_scene_config</code>.
-          It is not a final venue construction drawing. 这是实验性 3D/场景预览，不是正式施工图。
+          This is a visual planning preview generated from <code>party_scene_config</code>.
+          It is not a construction drawing, architectural plan, venue measurement document, or final supplier execution drawing.
+          这是视觉规划预览，不是正式施工图、建筑图、场地测量文件或供应商最终执行图。
         </p>
       </div>
       <div class="hero-actions">
@@ -66,7 +67,8 @@
         <h2>Sandbox only</h2>
         <ul>
           <li>Reads sessionStorage / localStorage / AI prefill, then falls back to Restaurant A Castle Standard.</li>
-          <li>No drag editing, no construction drawing, no external 3D service, no remote model loading.</li>
+          <li>Visual planning only: no construction drawing, no architecture plan, no supplier execution drawing.</li>
+          <li>No drag editing, no external 3D service, no remote model loading.</li>
           <li>No PaymentIntent, webhook, n8n, production deploy, or outbound message.</li>
         </ul>
       </article>

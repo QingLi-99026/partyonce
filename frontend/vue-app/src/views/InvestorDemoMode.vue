@@ -100,7 +100,7 @@
           <strong>客户看到什么</strong>
           <ul>
             <li>AI 推荐摘要、主题 / 套餐 / Restaurant A 渲染图</li>
-            <li>实验性 3D Preview 入口和场景配置摘要</li>
+            <li>实验性 3D Preview 入口和场景配置摘要（视觉规划预览，非施工图 / 非供应商执行图）</li>
             <li>简化报价 line items、供应商 / 场地上下文</li>
             <li>分享奖励入口、审核中 / 已奖励状态和下一步动作</li>
           </ul>
@@ -109,7 +109,7 @@
           <strong>后台看到什么</strong>
           <ul>
             <li>客户需求摘要、AI 推荐理由和完整 party_scene_config</li>
-            <li>2D 渲染图、3D Preview、供应商职责和报价依据</li>
+            <li>2D 渲染图、3D Preview（非施工图）、供应商职责和报价依据</li>
             <li>editable line items、运营备注、owner、next action</li>
             <li>UGC 分享奖励状态，仍然不外发、不触发 webhook/n8n</li>
           </ul>
@@ -120,7 +120,7 @@
         <el-button @click="go('/my/orders/order-local-1001')">查看客户订单详情</el-button>
         <el-button @click="bootstrapAdmin(); go('/admin/quotes/1')">查看后台报价详情</el-button>
         <el-button @click="bootstrapAdmin(); go('/admin/orders/1')">查看后台订单详情</el-button>
-        <el-button @click="go('/experimental/party-3d')">查看 3D Preview</el-button>
+        <el-button @click="go('/experimental/party-3d')">查看 3D Preview（非施工图）</el-button>
         <el-button @click="go('/my/rewards')">查看分享奖励</el-button>
       </div>
     </section>

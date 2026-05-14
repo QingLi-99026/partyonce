@@ -23,6 +23,25 @@
       </div>
     </section>
 
+    <section class="quote-flow-summary">
+      <div class="section-container">
+        <div class="quote-flow-card" :style="cardStyle">
+          <div>
+            <span class="visual-kicker">Start here · customer summary</span>
+            <h2>{{ quoteFlowSummary.title }}</h2>
+            <p>{{ quoteFlowSummary.body }}</p>
+          </div>
+          <div class="quote-flow-steps">
+            <span>1. 方案摘要</span>
+            <span>2. 餐厅渲染</span>
+            <span>3. 套餐差异</span>
+            <span>4. 报价组成</span>
+            <span>5. 提交 inquiry</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 当前选择结果 -->
     <section class="current-selection">
       <div class="section-container">
@@ -179,7 +198,7 @@
             </div>
           </dl>
           <button class="scene-preview-btn" type="button" @click="openParty3DPreview">
-            查看实验性 3D 场景预览
+            查看实验性 3D 场景预览（非施工图）
           </button>
         </div>
       </div>
@@ -429,6 +448,14 @@ export default {
       return {
         title: `${this.aiPrefill.selection?.themeName || this.themeConfig.name} · ${this.aiPrefill.selection?.packageName || this.packageData.name}`,
         body: '已从 AI Concierge 自动带入联系人、日期、人数、预算、场地偏好和推荐理由。确认后只会提交 inquiry / Lead skeleton，不会创建 Quote、Order 或 PaymentIntent。'
+      };
+    },
+
+    quoteFlowSummary() {
+      const source = this.aiPrefill ? 'AI Concierge 已整理' : '当前方案';
+      return {
+        title: `${source}: ${this.themeConfig.name} · ${this.packageData.name} · ${this.visualContext.primaryVenue.name}`,
+        body: '先确认主题、套餐和 Restaurant A 视觉效果；再看套餐差异和报价组成；最后只提交 inquiry / Lead skeleton，不会触发真实支付。'
       };
     },
     
@@ -894,6 +921,44 @@ export default {
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 24px;
+}
+
+.quote-flow-summary {
+  padding: 18px 0 10px;
+}
+
+.quote-flow-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  gap: 24px;
+  padding: 26px;
+  color: #fff;
+}
+
+.quote-flow-card h2 {
+  margin: 6px 0 10px;
+  color: #fff;
+  font-size: 1.6rem;
+}
+
+.quote-flow-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+}
+
+.quote-flow-steps {
+  display: grid;
+  gap: 8px;
+}
+
+.quote-flow-steps span {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-weight: 800;
 }
 
 /* 当前选择 */

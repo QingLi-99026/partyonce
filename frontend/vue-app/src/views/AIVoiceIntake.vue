@@ -9,6 +9,8 @@
           推荐 Castle / Space / Forest 主题、套餐层级和 Restaurant A 样板，并自动预填 quote request。
         </p>
         <div class="hero-actions">
+          <button class="primary-action" @click="useQuickDemo">Quick demo recommendation</button>
+          <button class="secondary-action" @click="quickDemoToQuote">Use sample and go Quote</button>
           <button class="primary-action" @click="speak(activePrompt)">听当前问题</button>
           <button class="secondary-action" @click="toggleVoice">
             {{ voiceEnabled ? '关闭声音' : '打开声音' }}
@@ -220,6 +222,21 @@ const draftAnswer = ref('');
 const recommendation = ref(null);
 const voiceEnabled = ref(false);
 
+const quickDemoAnswers = {
+  childAge: '6-8',
+  eventDate: '2026-06-20',
+  guestCount: '16-25',
+  budgetRange: 'standard',
+  area: 'North Sydney / Chatswood',
+  indoorOutdoor: 'indoor',
+  themePreference: 'castle',
+  venueStatus: 'need_restaurant',
+  scenePriorities: 'dessert_backdrop',
+  stylingPreference: 'balanced',
+  customerName: 'Quick Demo Parent',
+  customerContact: 'quick-demo@example.test'
+};
+
 const answeredCount = computed(() => intakeSteps.filter((step) => hasAnswer(step.id)).length);
 const progressPercent = computed(() => Math.round((answeredCount.value / intakeSteps.length) * 100));
 const activeStep = computed(() => intakeSteps[activeIndex.value]);
@@ -292,6 +309,26 @@ function resetFlow() {
   activeIndex.value = 0;
   draftAnswer.value = '';
   recommendation.value = null;
+}
+
+function applyQuickDemoAnswers() {
+  Object.keys(answers).forEach((key) => delete answers[key]);
+  Object.entries(quickDemoAnswers).forEach(([key, value]) => {
+    answers[key] = value;
+  });
+  activeIndex.value = intakeSteps.length - 1;
+  draftAnswer.value = quickDemoAnswers.customerContact;
+  recommendation.value = scoreRecommendation({ ...answers });
+  speak(`${recommendation.value.themeLabel} ${recommendation.value.tierLabel}. ${voiceScripts.quote}`);
+}
+
+function useQuickDemo() {
+  applyQuickDemoAnswers();
+}
+
+function quickDemoToQuote() {
+  applyQuickDemoAnswers();
+  goQuote();
 }
 
 function goQuote() {

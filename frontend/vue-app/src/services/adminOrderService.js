@@ -10,6 +10,15 @@ import { normalizeQuoteLineItems } from '@/data/quoteLineItems'
 export const ORDER_SOURCE_API = 'local API'
 export const ORDER_SOURCE_FALLBACK = 'fallback mock'
 export const ORDER_SOURCE_MIXED_FALLBACK = 'mixed fallback'
+export const ORDER_SOURCE_STATIC_PREVIEW_FALLBACK = 'static preview fallback'
+
+const shouldUseStaticPreviewFallback = () => {
+  if (typeof window === 'undefined') return false
+  if (import.meta.env.VITE_ENABLE_REMOTE_ORDER_API === 'true') return false
+  const isVercelPreview = /vercel\.app$/i.test(window.location.hostname)
+  const isViteStaticPreview = ['4173', '4174'].includes(window.location.port)
+  return isVercelPreview || isViteStaticPreview
+}
 
 const normalizeCustomer = (order) => {
   const customer = order.customer || order.customer_summary || {}
@@ -77,14 +86,20 @@ export const normalizeAdminOrder = (order) => ({
   line_items: normalizeQuoteLineItems(order.line_items)
 })
 
-const fallbackList = (error) => ({
-  source: ORDER_SOURCE_FALLBACK,
+const fallbackList = (error, source = ORDER_SOURCE_FALLBACK) => ({
+  source,
   error,
   items: loadAdminOrderSkeletons().map(normalizeAdminOrder),
   total: loadAdminOrderSkeletons().length
 })
 
 export const fetchAdminOrders = async (params = {}) => {
+  if (shouldUseStaticPreviewFallback()) {
+    return fallbackList(
+      new Error('Static Preview uses local/staging fallback data for Admin Orders unless VITE_ENABLE_REMOTE_ORDER_API=true.'),
+      ORDER_SOURCE_STATIC_PREVIEW_FALLBACK
+    )
+  }
   try {
     const response = await apiClient.get('/orders', { params })
     const items = Array.isArray(response?.items) ? response.items.map(normalizeAdminOrder) : []
@@ -100,6 +115,14 @@ export const fetchAdminOrders = async (params = {}) => {
 }
 
 export const fetchAdminOrderDetail = async (orderId) => {
+  if (shouldUseStaticPreviewFallback()) {
+    const item = getAdminOrderSkeleton(orderId) || updateAdminOrderSkeleton(orderId, {}, { id: orderId })
+    return {
+      source: ORDER_SOURCE_STATIC_PREVIEW_FALLBACK,
+      error: new Error('Static Preview uses local/staging fallback data for Admin Order Detail unless VITE_ENABLE_REMOTE_ORDER_API=true.'),
+      item: normalizeAdminOrder(item)
+    }
+  }
   try {
     const response = await apiClient.get(`/orders/${orderId}`)
     return {

@@ -258,6 +258,7 @@ import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visu
 import {
   ORDER_SOURCE_API,
   ORDER_SOURCE_FALLBACK,
+  ORDER_SOURCE_STATIC_PREVIEW_FALLBACK,
   fetchAdminOrders,
   resetAdminOrderFallback,
   updateAdminOrderOperations,
@@ -349,7 +350,9 @@ const loadOrders = async () => {
     const result = await fetchAdminOrders(params)
     orders.value = result.items
     dataSource.value = result.source
-    if (result.source === ORDER_SOURCE_FALLBACK) {
+    if (result.source === ORDER_SOURCE_STATIC_PREVIEW_FALLBACK) {
+      fallbackNotice.value = 'Static Preview mode: Admin Orders are using browser fallback data by design, so the demo avoids remote API auth noise. Auth guard remains active; no production data is requested.'
+    } else if (result.source === ORDER_SOURCE_FALLBACK) {
       fallbackNotice.value = 'Local backend Order API is unavailable, so the queue is using fallback mock data.'
     }
   } finally {

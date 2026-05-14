@@ -361,6 +361,7 @@ import PartySceneSummary from '@/components/PartySceneSummary.vue'
 import SocialRewardsPanel from '@/components/SocialRewardsPanel.vue'
 import {
   ORDER_SOURCE_API,
+  ORDER_SOURCE_STATIC_PREVIEW_FALLBACK,
   fetchAdminOrderDetail,
   updateAdminOrderOperations,
   updateAdminOrderStatus
@@ -453,7 +454,9 @@ const loadOrder = async () => {
     if (order.value) order.value.line_items = normalizeQuoteLineItems(order.value.line_items)
     dataSource.value = result.source
     syncOpsForm()
-    if (result.source !== ORDER_SOURCE_API) {
+    if (result.source === ORDER_SOURCE_STATIC_PREVIEW_FALLBACK) {
+      fallbackNotice.value = 'Static Preview mode: this Order Detail uses browser fallback data by design to avoid remote API auth noise. Auth guard remains active; no production data is requested.'
+    } else if (result.source !== ORDER_SOURCE_API) {
       fallbackNotice.value = 'Local backend Order detail API is unavailable, so this page is using fallback mock data.'
     }
   } finally {

@@ -32,8 +32,8 @@
         </div>
       </dl>
       <div class="actions">
-        <button type="button" @click="openPreview">查看 3D Preview</button>
-        <span>Experimental only · not a construction drawing</span>
+        <button type="button" @click="openPreview">查看 3D Preview（非施工图）</button>
+        <span>Visual planning only · not a construction / supplier execution drawing · 非施工图 / 非供应商执行图</span>
       </div>
     </div>
   </section>
