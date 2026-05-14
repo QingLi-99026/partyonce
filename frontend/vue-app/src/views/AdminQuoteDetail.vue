@@ -552,7 +552,18 @@ const readStoredLineItemDraft = () => {
   return null
 }
 
-const loadLineItemDraft = () => {
+const loadLineItemDraft = async () => {
+  if (quote.value?.id) {
+    try {
+      const response = await apiClient.get(`/quotes/${quote.value.id}/line-items`)
+      if (Array.isArray(response.items) && response.items.length) {
+        lineItemDraftRows.value = response.items.map(toDraftRow)
+        return
+      }
+    } catch (error) {
+      // Keep localStorage fallback for offline/local preview review.
+    }
+  }
   const stored = readStoredLineItemDraft()
   if (stored?.length) {
     lineItemDraftRows.value = stored
@@ -595,6 +606,17 @@ const saveLineItemDraft = () => {
     draft_saved_at: new Date().toISOString()
   }))
   const summary = summarizeQuoteLineItems(normalized)
+  const applySavedDraft = (persistence, items = normalized, savedSummary = summary) => {
+    quote.value = {
+      ...quote.value,
+      line_items: items,
+      subtotal: savedSummary.selected_total ?? savedSummary.total,
+      final_total: savedSummary.selected_total ?? savedSummary.total,
+      line_item_draft_saved_at: new Date().toISOString(),
+      line_item_draft_persistence: persistence
+    }
+    lineItemDraftRows.value = items.map(toDraftRow)
+  }
   const payload = {
     quote_id: quote.value?.id,
     saved_at: new Date().toISOString(),
@@ -602,15 +624,29 @@ const saveLineItemDraft = () => {
     items: normalized,
     summary
   }
-  localStorage.setItem(lineItemDraftStorageKey.value, JSON.stringify(payload))
-  quote.value = {
-    ...quote.value,
-    line_items: normalized,
-    subtotal: summary.total,
-    final_total: summary.total,
-    line_item_draft_saved_at: payload.saved_at
+  if (!quote.value?.id) {
+    localStorage.setItem(lineItemDraftStorageKey.value, JSON.stringify(payload))
+    applySavedDraft('localStorage fallback')
+    ElMessage.warning('Line item draft saved to browser fallback. Quote id is unavailable.')
+    return
   }
-  ElMessage.success('Line item draft saved locally. No payment, contract, webhook, or outbound action was triggered.')
+  apiClient.put(`/quotes/${quote.value.id}/line-items`, {
+    schema_version: summary.schema_version,
+    items: normalized,
+    draft_note: 'Admin editable line item draft mode; local/staging skeleton only.'
+  })
+    .then((response) => {
+      const backendItems = Array.isArray(response.items) ? response.items : normalized
+      const backendSummary = response.summary || summary
+      localStorage.removeItem(lineItemDraftStorageKey.value)
+      applySavedDraft('backend skeleton', backendItems, backendSummary)
+      ElMessage.success('Line item draft saved to local/staging backend skeleton. No payment, contract, webhook, or outbound action was triggered.')
+    })
+    .catch(() => {
+      localStorage.setItem(lineItemDraftStorageKey.value, JSON.stringify(payload))
+      applySavedDraft('localStorage fallback')
+      ElMessage.warning('Local Quote line item API unavailable. Draft saved to browser fallback only.')
+    })
 }
 
 const buildFallbackQuoteDetail = () => {
@@ -703,11 +739,11 @@ const loadQuote = async () => {
   try {
     quote.value = await apiClient.get(`/quotes/${route.params.quoteId}`)
     loadQuoteOpsState()
-    loadLineItemDraft()
+    await loadLineItemDraft()
   } catch (error) {
     quote.value = buildFallbackQuoteDetail()
     loadQuoteOpsState()
-    loadLineItemDraft()
+    await loadLineItemDraft()
     message.value = `${getErrorMessage(error)} Using local/staging fallback quote so line item draft mode can be reviewed.`
     messageType.value = 'warning'
   } finally {

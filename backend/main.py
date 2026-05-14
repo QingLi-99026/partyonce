@@ -1054,6 +1054,56 @@ class Stage2QuoteListResponse(BaseModel):
     admin_only: bool = True
     customer_only: bool = False
 
+class Stage2QuoteLineItemType(str, PyEnum):
+    VENUE_FEE = "venue_fee"
+    DECOR_FEE = "decor_fee"
+    SUPPLIER_FEE = "supplier_fee"
+    LABOR_FEE = "labor_fee"
+    TRANSPORT_FEE = "transport_fee"
+    SERVICE_FEE = "service_fee"
+    OPTIONAL_UPGRADE = "optional_upgrade"
+
+class Stage2QuoteLineItemDraft(BaseModel):
+    id: Optional[str] = None
+    quote_id: Optional[str] = None
+    schema_version: str = "quote_line_items_v1"
+    line_item_type: Optional[Stage2QuoteLineItemType] = None
+    type: Optional[Stage2QuoteLineItemType] = None
+    label: Optional[str] = None
+    name: Optional[str] = None
+    amount: float = 0.0
+    amount_basis: Optional[str] = None
+    customer_explanation: Optional[str] = None
+    admin_edit_hint: Optional[str] = None
+    party_scene_config_path: Optional[str] = None
+    is_optional: Optional[bool] = None
+    is_selected: bool = True
+    display_order: int = 0
+
+    @validator("amount")
+    def validate_stage2_quote_line_item_amount(cls, value):
+        amount = coerce_stage2_quote_amount(value)
+        if amount < 0:
+            raise ValueError("amount must be non-negative")
+        return amount
+
+    def resolved_type(self) -> Stage2QuoteLineItemType:
+        return self.line_item_type or self.type or Stage2QuoteLineItemType.SERVICE_FEE
+
+    def resolved_label(self) -> str:
+        return (self.label or self.name or self.resolved_type().value).strip()
+
+class Stage2QuoteLineItemReplaceRequest(BaseModel):
+    items: List[Stage2QuoteLineItemDraft] = Field(default_factory=list)
+    schema_version: str = "quote_line_items_v1"
+    draft_note: Optional[str] = None
+
+class Stage2QuoteLineItemListResponse(BaseModel):
+    quote_id: str
+    items: List[Dict[str, Any]]
+    summary: Dict[str, Any]
+    skeleton_notice: str = "Local/staging Quote line item skeleton only. No invoice, contract, payment, webhook, n8n, or outbound action."
+
 # ==================== STAGE 2 ORDER API SKELETON SCHEMAS ====================
 
 class Stage2OrderStatus(str, PyEnum):
@@ -1899,6 +1949,10 @@ def ensure_stage2_quote_sqlite_schema(conn: sqlite3.Connection):
         "next_action": "TEXT",
         "internal_note": "TEXT"
     })
+    line_item_migration_path = os.path.join(os.path.dirname(__file__), "migrations", "004_create_quote_line_item_storage.sql")
+    if os.path.exists(line_item_migration_path):
+        with open(line_item_migration_path, "r", encoding="utf-8") as migration_file:
+            conn.executescript(migration_file.read())
     conn.commit()
 
 def ensure_stage2_order_sqlite_schema(conn: sqlite3.Connection):
@@ -2172,6 +2226,175 @@ def build_stage2_quote_response(row: sqlite3.Row) -> Stage2QuoteResponse:
         )
     )
 
+def summarize_stage2_quote_line_items(items: List[Dict[str, Any]]) -> Dict[str, Any]:
+    total = round(sum(coerce_stage2_quote_amount(item.get("amount")) for item in items), 2)
+    selected_total = round(
+        sum(
+            coerce_stage2_quote_amount(item.get("amount"))
+            for item in items
+            if item.get("is_selected", True)
+        ),
+        2
+    )
+    return {
+        "schema_version": "quote_line_items_v1",
+        "count": len(items),
+        "total": total,
+        "selected_total": selected_total,
+        "deposit_placeholder": round(selected_total * 0.2, 2),
+        "deposit_note": "20% placeholder only. This does not create PaymentIntent, checkout, Stripe status, or real deposit collection."
+    }
+
+def encode_stage2_quote_line_item(row: sqlite3.Row) -> Dict[str, Any]:
+    raw = decode_stage2_quote_dict(row["raw_json"])
+    item = {
+        **raw,
+        "id": row["client_item_id"] or str(row["id"]),
+        "quote_id": str(row["quote_id"]),
+        "schema_version": row["schema_version"],
+        "line_item_type": row["line_item_type"],
+        "type": row["line_item_type"],
+        "label": row["label"],
+        "name": raw.get("name") or row["label"],
+        "amount": coerce_stage2_quote_amount(row["amount"]),
+        "amount_basis": row["amount_basis"],
+        "customer_explanation": row["customer_explanation"],
+        "admin_edit_hint": row["admin_edit_hint"],
+        "party_scene_config_path": row["party_scene_config_path"],
+        "is_optional": bool(row["is_optional"]),
+        "is_selected": bool(row["is_selected"]),
+        "display_order": row["display_order"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"]
+    }
+    return item
+
+def get_stage2_quote_line_items_from_db(conn: sqlite3.Connection, quote_id: str) -> List[Dict[str, Any]]:
+    ensure_stage2_quote_sqlite_schema(conn)
+    get_stage2_quote_detail_row(conn, quote_id)
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM quote_line_items
+        WHERE quote_id = ?
+        ORDER BY display_order ASC, id ASC
+        """,
+        (quote_id,)
+    ).fetchall()
+    return [encode_stage2_quote_line_item(row) for row in rows]
+
+def get_stage2_quote_line_item_response(quote_id: str) -> Stage2QuoteLineItemListResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Quote skeleton requires sqlite_local lead storage")
+    with closing(get_lead_sqlite_connection()) as conn:
+        items = get_stage2_quote_line_items_from_db(conn, quote_id)
+        if not items:
+            row = get_stage2_quote_detail_row(conn, quote_id)
+            items = decode_stage2_quote_list(row["line_items_json"])
+        return Stage2QuoteLineItemListResponse(
+            quote_id=str(quote_id),
+            items=items,
+            summary=summarize_stage2_quote_line_items(items)
+        )
+
+def replace_stage2_quote_line_items(
+    conn: sqlite3.Connection,
+    quote_id: str,
+    request: Stage2QuoteLineItemReplaceRequest
+) -> Stage2QuoteLineItemListResponse:
+    get_stage2_quote_detail_row(conn, quote_id)
+    now = datetime.utcnow().isoformat()
+    normalized_items: List[Dict[str, Any]] = []
+    conn.execute("DELETE FROM quote_line_items WHERE quote_id = ?", (quote_id,))
+    for index, item in enumerate(request.items):
+        line_item_type = item.resolved_type().value
+        is_optional = item.is_optional if item.is_optional is not None else line_item_type == Stage2QuoteLineItemType.OPTIONAL_UPGRADE.value
+        display_order = item.display_order if item.display_order is not None else index
+        raw = item.dict()
+        normalized = {
+            **raw,
+            "id": item.id or f"{line_item_type}-{index + 1}",
+            "quote_id": str(quote_id),
+            "schema_version": item.schema_version or request.schema_version,
+            "line_item_type": line_item_type,
+            "type": line_item_type,
+            "label": item.resolved_label(),
+            "name": item.name or item.label or item.resolved_label(),
+            "amount": coerce_stage2_quote_amount(item.amount),
+            "amount_basis": item.amount_basis,
+            "customer_explanation": item.customer_explanation,
+            "admin_edit_hint": item.admin_edit_hint,
+            "party_scene_config_path": item.party_scene_config_path,
+            "is_optional": bool(is_optional),
+            "is_selected": bool(item.is_selected),
+            "display_order": display_order
+        }
+        normalized_items.append(normalized)
+        conn.execute(
+            """
+            INSERT INTO quote_line_items (
+                quote_id, client_item_id, schema_version, line_item_type, label, amount,
+                amount_basis, customer_explanation, admin_edit_hint, party_scene_config_path,
+                is_optional, is_selected, display_order, raw_json, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                int(quote_id),
+                normalized["id"],
+                normalized["schema_version"],
+                normalized["line_item_type"],
+                normalized["label"],
+                normalized["amount"],
+                normalized["amount_basis"],
+                normalized["customer_explanation"],
+                normalized["admin_edit_hint"],
+                normalized["party_scene_config_path"],
+                1 if normalized["is_optional"] else 0,
+                1 if normalized["is_selected"] else 0,
+                normalized["display_order"],
+                encode_stage2_quote_snapshot(normalized),
+                now,
+                now
+            )
+        )
+    summary = summarize_stage2_quote_line_items(normalized_items)
+    conn.execute(
+        """
+        UPDATE quotes
+        SET line_items_json = ?, subtotal = ?, final_total = ?, updated_at = ?
+        WHERE id = ?
+        """,
+        (
+            encode_stage2_quote_snapshot(normalized_items),
+            summary["selected_total"],
+            summary["selected_total"],
+            now,
+            quote_id
+        )
+    )
+    return Stage2QuoteLineItemListResponse(
+        quote_id=str(quote_id),
+        items=normalized_items,
+        summary=summary
+    )
+
+def replace_stage2_quote_line_items_response(
+    quote_id: str,
+    request: Stage2QuoteLineItemReplaceRequest
+) -> Stage2QuoteLineItemListResponse:
+    if not is_lead_sqlite_local_enabled():
+        raise HTTPException(status_code=501, detail="Stage 2 Quote skeleton requires sqlite_local lead storage")
+    with closing(get_lead_sqlite_connection()) as conn:
+        ensure_stage2_quote_sqlite_schema(conn)
+        try:
+            conn.execute("BEGIN")
+            response = replace_stage2_quote_line_items(conn, quote_id, request)
+            conn.commit()
+            return response
+        except Exception:
+            conn.rollback()
+            raise
+
 def derive_stage2_quote_totals(request: Stage2QuoteCreateRequest, lead: sqlite3.Row) -> Dict[str, float]:
     pricing_snapshot = decode_lead_snapshot(lead["pricing_snapshot_json"])
     final_total = coerce_stage2_quote_amount(
@@ -2214,7 +2437,11 @@ def create_stage2_quote_from_persistent_lead(
         totals = derive_stage2_quote_totals(request, lead)
         selection_snapshot = request.selection_snapshot or decode_lead_snapshot(lead["selection_snapshot_json"])
         line_items = request.line_items or [{
-            "type": "lead_pricing_snapshot",
+            "type": Stage2QuoteLineItemType.SERVICE_FEE.value,
+            "line_item_type": Stage2QuoteLineItemType.SERVICE_FEE.value,
+            "label": "Lead pricing snapshot",
+            "amount": totals["final_total"],
+            "amount_basis": "Draft estimate copied from Lead pricing snapshot; server-side pricing validation still required.",
             "pricing_snapshot": decode_lead_snapshot(lead["pricing_snapshot_json"]),
             "note": "Draft estimate copied from Lead pricing snapshot; server-side pricing validation still required."
         }]
@@ -2256,6 +2483,13 @@ def create_stage2_quote_from_persistent_lead(
             conn.execute(
                 "UPDATE leads SET status = ?, updated_at = ? WHERE id = ?",
                 (LeadStatus.CONVERTED_TO_QUOTE.value, now, int(lead["id"]))
+            )
+            replace_stage2_quote_line_items(
+                conn,
+                str(cursor.lastrowid),
+                Stage2QuoteLineItemReplaceRequest(items=[
+                    Stage2QuoteLineItemDraft(**item) for item in line_items
+                ])
             )
             conn.commit()
         except Exception:
@@ -4243,6 +4477,34 @@ def get_stage2_quote_skeleton(
 ):
     """Admin-only Stage 2 Quote detail skeleton."""
     return get_stage2_quote_response(quote_id)
+
+@app.get("/api/quotes/{quote_id}/line-items", response_model=Stage2QuoteLineItemListResponse)
+def get_stage2_quote_line_items_skeleton(
+    quote_id: str,
+    current_user: User = Depends(require_admin)
+):
+    """
+    Admin-only local/staging Quote line item draft read endpoint.
+
+    It reads the editable line item skeleton and never touches payment, Order,
+    invoice, contract, webhook, n8n, or outbound messaging.
+    """
+    return get_stage2_quote_line_item_response(quote_id)
+
+@app.put("/api/quotes/{quote_id}/line-items", response_model=Stage2QuoteLineItemListResponse)
+def replace_stage2_quote_line_items_skeleton(
+    quote_id: str,
+    request: Stage2QuoteLineItemReplaceRequest,
+    current_user: User = Depends(require_admin)
+):
+    """
+    Admin-only local/staging Quote line item draft replace endpoint.
+
+    Replaces draft line items for an existing Quote and syncs the Quote skeleton
+    line_items_json / subtotal / final_total preview. It does not create payment,
+    Order, invoice, contract, webhook, n8n, or outbound messaging.
+    """
+    return replace_stage2_quote_line_items_response(quote_id, request)
 
 @app.patch("/api/quotes/{quote_id}", response_model=Stage2QuoteResponse)
 def update_stage2_quote_skeleton(
