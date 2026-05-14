@@ -132,15 +132,20 @@ Result:
 
 ## 11. Preview redeploy 结果
 
-Pending until the release candidate branch is pushed and Vercel creates the next Preview deployment.
+Release candidate branch was pushed and the Vercel Preview route was checked.
 
-Expected Preview branch:
+Preview branch:
 `eye-lite-v2-release-candidate-20260512`
 
-Known Preview URL family:
+Preview URL:
 `https://partyonce-git-eye-lite-v2-release-2af646-qingli-99026s-projects.vercel.app/`
 
-If Vercel deploy protection is enabled, the route may still require owner-side Preview access settings. That is a Vercel access blocker, not an app route blocker.
+Preview checks:
+- `/`: HTTP 200
+- `/experimental/party-3d`: HTTP 200
+- `/experimental/party-3d` browser smoke: non-blank, Party Scene 3D content visible, console error 0, broken images 0
+
+Vercel Preview access was available during this check. If deployment protection is later re-enabled, that would be a Vercel access blocker, not an app route blocker.
 
 ## 12. 是否读取/修改 `.env.production`
 
