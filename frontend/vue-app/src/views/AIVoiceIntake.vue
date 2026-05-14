@@ -26,6 +26,96 @@
       </div>
     </section>
 
+    <section class="concierge-chat-panel" :dir="isArabicLocale ? 'rtl' : 'ltr'">
+      <div class="chat-copy">
+        <p class="eyebrow">{{ $t('ai.interaction.eyebrow') }}</p>
+        <h2>{{ $t('ai.interaction.title') }}</h2>
+        <p>{{ $t('ai.interaction.copy') }}</p>
+      </div>
+
+      <div class="starter-prompts" aria-label="AI Concierge starter prompts">
+        <button
+          v-for="prompt in localizedStarterPrompts"
+          :key="prompt"
+          type="button"
+          @click="useStarterPrompt(prompt)"
+        >
+          {{ prompt }}
+        </button>
+      </div>
+
+      <div class="chat-input-card">
+        <label for="freeTextNeed">{{ $t('ai.interaction.inputLabel') }}</label>
+        <textarea
+          id="freeTextNeed"
+          v-model.trim="freeTextNeed"
+          rows="4"
+          :placeholder="$t('ai.interaction.placeholder')"
+        ></textarea>
+        <div class="chat-actions">
+          <span>{{ $t('ai.interaction.voicePreview') }}</span>
+          <button class="primary-action" type="button" :disabled="!freeTextNeed" @click="analyzeFreeText">
+            {{ $t('ai.interaction.analyze') }}
+          </button>
+          <button class="secondary-action" type="button" @click="clearFreeText">
+            {{ $t('ai.interaction.clear') }}
+          </button>
+        </div>
+      </div>
+
+      <div v-if="freeTextAnalysis" class="analysis-result-card">
+        <div class="advisor-message">
+          <span>AI</span>
+          <p>{{ freeTextAnalysis.advisor_message }}</p>
+        </div>
+
+        <div class="analysis-grid">
+          <article>
+            <h3>{{ $t('ai.interaction.recognized') }}</h3>
+            <dl>
+              <div v-for="item in recognizedFields" :key="item.key">
+                <dt>{{ item.label }}</dt>
+                <dd>{{ item.value }}</dd>
+              </div>
+            </dl>
+          </article>
+
+          <article>
+            <h3>{{ $t('ai.interaction.missing') }}</h3>
+            <ul>
+              <li v-for="field in freeTextAnalysis.missing_fields" :key="field">
+                {{ localizeField(field) }}
+              </li>
+            </ul>
+          </article>
+
+          <article>
+            <h3>{{ $t('ai.interaction.recommendation') }}</h3>
+            <p><strong>{{ freeTextAnalysis.recommendation.theme }}</strong></p>
+            <p>{{ freeTextAnalysis.recommendation.package }} · {{ freeTextAnalysis.recommendation.venue }}</p>
+            <small>{{ freeTextAnalysis.recommendation.rationale }}</small>
+          </article>
+        </div>
+
+        <div class="quote-ready-card">
+          <strong>{{ $t('ai.interaction.quoteReady') }}</strong>
+          <p>{{ freeTextAnalysis.quote_ready_summary.emotional_summary }}</p>
+          <ul>
+            <li v-for="question in freeTextAnalysis.quote_ready_summary.next_questions" :key="question">
+              {{ question }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="next-actions">
+          <button class="primary-action" @click="goQuote">{{ $t('ai.continueQuote') }}</button>
+          <button class="secondary-action" @click="goStep(0)">{{ $t('ai.interaction.editAnswers') }}</button>
+          <button class="secondary-action" @click="resetFlow">{{ $t('ai.restart') }}</button>
+          <button class="secondary-action" @click="goThemes">{{ $t('ai.viewThemes') }}</button>
+        </div>
+      </div>
+    </section>
+
     <section class="question-panel">
       <aside class="progress-rail">
         <div class="progress-meter">
@@ -221,6 +311,12 @@ import {
   stopSpeaking,
   voiceScripts
 } from '@/services/aiVoiceIntakeService';
+import {
+  analyzeFreeTextIntake,
+  localizeFieldLabel,
+  mapAnalysisToAnswers,
+  starterPromptTemplates
+} from '@/services/aiConciergeService';
 import { getVisualContext } from '@/data/visualAssets';
 
 const router = useRouter();
@@ -228,6 +324,8 @@ const { t, locale } = useI18n();
 const activeIndex = ref(0);
 const answers = reactive({});
 const draftAnswer = ref('');
+const freeTextNeed = ref('');
+const freeTextAnalysis = ref(null);
 const recommendation = ref(null);
 const voiceEnabled = ref(false);
 
@@ -249,8 +347,21 @@ const quickDemoAnswers = {
 const answeredCount = computed(() => intakeSteps.filter((step) => hasAnswer(step.id)).length);
 const progressPercent = computed(() => Math.round((answeredCount.value / intakeSteps.length) * 100));
 const isChineseLocale = computed(() => locale.value === 'zh');
+const isArabicLocale = computed(() => locale.value === 'ar');
 const activeStep = computed(() => localizedIntakeSteps.value[activeIndex.value]);
 const activePrompt = computed(() => activeStep.value?.prompt || voiceScripts.welcome);
+const localizedStarterPrompts = computed(() => starterPromptTemplates[locale.value] || starterPromptTemplates.en);
+const recognizedFields = computed(() => {
+  if (!freeTextAnalysis.value) return [];
+  const extracted = freeTextAnalysis.value.extracted || {};
+  return Object.entries(extracted)
+    .filter(([, value]) => Array.isArray(value) ? value.length : Boolean(value))
+    .map(([key, value]) => ({
+      key,
+      label: localizeField(key),
+      value: Array.isArray(value) ? value.join(' / ') : value
+    }));
+});
 const conciergeMessage = computed(() => {
   if (recommendation.value) {
     if (!isChineseLocale.value) {
@@ -509,6 +620,37 @@ function displaySupplier(supplier) {
   return `${t('ai.supplier')} · ${supplier.nameEn || supplier.name}`;
 }
 
+function localizeField(field) {
+  return localizeFieldLabel(field, locale.value);
+}
+
+function useStarterPrompt(prompt) {
+  freeTextNeed.value = prompt;
+  analyzeFreeText();
+}
+
+function analyzeFreeText() {
+  if (!freeTextNeed.value) return;
+  const analysis = analyzeFreeTextIntake(freeTextNeed.value, locale.value);
+  const derivedAnswers = mapAnalysisToAnswers(analysis);
+  Object.entries(derivedAnswers).forEach(([key, value]) => {
+    if (value) answers[key] = value;
+  });
+  recommendation.value = {
+    ...scoreRecommendation({ ...answers }),
+    quote_ready_summary: analysis.quote_ready_summary,
+    free_text_analysis: analysis,
+    advisor_message: analysis.advisor_message
+  };
+  freeTextAnalysis.value = analysis;
+  speak(analysis.advisor_message);
+}
+
+function clearFreeText() {
+  freeTextNeed.value = '';
+  freeTextAnalysis.value = null;
+}
+
 function commitInput() {
   if (!draftAnswer.value) return;
   answers[activeStep.value.id] = draftAnswer.value;
@@ -546,6 +688,8 @@ function resetFlow() {
   Object.keys(answers).forEach((key) => delete answers[key]);
   activeIndex.value = 0;
   draftAnswer.value = '';
+  freeTextNeed.value = '';
+  freeTextAnalysis.value = null;
   recommendation.value = null;
 }
 
@@ -570,6 +714,9 @@ function quickDemoToQuote() {
 }
 
 function goQuote() {
+  if (!recommendation.value && freeTextNeed.value) {
+    analyzeFreeText();
+  }
   const saved = saveIntakeForQuote({ ...answers }, recommendation.value);
   router.push({
     path: '/quote',
@@ -577,7 +724,7 @@ function goQuote() {
       theme: saved.theme,
       package: saved.tier,
       scene: 'restaurant-a',
-      source: 'ai_concierge'
+      source: 'ai'
     }
   });
 }
@@ -788,6 +935,195 @@ button:disabled {
   box-shadow: 0 10px 28px rgba(124, 58, 237, 0.14);
 }
 
+.concierge-chat-panel {
+  max-width: 1180px;
+  margin: 0 auto 24px;
+  padding: 24px;
+  border: 1px solid rgba(124, 58, 237, 0.14);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 18px 54px rgba(15, 23, 42, 0.09);
+}
+
+.chat-copy {
+  display: grid;
+  gap: 8px;
+  max-width: 760px;
+  margin-bottom: 18px;
+}
+
+.chat-copy h2 {
+  margin: 0;
+  color: #111827;
+  font-size: clamp(24px, 3vw, 36px);
+}
+
+.chat-copy p:last-child {
+  margin: 0;
+  color: #526174;
+  line-height: 1.65;
+}
+
+.starter-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.starter-prompts button {
+  padding: 10px 12px;
+  border: 1px solid #e9d5ff;
+  border-radius: 999px;
+  background: #faf5ff;
+  color: #6d28d9;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.chat-input-card {
+  display: grid;
+  gap: 10px;
+}
+
+.chat-input-card label {
+  color: #111827;
+  font-weight: 900;
+}
+
+.chat-input-card textarea {
+  width: 100%;
+  min-height: 112px;
+  padding: 16px;
+  border: 1px solid #ddd6fe;
+  border-radius: 18px;
+  color: #111827;
+  font-size: 16px;
+  line-height: 1.65;
+  resize: vertical;
+}
+
+.chat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.chat-actions span {
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.analysis-result-card {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.advisor-message {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eef2ff, #fff7ed);
+}
+
+.advisor-message span {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  background: #7c3aed;
+  color: #fff;
+  font-weight: 900;
+}
+
+.advisor-message p {
+  margin: 0;
+  color: #30394b;
+  line-height: 1.65;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.analysis-grid article,
+.quote-ready-card {
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.analysis-grid h3 {
+  margin: 0 0 10px;
+  color: #111827;
+}
+
+.analysis-grid dl {
+  gap: 8px;
+  margin: 0;
+}
+
+.analysis-grid dt {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.analysis-grid dd {
+  margin: 0;
+  color: #111827;
+  font-weight: 800;
+}
+
+.analysis-grid ul,
+.quote-ready-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #4b5563;
+  line-height: 1.55;
+}
+
+.quote-ready-card {
+  background: #f8fafc;
+}
+
+.quote-ready-card strong {
+  color: #111827;
+}
+
+.quote-ready-card p {
+  margin: 8px 0 12px;
+  color: #4b5563;
+  line-height: 1.65;
+}
+
+.concierge-chat-panel[dir='rtl'] {
+  text-align: right;
+}
+
+.concierge-chat-panel[dir='rtl'] .advisor-message {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.concierge-chat-panel[dir='rtl'] .advisor-message span {
+  order: 2;
+}
+
+.concierge-chat-panel[dir='rtl'] .analysis-grid ul,
+.concierge-chat-panel[dir='rtl'] .quote-ready-card ul {
+  padding-right: 18px;
+  padding-left: 0;
+}
+
 .question-card {
   padding: 28px;
 }
@@ -995,7 +1331,8 @@ dt {
 
   .option-grid,
   .input-card,
-  .theme-preview-grid {
+  .theme-preview-grid,
+  .analysis-grid {
     grid-template-columns: 1fr;
   }
 }

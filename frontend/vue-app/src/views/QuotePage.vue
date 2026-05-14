@@ -19,6 +19,19 @@
           <span class="ai-prefill-kicker">AI Concierge prefill</span>
           <strong>{{ aiPrefillNotice.title }}</strong>
           <p>{{ aiPrefillNotice.body }}</p>
+          <div v-if="aiQuoteReadySummary" class="ai-summary-grid">
+            <span>{{ $t('ai.interaction.quoteReady') }}</span>
+            <p>{{ aiQuoteReadySummary.emotional_summary }}</p>
+            <ul>
+              <li v-if="aiQuoteReadySummary.age">Age: {{ aiQuoteReadySummary.age }}</li>
+              <li v-if="aiQuoteReadySummary.budget_range">Budget: {{ aiQuoteReadySummary.budget_range }}</li>
+              <li v-if="aiQuoteReadySummary.package_recommendation">Package: {{ aiQuoteReadySummary.package_recommendation }}</li>
+              <li v-if="aiQuoteReadySummary.venue_recommendation">Venue: {{ aiQuoteReadySummary.venue_recommendation }}</li>
+              <li v-if="aiQuoteReadySummary.missing_fields?.length">
+                Missing: {{ aiQuoteReadySummary.missing_fields.join(' / ') }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -463,6 +476,12 @@ export default {
       };
     },
 
+    aiQuoteReadySummary() {
+      return this.aiPrefill?.quote_ready_summary
+        || this.aiPrefill?.aiRecommendation?.quote_ready_summary
+        || null;
+    },
+
     quoteFlowSummary() {
       const source = this.aiPrefill ? this.$t('quotePage.aiPrepared') : this.$t('quotePage.currentPlan');
       return {
@@ -829,7 +848,7 @@ export default {
 
     applyAiConciergePrefill() {
       const prefill = readQuotePrefill();
-      if (!prefill || this.$route.query.source !== 'ai_concierge') {
+      if (!prefill || !['ai', 'ai_concierge'].includes(this.$route.query.source)) {
         return;
       }
 
@@ -942,6 +961,32 @@ export default {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.ai-summary-grid {
+  margin-top: 8px;
+  padding: 14px;
+  border: 1px solid rgba(196, 181, 253, 0.32);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.22);
+}
+
+.ai-summary-grid span {
+  display: block;
+  margin-bottom: 6px;
+  color: #ddd6fe;
+  font-weight: 900;
+}
+
+.ai-summary-grid p {
+  margin: 0 0 8px;
+  line-height: 1.6;
+}
+
+.ai-summary-grid ul {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.55;
 }
 
 .section-title {

@@ -270,6 +270,21 @@
       "upgradeTitle": "업그레이드 가치",
       "upgradeGeneric1": "상위 등급은 더 강한 비주얼 디테일을 추가합니다.",
       "upgradeGeneric2": "플래너 지원과 공급업체 조율이 더 완성됩니다."
+    },
+    "interaction": {
+      "eyebrow": "대화형 AI 파티 상담사",
+      "title": "원하는 분위기를 말하면 견적 준비용 요약으로 정리합니다",
+      "copy": "실제 플래너에게 말하듯 입력하세요. 이 페이지는 로컬 규칙으로 나이, 스타일, 예산, 누락 정보를 분석하며 외부 AI를 호출하지 않습니다.",
+      "inputLabel": "파티 아이디어",
+      "placeholder": "예: 딸이 곧 18살인데 너무 유치하지 않고 고급스럽고 사진이 예쁘게 나오면 좋겠어요. 예산은 너무 과하지 않았으면 해요.",
+      "voicePreview": "Voice preview / Coming soon / Local only",
+      "analyze": "분석하고 추천하기",
+      "clear": "지우기",
+      "recognized": "인식된 정보",
+      "missing": "추가로 필요한 정보",
+      "recommendation": "상담사 추천",
+      "quoteReady": "견적 준비 요약",
+      "editAnswers": "답변 수정"
     }
   },
   "quotePage": {
@@ -362,9 +377,18 @@
       "unknown": "알 수 없는 장면"
     },
     "packages": {
-      "basic": { "name": "Basic package", "description": "기본 장식과 짧은 장소 이용" },
-      "standard": { "name": "Standard package", "description": "완성형 장식, 더 긴 장소 이용, 플래너 지원" },
-      "premium": { "name": "Premium package", "description": "VIP 맞춤, 종일 장소 이용, 전담 지원" }
+      "basic": {
+        "name": "Basic package",
+        "description": "기본 장식과 짧은 장소 이용"
+      },
+      "standard": {
+        "name": "Standard package",
+        "description": "완성형 장식, 더 긴 장소 이용, 플래너 지원"
+      },
+      "premium": {
+        "name": "Premium package",
+        "description": "VIP 맞춤, 종일 장소 이용, 전담 지원"
+      }
     },
     "addons": {
       "cake": "맞춤 테마 케이크",

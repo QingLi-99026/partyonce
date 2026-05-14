@@ -270,6 +270,21 @@
       "upgradeTitle": "قيمة الترقية",
       "upgradeGeneric1": "الفئات الأعلى تضيف تفاصيل بصرية أقوى.",
       "upgradeGeneric2": "دعم المخطط وتنسيق الموردين يصبحان أكثر اكتمالاً."
+    },
+    "interaction": {
+      "eyebrow": "مستشار حفلات AI تفاعلي",
+      "title": "اكتب فكرتك وسأحولها إلى موجز جاهز لطلب العرض",
+      "copy": "اكتب كما لو كنت تتحدث مع منسق حفلات. تستخدم الصفحة قواعد محلية لاستخراج العمر والأسلوب والميزانية والمعلومات الناقصة، ولا تستدعي AI خارجياً.",
+      "inputLabel": "فكرة الحفل",
+      "placeholder": "مثال: ابنتي ستبلغ 18 عاماً، أريد حفلاً راقياً وغير طفولي، مناسباً للصور، وبميزانية غير مبالغ فيها.",
+      "voicePreview": "Voice preview / Coming soon / Local only",
+      "analyze": "تحليل واقتراح",
+      "clear": "مسح",
+      "recognized": "المعلومات المستخرجة",
+      "missing": "ما نحتاجه بعد",
+      "recommendation": "توصية المستشار",
+      "quoteReady": "ملخص جاهز للعرض",
+      "editAnswers": "تعديل الإجابات"
     }
   },
   "quotePage": {
@@ -362,9 +377,18 @@
       "unknown": "مشهد غير معروف"
     },
     "packages": {
-      "basic": { "name": "Basic package", "description": "ديكور أساسي واستخدام قصير للقاعة" },
-      "standard": { "name": "Standard package", "description": "ديكور كامل، استخدام أطول للقاعة، ودعم مخطط" },
-      "premium": { "name": "Premium package", "description": "تخصيص VIP، استخدام يوم كامل للقاعة، ودعم مخصص" }
+      "basic": {
+        "name": "Basic package",
+        "description": "ديكور أساسي واستخدام قصير للقاعة"
+      },
+      "standard": {
+        "name": "Standard package",
+        "description": "ديكور كامل، استخدام أطول للقاعة، ودعم مخطط"
+      },
+      "premium": {
+        "name": "Premium package",
+        "description": "تخصيص VIP، استخدام يوم كامل للقاعة، ودعم مخصص"
+      }
     },
     "addons": {
       "cake": "كيكة ثيم مخصصة",

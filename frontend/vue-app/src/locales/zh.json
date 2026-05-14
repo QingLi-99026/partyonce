@@ -270,6 +270,21 @@
       "upgradeTitle": "升级价值",
       "upgradeGeneric1": "更高档位会增加更强的视觉细节。",
       "upgradeGeneric2": "策划支持和供应商协调会更完整。"
+    },
+    "interaction": {
+      "eyebrow": "互动式 AI 派对顾问",
+      "title": "直接告诉我你的想法，我来整理成可报价需求",
+      "copy": "你可以像和真人顾问聊天一样输入一句话。我会本地规则分析年龄、风格、预算和缺失信息，不调用外部 AI。",
+      "inputLabel": "你的派对想法",
+      "placeholder": "例如：我女儿快18岁了，想办得高级一点，不要太幼稚，拍照要好看，预算别太夸张。",
+      "voicePreview": "Voice preview / Coming soon / Local only",
+      "analyze": "分析并推荐",
+      "clear": "清空",
+      "recognized": "已识别信息",
+      "missing": "还需要补充",
+      "recommendation": "顾问推荐",
+      "quoteReady": "Quote-ready summary",
+      "editAnswers": "编辑答案"
     }
   },
   "quotePage": {
@@ -362,9 +377,18 @@
       "unknown": "未知场景"
     },
     "packages": {
-      "basic": { "name": "Basic 套餐", "description": "基础布置与短时场地使用" },
-      "standard": { "name": "Standard 套餐", "description": "完整布置、更长场地使用和策划支持" },
-      "premium": { "name": "Premium 套餐", "description": "VIP 定制、全天场地使用和专属支持" }
+      "basic": {
+        "name": "Basic 套餐",
+        "description": "基础布置与短时场地使用"
+      },
+      "standard": {
+        "name": "Standard 套餐",
+        "description": "完整布置、更长场地使用和策划支持"
+      },
+      "premium": {
+        "name": "Premium 套餐",
+        "description": "VIP 定制、全天场地使用和专属支持"
+      }
     },
     "addons": {
       "cake": "定制主题蛋糕",

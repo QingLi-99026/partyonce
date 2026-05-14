@@ -23,7 +23,17 @@ export function scoreRecommendation(answers) {
 }
 
 export function buildQuotePrefill(answers, recommendation) {
-  return buildQuotePrefillPayload(answers, recommendation);
+  const prefill = buildQuotePrefillPayload(answers, recommendation);
+  if (recommendation?.quote_ready_summary) {
+    prefill.quote_ready_summary = recommendation.quote_ready_summary;
+    prefill.aiRecommendation = {
+      ...prefill.aiRecommendation,
+      quote_ready_summary: recommendation.quote_ready_summary,
+      free_text_analysis: recommendation.free_text_analysis || null,
+      advisor_message: recommendation.advisor_message || null
+    };
+  }
+  return prefill;
 }
 
 export function speakText(text, enabled = true) {

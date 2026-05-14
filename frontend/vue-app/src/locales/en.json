@@ -270,6 +270,21 @@
       "upgradeTitle": "Upgrade value",
       "upgradeGeneric1": "Higher tiers add stronger visual detail.",
       "upgradeGeneric2": "Planner support and supplier coordination become more complete."
+    },
+    "interaction": {
+      "eyebrow": "Interactive AI party advisor",
+      "title": "Tell me your idea, and I will turn it into a quote-ready brief",
+      "copy": "Type naturally like you are talking to a human planner. The page uses local rules to detect age, style, budget, and missing details. No external AI is called.",
+      "inputLabel": "Your party idea",
+      "placeholder": "Example: My daughter is turning 18. I want it to feel elegant, not childish, photo-friendly, and not too expensive.",
+      "voicePreview": "Voice preview / Coming soon / Local only",
+      "analyze": "Analyze and recommend",
+      "clear": "Clear",
+      "recognized": "Recognized details",
+      "missing": "Still needed",
+      "recommendation": "Advisor recommendation",
+      "quoteReady": "Quote-ready summary",
+      "editAnswers": "Edit answers"
     }
   },
   "quotePage": {
@@ -362,9 +377,18 @@
       "unknown": "Unknown scene"
     },
     "packages": {
-      "basic": { "name": "Basic package", "description": "Essential decor and short venue use" },
-      "standard": { "name": "Standard package", "description": "Complete decor, longer venue use, and planner support" },
-      "premium": { "name": "Premium package", "description": "VIP customization, full-day venue use, and dedicated support" }
+      "basic": {
+        "name": "Basic package",
+        "description": "Essential decor and short venue use"
+      },
+      "standard": {
+        "name": "Standard package",
+        "description": "Complete decor, longer venue use, and planner support"
+      },
+      "premium": {
+        "name": "Premium package",
+        "description": "VIP customization, full-day venue use, and dedicated support"
+      }
     },
     "addons": {
       "cake": "Custom theme cake",
