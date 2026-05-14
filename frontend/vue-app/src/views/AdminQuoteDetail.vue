@@ -413,6 +413,21 @@
         </section>
 
         <section class="panel-grid">
+          <PartySceneSummary
+            title="Unified AI / Visual / 3D Context"
+            audience="admin"
+            :scene-config="quotePartySceneConfig"
+            :visual-context="quoteVisualContext"
+            :recommendation-text="quotePackageExplanation.whyRecommend"
+          />
+          <SocialRewardsPanel
+            mode="admin"
+            title="Customer sharing rewards status"
+            :customer-id="quote?.customer_id || quote?.customer_summary?.id || 'customer-local-41'"
+          />
+        </section>
+
+        <section class="panel-grid">
           <article class="panel">
             <h2>Selection Snapshot</h2>
             <pre>{{ formatJson(quote.selection_snapshot) }}</pre>
@@ -441,6 +456,8 @@ import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExpl
 import { buildQuoteLineItemsFromSelection, normalizeQuoteLineItem, normalizeQuoteLineItems, quoteLineItemOrder, quoteLineItemTypes, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
 import { writePartySceneConfig } from '@/services/partyScenePreviewService'
+import PartySceneSummary from '@/components/PartySceneSummary.vue'
+import SocialRewardsPanel from '@/components/SocialRewardsPanel.vue'
 
 const route = useRoute()
 const router = useRouter()

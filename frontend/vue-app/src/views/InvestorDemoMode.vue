@@ -86,6 +86,45 @@
       </article>
     </section>
 
+    <section class="unified-experience">
+      <div>
+        <p class="eyebrow">Unified Customer/Admin Experience</p>
+        <h2>同一套业务上下文，客户看得懂，后台解释得清楚</h2>
+        <p>
+          AI Concierge 生成 party_scene_config；Quote 和 Order 读取同一份视觉、报价、场地、供应商和奖励上下文。
+          客户侧看到简化解释，后台侧看到运营说明、line items、owner 和 next action。
+        </p>
+      </div>
+      <div class="unified-columns">
+        <article>
+          <strong>客户看到什么</strong>
+          <ul>
+            <li>AI 推荐摘要、主题 / 套餐 / Restaurant A 渲染图</li>
+            <li>实验性 3D Preview 入口和场景配置摘要</li>
+            <li>简化报价 line items、供应商 / 场地上下文</li>
+            <li>分享奖励入口、审核中 / 已奖励状态和下一步动作</li>
+          </ul>
+        </article>
+        <article>
+          <strong>后台看到什么</strong>
+          <ul>
+            <li>客户需求摘要、AI 推荐理由和完整 party_scene_config</li>
+            <li>2D 渲染图、3D Preview、供应商职责和报价依据</li>
+            <li>editable line items、运营备注、owner、next action</li>
+            <li>UGC 分享奖励状态，仍然不外发、不触发 webhook/n8n</li>
+          </ul>
+        </article>
+      </div>
+      <div class="unified-actions">
+        <el-button type="primary" @click="go('/my/quotes/quote-local-501')">查看客户报价详情</el-button>
+        <el-button @click="go('/my/orders/order-local-1001')">查看客户订单详情</el-button>
+        <el-button @click="bootstrapAdmin(); go('/admin/quotes/1')">查看后台报价详情</el-button>
+        <el-button @click="bootstrapAdmin(); go('/admin/orders/1')">查看后台订单详情</el-button>
+        <el-button @click="go('/experimental/party-3d')">查看 3D Preview</el-button>
+        <el-button @click="go('/my/rewards')">查看分享奖励</el-button>
+      </div>
+    </section>
+
     <section class="launch-plan">
       <p class="eyebrow">Current status and next launch plan</p>
       <h2>当前是 staging，可演示但不是 production Go</h2>
@@ -220,7 +259,9 @@ const routeGroups = [
       { label: 'AI Concierge', path: '/ai-voice-intake' },
       { label: 'Quote Prefill', path: '/quote?theme=space&package=standard&scene=restaurant-a&source=ai_concierge' },
       { label: 'My Quotes', path: '/my/quotes' },
-      { label: 'My Orders', path: '/my/orders' }
+      { label: 'My Quote Detail', path: '/my/quotes/quote-local-501' },
+      { label: 'My Orders', path: '/my/orders' },
+      { label: 'My Order Detail', path: '/my/orders/order-local-1001' }
     ]
   },
   {
@@ -228,7 +269,9 @@ const routeGroups = [
     note: '需要先启用后台演示身份。',
     routes: [
       { label: 'Admin Quotes', path: '/admin/quotes' },
+      { label: 'Admin Quote Detail', path: '/admin/quotes/1' },
       { label: 'Admin Orders', path: '/admin/orders' },
+      { label: 'Admin Order Detail', path: '/admin/orders/1' },
       { label: 'Notify Dry-run', path: '/admin/notifications/dry-run' }
     ]
   },
@@ -238,6 +281,8 @@ const routeGroups = [
     routes: [
       { label: 'Suppliers', path: '/suppliers' },
       { label: 'Venues', path: '/venues' },
+      { label: '3D Preview', path: '/experimental/party-3d' },
+      { label: 'My Rewards', path: '/my/rewards' },
       { label: 'Partner Apply', path: '/partner/apply' },
       { label: 'Payment Readiness', path: '/payment/deposit' }
     ]
@@ -289,6 +334,7 @@ function handleAction(action) {
 .demo-progress,
 .active-step-card,
 .route-board,
+.unified-experience,
 .launch-plan,
 .guardrail-alert {
   max-width: 1180px;
@@ -307,6 +353,7 @@ function handleAction(action) {
 .demo-hero,
 .active-step-card,
 .route-group,
+.unified-experience,
 .launch-plan,
 .stage-card {
   border: 1px solid rgba(148, 163, 184, 0.28);
@@ -472,6 +519,36 @@ li,
   color: #111827;
 }
 
+.unified-experience {
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.unified-experience > div:first-child p:not(.eyebrow) {
+  max-width: 880px;
+}
+
+.unified-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.unified-columns article {
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.unified-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
 .launch-plan {
   padding: 28px;
 }
@@ -493,6 +570,7 @@ li,
   .demo-hero,
   .active-step-card,
   .route-board,
+  .unified-columns,
   .plan-grid {
     grid-template-columns: 1fr;
   }

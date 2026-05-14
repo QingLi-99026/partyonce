@@ -73,6 +73,15 @@
         </article>
       </section>
 
+      <PartySceneSummary
+        class="unified-panel"
+        title="订单场景与 3D Preview"
+        audience="customer"
+        :scene-config="orderPartySceneConfig"
+        :visual-context="orderVisualContext"
+        :recommendation-text="orderRecommendationText"
+      />
+
       <section class="panel">
         <h2>简化订单组成</h2>
         <p class="panel-intro">
@@ -186,7 +195,10 @@ import {
   saveCustomerSupplementRequest
 } from '@/services/customerExperienceService'
 import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
+import { buildPartySceneConfig } from '@/data/partySceneConfig'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
+import { getPackageExplanation } from '@/data/packageExplanation'
+import PartySceneSummary from '@/components/PartySceneSummary.vue'
 import {
   buildDemoShareText,
   createRewardSubmission,
@@ -214,6 +226,17 @@ const orderVisualContext = computed(() => getVisualContext(
   normalizeThemeId(order.value?.theme || order.value?.selection_snapshot?.theme),
   normalizeTierId(order.value?.package || order.value?.package_tier || order.value?.selection_snapshot?.package)
 ))
+const orderPackageTier = computed(() => normalizeTierId(order.value?.package || order.value?.package_tier || order.value?.selection_snapshot?.package))
+const orderPartySceneConfig = computed(() => order.value?.party_scene_config || order.value?.selection_snapshot?.party_scene_config || buildPartySceneConfig({}, {
+  theme: orderVisualContext.value.packageVisual.theme,
+  tier: orderPackageTier.value,
+  visualContext: orderVisualContext.value,
+  reasonHeadline: getPackageExplanation(orderPackageTier.value).whyRecommend
+}))
+const orderRecommendationText = computed(() => {
+  const explanation = getPackageExplanation(orderPackageTier.value)
+  return order.value?.aiRecommendation?.reasonHeadline || `${explanation.whyRecommend} ${explanation.customerFit}`
+})
 
 const orderTagType = (status) => ({
   draft: 'info',
@@ -367,6 +390,7 @@ h2 {
 
 .summary-card,
 .panel,
+.unified-panel,
 .next-step {
   border: 1px solid #e2e8f0;
   border-radius: 8px;

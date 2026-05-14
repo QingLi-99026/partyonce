@@ -73,6 +73,15 @@
         </article>
       </section>
 
+      <PartySceneSummary
+        class="unified-panel"
+        title="AI 推荐与场景配置"
+        audience="customer"
+        :scene-config="quotePartySceneConfig"
+        :visual-context="quoteVisualContext"
+        :recommendation-text="quoteRecommendationText"
+      />
+
       <section class="panel">
         <h2>简化报价组成</h2>
         <p class="panel-intro">
@@ -116,6 +125,12 @@
           </dl>
         </div>
       </section>
+
+      <SocialRewardsPanel
+        class="unified-panel"
+        :customer-id="quote.customer_id || identity.id"
+        title="分享奖励入口"
+      />
 
       <section class="next-step">
         <span>Next step</span>
@@ -187,7 +202,11 @@ import {
   saveQuoteConfirmationPlaceholder
 } from '@/services/customerExperienceService'
 import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
+import { buildPartySceneConfig } from '@/data/partySceneConfig'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
+import { getPackageExplanation } from '@/data/packageExplanation'
+import PartySceneSummary from '@/components/PartySceneSummary.vue'
+import SocialRewardsPanel from '@/components/SocialRewardsPanel.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -207,6 +226,25 @@ const quoteVisualContext = computed(() => {
     normalizeThemeId(selection.theme || selection.themeName),
     normalizeTierId(selection.package || selection.packageTier || selection.packageName)
   )
+})
+const quotePackageTier = computed(() => {
+  const selection = quote.value?.selection_snapshot || {}
+  return normalizeTierId(selection.package || selection.packageTier || selection.packageName)
+})
+const quotePartySceneConfig = computed(() => {
+  const selection = quote.value?.selection_snapshot || {}
+  return quote.value?.party_scene_config || selection.party_scene_config || buildPartySceneConfig({}, {
+    theme: quoteVisualContext.value.packageVisual.theme,
+    tier: quotePackageTier.value,
+    visualContext: quoteVisualContext.value,
+    reasonHeadline: getPackageExplanation(quotePackageTier.value).whyRecommend
+  })
+})
+const quoteRecommendationText = computed(() => {
+  const explanation = getPackageExplanation(quotePackageTier.value)
+  return quote.value?.aiRecommendation?.reasonHeadline
+    || quote.value?.selection_snapshot?.sceneConfigSummary?.label
+    || `${explanation.whyRecommend} ${explanation.customerFit}`
 })
 const customerQuoteGroups = computed(() => {
   const groups = quoteLineItemSummary.value.groups
@@ -372,6 +410,7 @@ h2 {
 
 .summary-card,
 .panel,
+.unified-panel,
 .next-step {
   border: 1px solid #e2e8f0;
   border-radius: 8px;

@@ -190,6 +190,23 @@
         </section>
 
         <section class="panel-grid">
+          <PartySceneSummary
+            title="Unified AI / Scene / 3D Order Context"
+            audience="admin"
+            :scene-config="orderPartySceneConfig"
+            :visual-context="orderVisualContext"
+            :recommendation-text="orderPackageExplanation.whyRecommend"
+          />
+          <SocialRewardsPanel
+            mode="admin"
+            title="Order social rewards status"
+            :customer-id="order?.customer?.id || 'customer-local-41'"
+            :order-id="order?.id || ''"
+            :order-number="order?.order_number || ''"
+          />
+        </section>
+
+        <section class="panel-grid">
           <article class="panel ops-explainer-panel">
             <h2>Ops Pricing Explanation</h2>
             <div class="scene-config-admin-summary">
@@ -340,6 +357,8 @@ import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visu
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
 import { normalizeQuoteLineItems, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
+import PartySceneSummary from '@/components/PartySceneSummary.vue'
+import SocialRewardsPanel from '@/components/SocialRewardsPanel.vue'
 import {
   ORDER_SOURCE_API,
   fetchAdminOrderDetail,
