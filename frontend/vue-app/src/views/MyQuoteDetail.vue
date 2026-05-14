@@ -78,10 +78,10 @@
         <p class="panel-intro">
           报价已按稳定类型拆分，方便后续正式报价单、PDF 和 deposit 计算。
         </p>
-        <el-table :data="quoteLineItemSummary.groups" empty-text="No line item snapshot">
+        <el-table :data="customerQuoteGroups" empty-text="No line item snapshot">
           <el-table-column label="Type" min-width="180">
             <template #default="{ row }">
-              <strong>{{ row.labelZh }}</strong>
+              <strong>{{ row.label }}</strong>
               <small>{{ row.customerLabel }}</small>
             </template>
           </el-table-column>
@@ -184,6 +184,27 @@ const supplementNote = ref('')
 
 const canConfirmQuote = computed(() => ['sent', 'accepted'].includes(quote.value?.status))
 const quoteLineItemSummary = computed(() => summarizeQuoteLineItems(quote.value?.line_items || []))
+const customerQuoteGroups = computed(() => {
+  const groups = quoteLineItemSummary.value.groups
+  const byType = (types) => groups.filter((group) => types.includes(group.type))
+  const mergeGroup = ({ label, customerLabel, types }) => {
+    const matched = byType(types)
+    return {
+      label,
+      customerLabel,
+      description: matched.map((group) => group.description).filter(Boolean).join(' / '),
+      amount: matched.reduce((sum, group) => sum + Number(group.amount || 0), 0),
+      items: matched.flatMap((group) => group.items || [])
+    }
+  }
+  return [
+    mergeGroup({ label: '场地费用', customerLabel: '场地与空间使用', types: ['venue_fee'] }),
+    mergeGroup({ label: '装饰费用', customerLabel: '主题装饰', types: ['decor_fee'] }),
+    mergeGroup({ label: '供应商服务', customerLabel: '供应商服务', types: ['supplier_fee'] }),
+    mergeGroup({ label: '人工与运输', customerLabel: '现场执行与物流', types: ['labor_fee', 'transport_fee', 'service_fee'] }),
+    mergeGroup({ label: '可选升级', customerLabel: '客户选择的升级项', types: ['optional_upgrade'] })
+  ].filter((group) => group.amount > 0 || group.items.length > 0)
+})
 
 const quoteTagType = (status) => ({
   draft: 'info',

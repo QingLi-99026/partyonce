@@ -238,6 +238,79 @@
           <el-empty v-else description="No line item snapshot is available." />
         </section>
 
+        <section class="panel editable-line-items-panel">
+          <div class="panel-heading-row">
+            <div>
+              <h2>Editable Line Item Draft</h2>
+              <p class="control-note">
+                Local/staging draft only. This does not finalize payment amount, create invoice, create contract, or trigger external systems.
+              </p>
+            </div>
+            <div class="draft-actions">
+              <el-button type="primary" plain @click="addLineItemDraftRow">Add Line Item</el-button>
+              <el-button @click="resetLineItemDraft">Reset from Snapshot</el-button>
+              <el-button type="success" @click="saveLineItemDraft">Save Draft Locally</el-button>
+            </div>
+          </div>
+
+          <div class="line-item-draft-summary">
+            <strong>Draft subtotal: {{ formatMoney(lineItemDraftSummary.total, quote.currency) }}</strong>
+            <span>Deposit placeholder: {{ formatMoney(lineItemDraftSummary.deposit_placeholder, quote.currency) }}</span>
+            <small>{{ lineItemDraftSummary.deposit_note }}</small>
+          </div>
+
+          <div class="line-item-editor-list">
+            <article v-for="(item, index) in lineItemDraftRows" :key="item.draft_id" class="line-item-editor-row">
+              <div class="editor-row-header">
+                <strong>报价项目 {{ index + 1 }}</strong>
+                <el-button type="danger" text @click="removeLineItemDraftRow(index)">Delete</el-button>
+              </div>
+              <div class="line-item-form-grid">
+                <label>
+                  <span>费用类型</span>
+                  <el-select v-model="item.type" placeholder="Line item type">
+                    <el-option
+                      v-for="type in quoteLineItemTypeOptions"
+                      :key="type.type"
+                      :label="`${type.labelZh} · ${type.customerLabel}`"
+                      :value="type.type"
+                    />
+                  </el-select>
+                </label>
+                <label>
+                  <span>Label / Title</span>
+                  <el-input v-model="item.name" placeholder="Line item title" />
+                </label>
+                <label>
+                  <span>Amount</span>
+                  <el-input-number v-model="item.amount" :min="0" :step="25" controls-position="right" />
+                </label>
+                <label>
+                  <span>可选升级项</span>
+                  <el-switch
+                    :model-value="item.type === 'optional_upgrade'"
+                    active-text="Optional"
+                    inactive-text="Base"
+                    @change="(checked) => setOptionalUpgrade(item, checked)"
+                  />
+                </label>
+              </div>
+              <label class="wide-field">
+                <span>计费依据 amount_basis</span>
+                <el-input v-model="item.amount_basis" type="textarea" :rows="2" placeholder="Why this amount is here" />
+              </label>
+              <label class="wide-field">
+                <span>客户解释 customer_explanation</span>
+                <el-input v-model="item.customer_explanation" type="textarea" :rows="2" placeholder="Customer-facing explanation" />
+              </label>
+              <label class="wide-field">
+                <span>后台编辑提示 admin_edit_hint</span>
+                <el-input v-model="item.admin_edit_hint" type="textarea" :rows="2" placeholder="Internal edit guidance" />
+              </label>
+            </article>
+          </div>
+        </section>
+
         <section class="panel-grid">
           <article class="panel visual-panel">
             <h2>Visual Delivery Context</h2>
@@ -362,7 +435,7 @@ import apiClient from '@/api'
 import { createDraftOrderFromQuote } from '@/services/adminOrderService'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
-import { normalizeQuoteLineItems, summarizeQuoteLineItems } from '@/data/quoteLineItems'
+import { buildQuoteLineItemsFromSelection, normalizeQuoteLineItem, normalizeQuoteLineItems, quoteLineItemOrder, quoteLineItemTypes, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
 
 const route = useRoute()
@@ -374,6 +447,7 @@ const loading = ref(false)
 const message = ref('')
 const messageType = ref('info')
 const creatingOrder = ref(false)
+const lineItemDraftRows = ref([])
 const quoteOps = ref({
   owner: '',
   nextAction: '',
@@ -381,8 +455,13 @@ const quoteOps = ref({
   updatedAt: ''
 })
 
-const lineItems = computed(() => normalizeQuoteLineItems(quote.value?.line_items))
+const quoteLineItemTypeOptions = quoteLineItemOrder.map((type) => ({
+  type,
+  ...quoteLineItemTypes[type]
+}))
+const lineItems = computed(() => normalizeQuoteLineItems(lineItemDraftRows.value.length ? lineItemDraftRows.value : quote.value?.line_items))
 const lineItemSummary = computed(() => summarizeQuoteLineItems(lineItems.value))
+const lineItemDraftSummary = computed(() => summarizeQuoteLineItems(lineItemDraftRows.value))
 const canCreateDraftOrder = computed(() => quote.value?.status === 'accepted')
 const quoteVisualContext = computed(() => {
   const selection = quote.value?.selection_snapshot || {}
@@ -445,6 +524,135 @@ const quoteOpsAlerts = computed(() => {
 })
 
 const opsStorageKey = computed(() => `partyonce_quote_ops_${route.params.quoteId}`)
+const lineItemDraftStorageKey = computed(() => `partyonce_quote_line_item_draft_${route.params.quoteId}`)
+
+const toDraftRow = (item = {}, index = 0) => {
+  const normalized = normalizeQuoteLineItem(item, index)
+  return {
+    draft_id: item.draft_id || item.id || `draft-${Date.now()}-${index}`,
+    id: normalized.id,
+    type: normalized.type,
+    name: normalized.name,
+    amount: Number(normalized.amount || 0),
+    amount_basis: normalized.amount_basis || '',
+    customer_explanation: normalized.customer_explanation || '',
+    admin_edit_hint: normalized.admin_edit_hint || '',
+    description: normalized.description || '',
+    source: normalized.source || 'admin_draft'
+  }
+}
+
+const readStoredLineItemDraft = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(lineItemDraftStorageKey.value) || 'null')
+    if (Array.isArray(parsed?.items)) return parsed.items.map(toDraftRow)
+  } catch (error) {
+    // Ignore corrupt local/staging draft and rebuild from snapshot.
+  }
+  return null
+}
+
+const loadLineItemDraft = () => {
+  const stored = readStoredLineItemDraft()
+  if (stored?.length) {
+    lineItemDraftRows.value = stored
+    return
+  }
+  lineItemDraftRows.value = normalizeQuoteLineItems(quote.value?.line_items).map(toDraftRow)
+}
+
+const resetLineItemDraft = () => {
+  lineItemDraftRows.value = normalizeQuoteLineItems(quote.value?.line_items).map(toDraftRow)
+  localStorage.removeItem(lineItemDraftStorageKey.value)
+  ElMessage.info('Line item draft reset from current Quote snapshot.')
+}
+
+const addLineItemDraftRow = () => {
+  lineItemDraftRows.value.push(toDraftRow({
+    id: `admin-draft-${Date.now()}`,
+    type: 'optional_upgrade',
+    name: 'New optional upgrade',
+    amount: 0,
+    amount_basis: 'Manual local/staging draft item.',
+    customer_explanation: quoteLineItemTypes.optional_upgrade.customerExplanation,
+    admin_edit_hint: quoteLineItemTypes.optional_upgrade.adminEditHint,
+    source: 'admin_line_item_draft'
+  }, lineItemDraftRows.value.length))
+}
+
+const removeLineItemDraftRow = (index) => {
+  lineItemDraftRows.value.splice(index, 1)
+}
+
+const setOptionalUpgrade = (item, checked) => {
+  item.type = checked ? 'optional_upgrade' : 'service_fee'
+}
+
+const saveLineItemDraft = () => {
+  const normalized = normalizeQuoteLineItems(lineItemDraftRows.value).map((item) => ({
+    ...item,
+    source: 'admin_line_item_draft',
+    draft_saved_at: new Date().toISOString()
+  }))
+  const summary = summarizeQuoteLineItems(normalized)
+  const payload = {
+    quote_id: quote.value?.id,
+    saved_at: new Date().toISOString(),
+    persistence: 'localStorage fallback; backend quote line item draft API not yet enabled',
+    items: normalized,
+    summary
+  }
+  localStorage.setItem(lineItemDraftStorageKey.value, JSON.stringify(payload))
+  quote.value = {
+    ...quote.value,
+    line_items: normalized,
+    subtotal: summary.total,
+    final_total: summary.total,
+    line_item_draft_saved_at: payload.saved_at
+  }
+  ElMessage.success('Line item draft saved locally. No payment, contract, webhook, or outbound action was triggered.')
+}
+
+const buildFallbackQuoteDetail = () => {
+  const visualContext = getVisualContext('castle', 'standard')
+  const packageExplanation = getPackageExplanation('standard')
+  const lineItems = buildQuoteLineItemsFromSelection({
+    packageData: { name: 'Castle Princess Standard', price: 1499 },
+    sceneData: { name: 'Restaurant A Private Dining', basePrice: 2600 },
+    visualContext,
+    packageExplanation,
+    currency: 'AUD'
+  })
+  const summary = summarizeQuoteLineItems(lineItems)
+  return {
+    id: route.params.quoteId || 'local-fallback-quote',
+    quote_number: `LOCAL-STAGING-Q-${route.params.quoteId || '001'}`,
+    status: 'draft',
+    currency: 'AUD',
+    subtotal: summary.total,
+    discount_total: 0,
+    tax_total: 0,
+    final_total: summary.total,
+    lead_id: 'local-fallback',
+    customer_id: 'customer-local-41',
+    customer_summary: {
+      name: 'Local staging customer',
+      contact: 'fixture@example.test'
+    },
+    lead_summary: {
+      status: 'fallback_demo'
+    },
+    selection_snapshot: {
+      theme: 'castle',
+      package: 'standard',
+      venueName: visualContext.primaryVenue.name
+    },
+    line_items: lineItems,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    skeleton_notice: 'Fallback local/staging Quote detail used because the backend Quote detail API was unavailable.'
+  }
+}
 
 const loadQuoteOpsState = () => {
   if (quote.value) {
@@ -495,10 +703,13 @@ const loadQuote = async () => {
   try {
     quote.value = await apiClient.get(`/quotes/${route.params.quoteId}`)
     loadQuoteOpsState()
+    loadLineItemDraft()
   } catch (error) {
-    quote.value = null
-    message.value = getErrorMessage(error)
-    messageType.value = 'error'
+    quote.value = buildFallbackQuoteDetail()
+    loadQuoteOpsState()
+    loadLineItemDraft()
+    message.value = `${getErrorMessage(error)} Using local/staging fallback quote so line item draft mode can be reviewed.`
+    messageType.value = 'warning'
   } finally {
     loading.value = false
   }
@@ -691,6 +902,86 @@ onMounted(loadQuote)
   color: #212529;
 }
 
+.panel-heading-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.panel-heading-row h2 {
+  margin-bottom: 6px;
+}
+
+.draft-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.editable-line-items-panel {
+  border-color: #c3fae8;
+  background: #fbfffd;
+}
+
+.line-item-draft-summary {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid #c3fae8;
+  border-radius: 8px;
+  background: #f1fef8;
+}
+
+.line-item-draft-summary strong,
+.line-item-draft-summary span,
+.line-item-draft-summary small {
+  color: #087f5b;
+}
+
+.line-item-editor-list {
+  display: grid;
+  gap: 14px;
+}
+
+.line-item-editor-row {
+  padding: 14px;
+  border: 1px solid #d8f5e7;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.editor-row-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.line-item-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 180px 160px;
+  gap: 12px;
+  align-items: end;
+}
+
+.line-item-form-grid label,
+.wide-field {
+  display: grid;
+  gap: 6px;
+  color: #495057;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.wide-field {
+  margin-top: 12px;
+}
+
 dl {
   display: grid;
   gap: 12px;
@@ -849,8 +1140,13 @@ pre {
   }
 
   .summary-grid,
-  .panel-grid {
+  .panel-grid,
+  .line-item-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .panel-heading-row {
+    flex-direction: column;
   }
 
   dd {
