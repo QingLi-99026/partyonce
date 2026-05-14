@@ -290,10 +290,19 @@
           </article>
 
           <article class="panel">
-            <h2>Line Items</h2>
+            <h2>Standardized Line Items</h2>
             <el-table :data="order.line_items" row-key="name" style="width: 100%">
-              <el-table-column label="Item" min-width="220">
-                <template #default="{ row }">{{ row.name }}</template>
+              <el-table-column label="Type" width="170">
+                <template #default="{ row }">
+                  <strong>{{ row.type_label_zh || row.type }}</strong>
+                  <small>{{ row.customer_label }}</small>
+                </template>
+              </el-table-column>
+              <el-table-column label="Item / Basis" min-width="260">
+                <template #default="{ row }">
+                  <span>{{ row.name }}</span>
+                  <small>{{ row.description }}</small>
+                </template>
               </el-table-column>
               <el-table-column label="Amount" width="150" align="right">
                 <template #default="{ row }">{{ formatMoney(row.amount, order.currency) }}</template>
@@ -313,6 +322,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { blockedOrderActions, orderStatuses } from '@/mock/adminOrders'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
+import { normalizeQuoteLineItems, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import {
   ORDER_SOURCE_API,
   fetchAdminOrderDetail,
@@ -358,7 +368,8 @@ const orderUpgradeExplanation = computed(() => getUpgradeExplanation(orderPackag
 const orderPriceBasis = computed(() => {
   const context = orderVisualContext.value
   const explanation = orderPackageExplanation.value
-  const lineItems = Array.isArray(order.value?.line_items) ? order.value.line_items : []
+  const lineItems = normalizeQuoteLineItems(order.value?.line_items)
+  const summary = summarizeQuoteLineItems(lineItems)
   return [
     `套餐层级：${explanation.label} · ${explanation.positioning}`,
     `装饰项：${context.packageVisual.scope}`,
@@ -366,7 +377,7 @@ const orderPriceBasis = computed(() => {
     `渲染范围：${context.restaurant.decorationLayer}`,
     ...context.suppliers.map((supplier) => `供应商：${supplier.name} (${supplier.category}) · ${supplier.priceRange}`),
     ...explanation.priceDrivers.map((driver) => `价格驱动：${driver}`),
-    ...lineItems.slice(0, 4).map((item) => `${item.name || item.item_name || 'Line item'} · ${formatMoney(item.amount || item.price || item.total || 0, order.value?.currency)}`)
+    ...summary.groups.map((group) => `${group.labelZh}：${formatMoney(group.amount, order.value?.currency)} · ${group.description}`)
   ].filter(Boolean)
 })
 const orderCustomerScript = computed(() => {
@@ -397,6 +408,7 @@ const loadOrder = async () => {
   try {
     const result = await fetchAdminOrderDetail(route.params.orderId)
     order.value = result.item
+    if (order.value) order.value.line_items = normalizeQuoteLineItems(order.value.line_items)
     dataSource.value = result.source
     syncOpsForm()
     if (result.source !== ORDER_SOURCE_API) {
@@ -421,6 +433,7 @@ const saveOrderOperations = async () => {
     return
   }
   order.value = result.item
+  if (order.value) order.value.line_items = normalizeQuoteLineItems(order.value.line_items)
   dataSource.value = result.source
   syncOpsForm()
   if (result.source !== ORDER_SOURCE_API) {
@@ -437,6 +450,7 @@ const updateStatus = async (status) => {
     return
   }
   order.value = result.item
+  if (order.value) order.value.line_items = normalizeQuoteLineItems(order.value.line_items)
   dataSource.value = result.source
   syncOpsForm()
   if (result.source !== ORDER_SOURCE_API) {
@@ -718,6 +732,12 @@ dd {
 
 .ops-basis-list {
   margin-top: 14px;
+}
+
+:deep(.el-table small) {
+  display: block;
+  margin-top: 4px;
+  color: #868e96;
 }
 
 @media (max-width: 900px) {

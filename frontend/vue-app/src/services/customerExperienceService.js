@@ -1,6 +1,7 @@
 import { loadAdminOrderSkeletons } from '@/mock/adminOrders'
 import apiClient from '@/api'
 import { useUserStore } from '@/store'
+import { normalizeQuoteLineItems } from '@/data/quoteLineItems'
 
 const SOURCE_LOCAL_DEMO = 'local/staging filtered fixture'
 const SOURCE_READONLY_API = 'customer read-only API'
@@ -68,9 +69,11 @@ const quoteFixtures = [
     valid_until: '2026-05-25',
     created_at: '2026-05-11T08:00:00.000Z',
     line_items: [
-      { name: 'Premium castle room styling', amount: 980 },
-      { name: 'Private dining room setup', amount: 420 },
-      { name: 'Materials and activity station', amount: 280 }
+      { type: 'venue_fee', name: 'Sydney Kids Studio Room A', amount: 420 },
+      { type: 'decor_fee', name: 'Premium castle room styling', amount: 760 },
+      { type: 'supplier_fee', name: 'Cake and activity supplier allowance', amount: 280 },
+      { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
+      { type: 'service_fee', name: 'Planning service', amount: 60 }
     ]
   },
   {
@@ -94,9 +97,11 @@ const quoteFixtures = [
     valid_until: '2026-05-28',
     created_at: '2026-05-11T08:20:00.000Z',
     line_items: [
-      { name: 'Standard space room styling', amount: 720 },
-      { name: 'Activity materials', amount: 260 },
-      { name: 'Setup and pack-down', amount: 260 }
+      { type: 'venue_fee', name: 'Harbour View Function Room', amount: 280 },
+      { type: 'decor_fee', name: 'Standard space room styling', amount: 520 },
+      { type: 'supplier_fee', name: 'Activity materials supplier allowance', amount: 220 },
+      { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
+      { type: 'transport_fee', name: 'Transport and handling', amount: 60 }
     ]
   },
   {
@@ -120,9 +125,11 @@ const quoteFixtures = [
     valid_until: '2026-05-30',
     created_at: '2026-05-11T08:35:00.000Z',
     line_items: [
-      { name: 'Basic forest theme styling', amount: 520 },
-      { name: 'Kids table materials', amount: 160 },
-      { name: 'Local setup support', amount: 100 }
+      { type: 'venue_fee', name: 'Forest Play Cafe', amount: 180 },
+      { type: 'decor_fee', name: 'Basic forest theme styling', amount: 390 },
+      { type: 'labor_fee', name: 'Local setup support', amount: 120 },
+      { type: 'transport_fee', name: 'Transport and handling', amount: 50 },
+      { type: 'service_fee', name: 'Planning service', amount: 40 }
     ]
   }
 ]
@@ -183,11 +190,11 @@ const readInquiryQuotes = () => {
       amount: Number(inquiry.pricing?.finalTotal || 0),
       valid_until: '-',
       created_at: inquiry.submitTime || null,
-      line_items: [
-        { name: inquiry.selection?.packageName || 'Package', amount: Number(inquiry.pricing?.packagePrice || 0) },
-        { name: inquiry.selection?.sceneName || 'Scene fee', amount: Number(inquiry.pricing?.sceneFee || 0) },
-        { name: 'Add-ons', amount: Number(inquiry.pricing?.addonsTotal || 0) }
-      ].filter((item) => item.amount > 0)
+      line_items: normalizeQuoteLineItems(inquiry.pricing?.lineItems || [
+        { type: 'decor_fee', name: inquiry.selection?.packageName || 'Package decor layer', amount: Number(inquiry.pricing?.packagePrice || 0) },
+        { type: 'venue_fee', name: inquiry.selection?.sceneName || 'Scene fee', amount: Number(inquiry.pricing?.sceneFee || 0) },
+        { type: 'optional_upgrade', name: 'Add-ons', amount: Number(inquiry.pricing?.addonsTotal || 0) }
+      ]).filter((item) => item.amount > 0)
     }))
   } catch (error) {
     return []
@@ -219,7 +226,7 @@ const normalizeQuote = (quote) => {
     valid_until: quote.valid_until || '-',
     created_at: quote.created_at || null,
     next_step: quote.next_step || quoteNextStep[status] || '请联系 PartyOnce 顾问确认下一步。',
-    line_items: Array.isArray(quote.line_items) ? quote.line_items : []
+    line_items: normalizeQuoteLineItems(quote.line_items)
   }
 }
 
@@ -245,7 +252,7 @@ const normalizeOrder = (order) => {
     next_step: order.next_action || orderNextStep[status] || '请联系 PartyOnce 顾问确认下一步。',
     created_at: order.created_at || null,
     updated_at: order.updated_at || null,
-    line_items: Array.isArray(order.line_items) ? order.line_items : []
+    line_items: normalizeQuoteLineItems(order.line_items)
   }
 }
 

@@ -74,9 +74,18 @@
       </section>
 
       <section class="panel">
-        <h2>Quote Items</h2>
-        <el-table :data="quote.line_items" empty-text="No line item snapshot">
-          <el-table-column prop="name" label="Item" />
+        <h2>简化报价组成</h2>
+        <p class="panel-intro">
+          报价已按稳定类型拆分，方便后续正式报价单、PDF 和 deposit 计算。
+        </p>
+        <el-table :data="quoteLineItemSummary.groups" empty-text="No line item snapshot">
+          <el-table-column label="Type" min-width="180">
+            <template #default="{ row }">
+              <strong>{{ row.labelZh }}</strong>
+              <small>{{ row.customerLabel }}</small>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="Basis" min-width="260" />
           <el-table-column label="Amount" width="160" align="right">
             <template #default="{ row }">{{ formatCustomerMoney(row.amount, quote.currency) }}</template>
           </el-table-column>
@@ -152,6 +161,7 @@ import {
   saveCustomerSupplementRequest,
   saveQuoteConfirmationPlaceholder
 } from '@/services/customerExperienceService'
+import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
 
 const route = useRoute()
 const router = useRouter()
@@ -164,6 +174,7 @@ const interaction = ref({})
 const supplementNote = ref('')
 
 const canConfirmQuote = computed(() => ['sent', 'accepted'].includes(quote.value?.status))
+const quoteLineItemSummary = computed(() => summarizeQuoteLineItems(quote.value?.line_items || []))
 
 const quoteTagType = (status) => ({
   draft: 'info',
@@ -247,6 +258,18 @@ h1,
 h2 {
   margin: 0 0 8px;
   color: #0f172a;
+}
+
+.panel-intro {
+  margin: 0 0 14px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+:deep(.el-table small) {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
 }
 
 .page-hero p {

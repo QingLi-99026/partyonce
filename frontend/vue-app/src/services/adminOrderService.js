@@ -5,6 +5,7 @@ import {
   resetAdminOrderSkeletons,
   updateAdminOrderSkeleton
 } from '@/mock/adminOrders'
+import { normalizeQuoteLineItems } from '@/data/quoteLineItems'
 
 export const ORDER_SOURCE_API = 'local API'
 export const ORDER_SOURCE_FALLBACK = 'fallback mock'
@@ -73,7 +74,7 @@ export const normalizeAdminOrder = (order) => ({
   updated_at: order.updated_at || null,
   confirmed_at: order.confirmed_at || null,
   status_flow: normalizeStatusFlow(order),
-  line_items: Array.isArray(order.line_items) ? order.line_items : []
+  line_items: normalizeQuoteLineItems(order.line_items)
 })
 
 const fallbackList = (error) => ({

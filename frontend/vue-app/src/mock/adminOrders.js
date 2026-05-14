@@ -44,9 +44,11 @@ const seedOrders = [
       { status: 'completed', label: 'Event completed', completed: false }
     ],
     line_items: [
-      { name: 'Premium castle room styling', amount: 980 },
-      { name: 'Private dining room setup', amount: 420 },
-      { name: 'Materials and activity station', amount: 280 }
+      { type: 'venue_fee', name: 'Sydney Kids Studio Room A', amount: 420 },
+      { type: 'decor_fee', name: 'Premium castle room styling', amount: 760 },
+      { type: 'supplier_fee', name: 'Cake and activity station supplier allowance', amount: 280 },
+      { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
+      { type: 'service_fee', name: 'Planning service', amount: 60 }
     ]
   },
   {
@@ -90,9 +92,11 @@ const seedOrders = [
       { status: 'completed', label: 'Event completed', completed: false }
     ],
     line_items: [
-      { name: 'Standard space room styling', amount: 720 },
-      { name: 'Activity materials', amount: 260 },
-      { name: 'Setup and pack-down', amount: 260 }
+      { type: 'venue_fee', name: 'Harbour View Function Room', amount: 280 },
+      { type: 'decor_fee', name: 'Standard space room styling', amount: 520 },
+      { type: 'supplier_fee', name: 'Activity materials supplier allowance', amount: 220 },
+      { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
+      { type: 'transport_fee', name: 'Transport and handling', amount: 60 }
     ]
   },
   {
@@ -136,9 +140,11 @@ const seedOrders = [
       { status: 'completed', label: 'Event completed', completed: false }
     ],
     line_items: [
-      { name: 'Basic forest theme styling', amount: 520 },
-      { name: 'Kids table materials', amount: 160 },
-      { name: 'Local setup support', amount: 100 }
+      { type: 'venue_fee', name: 'Forest Play Cafe', amount: 180 },
+      { type: 'decor_fee', name: 'Basic forest theme styling', amount: 390 },
+      { type: 'labor_fee', name: 'Local setup support', amount: 120 },
+      { type: 'transport_fee', name: 'Transport and handling', amount: 50 },
+      { type: 'service_fee', name: 'Planning service', amount: 40 }
     ]
   }
 ]

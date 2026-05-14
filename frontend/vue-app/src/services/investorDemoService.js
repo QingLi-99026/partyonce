@@ -3,6 +3,7 @@ import {
   AI_CONCIERGE_STORAGE_KEY
 } from '@/data/aiConciergeQuestions';
 import { buildQuotePrefillPayload, recommendThemeAndPackage } from '@/data/recommendationRules';
+import { buildQuoteLineItemsFromSelection, summarizeQuoteLineItems } from '@/data/quoteLineItems';
 
 export const INVESTOR_DEMO_STATE_KEY = 'partyonce_investor_guided_demo_v1';
 export const INVESTOR_DEMO_INQUIRY_ID = 'investor-guided-demo-inquiry-v1';
@@ -80,6 +81,18 @@ export function bootstrapInvestorAdminFixture() {
 export function seedInvestorAiInquiry() {
   if (typeof window === 'undefined') return null;
   const { answers, recommendation, quotePrefill } = buildInvestorDemoRecommendation();
+  const demoLineItems = buildQuoteLineItemsFromSelection({
+    packageData: { name: 'Standard experience package', price: 1430 },
+    sceneData: { name: 'Restaurant A Private Dining', basePrice: 2600 },
+    selectedAddons: ['cake', 'activity'],
+    addons: [
+      { id: 'cake', name: 'Theme cake / dessert table', price: 260 },
+      { id: 'activity', name: 'Kids activity host', price: 320 }
+    ],
+    visualContext: recommendation.visualContext,
+    packageExplanation: recommendation.packageExplanation
+  });
+  const demoLineItemSummary = summarizeQuoteLineItems(demoLineItems);
   window.localStorage.setItem(AI_CONCIERGE_STORAGE_KEY, JSON.stringify({
     answers,
     recommendation,
@@ -105,7 +118,9 @@ export function seedInvestorAiInquiry() {
       packagePrice: 1430,
       sceneFee: 260,
       addonsTotal: 580,
-      finalTotal: 2270,
+      finalTotal: demoLineItemSummary.total,
+      lineItems: demoLineItems,
+      lineItemSummary: demoLineItemSummary,
       aiEstimate: quotePrefill.pricing
     },
     aiRecommendation: quotePrefill.aiRecommendation,

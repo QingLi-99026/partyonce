@@ -74,9 +74,18 @@
       </section>
 
       <section class="panel">
-        <h2>Order Items</h2>
-        <el-table :data="order.line_items" empty-text="No order item snapshot">
-          <el-table-column prop="name" label="Item" />
+        <h2>简化订单组成</h2>
+        <p class="panel-intro">
+          订单沿用标准报价类型，后续可用于正式报价单和 deposit 计算。
+        </p>
+        <el-table :data="orderLineItemSummary.groups" empty-text="No order item snapshot">
+          <el-table-column label="Type" min-width="180">
+            <template #default="{ row }">
+              <strong>{{ row.labelZh }}</strong>
+              <small>{{ row.customerLabel }}</small>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="Basis" min-width="260" />
           <el-table-column label="Amount" width="160" align="right">
             <template #default="{ row }">{{ formatCustomerMoney(row.amount, order.currency) }}</template>
           </el-table-column>
@@ -122,7 +131,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -135,6 +144,7 @@ import {
   orderStatuses,
   saveCustomerSupplementRequest
 } from '@/services/customerExperienceService'
+import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
 
 const route = useRoute()
 const router = useRouter()
@@ -145,6 +155,7 @@ const apiNotice = ref('')
 const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
 const interaction = ref({})
 const supplementNote = ref('')
+const orderLineItemSummary = computed(() => summarizeQuoteLineItems(order.value?.line_items || []))
 
 const orderTagType = (status) => ({
   draft: 'info',
@@ -223,6 +234,18 @@ h1,
 h2 {
   margin: 0 0 8px;
   color: #0f172a;
+}
+
+.panel-intro {
+  margin: 0 0 14px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+:deep(.el-table small) {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
 }
 
 .page-hero p {

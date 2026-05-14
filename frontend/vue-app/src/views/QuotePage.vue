@@ -61,22 +61,34 @@
       <div class="section-container">
         <h2 class="section-title" :style="titleStyle">价格明细</h2>
         <div class="price-card" :style="cardStyle">
-          <div class="price-row">
-            <span>套餐基础价</span>
-            <span>{{ formatPrice(packageData.price) }}</span>
-          </div>
-          <div class="price-row">
-            <span>场景基础费 (10%)</span>
-            <span>{{ formatPrice(sceneData.basePrice * 0.1) }}</span>
-          </div>
-          <div v-if="selectedAddons.length > 0" class="price-row is-addon">
-            <span>附加项 ({{ selectedAddons.length }}项)</span>
-            <span>{{ formatPrice(addonsTotal) }}</span>
+          <div
+            v-for="group in lineItemSummary.groups"
+            :key="group.type"
+            class="price-row"
+            :class="{ 'is-addon': group.type === 'optional_upgrade' }"
+          >
+            <span>{{ group.labelZh }} · {{ group.customerLabel }}</span>
+            <span>{{ formatPrice(group.amount) }}</span>
           </div>
           <div class="price-divider"></div>
           <div class="price-row is-total">
             <span>预估总价</span>
             <span class="total-price">{{ formatPrice(finalTotal) }}</span>
+          </div>
+        </div>
+
+        <div class="line-item-card" :style="cardStyle">
+          <div class="pricing-explainer-header">
+            <span class="visual-kicker">Standardized line items</span>
+            <h3>报价由哪些稳定类型构成</h3>
+            <p>场地费、装饰费、供应商费、人工费、运输费、服务费和可选升级项会进入 quote snapshot，方便后台编辑、PDF 报价单和未来 deposit 计算。</p>
+          </div>
+          <div class="line-item-grid">
+            <article v-for="group in lineItemSummary.groups" :key="group.type">
+              <strong>{{ group.labelZh }}</strong>
+              <span>{{ formatPrice(group.amount) }}</span>
+              <p>{{ group.description }}</p>
+            </article>
           </div>
         </div>
 
@@ -275,6 +287,7 @@
 import { getTheme } from '@/themes';
 import { getVisualContext } from '@/data/visualAssets';
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation';
+import { buildQuoteLineItemsFromSelection, summarizeQuoteLineItems } from '@/data/quoteLineItems';
 import { readQuotePrefill } from '@/services/aiVoiceIntakeService';
 
 export default {
@@ -389,8 +402,24 @@ export default {
       }, 0);
     },
 
+    standardizedLineItems() {
+      return buildQuoteLineItemsFromSelection({
+        packageData: this.packageData,
+        sceneData: this.sceneData,
+        selectedAddons: this.selectedAddons,
+        addons: this.addons,
+        visualContext: this.visualContext,
+        packageExplanation: this.packageExplanation,
+        currency: 'AUD'
+      });
+    },
+
+    lineItemSummary() {
+      return summarizeQuoteLineItems(this.standardizedLineItems);
+    },
+
     finalTotal() {
-      return this.packageData.price + (this.sceneData.basePrice * 0.1) + this.addonsTotal;
+      return this.lineItemSummary.total;
     },
     
     addons() {
@@ -583,6 +612,8 @@ export default {
           sceneFee: this.sceneData.basePrice * 0.1,
           addonsTotal: this.addonsTotal,
           finalTotal: this.finalTotal,
+          lineItems: this.standardizedLineItems,
+          lineItemSummary: this.lineItemSummary,
           packageExplanation: this.packageExplanation,
           upgradeExplanation: this.upgradeExplanation,
           snapshot_note: this.aiPrefill?.pricing?.snapshot_note || 'Frontend staging estimate; final quote requires human review.',
@@ -955,6 +986,44 @@ export default {
   color: #eaf8ff;
 }
 
+.line-item-card {
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+  padding: 28px;
+  color: #eaf8ff;
+}
+
+.line-item-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.line-item-grid article {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.line-item-grid strong,
+.line-item-grid span {
+  display: block;
+}
+
+.line-item-grid span {
+  margin-top: 6px;
+  color: #ffd700;
+  font-weight: 800;
+}
+
+.line-item-grid p {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.74);
+  line-height: 1.55;
+}
+
 .pricing-explainer-header h3 {
   margin: 8px 0;
   color: #fff;
@@ -1023,6 +1092,10 @@ export default {
   }
 
   .pricing-explainer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .line-item-grid {
     grid-template-columns: 1fr;
   }
 }

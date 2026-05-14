@@ -201,16 +201,25 @@
         </section>
 
         <section class="panel">
-          <h2>Line Items Snapshot</h2>
+          <h2>Standardized Line Items Snapshot</h2>
           <el-table v-if="lineItems.length > 0" :data="lineItems" row-key="name" style="width: 100%">
-            <el-table-column label="Name" min-width="220">
-              <template #default="{ row }">{{ row.name || row.item_name || row.type || '-' }}</template>
+            <el-table-column label="Type" width="170">
+              <template #default="{ row }">
+                <strong>{{ row.type_label_zh }}</strong>
+                <small>{{ row.customer_label }}</small>
+              </template>
+            </el-table-column>
+            <el-table-column label="Name / Basis" min-width="260">
+              <template #default="{ row }">
+                <span>{{ row.name || '-' }}</span>
+                <small>{{ row.description }}</small>
+              </template>
             </el-table-column>
             <el-table-column label="Amount" width="160" align="right">
-              <template #default="{ row }">{{ formatMoney(row.amount || row.price || row.total || 0, quote.currency) }}</template>
+              <template #default="{ row }">{{ formatMoney(row.amount, quote.currency) }}</template>
             </el-table-column>
             <el-table-column label="Source" min-width="200">
-              <template #default="{ row }">{{ row.source || row.type || 'snapshot' }}</template>
+              <template #default="{ row }">{{ row.source || 'snapshot' }}</template>
             </el-table-column>
           </el-table>
           <el-empty v-else description="No line item snapshot is available." />
@@ -335,6 +344,7 @@ import apiClient from '@/api'
 import { createDraftOrderFromQuote } from '@/services/adminOrderService'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
+import { normalizeQuoteLineItems, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 
 const route = useRoute()
 const router = useRouter()
@@ -352,7 +362,8 @@ const quoteOps = ref({
   updatedAt: ''
 })
 
-const lineItems = computed(() => (Array.isArray(quote.value?.line_items) ? quote.value.line_items : []))
+const lineItems = computed(() => normalizeQuoteLineItems(quote.value?.line_items))
+const lineItemSummary = computed(() => summarizeQuoteLineItems(lineItems.value))
 const canCreateDraftOrder = computed(() => quote.value?.status === 'accepted')
 const quoteVisualContext = computed(() => {
   const selection = quote.value?.selection_snapshot || {}
@@ -370,9 +381,8 @@ const quoteUpgradeExplanation = computed(() => getUpgradeExplanation(quotePackag
 const quotePriceBasis = computed(() => {
   const context = quoteVisualContext.value
   const explanation = quotePackageExplanation.value
-  const lineItemBasis = lineItems.value
-    .slice(0, 4)
-    .map((item) => `${item.name || item.item_name || item.type || 'Line item'} · ${formatMoney(item.amount || item.price || item.total || 0, quote.value?.currency)}`)
+  const lineItemBasis = lineItemSummary.value.groups
+    .map((group) => `${group.labelZh}：${formatMoney(group.amount, quote.value?.currency)} · ${group.description}`)
   return [
     `套餐层级：${explanation.label} · ${explanation.positioning}`,
     `装饰项：${context.packageVisual.scope}`,
@@ -778,6 +788,12 @@ pre {
 
 .ops-basis-list {
   margin-top: 14px;
+}
+
+:deep(.el-table small) {
+  display: block;
+  margin-top: 4px;
+  color: #868e96;
 }
 
 @media (max-width: 900px) {
