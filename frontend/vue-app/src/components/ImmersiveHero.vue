@@ -73,14 +73,14 @@
           </circle>
         </svg>
       </div>
-      
+
       <!-- 宇宙元素 - 仅星际探险主题 -->
       <div v-if="themeId === 'space'" class="space-elements">
         <!-- 流星拖尾效果 -->
         <div class="shooting-stars">
           <div v-for="n in 3" :key="n" class="shooting-star" :style="getShootingStarStyle(n)"></div>
         </div>
-        
+
         <!-- 带环行星 -->
         <div class="planet-with-rings">
           <svg viewBox="0 0 200 200" class="planet-svg">
@@ -120,20 +120,20 @@
         <div class="scanlines"></div>
       </div>
     </div>
-    
+
     <!-- 装饰元素层 -->
     <div class="decorations-layer">
-      <div 
-        v-for="(element, index) in themeConfig.decorations.elements" 
+      <div
+        v-for="(element, index) in themeConfig.decorations.elements"
         :key="index"
         class="floating-element"
-        :class="`element-${element}`"
+        :class="`element-${getElementKey(element)}`"
         :style="getElementStyle(index)"
       >
-        <component :is="getElementIcon(element)" />
+        <span class="floating-element-icon" aria-hidden="true">{{ getElementIcon(element) }}</span>
       </div>
     </div>
-    
+
     <!-- 内容层 -->
     <div class="hero-content">
       <div class="content-wrapper">
@@ -142,16 +142,16 @@
           <span class="title-line">{{ themeConfig.name }}</span>
           <span class="title-tagline">{{ themeConfig.tagline }}</span>
         </h1>
-        
+
         <!-- 副标题 -->
         <p class="hero-subtitle" :style="subtitleStyle">
           让每一个派对都成为难忘的回忆
         </p>
-        
+
         <!-- CTA按钮组 -->
         <div class="cta-group">
-          <button 
-            class="cta-primary" 
+          <button
+            class="cta-primary"
             :style="primaryButtonStyle"
             @click="handlePrimaryCTA"
           >
@@ -159,16 +159,16 @@
             <span class="cta-text">{{ themeConfig.ctaText }}</span>
             <div class="cta-glow"></div>
           </button>
-          
-          <button 
-            class="cta-secondary" 
+
+          <button
+            class="cta-secondary"
             :style="secondaryButtonStyle"
             @click="handleSecondaryCTA"
           >
             <span>探索更多主题</span>
           </button>
         </div>
-        
+
         <!-- 语音按钮 -->
         <button class="voice-button" @click="playVoice">
           <span class="voice-icon">🔊</span>
@@ -176,7 +176,7 @@
         </button>
       </div>
     </div>
-    
+
     <!-- 底部渐变遮罩 -->
     <div class="bottom-fade"></div>
   </section>
@@ -187,19 +187,19 @@ import { getTheme } from '@/themes';
 
 export default {
   name: 'ImmersiveHero',
-  
+
   props: {
     themeId: {
       type: String,
       default: 'space'
     }
   },
-  
+
   computed: {
     themeConfig() {
       return getTheme(this.themeId);
     },
-    
+
     heroStyle() {
       return {
         '--theme-primary': this.themeConfig.colors.primary,
@@ -208,32 +208,32 @@ export default {
         fontFamily: this.themeConfig.fonts.body
       };
     },
-    
+
     gradientStyle() {
       return {
         background: this.themeConfig.background.gradient
       };
     },
-    
+
     overlayStyle() {
       return {
         background: this.themeConfig.background.overlay
       };
     },
-    
+
     titleStyle() {
       return {
         fontFamily: this.themeConfig.fonts.heading,
         color: this.themeConfig.colors.text
       };
     },
-    
+
     subtitleStyle() {
       return {
         color: this.themeConfig.colors.textMuted
       };
     },
-    
+
     primaryButtonStyle() {
       const btn = this.themeConfig.button.primary;
       return {
@@ -243,7 +243,7 @@ export default {
         '--hover-glow': btn.hoverGlow
       };
     },
-    
+
     secondaryButtonStyle() {
       const btn = this.themeConfig.button.secondary;
       return {
@@ -252,7 +252,7 @@ export default {
         color: btn.color
       };
     },
-    
+
     getThemeIcon() {
       const icons = {
         space: '🚀',
@@ -262,7 +262,7 @@ export default {
       return icons[this.themeId] || '✨';
     }
   },
-  
+
   methods: {
     getStarStyle(n) {
       return {
@@ -272,7 +272,7 @@ export default {
         animationDuration: `${2 + Math.random() * 2}s`
       };
     },
-    
+
     getRayStyle(n) {
       return {
         left: `${20 + n * 15}%`,
@@ -280,7 +280,7 @@ export default {
         transform: `rotate(${-30 + n * 15}deg)`
       };
     },
-    
+
     getElementStyle(index) {
       return {
         left: `${10 + (index * 25)}%`,
@@ -289,27 +289,39 @@ export default {
         animationDuration: `${4 + index * 0.5}s`
       };
     },
-    
+
+    getElementKey(element) {
+      return typeof element === 'string' ? element : element?.type;
+    },
+
     getElementIcon(element) {
       // 返回装饰元素的SVG或字符
+      const elementKey = this.getElementKey(element);
       const icons = {
         planet: '🪐',
+        planet_with_rings: '🪐',
         orbit: '⭕',
+        satellite: '🛰️',
         star: '⭐',
+        sparkle: '✨',
         constellation: '✦',
         castle_tower: '🏰',
+        castle_silhouette: '🏰',
         crown: '👑',
         vine: '🌿',
         gem: '💎',
         cloud: '☁️',
+        nebula_cloud: '☁️',
+        forest_silhouette: '🌲',
         leaf: '🍃',
         mushroom: '🍄',
         wood_sign: '🪧',
+        shooting_star: '⭐',
         firefly: '✨'
       };
-      return icons[element] || '✨';
+      return icons[elementKey] || '✨';
     },
-    
+
     getShootingStarStyle(n) {
       const positions = [
         { top: '10%', left: '80%', delay: '0s', duration: '3s' },
@@ -324,15 +336,15 @@ export default {
         animationDuration: pos.duration
       };
     },
-    
+
     handlePrimaryCTA() {
       this.$emit('start-planning', this.themeId);
     },
-    
+
     handleSecondaryCTA() {
       this.$emit('explore-themes');
     },
-    
+
     playVoice() {
       // 播放语音欢迎词
       const utterance = new SpeechSynthesisUtterance(this.themeConfig.voice.welcome);
@@ -428,6 +440,11 @@ export default {
   font-size: 2rem;
   opacity: 0.6;
   animation: float 6s ease-in-out infinite;
+}
+
+.floating-element-icon {
+  display: inline-block;
+  line-height: 1;
 }
 
 @keyframes float {
@@ -751,19 +768,19 @@ export default {
   .hero-content {
     padding: 100px 20px 60px;
   }
-  
+
   .cta-group {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .cta-primary,
   .cta-secondary {
     width: 100%;
     max-width: 280px;
     justify-content: center;
   }
-  
+
   .floating-element {
     font-size: 1.5rem;
   }
