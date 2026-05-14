@@ -142,9 +142,13 @@ export const getCustomerReadOnlyIdentity = () => {
   const role = userInfo.role || 'customer'
   const isAdminLike = ['admin', 'manager'].includes(role)
   const apiCustomerId = userInfo.customer_id || userInfo.customerId || null
+  const fixtureId = userInfo.customer_fixture_id ||
+    userInfo.customerId ||
+    (isAdminLike ? DEFAULT_CUSTOMER_FIXTURE.id : userInfo.id) ||
+    DEFAULT_CUSTOMER_FIXTURE.id
 
   return {
-    id: userInfo.customer_fixture_id || userInfo.customerId || userInfo.id || DEFAULT_CUSTOMER_FIXTURE.id,
+    id: fixtureId,
     name: userInfo.full_name || userInfo.name || DEFAULT_CUSTOMER_FIXTURE.name,
     contact: userInfo.email || userInfo.contact || DEFAULT_CUSTOMER_FIXTURE.contact,
     role,

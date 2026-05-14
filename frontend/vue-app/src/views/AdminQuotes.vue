@@ -293,10 +293,46 @@ const bulkLoading = ref(false)
 const shouldUseStaticPreviewFallback = () => {
   if (typeof window === 'undefined') return false
   if (import.meta.env.VITE_ENABLE_REMOTE_QUOTE_API === 'true') return false
-  const isVercelPreview = /vercel\\.app$/i.test(window.location.hostname)
+  const isVercelPreview = /vercel\.app$/i.test(window.location.hostname)
   const isViteStaticPreview = /^417\d$/.test(window.location.port)
   return isVercelPreview || isViteStaticPreview
 }
+
+const staticPreviewQuoteRows = [
+  {
+    id: '1',
+    lead_id: 'lead-local-301',
+    quote_number: 'PE-Q-0501',
+    status: 'accepted',
+    customer_summary: {
+      id: 'customer-local-41',
+      name: 'Ava Thompson',
+      contact: 'ava.parent@example.test'
+    },
+    owner_label: 'Staging Ops',
+    owner_user_id: null,
+    next_action: 'Walk through Castle Princess Premium and confirm Restaurant A availability',
+    internal_note: 'Static Preview demo quote only. No payment, webhook, n8n, or outbound message is triggered.',
+    selection_snapshot: {
+      theme: 'Castle Princess',
+      package: 'Premium',
+      venue: 'Restaurant A',
+      guest_count: 18,
+      event_date: '2026-06-14'
+    },
+    currency: 'AUD',
+    final_total: 1680,
+    valid_until: '2026-05-25',
+    created_at: '2026-05-11T08:00:00.000Z',
+    line_items: [
+      { type: 'venue_fee', name: 'Restaurant A private room', amount: 420 },
+      { type: 'decor_fee', name: 'Premium castle room styling', amount: 760 },
+      { type: 'supplier_fee', name: 'Cake and activity supplier allowance', amount: 280 },
+      { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
+      { type: 'service_fee', name: 'Planning service', amount: 60 }
+    ]
+  }
+]
 
 const statusGuide = [
   { status: 'draft', label: '后台准备报价，客户侧只读显示准备中。' },
@@ -364,9 +400,9 @@ const loadQuotes = async () => {
   message.value = ''
   try {
     if (shouldUseStaticPreviewFallback()) {
-      quotes.value = []
-      quoteTotal.value = 0
-      message.value = 'Static Preview mode: Quote Review is using a controlled empty skeleton state to avoid remote API auth/network noise. Use Lead Review or Investor Demo to seed local/staging data.'
+      quotes.value = staticPreviewQuoteRows.map((row) => ({ ...row }))
+      quoteTotal.value = quotes.value.length
+      message.value = 'Static Preview mode: Quote Review is using safe demo quote data instead of calling the remote staging API. No payment, webhook, n8n, or outbound action is triggered.'
       messageType.value = 'warning'
       return
     }
