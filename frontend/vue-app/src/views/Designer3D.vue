@@ -1,523 +1,365 @@
 <template>
-  <div class="designer-page">
-    <div class="designer-header">
-      <h1>3D 场地设计器</h1>
-      <div class="header-actions">
-        <el-select v-model="selectedVenue" placeholder="选择场地" style="width: 200px; margin-right: 12px;">
-          <el-option
-            v-for="venue in venues"
-            :key="venue.id"
-            :label="venue.name"
-            :value="venue.id"
-          />
-        </el-select>
-        <el-button type="primary" @click="saveDesign" :loading="saving">
-          <el-icon><Download /></el-icon> 保存设计
-        </el-button>
-        <el-button @click="clearScene">
-          <el-icon><Delete /></el-icon> 清空
-        </el-button>
-      </div>
-    </div>
-
-    <div class="designer-container">
-      <!-- 左侧物品面板 -->
-      <aside class="objects-panel">
-        <h3>装饰物品</h3>
-        
-        <div class="category" v-for="category in objectCategories" :key="category.name">
-          <h4>{{ category.name }}</h4>
-          <div class="object-grid">
-            <div
-              v-for="obj in category.objects"
-              :key="obj.type"
-              class="object-item"
-              draggable="true"
-              @dragstart="handleDragStart($event, obj)"
-              @click="addObject(obj)"
-            >
-              <div class="object-icon">{{ obj.icon }}</div>
-              <div class="object-name">{{ obj.name }}</div>
-              <div class="object-price">${{ obj.price }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="budget-section">
-          <h4>预算概览</h4>
-          <div class="budget-item">
-            <span>当前费用</span>
-            <span class="price">${{ totalCost }}</span>
-          </div>
-          <div class="budget-item">
-            <span>物品数量</span>
-            <span>{{ sceneObjects.length }}</span>
-          </div>
-        </div>
-      </aside>
-
-      <!-- 中间 3D 场景 -->
-      <div class="scene-container" ref="sceneContainer">
-        <div v-if="!selectedVenue" class="venue-placeholder">
-          <el-icon><OfficeBuilding /></el-icon>
-          <p>请先选择一个场地开始设计</p>
-        </div>
-        <canvas v-show="selectedVenue" ref="canvas" class="scene-canvas"></canvas>
-        
-        <!-- 场景控制 -->
-        <div class="scene-controls">
-          <el-button-group>
-            <el-button size="small" @click="resetCamera">
-              <el-icon><View /></el-icon> 重置视角
-            </el-button>
-            <el-button size="small" @click="toggleGrid">
-              <el-icon><Grid /></el-icon> 网格
-            </el-button>
-          </el-button-group>
+  <main class="designer-preview-page" aria-labelledby="designer-title">
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <p class="eyebrow">{{ t('designerPreview.eyebrow') }}</p>
+        <h1 id="designer-title">{{ t('designerPreview.title') }}</h1>
+        <p class="lead">
+          {{ t('designerPreview.lead') }}
+        </p>
+        <p class="safety-note">
+          {{ t('designerPreview.safetyNote') }}
+        </p>
+        <div class="cta-row" aria-label="3D design preview actions">
+          <router-link class="primary-action" to="/">{{ t('designerPreview.backHome') }}</router-link>
+          <router-link class="secondary-action" to="/themes">{{ t('designerPreview.enterThemes') }}</router-link>
+          <router-link class="secondary-action" to="/quote">{{ t('designerPreview.getQuote') }}</router-link>
         </div>
       </div>
 
-      <!-- 右侧属性面板 -->
-      <aside class="properties-panel" v-if="selectedObject">
-        <h3>物品属性</h3>
-        <el-form label-position="top">
-          <el-form-item label="名称">
-            <el-input v-model="selectedObject.name" disabled />
-          </el-form-item>
-          
-          <el-form-item label="位置 X">
-            <el-slider v-model="selectedObject.position.x" :min="-50" :max="50" :step="0.5" />
-          </el-form-item>
-          
-          <el-form-item label="位置 Z">
-            <el-slider v-model="selectedObject.position.z" :min="-50" :max="50" :step="0.5" />
-          </el-form-item>
-          
-          <el-form-item label="旋转">
-            <el-slider v-model="selectedObject.rotation" :min="0" :max="360" :step="15" />
-          </el-form-item>
-          
-          <el-form-item label="缩放">
-            <el-slider v-model="selectedObject.scale" :min="0.5" :max="2" :step="0.1" />
-          </el-form-item>
-          
-          <el-form-item>
-            <el-button type="danger" @click="removeObject" style="width: 100%">
-              删除物品
-            </el-button>
-          </el-form-item>
-        </el-form>
-      </aside>
+      <div class="scene-card" aria-label="Restaurant A visual planning preview">
+        <div class="scene-toolbar">
+          <span>Restaurant A</span>
+          <span>Castle Standard sample</span>
+        </div>
+        <div class="scene-board">
+          <div class="backdrop">{{ t('designerPreview.scene.backdrop') }}</div>
+          <div class="balloon-arch">Balloon Arch</div>
+          <div class="photo-zone">{{ t('designerPreview.scene.photoZone') }}</div>
+          <div class="dessert-table">{{ t('designerPreview.scene.dessertTable') }}</div>
+          <div class="main-table">{{ t('designerPreview.scene.mainTable') }}</div>
+          <div
+            v-for="table in tables"
+            :key="table"
+            class="guest-table"
+            :style="tableStyle(table)"
+          >
+            {{ table }}
+          </div>
+          <div class="entrance">{{ t('designerPreview.scene.entrance') }}</div>
+        </div>
+      </div>
+    </section>
 
-      <aside v-else class="properties-panel empty">
-        <p>点击场景中的物品进行编辑</p>
-      </aside>
-    </div>
-  </div>
+    <section class="status-grid" aria-label="3D preview status">
+      <article>
+        <h2>{{ t('designerPreview.status.currentTitle') }}</h2>
+        <p>{{ t('designerPreview.status.currentCopy') }}</p>
+      </article>
+      <article>
+        <h2>{{ t('designerPreview.status.contentTitle') }}</h2>
+        <p>{{ t('designerPreview.status.contentCopy') }}</p>
+      </article>
+      <article>
+        <h2>{{ t('designerPreview.status.nextTitle') }}</h2>
+        <p>{{ t('designerPreview.status.nextCopy') }}</p>
+      </article>
+    </section>
+  </main>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { Download, Delete, OfficeBuilding, View, Grid } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { useI18n } from 'vue-i18n'
 
-// 场景相关
-const sceneContainer = ref(null)
-const canvas = ref(null)
-let scene, camera, renderer, controls
-let raycaster, mouse
-const sceneObjects = ref([])
-const selectedObject = ref(null)
-const selectedVenue = ref(null)
-const saving = ref(false)
+const { t } = useI18n()
+const tables = [1, 2, 3, 4, 5, 6, 7, 8]
 
-// 场地列表
-const venues = ref([
-  { id: 1, name: '云端宴会厅', width: 20, length: 30, height: 8 },
-  { id: 2, name: '海边草坪', width: 40, length: 50, height: 0 },
-  { id: 3, name: '城市屋顶', width: 15, length: 25, height: 6 },
-])
+const tableStyle = (table) => {
+  const positions = [
+    { left: '18%', top: '48%' },
+    { left: '35%', top: '48%' },
+    { left: '52%', top: '48%' },
+    { left: '69%', top: '48%' },
+    { left: '22%', top: '68%' },
+    { left: '39%', top: '68%' },
+    { left: '56%', top: '68%' },
+    { left: '73%', top: '68%' }
+  ]
 
-// 装饰物品分类
-const objectCategories = [
-  {
-    name: '家具',
-    objects: [
-      { type: 'round_table', name: '圆桌', icon: '⚪', price: 50, color: '#8B4513' },
-      { type: 'square_table', name: '方桌', icon: '⬜', price: 45, color: '#8B4513' },
-      { type: 'chair', name: '椅子', icon: '🪑', price: 15, color: '#654321' },
-      { type: 'bar_counter', name: '吧台', icon: '🍷', price: 200, color: '#2F4F4F' },
-    ]
-  },
-  {
-    name: '灯光',
-    objects: [
-      { type: 'chandelier', name: '吊灯', icon: '💡', price: 150, color: '#FFD700' },
-      { type: 'floor_lamp', name: '落地灯', icon: '🕯️', price: 80, color: '#FFA500' },
-      { type: 'string_lights', name: '串灯', icon: '✨', price: 30, color: '#FFFACD' },
-      { type: 'led_panel', name: 'LED面板', icon: '🔲', price: 100, color: '#00CED1' },
-    ]
-  },
-  {
-    name: '花艺',
-    objects: [
-      { type: 'centerpiece', name: '中心花艺', icon: '💐', price: 60, color: '#FF69B4' },
-      { type: 'arch_flowers', name: '拱门花艺', icon: '🌸', price: 300, color: '#FFB6C1' },
-      { type: 'wall_greenery', name: '墙面绿植', icon: '🌿', price: 120, color: '#228B22' },
-      { type: 'floor_plants', name: '地面花艺', icon: '🪴', price: 80, color: '#32CD32' },
-    ]
-  },
-  {
-    name: '舞台',
-    objects: [
-      { type: 'main_stage', name: '主舞台', icon: '🎪', price: 500, color: '#4B0082' },
-      { type: 'backdrop', name: '背景板', icon: '🖼️', price: 250, color: '#9370DB' },
-      { type: 'signin_board', name: '签到台', icon: '✍️', price: 100, color: '#DDA0DD' },
-      { type: 'dessert_table', name: '甜品台', icon: '🍰', price: 150, color: '#FFB6C1' },
-    ]
-  }
-]
-
-// 计算总费用
-const totalCost = computed(() => {
-  return sceneObjects.value.reduce((sum, obj) => sum + (obj.price || 0), 0)
-})
-
-// 初始化 Three.js 场景
-const initScene = () => {
-  if (!canvas.value) return
-
-  scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x1a1a2e)
-
-  camera = new THREE.PerspectiveCamera(
-    75,
-    sceneContainer.value.clientWidth / sceneContainer.value.clientHeight,
-    0.1,
-    1000
-  )
-  camera.position.set(0, 20, 30)
-
-  renderer = new THREE.WebGLRenderer({ canvas: canvas.value, antialias: true })
-  renderer.setSize(sceneContainer.value.clientWidth, sceneContainer.value.clientHeight)
-  renderer.shadowMap.enabled = true
-
-  controls = new OrbitControls(camera, renderer.domElement)
-  controls.enableDamping = true
-  controls.maxPolarAngle = Math.PI / 2
-
-  // 灯光
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-  scene.add(ambientLight)
-
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-  directionalLight.position.set(10, 20, 10)
-  directionalLight.castShadow = true
-  scene.add(directionalLight)
-
-  // 网格
-  const gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x222222)
-  scene.add(gridHelper)
-
-  // 地面
-  const floorGeometry = new THREE.PlaneGeometry(100, 100)
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x2a2a3e })
-  const floor = new THREE.Mesh(floorGeometry, floorMaterial)
-  floor.rotation.x = -Math.PI / 2
-  floor.receiveShadow = true
-  scene.add(floor)
-
-  raycaster = new THREE.Raycaster()
-  mouse = new THREE.Vector2()
-
-  animate()
+  return positions[table - 1]
 }
-
-const animate = () => {
-  requestAnimationFrame(animate)
-  controls.update()
-  renderer.render(scene, camera)
-}
-
-// 添加物体
-const addObject = (objData) => {
-  if (!scene) return
-
-  const geometry = new THREE.BoxGeometry(2, 2, 2)
-  const material = new THREE.MeshStandardMaterial({ color: objData.color })
-  const mesh = new THREE.Mesh(geometry, material)
-  
-  mesh.position.set(
-    (Math.random() - 0.5) * 20,
-    1,
-    (Math.random() - 0.5) * 20
-  )
-  mesh.castShadow = true
-  mesh.receiveShadow = true
-  
-  mesh.userData = { ...objData, id: Date.now() }
-  scene.add(mesh)
-  
-  sceneObjects.value.push({
-    id: mesh.userData.id,
-    name: objData.name,
-    type: objData.type,
-    price: objData.price,
-    mesh: mesh,
-    position: { x: mesh.position.x, y: mesh.position.y, z: mesh.position.z },
-    rotation: 0,
-    scale: 1
-  })
-
-  ElMessage.success(`已添加 ${objData.name}`)
-}
-
-// 拖拽开始
-const handleDragStart = (event, obj) => {
-  event.dataTransfer.setData('object', JSON.stringify(obj))
-}
-
-// 删除物体
-const removeObject = () => {
-  if (!selectedObject.value) return
-  
-  const index = sceneObjects.value.findIndex(o => o.id === selectedObject.value.id)
-  if (index > -1) {
-    scene.remove(sceneObjects.value[index].mesh)
-    sceneObjects.value.splice(index, 1)
-    selectedObject.value = null
-    ElMessage.success('已删除')
-  }
-}
-
-// 清空场景
-const clearScene = () => {
-  sceneObjects.value.forEach(obj => {
-    scene.remove(obj.mesh)
-  })
-  sceneObjects.value = []
-  selectedObject.value = null
-  ElMessage.success('场景已清空')
-}
-
-// 重置相机
-const resetCamera = () => {
-  camera.position.set(0, 20, 30)
-  controls.reset()
-}
-
-// 切换网格
-const toggleGrid = () => {
-  // 实现网格显示/隐藏
-}
-
-// 保存设计
-const saveDesign = async () => {
-  saving.value = true
-  try {
-    // 调用 API 保存设计
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    ElMessage.success('设计已保存')
-  } catch (error) {
-    ElMessage.error('保存失败')
-  } finally {
-    saving.value = false
-  }
-}
-
-onMounted(() => {
-  initScene()
-})
-
-onUnmounted(() => {
-  if (renderer) renderer.dispose()
-})
 </script>
 
 <style scoped>
-.designer-page {
-  height: calc(100vh - 64px);
-  display: flex;
-  flex-direction: column;
-  background: #0f0f23;
+.designer-preview-page {
+  min-height: calc(100vh - 120px);
+  padding: 56px clamp(20px, 5vw, 72px);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 214, 230, 0.9), transparent 26%),
+    radial-gradient(circle at 88% 22%, rgba(206, 236, 255, 0.8), transparent 30%),
+    linear-gradient(135deg, #fff8fb 0%, #f4fbff 48%, #fff9ed 100%);
+  color: #233044;
 }
 
-.designer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  background: #1a1a2e;
-  border-bottom: 1px solid #2d2d44;
-}
-
-.designer-header h1 {
-  margin: 0;
-  color: #fff;
-  font-size: 20px;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-}
-
-.designer-container {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
-
-.objects-panel {
-  width: 280px;
-  background: #1a1a2e;
-  border-right: 1px solid #2d2d44;
-  padding: 16px;
-  overflow-y: auto;
-}
-
-.objects-panel h3 {
-  color: #fff;
-  margin-bottom: 20px;
-  font-size: 16px;
-}
-
-.category {
-  margin-bottom: 24px;
-}
-
-.category h4 {
-  color: #a0a0b0;
-  font-size: 12px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  letter-spacing: 1px;
-}
-
-.object-grid {
+.hero-panel {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+  gap: 36px;
+  align-items: center;
+  max-width: 1220px;
+  margin: 0 auto;
 }
 
-.object-item {
-  background: #252538;
-  border-radius: 8px;
-  padding: 12px 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: 1px solid transparent;
+.hero-copy {
+  padding: 34px;
+  border: 1px solid rgba(255, 165, 190, 0.35);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 24px 70px rgba(67, 88, 113, 0.16);
 }
 
-.object-item:hover {
-  background: #303050;
-  border-color: #409EFF;
+.eyebrow {
+  display: inline-flex;
+  margin: 0 0 14px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: #fff0f5;
+  color: #b94272;
+  font-size: 13px;
+  font-weight: 800;
 }
 
-.object-icon {
-  font-size: 24px;
-  margin-bottom: 4px;
+h1 {
+  margin: 0;
+  max-width: 620px;
+  color: #26364f;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.02;
 }
 
-.object-name {
+.lead {
+  margin: 18px 0 0;
+  color: #54657c;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.safety-note {
+  margin: 20px 0 0;
+  padding: 16px;
+  border-left: 4px solid #ff9dbc;
+  border-radius: 14px;
+  background: #fff6f9;
+  color: #6d5060;
+  line-height: 1.6;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.primary-action,
+.secondary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.primary-action {
+  background: linear-gradient(135deg, #ff7fab, #ffad71);
   color: #fff;
-  font-size: 12px;
-  margin-bottom: 4px;
+  box-shadow: 0 12px 24px rgba(255, 127, 171, 0.28);
 }
 
-.object-price {
-  color: #67c23a;
-  font-size: 11px;
+.secondary-action {
+  border: 1px solid rgba(64, 112, 160, 0.18);
+  background: #fff;
+  color: #326083;
 }
 
-.budget-section {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #2d2d44;
+.scene-card {
+  overflow: hidden;
+  border: 1px solid rgba(95, 122, 151, 0.18);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 28px 80px rgba(50, 70, 93, 0.18);
 }
 
-.budget-section h4 {
-  color: #a0a0b0;
-  font-size: 12px;
-  margin-bottom: 12px;
-}
-
-.budget-item {
+.scene-toolbar {
   display: flex;
   justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #2f4057;
   color: #fff;
-  margin-bottom: 8px;
-  font-size: 14px;
+  font-weight: 800;
 }
 
-.budget-item .price {
-  color: #67c23a;
-  font-weight: bold;
-}
-
-.scene-container {
-  flex: 1;
+.scene-board {
   position: relative;
-  background: #0f0f23;
+  min-height: 440px;
+  margin: 20px;
+  border: 8px solid #d8c4a3;
+  border-radius: 24px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.36) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,0.36) 1px, transparent 1px),
+    linear-gradient(135deg, #f8e7d8, #fff5eb);
+  background-size: 46px 46px, 46px 46px, auto;
+  box-shadow: inset 0 0 0 1px rgba(135, 96, 55, 0.12);
 }
 
-.venue-placeholder {
+.backdrop,
+.balloon-arch,
+.photo-zone,
+.dessert-table,
+.main-table,
+.guest-table,
+.entrance {
   position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-}
-
-.venue-placeholder .el-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-}
-
-.scene-canvas {
-  width: 100%;
-  height: 100%;
-}
-
-.scene-controls {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.properties-panel {
-  width: 280px;
-  background: #1a1a2e;
-  border-left: 1px solid #2d2d44;
-  padding: 16px;
-  overflow-y: auto;
-}
-
-.properties-panel h3 {
-  color: #fff;
-  margin-bottom: 20px;
-  font-size: 16px;
-}
-
-.properties-panel.empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
+  text-align: center;
+  color: #5c3b55;
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: 0 10px 20px rgba(71, 54, 75, 0.14);
 }
 
-:deep(.el-form-item__label) {
-  color: #a0a0b0;
+.backdrop {
+  left: 31%;
+  top: 7%;
+  width: 38%;
+  height: 13%;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8c9e3, #d8b2ff);
 }
 
-:deep(.el-input__wrapper),
-:deep(.el-slider__runway) {
-  background: #252538;
+.balloon-arch {
+  left: 26%;
+  top: 4%;
+  width: 48%;
+  height: 21%;
+  border: 8px dotted #ff8fbd;
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.photo-zone {
+  left: 7%;
+  top: 12%;
+  width: 16%;
+  height: 21%;
+  border-radius: 18px;
+  background: #ffe3ef;
+}
+
+.dessert-table {
+  right: 7%;
+  top: 14%;
+  width: 18%;
+  height: 17%;
+  border-radius: 18px;
+  background: #fff1bd;
+}
+
+.main-table {
+  left: 39%;
+  top: 30%;
+  width: 22%;
+  height: 12%;
+  border-radius: 999px;
+  background: #fff;
+  border: 4px solid #ffb6cf;
+}
+
+.guest-table {
+  width: 62px;
+  height: 52px;
+  transform: translate(-50%, -50%);
+  border-radius: 18px;
+  background: #ffffff;
+  border: 3px solid #eec1d3;
+}
+
+.guest-table::before,
+.guest-table::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #c8e4ff;
+}
+
+.guest-table::before {
+  left: -14px;
+}
+
+.guest-table::after {
+  right: -14px;
+}
+
+.entrance {
+  left: 39%;
+  bottom: 4%;
+  width: 22%;
+  height: 9%;
+  border-radius: 999px;
+  background: #dceeff;
+  color: #2f668f;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  max-width: 1220px;
+  margin: 30px auto 0;
+}
+
+.status-grid article {
+  padding: 22px;
+  border: 1px solid rgba(95, 122, 151, 0.14);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.status-grid h2 {
+  margin: 0 0 8px;
+  color: #26364f;
+  font-size: 18px;
+}
+
+.status-grid p {
+  margin: 0;
+  color: #607187;
+  line-height: 1.6;
+}
+
+@media (max-width: 980px) {
+  .hero-panel,
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scene-board {
+    min-height: 380px;
+  }
+}
+
+@media (max-width: 640px) {
+  .designer-preview-page {
+    padding: 28px 16px;
+  }
+
+  .hero-copy {
+    padding: 24px;
+  }
+
+  .scene-toolbar {
+    flex-direction: column;
+  }
 }
 </style>

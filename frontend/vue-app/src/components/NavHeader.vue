@@ -2,8 +2,8 @@
   <el-header class="nav-header">
     <div class="header-content">
       <div class="logo" @click="$router.push('/')">
-        <el-icon><Present /></el-icon>
-        <span>PartyOnce</span>
+        <span class="logo-mark"><el-icon><Present /></el-icon></span>
+        <span class="logo-wordmark">Party Event</span>
       </div>
       
       <el-menu
@@ -154,11 +154,31 @@ const handleCommand = (command) => {
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 24px;
+  gap: 10px;
+  min-width: 158px;
+  font-size: 22px;
   font-weight: bold;
   color: #409EFF;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.logo-mark {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(135deg, #e04491, #ff8a5b);
+  box-shadow: 0 8px 20px rgba(224, 68, 145, 0.22);
+}
+
+.logo-wordmark {
+  line-height: 1;
+  color: #263445;
 }
 
 .nav-menu {
@@ -166,7 +186,13 @@ const handleCommand = (command) => {
   min-width: 0;
   margin: 0 18px;
   border-bottom: none;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.nav-menu::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-menu .el-menu-item {
@@ -182,6 +208,13 @@ const handleCommand = (command) => {
   min-width: max-content;
   padding-left: 8px;
   background: #fff;
+  position: relative;
+  z-index: 2;
+}
+
+.user-actions :deep(.el-button) {
+  margin-left: 0;
+  white-space: nowrap;
 }
 
 .user-info {
@@ -217,6 +250,19 @@ const handleCommand = (command) => {
 
   .header-content {
     padding: 0 12px;
+  }
+
+  .logo {
+    min-width: 136px;
+    font-size: 19px;
+  }
+
+  .user-actions {
+    gap: 6px;
+  }
+
+  .user-actions :deep(.el-button) {
+    padding: 8px 10px;
   }
 
   .user-actions {

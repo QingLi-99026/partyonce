@@ -45,7 +45,7 @@
     "navVenues": "Venues",
     "navCta": "Start planning",
     "kicker": "Welcome · AI Party Concierge",
-    "title": "Welcome to PartyOnce, where every party is visible before it happens",
+    "title": "Welcome to Party Event, where every party is visible before it happens",
     "intro": "Preview castle, space, and forest themes, compare dining layouts and package levels, then let AI turn the idea into a clear quote request.",
     "planYourself": "Plan myself",
     "aiRecommend": "AI recommends",
@@ -67,6 +67,38 @@
     "restaurantKicker": "Restaurant A rendering sample",
     "restaurantTitle": "Original dining room + theme decor layer",
     "restaurantCopy": "Restaurant A keeps tables, chairs, and spatial structure unchanged while balloons, linens, backdrop, dessert table, and lighting change.",
+    "localizedScenesTitle": "Preview the party scene",
+    "localizedScenesSubtitle": "Each scene explains the mood, layout, and visual result in plain English.",
+    "localizedScenes": {
+      "castle": {
+        "title": "Castle dining room",
+        "copy": "A warm princess-style setup with a backdrop, dessert table, soft balloons, and photo moments for younger children."
+      },
+      "space": {
+        "title": "Space mission room",
+        "copy": "A blue and silver explorer setup with rocket details, task badges, and a clear party flow for active children."
+      },
+      "forest": {
+        "title": "Forest adventure corner",
+        "copy": "A nature-inspired setup with warm lights, greenery, table styling, and a friendly discovery mood."
+      }
+    },
+    "localizedPackagesTitle": "Compare the package levels",
+    "localizedPackagesSubtitle": "Choose the level that matches your budget, visual expectations, and party scale.",
+    "localizedPackages": {
+      "basic": {
+        "title": "Basic essentials",
+        "copy": "A controlled-budget setup with table styling, light theme decor, and a simple photo corner."
+      },
+      "standard": {
+        "title": "Standard party experience",
+        "copy": "A complete party look with stronger theme decoration, backdrop, dessert-table styling, and supplier guidance."
+      },
+      "premium": {
+        "title": "Premium immersive setup",
+        "copy": "A fuller visual experience with lighting layers, custom boards, stronger photo zones, and on-site coordination."
+      }
+    },
     "stepsTitle": "Four simple steps to a ready party",
     "finalTitle": "Ready to start your party journey?",
     "footerTagline": "Make every party one of a kind",
@@ -158,5 +190,48 @@
     "edit": "Edit",
     "priceDetails": "Price details",
     "estimatedTotal": "Estimated total"
+  },
+  "footer": {
+    "tagline": "One-stop party planning for family celebrations",
+    "services": "Services",
+    "venueBooking": "Venue booking",
+    "aiPlanning": "AI planning",
+    "design3d": "3D design",
+    "onlineQuote": "Online quote",
+    "about": "About",
+    "aboutUs": "About us",
+    "partners": "Partners",
+    "news": "News",
+    "joinUs": "Join us",
+    "help": "Help",
+    "faq": "FAQ",
+    "guide": "User guide",
+    "contactSupport": "Contact support",
+    "feedback": "Feedback",
+    "copyright": "© 2024 Party Event. All rights reserved. | Privacy Policy | Terms of Service"
+  },
+  "designerPreview": {
+    "eyebrow": "Beta / Coming soon / Local preview",
+    "title": "3D Party Design Preview",
+    "lead": "Preview the party space, tables, stage, and themed decor so parents can understand the Restaurant A flow and atmosphere before planning.",
+    "safetyNote": "This is an experimental visual planning preview, not a final construction drawing, architectural drawing, or supplier execution plan.",
+    "backHome": "Back home",
+    "enterThemes": "Enter themes",
+    "getQuote": "Get quote",
+    "scene": {
+      "backdrop": "Theme backdrop",
+      "photoZone": "Photo zone",
+      "dessertTable": "Dessert table",
+      "mainTable": "Main table",
+      "entrance": "Entrance flow"
+    },
+    "status": {
+      "currentTitle": "Current status",
+      "currentCopy": "This safe placeholder prevents the 3D Design entry from showing a blank page and explains the current capability boundary.",
+      "contentTitle": "Visual content",
+      "contentCopy": "Shows tables, main table, dessert table, photo zone, backdrop, balloon arch, and entrance flow.",
+      "nextTitle": "Next step",
+      "nextCopy": "Formal 3D editing, drag-and-drop design, and supplier execution drawings will be evaluated in a later workpack."
+    }
   }
 }

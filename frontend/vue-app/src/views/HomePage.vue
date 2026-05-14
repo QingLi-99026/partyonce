@@ -1,28 +1,6 @@
 <template>
   <div class="home-page" :style="pageStyle">
-    <!-- 导航栏 -->
-    <nav class="main-nav" :class="{ 'is-scrolled': isScrolled }">
-      <div class="nav-container">
-        <div class="logo">
-          <span class="logo-icon">🎉</span>
-          <span class="logo-text">PartyOnce</span>
-        </div>
-        <div class="nav-links">
-          <a href="#themes" class="nav-link">{{ $t('home.navThemes') }}</a>
-          <a href="#how-it-works" class="nav-link">{{ $t('home.navProcess') }}</a>
-          <a href="#venues" class="nav-link">{{ $t('home.navVenues') }}</a>
-        </div>
-        <div class="nav-actions">
-          <LanguageSwitcher />
-          <button class="nav-cta">{{ $t('home.navCta') }}</button>
-        </div>
-      </div>
-    </nav>
-
-    <section
-      class="investor-hero"
-      :style="{ backgroundImage: `linear-gradient(90deg, rgba(42, 23, 38, 0.78), rgba(126, 71, 96, 0.48), rgba(255, 230, 238, 0.24)), url(${investorHero.image})` }"
-    >
+    <section class="investor-hero">
       <div class="investor-hero-content">
         <span class="investor-kicker">{{ $t('home.kicker') }}</span>
         <h1 class="investor-title">{{ $t('home.title') }}</h1>
@@ -52,12 +30,6 @@
         </div>
       </div>
     </section>
-
-    <!-- 主题切换条 -->
-    <ThemeSwitcher 
-      :current-theme="currentTheme" 
-      @theme-change="handleThemeChange"
-    />
 
     <!-- 沉浸式Hero -->
     <ImmersiveHero 
@@ -198,16 +170,46 @@
     </section>
 
     <!-- 场景展示区 -->
-    <SceneShowcase 
+    <SceneShowcase
+      v-if="!isEnglishLocale"
       :theme-id="currentTheme"
       @select-scene="handleSelectScene"
     />
+    <section v-else class="localized-showcase">
+      <div class="section-container">
+        <h2 class="section-title" :style="sectionTitleStyle">{{ $t('home.localizedScenesTitle') }}</h2>
+        <p class="section-subtitle" :style="sectionSubtitleStyle">{{ $t('home.localizedScenesSubtitle') }}</p>
+        <div class="localized-card-grid">
+          <article v-for="scene in localizedSceneCards" :key="scene.title" class="localized-info-card">
+            <span class="localized-card-icon">{{ scene.icon }}</span>
+            <h3>{{ scene.title }}</h3>
+            <p>{{ scene.copy }}</p>
+            <button class="localized-card-button" @click="goTo('/quote')">{{ $t('quote.entry') }}</button>
+          </article>
+        </div>
+      </div>
+    </section>
 
     <!-- 套餐/价格联动区 -->
-    <PackageShowcase 
+    <PackageShowcase
+      v-if="!isEnglishLocale"
       :theme-id="currentTheme"
       @select-package="handleSelectPackage"
     />
+    <section v-else class="localized-showcase localized-showcase-soft">
+      <div class="section-container">
+        <h2 class="section-title" :style="sectionTitleStyle">{{ $t('home.localizedPackagesTitle') }}</h2>
+        <p class="section-subtitle" :style="sectionSubtitleStyle">{{ $t('home.localizedPackagesSubtitle') }}</p>
+        <div class="localized-card-grid">
+          <article v-for="pkg in localizedPackageCards" :key="pkg.title" class="localized-info-card">
+            <span class="localized-tier">{{ pkg.tier }}</span>
+            <h3>{{ pkg.title }}</h3>
+            <p>{{ pkg.copy }}</p>
+            <button class="localized-card-button" @click="goTo('/quote')">{{ $t('quote.request') }}</button>
+          </article>
+        </div>
+      </div>
+    </section>
 
     <!-- CTA区 -->
     <section class="final-cta">
@@ -226,27 +228,11 @@
       </div>
     </section>
 
-    <!-- 页脚 -->
-    <footer class="main-footer">
-      <div class="footer-container">
-        <div class="footer-brand">
-          <span class="footer-logo">🎉 PartyOnce</span>
-          <p class="footer-tagline">{{ $t('home.footerTagline') }}</p>
-        </div>
-        <div class="footer-links">
-          <a href="#">{{ $t('home.about') }}</a>
-          <a href="#">{{ $t('home.contact') }}</a>
-          <a href="#">{{ $t('home.privacy') }}</a>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
 <script>
-import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import ImmersiveHero from '@/components/ImmersiveHero.vue';
-import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import SceneShowcase from '@/components/SceneShowcase.vue';
 import PackageShowcase from '@/components/PackageShowcase.vue';
 import { getTheme } from '@/themes';
@@ -256,9 +242,7 @@ export default {
   name: 'HomePage',
   
   components: {
-    ThemeSwitcher,
     ImmersiveHero,
-    LanguageSwitcher,
     SceneShowcase,
     PackageShowcase
   },
@@ -266,10 +250,9 @@ export default {
   data() {
     return {
       currentTheme: this.$route.query.theme || 'castle',
-      isScrolled: false,
       investorHero: {
         image: '/party-assets/investor-hero/immersive-homepage-hero.png',
-        alt: 'PartyOnce immersive visual homepage hero'
+        alt: 'Party Event immersive visual homepage hero'
       }
     };
   },
@@ -368,6 +351,50 @@ export default {
     restaurantVisualsForTheme() {
       return getRestaurantAVisuals(this.currentTheme);
     },
+
+    isEnglishLocale() {
+      return this.$i18n.locale === 'en';
+    },
+
+    localizedSceneCards() {
+      return [
+        {
+          icon: '🏰',
+          title: this.$t('home.localizedScenes.castle.title'),
+          copy: this.$t('home.localizedScenes.castle.copy')
+        },
+        {
+          icon: '🚀',
+          title: this.$t('home.localizedScenes.space.title'),
+          copy: this.$t('home.localizedScenes.space.copy')
+        },
+        {
+          icon: '🌲',
+          title: this.$t('home.localizedScenes.forest.title'),
+          copy: this.$t('home.localizedScenes.forest.copy')
+        }
+      ];
+    },
+
+    localizedPackageCards() {
+      return [
+        {
+          tier: this.$t('tiers.basic'),
+          title: this.$t('home.localizedPackages.basic.title'),
+          copy: this.$t('home.localizedPackages.basic.copy')
+        },
+        {
+          tier: this.$t('tiers.standard'),
+          title: this.$t('home.localizedPackages.standard.title'),
+          copy: this.$t('home.localizedPackages.standard.copy')
+        },
+        {
+          tier: this.$t('tiers.premium'),
+          title: this.$t('home.localizedPackages.premium.title'),
+          copy: this.$t('home.localizedPackages.premium.copy')
+        }
+      ];
+    },
     
     pageStyle() {
       const theme = this.currentThemeConfig;
@@ -430,35 +457,9 @@ export default {
     }
   },
   
-  mounted() {
-    window.addEventListener('scroll', this.handleScroll);
-  },
-  
-  beforeDestroy() {
-    window.removeEventListener('scroll', this.handleScroll);
-  },
-  
   methods: {
-    handleScroll() {
-      this.isScrolled = window.scrollY > 50;
-    },
-    
     handleThemeChange(themeId) {
-      // 添加切换动画效果
-      const app = document.getElementById('app');
-      if (app) {
-        app.style.opacity = '0.7';
-        app.style.transform = 'scale(0.98)';
-        app.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        
-        setTimeout(() => {
-          this.currentTheme = themeId;
-          app.style.opacity = '1';
-          app.style.transform = 'scale(1)';
-        }, 150);
-      } else {
-        this.currentTheme = themeId;
-      }
+      this.switchToTheme(themeId);
     },
     
     switchToTheme(themeId) {
@@ -534,7 +535,7 @@ export default {
     },
     
     handleStartPlanning(themeId) {
-      this.$router.push(`/planner?theme=${themeId}`);
+      this.$router.push(`/ai-voice-intake?theme=${themeId}`);
     },
     
     scrollToThemes() {
@@ -546,7 +547,7 @@ export default {
     },
     
     handleFinalCTA() {
-      this.$router.push(`/planner?theme=${this.currentTheme}`);
+      this.$router.push(`/quote?theme=${this.currentTheme}`);
     },
 
     goTo(path) {
@@ -555,8 +556,7 @@ export default {
 
     handleSelectScene({ theme, scene }) {
       console.log('Selected scene:', theme, scene);
-      // 可以跳转到场景详情或策划页面
-      this.$router.push(`/planner?theme=${theme}&scene=${encodeURIComponent(scene.name)}`);
+      this.$router.push(`/quote?theme=${theme}&scene=${encodeURIComponent(scene.name)}`);
     },
 
     handleSelectPackage({ theme, package: pkg, price }) {
@@ -574,102 +574,28 @@ export default {
   transition: background-color 0.5s ease;
 }
 
-/* 导航栏 */
-.main-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  padding: 16px 0;
-  transition: all 0.3s ease;
-  background: transparent;
-}
-
-.main-nav.is-scrolled {
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-}
-
-.logo-icon {
-  font-size: 1.75rem;
-}
-
-.nav-links {
-  display: flex;
-  gap: 32px;
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: white;
-}
-
-.nav-link {
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.nav-link:hover {
-  color: white;
-}
-
-.nav-cta {
-  padding: 10px 24px;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 25px;
-  color: white;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.nav-cta:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
 .investor-hero {
-  min-height: 92vh;
-  padding: 132px 24px 72px;
+  min-height: 78vh;
+  padding: 72px 24px;
   display: grid;
-  grid-template-columns: minmax(0, 0.86fr) minmax(360px, 0.72fr);
-  gap: 48px;
+  grid-template-columns: minmax(0, 0.96fr) minmax(340px, 0.72fr);
+  gap: 42px;
   align-items: center;
-  background-size: cover;
-  background-position: center top;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(circle at 84% 18%, rgba(0, 184, 217, 0.18), transparent 28%),
+    linear-gradient(135deg, #fff8f0 0%, #ffe4ef 46%, #dff7ff 100%);
+  border-bottom: 1px solid rgba(92, 43, 67, 0.12);
 }
 
 .investor-hero-content {
   max-width: 720px;
   margin-left: max(0px, calc((100vw - 1200px) / 2));
+  padding: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 28px 80px rgba(92, 43, 67, 0.16);
+  backdrop-filter: blur(16px);
 }
 
 :global([dir='rtl']) .investor-hero-content {
@@ -680,7 +606,7 @@ export default {
 .investor-kicker {
   display: inline-flex;
   margin-bottom: 18px;
-  color: #00f0ff;
+  color: #b72d7a;
   font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -688,8 +614,8 @@ export default {
 
 .investor-title {
   margin: 0;
-  color: #fff;
-  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  color: #251522;
+  font-size: clamp(2.4rem, 5.4vw, 4.9rem);
   line-height: 1.02;
   font-weight: 900;
 }
@@ -697,7 +623,7 @@ export default {
 .investor-copy {
   max-width: 620px;
   margin: 24px 0 0;
-  color: rgba(255, 255, 255, 0.76);
+  color: #5b4653;
   font-size: clamp(1rem, 1.7vw, 1.25rem);
   line-height: 1.75;
 }
@@ -717,12 +643,12 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  color: #fff;
+  color: #372032;
   font-size: 1rem;
   font-weight: 800;
-  border: 1px solid rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(183, 45, 122, 0.24);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.72);
   cursor: pointer;
   backdrop-filter: blur(14px);
   transition: transform 0.22s ease, background 0.22s ease;
@@ -733,10 +659,10 @@ export default {
 }
 
 .investor-action.is-primary {
-  color: #03111a;
-  border-color: rgba(0, 240, 255, 0.65);
-  background: linear-gradient(135deg, #00f0ff, #31b7ff);
-  box-shadow: 0 14px 36px rgba(0, 212, 255, 0.34);
+  color: #fff;
+  border-color: rgba(183, 45, 122, 0.42);
+  background: linear-gradient(135deg, #e04491, #ff8a5b);
+  box-shadow: 0 14px 36px rgba(224, 68, 145, 0.28);
 }
 
 .investor-visual-stack {
@@ -746,8 +672,8 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 24px;
   overflow: hidden;
-  background: rgba(4, 8, 20, 0.64);
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.46);
+  background: #fff;
+  box-shadow: 0 32px 80px rgba(92, 43, 67, 0.2);
   backdrop-filter: blur(18px);
 }
 
@@ -761,11 +687,12 @@ export default {
 
 .visual-stack-meta {
   padding: 18px 20px 20px;
+  background: #fff;
 }
 
 .visual-stack-meta span {
   display: block;
-  color: #00f0ff;
+  color: #b72d7a;
   font-size: 0.76rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -774,7 +701,7 @@ export default {
 .visual-stack-meta strong {
   display: block;
   margin-top: 8px;
-  color: #fff;
+  color: #251522;
   font-size: 1.05rem;
 }
 
@@ -1054,6 +981,68 @@ export default {
   line-height: 1.45;
 }
 
+.localized-showcase {
+  padding: 90px 24px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.localized-showcase-soft {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.localized-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.localized-info-card {
+  min-height: 260px;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.14);
+}
+
+.localized-card-icon,
+.localized-tier {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: var(--theme-accent);
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.localized-tier {
+  font-size: 0.86rem;
+  text-transform: uppercase;
+}
+
+.localized-info-card h3 {
+  margin: 0 0 12px;
+  color: var(--theme-text);
+  font-size: 1.35rem;
+}
+
+.localized-info-card p {
+  min-height: 72px;
+  margin: 0 0 22px;
+  color: var(--theme-text-muted);
+  line-height: 1.65;
+}
+
+.localized-card-button {
+  min-height: 42px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  color: #20111d;
+  background: var(--theme-accent);
+  font-weight: 800;
+  cursor: pointer;
+}
+
 /* 流程介绍区 */
 .how-it-works {
   padding: 100px 24px;
@@ -1109,27 +1098,31 @@ export default {
 
 /* CTA区 */
 .final-cta {
-  padding: 120px 24px;
+  padding: 64px 24px 56px;
   text-align: center;
+  background: linear-gradient(180deg, rgba(255, 248, 240, 0), #fff8f0 62%, #fff8f0 100%);
 }
 
 .cta-title {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 700;
-  margin-bottom: 40px;
+  max-width: 760px;
+  margin: 0 auto 24px;
+  color: #2b1d27;
+  font-size: clamp(1.55rem, 3vw, 2.18rem);
+  font-weight: 800;
+  line-height: 1.2;
 }
 
 .cta-main-button {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 20px 48px;
+  padding: 16px 34px;
   border: none;
   border-radius: 50px;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.06rem;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .cta-main-button:hover {
@@ -1145,61 +1138,18 @@ export default {
   transform: translateX(4px);
 }
 
-/* 页脚 */
-.main-footer {
-  padding: 60px 24px 40px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 24px;
-}
-
-.footer-logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-}
-
-.footer-tagline {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 4px;
-}
-
-.footer-links {
-  display: flex;
-  gap: 32px;
-}
-
-.footer-links a {
-  color: rgba(255, 255, 255, 0.6);
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: color 0.3s;
-}
-
-.footer-links a:hover {
-  color: white;
-}
-
 /* 移动端适配 */
 @media (max-width: 768px) {
   .investor-hero {
     min-height: auto;
-    padding: 118px 18px 54px;
+    padding: 42px 18px 54px;
     grid-template-columns: 1fr;
     gap: 28px;
   }
 
   .investor-hero-content {
     margin-left: 0;
+    padding: 28px 22px;
   }
 
   .investor-title {
@@ -1211,26 +1161,13 @@ export default {
     margin-right: 0;
   }
 
-  .nav-links {
-    display: none;
-  }
-
-  .nav-container {
-    padding: 0 14px;
-  }
-
-  .nav-actions {
-    gap: 8px;
-  }
-
-  .nav-cta {
-    padding: 9px 14px;
-  }
-  
   .themes-section,
-  .how-it-works,
-  .final-cta {
+  .how-it-works {
     padding: 60px 20px;
+  }
+
+  .final-cta {
+    padding: 46px 18px 42px;
   }
   
   .theme-cards {
@@ -1241,13 +1178,5 @@ export default {
     grid-template-columns: 1fr;
   }
   
-  .footer-container {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .footer-links {
-    justify-content: center;
-  }
 }
 </style>

@@ -71,9 +71,10 @@ const routes = [
   },
   {
     path: '/designer',
+    alias: '/3d-designer',
     name: 'Designer3D',
     component: () => import('@/views/Designer3D.vue'),
-    meta: { title: '3D设计器', requiresAuth: true }
+    meta: { title: '3D派对设计预览' }
   },
   {
     path: '/quotation',
@@ -343,7 +344,7 @@ router.beforeEach((to, from, next) => {
   
   // 设置页面标题
   if (to.meta.title) {
-    document.title = `${to.meta.title} - PartyOnce`
+    document.title = `${to.meta.title} - Party Event`
   }
   
   // 检查是否需要登录

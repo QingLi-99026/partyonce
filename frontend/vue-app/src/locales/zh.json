@@ -45,7 +45,7 @@
     "navVenues": "场地",
     "navCta": "开始策划",
     "kicker": "Welcome · AI Party Concierge",
-    "title": "欢迎来到 PartyOnce，让孩子的派对先被看见",
+    "title": "欢迎来到 Party Event 派对活动，让孩子的派对先被看见",
     "intro": "从梦幻城堡、星际探险到森林奇境，先看主题、餐厅布置和套餐差异，再让 AI 帮你整理成清楚的 quote request。",
     "planYourself": "自己来策划",
     "aiRecommend": "AI 帮我推荐",
@@ -67,6 +67,38 @@
     "restaurantKicker": "Restaurant A 渲染样例",
     "restaurantTitle": "餐厅原貌 + 主题装饰层",
     "restaurantCopy": "Restaurant A 保持桌椅和空间结构不变，只改变气球、桌布、背景板、甜品台和灯光层。",
+    "localizedScenesTitle": "预览派对场景",
+    "localizedScenesSubtitle": "每个场景都说明氛围、布局和视觉效果。",
+    "localizedScenes": {
+      "castle": {
+        "title": "城堡餐厅场景",
+        "copy": "适合小朋友的公主风布置，包含背景板、甜品台、柔色气球和拍照区。"
+      },
+      "space": {
+        "title": "星际任务场景",
+        "copy": "蓝银色太空探索布置，包含火箭细节、任务徽章和清楚的派对动线。"
+      },
+      "forest": {
+        "title": "森林探险角落",
+        "copy": "自然灵感布置，包含暖光、绿植、桌面造型和友好的探索氛围。"
+      }
+    },
+    "localizedPackagesTitle": "比较套餐层级",
+    "localizedPackagesSubtitle": "按预算、视觉期待和派对规模选择合适层级。",
+    "localizedPackages": {
+      "basic": {
+        "title": "Basic 基础配置",
+        "copy": "控制预算的轻量布置，包含桌面造型、轻主题装饰和简洁拍照角。"
+      },
+      "standard": {
+        "title": "Standard 标准体验",
+        "copy": "完整派对感，包含更强主题装饰、背景板、甜品台造型和供应商建议。"
+      },
+      "premium": {
+        "title": "Premium 沉浸布置",
+        "copy": "更完整的视觉体验，包含灯光层、定制板、主拍照区和现场协调。"
+      }
+    },
     "stepsTitle": "简单四步，梦想派对成真",
     "finalTitle": "准备好开启你的派对之旅了吗？",
     "footerTagline": "让每一个派对都独一无二",
@@ -158,5 +190,48 @@
     "edit": "修改",
     "priceDetails": "价格明细",
     "estimatedTotal": "预估总价"
+  },
+  "footer": {
+    "tagline": "派对活动一站式策划平台",
+    "services": "服务",
+    "venueBooking": "场地预订",
+    "aiPlanning": "AI策划",
+    "design3d": "3D设计",
+    "onlineQuote": "在线报价",
+    "about": "关于",
+    "aboutUs": "关于我们",
+    "partners": "合作伙伴",
+    "news": "新闻动态",
+    "joinUs": "加入我们",
+    "help": "帮助",
+    "faq": "常见问题",
+    "guide": "使用指南",
+    "contactSupport": "联系客服",
+    "feedback": "意见反馈",
+    "copyright": "© 2024 Party Event. All rights reserved. | 隐私政策 | 服务条款"
+  },
+  "designerPreview": {
+    "eyebrow": "Beta / Coming soon / 本地预览中",
+    "title": "3D 派对设计预览",
+    "lead": "可视化派对空间、桌椅、舞台和主题布置，帮助家长先理解 Restaurant A 的派对动线与氛围。",
+    "safetyNote": "这是实验性 3D/场景预览，不是正式施工图、建筑图或供应商执行图。",
+    "backHome": "返回首页",
+    "enterThemes": "进入主题页",
+    "getQuote": "获取报价",
+    "scene": {
+      "backdrop": "主题背景板",
+      "photoZone": "拍照区",
+      "dessertTable": "甜品台",
+      "mainTable": "主桌",
+      "entrance": "入口动线"
+    },
+    "status": {
+      "currentTitle": "当前状态",
+      "currentCopy": "这是安全占位版，用于避免 3D Design 核心入口空白，并说明未来能力边界。",
+      "contentTitle": "可视化内容",
+      "contentCopy": "展示桌椅、主桌、甜品台、拍照区、背景板、气球拱门与入口动线。",
+      "nextTitle": "下一步",
+      "nextCopy": "正式 3D 编辑、拖拽设计和供应商施工图会在后续工作包中单独评估。"
+    }
   }
 }
