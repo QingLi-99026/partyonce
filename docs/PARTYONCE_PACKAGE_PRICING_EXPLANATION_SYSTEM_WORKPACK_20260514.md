@@ -186,9 +186,18 @@ AI 进入 `/quote` 后，quote prefill / pricing snapshot 包含：
 
 `https://partyonce-git-eye-lite-v2-release-2af646-qingli-99026s-projects.vercel.app/`
 
-本轮代码侧会在 commit 后 push release candidate branch，触发 Vercel Preview redeploy。
+本轮代码侧已 commit 并 push release candidate branch，触发 Vercel Preview redeploy。
 
-Owner 提到 `/`、`/themes`、`/quote` 已返回 200；这证明公开路由可访问，但“是否已经切到最新 deployment”仍需要 Vercel Dashboard 最终确认。当前本地 Vercel CLI 无登录凭据，不能直接读取 Dashboard deployment 列表。
+Owner 提到 `/`、`/themes`、`/quote` 已返回 200；这证明公开路由可访问。推送后，Codex 使用公开 Preview 做浏览器渲染复测：
+
+- `/quote?theme=castle&package=standard&scene=restaurant-a` 返回 200
+- 页面出现 `Standard 到底差在哪里`
+- 页面出现 `为什么推荐这一档`
+- 页面出现 `价格差异来自哪里`
+
+因此公开 Preview 已经能看到 Phase 3 新解释系统。
+
+仍需说明：当前本地 Vercel CLI 无登录凭据，不能直接读取 Dashboard deployment 列表，所以 Dashboard 内“最新 deployment commit 是否为本轮 commit”的最终后台确认仍需要 owner 登录 Vercel 复核。
 
 后续确认建议：
 
