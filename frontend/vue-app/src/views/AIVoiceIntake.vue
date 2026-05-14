@@ -141,6 +141,26 @@
             </dd>
           </div>
           <div>
+            <dt>价格差异来自哪里</dt>
+            <dd>
+              <ul class="compact-list">
+                <li v-for="item in recommendation.priceDrivers" :key="item">{{ item }}</li>
+              </ul>
+            </dd>
+          </div>
+          <div>
+            <dt>这个方案为什么适合我</dt>
+            <dd>{{ recommendation.customerFit }}</dd>
+          </div>
+          <div>
+            <dt>{{ recommendation.upgradeExplanation.title }}</dt>
+            <dd>
+              <ul class="compact-list">
+                <li v-for="item in recommendation.upgradeExplanation.items" :key="item">{{ item }}</li>
+              </ul>
+            </dd>
+          </div>
+          <div>
             <dt>下一步</dt>
             <dd>{{ recommendation.nextStepSuggestion }} 当前为 staging preview，不会创建 Quote / Order，也不会触发 payment。</dd>
           </div>

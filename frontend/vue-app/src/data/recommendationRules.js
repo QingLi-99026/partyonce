@@ -1,5 +1,6 @@
 import { getVisualContext } from '@/data/visualAssets';
 import { aiConciergeQuestions } from '@/data/aiConciergeQuestions';
+import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation';
 
 const THEME_LABELS = {
   castle: 'Castle Princess',
@@ -29,29 +30,6 @@ const BUDGET_MATCH = {
   basic: 'Basic 会优先控制预算，把钱花在主题识别、桌面氛围和基础拍照点上。',
   standard: 'Standard 在预算和效果之间最平衡，适合多数家庭先做完整生日体验。',
   premium: 'Premium 适合希望现场更有沉浸感和仪式感的家庭，预算会更多留给灯光、拱门和定制板。'
-};
-
-const PACKAGE_INCLUDES = {
-  basic: [
-    '基础主题桌布和桌面摆件',
-    '少量主题气球',
-    '小型欢迎牌',
-    '轻量拍照角'
-  ],
-  standard: [
-    '主题色桌布和桌面花艺',
-    '中型气球拱门',
-    '主题背景板',
-    '甜品台建议',
-    '供应商组合建议'
-  ],
-  premium: [
-    '大型沉浸式主题拱门',
-    '主题灯光层',
-    '定制 KT 板',
-    '完整拍照区',
-    '现场协调建议'
-  ]
 };
 
 const optionFor = (questionId, value) => {
@@ -97,6 +75,8 @@ export function recommendThemeAndPackage(answers = {}) {
   const theme = Object.entries(themeScores).sort((a, b) => b[1] - a[1])[0]?.[0] || 'space';
   const tier = answers.budgetRange || 'standard';
   const visualContext = getVisualContext(theme, tier);
+  const tierExplanation = getPackageExplanation(tier);
+  const upgradeExplanation = getUpgradeExplanation(tier);
   const guestOption = optionFor('guestCount', answers.guestCount);
   const venueStatus = answers.venueStatus || 'unsure';
   const venueType = venueStatus === 'need_restaurant'
@@ -123,7 +103,11 @@ export function recommendThemeAndPackage(answers = {}) {
     ],
     reasonHeadline: `Based on ${labelFor('childAge', answers.childAge)}, ${labelFor('indoorOutdoor', answers.indoorOutdoor)} and ${labelFor('budgetRange', answers.budgetRange)}, ${THEME_LABELS[theme]} ${TIER_LABELS[tier]} is the clearest starting point.`,
     budgetMatch: BUDGET_MATCH[tier],
-    packageIncludes: PACKAGE_INCLUDES[tier],
+    packageIncludes: tierExplanation.includes,
+    priceDrivers: tierExplanation.priceDrivers,
+    upgradeExplanation,
+    customerFit: tierExplanation.customerFit,
+    quoteExplanation: tierExplanation.quoteExplanation,
     nextStepSuggestion: '进入 quote request，确认联系人、日期和备注后提交 inquiry。团队会再人工确认场地、供应商可用性和最终报价。',
     summary: {
       childAge: labelFor('childAge', answers.childAge),
@@ -165,6 +149,7 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
         `Area: ${result.summary.area}`,
         `Venue: ${result.summary.venueStatus}`,
         `Budget match: ${result.budgetMatch}`,
+        `Price explanation: ${result.quoteExplanation}`,
         `AI reason: ${result.reason.join(' ')}`
       ].join('\n'),
       customerBrief: result.customerBrief,
@@ -203,6 +188,9 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
       packageTier: result.tier,
       priceHint: packageVisual.priceHint,
       estimatedLevel: result.tier,
+      priceDrivers: result.priceDrivers,
+      upgradeAdds: result.upgradeExplanation.items,
+      customerFit: result.customerFit,
       snapshot_note: 'Rule-based local/staging estimate; final price requires human review.'
     },
     aiRecommendation: {
@@ -212,6 +200,10 @@ export function buildQuotePrefillPayload(answers = {}, recommendation) {
       reasonHeadline: result.reasonHeadline,
       budgetMatch: result.budgetMatch,
       packageIncludes: result.packageIncludes,
+      priceDrivers: result.priceDrivers,
+      upgradeExplanation: result.upgradeExplanation,
+      customerFit: result.customerFit,
+      quoteExplanation: result.quoteExplanation,
       customerBrief: result.customerBrief,
       venueRecommendation: {
         id: venue.id,

@@ -79,6 +79,37 @@
             <span class="total-price">{{ formatPrice(finalTotal) }}</span>
           </div>
         </div>
+
+        <div class="pricing-explainer" :style="cardStyle">
+          <div class="pricing-explainer-header">
+            <span class="visual-kicker">Package explanation</span>
+            <h3>{{ packageExplanation.label }} 到底差在哪里</h3>
+            <p>{{ packageExplanation.positioning }}</p>
+          </div>
+          <div class="pricing-explainer-grid">
+            <div>
+              <h4>为什么推荐这一档</h4>
+              <p>{{ packageExplanation.whyRecommend }}</p>
+            </div>
+            <div>
+              <h4>价格差异来自哪里</h4>
+              <ul>
+                <li v-for="item in packageExplanation.priceDrivers" :key="item">{{ item }}</li>
+              </ul>
+            </div>
+            <div>
+              <h4>{{ upgradeExplanation.title }}</h4>
+              <ul>
+                <li v-for="item in upgradeExplanation.items" :key="item">{{ item }}</li>
+              </ul>
+            </div>
+            <div>
+              <h4>这个方案为什么适合我</h4>
+              <p>{{ packageExplanation.customerFit }}</p>
+            </div>
+          </div>
+          <p class="pricing-explainer-note">{{ packageExplanation.quoteExplanation }}</p>
+        </div>
       </div>
     </section>
 
@@ -243,6 +274,7 @@
 <script>
 import { getTheme } from '@/themes';
 import { getVisualContext } from '@/data/visualAssets';
+import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation';
 import { readQuotePrefill } from '@/services/aiVoiceIntakeService';
 
 export default {
@@ -332,6 +364,14 @@ export default {
 
     visualContext() {
       return getVisualContext(this.themeId, this.packageId);
+    },
+
+    packageExplanation() {
+      return getPackageExplanation(this.packageId);
+    },
+
+    upgradeExplanation() {
+      return getUpgradeExplanation(this.packageId);
     },
 
     aiPrefillNotice() {
@@ -543,6 +583,8 @@ export default {
           sceneFee: this.sceneData.basePrice * 0.1,
           addonsTotal: this.addonsTotal,
           finalTotal: this.finalTotal,
+          packageExplanation: this.packageExplanation,
+          upgradeExplanation: this.upgradeExplanation,
           snapshot_note: this.aiPrefill?.pricing?.snapshot_note || 'Frontend staging estimate; final quote requires human review.',
           aiEstimate: this.aiPrefill?.pricing || null
         },
@@ -905,6 +947,58 @@ export default {
   font-size: 1.5rem;
 }
 
+.pricing-explainer {
+  display: grid;
+  gap: 22px;
+  margin-top: 22px;
+  padding: 28px;
+  color: #eaf8ff;
+}
+
+.pricing-explainer-header h3 {
+  margin: 8px 0;
+  color: #fff;
+  font-size: 1.45rem;
+}
+
+.pricing-explainer-header p,
+.pricing-explainer-grid p,
+.pricing-explainer-grid li,
+.pricing-explainer-note {
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.65;
+}
+
+.pricing-explainer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pricing-explainer-grid > div {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pricing-explainer-grid h4 {
+  margin: 0 0 8px;
+  color: #fff;
+}
+
+.pricing-explainer-grid ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.pricing-explainer-note {
+  margin: 0;
+  padding-top: 4px;
+}
+
 /* 附加项 */
 .addons-section {
   padding: 40px 0;
@@ -925,6 +1019,10 @@ export default {
 
 @media (max-width: 760px) {
   .visual-context-card {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-explainer-grid {
     grid-template-columns: 1fr;
   }
 }

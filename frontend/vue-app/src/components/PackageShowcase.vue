@@ -50,6 +50,15 @@
               <span class="feature-text">{{ feature }}</span>
             </div>
           </div>
+
+          <div class="package-explainer">
+            <h4>为什么选这一档</h4>
+            <p>{{ pkg.explanation.whyRecommend }}</p>
+            <h4>价格主要来自</h4>
+            <ul>
+              <li v-for="driver in pkg.explanation.priceDrivers" :key="driver">{{ driver }}</li>
+            </ul>
+          </div>
           
           <!-- 附加项入口 -->
           <div class="addon-hint" :style="addonHintStyle">
@@ -72,7 +81,7 @@
       <!-- 价格说明 -->
       <div class="price-notice" :style="noticeStyle">
         <p>* 以上价格为{{ currentThemeName }}主题基础报价，最终价格根据具体场景、人数、日期等因素调整</p>
-        <p>所有套餐均包含场地布置、基础道具、工作人员服务</p>
+        <p>Basic 控制预算，Standard 提供完整派对感，Premium 强调沉浸式视觉和拍照区。</p>
       </div>
     </div>
   </section>
@@ -80,6 +89,7 @@
 
 <script>
 import { getTheme } from '@/themes';
+import { getPackageExplanation } from '@/data/packageExplanation';
 
 export default {
   name: 'PackageShowcase',
@@ -110,11 +120,9 @@ export default {
           price: this.getThemePrice(800),
           unit: '起',
           features: [
-            '场地基础布置',
-            '主题装饰道具',
-            '2小时场地使用',
-            '基础灯光音响'
+            ...getPackageExplanation('basic').includes
           ],
+          explanation: getPackageExplanation('basic'),
           addonHint: '可添加：蛋糕、摄影师',
           ctaText: '选择基础包',
           popular: false
@@ -126,13 +134,9 @@ export default {
           price: this.getThemePrice(1500),
           unit: '起',
           features: [
-            '全套主题布置',
-            '专业场景道具',
-            '4小时场地使用',
-            '专业灯光音响',
-            '1位活动策划师',
-            '基础摄影服务'
+            ...getPackageExplanation('standard').includes
           ],
+          explanation: getPackageExplanation('standard'),
           addonHint: '可添加： Catering、表演',
           ctaText: '选择标准包',
           popular: true,
@@ -145,15 +149,9 @@ export default {
           price: this.getThemePrice(3000),
           unit: '起',
           features: [
-            'VIP主题定制',
-            '高级场景道具',
-            '全天场地使用',
-            '顶级灯光音响',
-            '专属策划团队',
-            '专业摄影摄像',
-            '定制餐饮服务',
-            '专属管家服务'
+            ...getPackageExplanation('premium').includes
           ],
+          explanation: getPackageExplanation('premium'),
           addonHint: '可添加： 明星表演、直升机',
           ctaText: '选择尊享包',
           popular: false
@@ -414,6 +412,37 @@ export default {
 .feature-text {
   font-size: 0.9375rem;
   opacity: 0.9;
+}
+
+.package-explainer {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 22px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.package-explainer h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.package-explainer p,
+.package-explainer li {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  opacity: 0.86;
+}
+
+.package-explainer ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
 }
 
 /* 附加项入口 */

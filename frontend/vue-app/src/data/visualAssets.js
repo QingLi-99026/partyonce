@@ -1,3 +1,5 @@
+import { getPackageExplanation, packageTierExplanations, tierOrder } from './packageExplanation';
+
 const THEME_IMAGES = {
   castle: '/party-assets/themes/castle-princess-full.png',
   space: '/party-assets/themes/space-explorer.png',
@@ -64,30 +66,23 @@ const THEME_META = {
 
 const TIER_META = {
   basic: {
-    label: 'Basic',
-    labelZh: '基础',
-    priceHint: '$899-$1,299',
+    ...packageTierExplanations.basic,
     scope: '基础桌面装饰、主题气球、入口欢迎牌、轻量拍照角',
-    buyerCue: '适合小型生日、预算敏感、想快速确认方向的家庭'
+    buyerCue: packageTierExplanations.basic.bestFor
   },
   standard: {
-    label: 'Standard',
-    labelZh: '标准',
-    priceHint: '$1,499-$2,399',
+    ...packageTierExplanations.standard,
     scope: '完整主题桌布、气球拱门、甜品台、主题背景板、供应商建议',
-    buyerCue: '适合 15-30 人、需要完整主题氛围和可拍照效果的派对'
+    buyerCue: packageTierExplanations.standard.bestFor
   },
   premium: {
-    label: 'Premium',
-    labelZh: '尊享',
-    priceHint: '$2,800+',
+    ...packageTierExplanations.premium,
     scope: '沉浸式背景、灯光层、定制 KT 板、主视觉拍照区、现场协调',
-    buyerCue: '适合投资人演示、高预算客户、需要强记忆点的活动'
+    buyerCue: packageTierExplanations.premium.bestFor
   }
 };
 
 const themeOrder = ['castle', 'space', 'forest'];
-const tierOrder = ['basic', 'standard', 'premium'];
 
 export const visualAssets = [
   {
@@ -153,7 +148,8 @@ export const themePackageVisuals = themeOrder.flatMap((themeId) => {
       materials: theme.materials,
       priceHint: tier.priceHint,
       scope: tier.scope,
-      buyerCue: tier.buyerCue
+      buyerCue: tier.buyerCue,
+      explanation: getPackageExplanation(tierId)
     };
   });
 });

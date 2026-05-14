@@ -73,6 +73,12 @@
           </div>
         </dl>
 
+        <div class="package-explanation">
+          <strong>{{ orderPackageExplanation(order).label }} · 报价解释</strong>
+          <p>{{ orderPackageExplanation(order).quoteExplanation }}</p>
+          <span>升级价值：{{ orderPackageExplanation(order).upgradeAdds.slice(0, 2).join(' / ') }}</span>
+        </div>
+
         <div class="next-step">
           <span>Next step</span>
           <p>{{ order.next_step }}</p>
@@ -109,6 +115,7 @@ import {
   orderStatuses
 } from '@/services/customerExperienceService'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
+import { getPackageExplanation } from '@/data/packageExplanation'
 
 const router = useRouter()
 const loading = ref(false)
@@ -148,6 +155,7 @@ const orderTagType = (status) => ({
 const orderInteraction = (orderId) => getCustomerInteractionState('order', orderId)
 
 const orderVisual = (order) => getVisualContext(normalizeThemeId(order.theme), normalizeTierId(order.package))
+const orderPackageExplanation = (order) => getPackageExplanation(normalizeTierId(order.package))
 
 const loadOrders = async () => {
   loading.value = true
@@ -285,6 +293,28 @@ h1 {
 .detail-list div {
   border-top: 1px solid #f1f5f9;
   padding-top: 10px;
+}
+
+.package-explanation {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 12px;
+  border: 1px solid #e0e7ff;
+  border-radius: 8px;
+  background: #f8faff;
+}
+
+.package-explanation strong {
+  color: #1e293b;
+}
+
+.package-explanation p,
+.package-explanation span {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 dt {
