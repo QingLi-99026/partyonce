@@ -3,8 +3,8 @@
     <header class="page-hero">
       <div>
         <p class="eyebrow">Payment readiness</p>
-        <h1>Stripe Test-Mode Deposit Prep</h1>
-        <p>Local/staging readiness gate. This page does not create a PaymentIntent or collect live payment.</p>
+        <h1>Test-Mode Payment Preparation</h1>
+        <p>Local/staging readiness gate. Deposit payment is not enabled in this preview and no real payment will be triggered.</p>
       </div>
       <el-tag :type="readiness.ready ? 'success' : 'warning'" effect="plain" size="large">
         {{ readiness.ready ? 'test-mode ready' : 'blocked' }}
@@ -16,7 +16,7 @@
       type="warning"
       :closable="false"
       show-icon
-      title="Readiness only: no live payment, no PaymentIntent, no webhook/n8n, and no outbound message."
+      title="Readiness only: no live payment, no webhook/n8n, and no outbound message."
     />
 
     <section class="content-grid">
@@ -32,7 +32,7 @@
       </article>
 
       <article class="panel">
-        <h2>Stripe Test-Mode Checks</h2>
+        <h2>Test-Mode Payment Checks</h2>
         <ul class="check-list">
           <li :class="{ ok: readiness.testModeEnabled }">
             <span>{{ readiness.testModeEnabled ? 'OK' : 'WAIT' }}</span>
@@ -64,13 +64,13 @@
       <p>{{ readiness.boundary }}</p>
       <div class="actions">
         <el-button type="primary" :disabled="!readiness.ready" @click="prepareTestMode">
-          Prepare Stripe test card field
+          Prepare test card field
         </el-button>
         <el-button @click="router.push('/my/orders')">Back to My Orders</el-button>
         <el-button @click="router.push('/payment/cancelled')">Open Cancelled State</el-button>
       </div>
       <div v-if="stripeMounted" class="test-card-shell">
-        <p>Stripe.js test card field mounted. Payment confirmation remains disabled until backend test PaymentIntent endpoint is approved.</p>
+        <p>Test card field mounted. Payment confirmation remains disabled until a separate approved backend test-payment endpoint exists.</p>
         <div ref="cardMountRef" class="card-mount"></div>
         <el-button disabled>Confirm test payment · backend not enabled</el-button>
       </div>
@@ -111,14 +111,14 @@ const prepareTestMode = async () => {
   const { loadStripe } = await import('@stripe/stripe-js')
   const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
   if (!stripe) {
-    ElMessage.error('Stripe.js could not be initialized with the test publishable key.')
+    ElMessage.error('Test payment field could not be initialized with the test publishable key.')
     return
   }
   const elements = stripe.elements()
   const card = elements.create('card', { hidePostalCode: true })
   card.mount(cardMountRef.value)
   stripeMounted.value = true
-  ElMessage.success('Stripe test card field mounted. Payment confirmation is still blocked.')
+  ElMessage.success('Test card field mounted. Payment confirmation is still blocked.')
 }
 
 onMounted(() => {

@@ -467,7 +467,7 @@
     "receivedItem1": "يمكن للفريق تأكيد الخطة باستخدام Restaurant A ومرئيات الثيم واقتراحات الموردين.",
     "receivedItem2": "يمكنك متابعة عرض السعر في My Quotes.",
     "receivedItem3": "يمكنك متابعة حالة الطلب لاحقاً في My Orders.",
-    "receivedItem4": "هذه معاينة staging ولا تشغل payment أو PaymentIntent أو webhook أو n8n أو رسائل خارجية.",
+    "receivedItem4": "هذه معاينة staging ولا تشغل دفعاً حقيقياً أو webhook أو n8n أو رسائل خارجية.",
     "localizedPackageCopy": "تظهر هذه الباقة كتقدير local/staging. النطاق النهائي يحتاج مراجعة بشرية.",
     "localizedPackagePoint1": "نطاق الديكور والقاعة والموردين يؤثر في التقدير النهائي.",
     "localizedPackagePoint2": "الفئات الأعلى تضيف تفاصيل بصرية وتنسيقاً أقوى.",
@@ -517,7 +517,7 @@
     "myQuotes": {
       "title": "My Quotes",
       "subtitle": "راجع حالة عرض السعر ولقطة الباقة والمبلغ وتاريخ الانتهاء والخطوة التالية.",
-      "safety": "عرض local/staging للقراءة فقط: لا يتم تشغيل دفع إلكتروني أو Stripe أو webhook/n8n أو رسائل خارجية.",
+      "safety": "عرض local/staging للقراءة فقط: لا يتم تشغيل دفع إلكتروني أو webhook/n8n أو رسائل خارجية.",
       "search": "ابحث برقم العرض أو الثيم أو الباقة أو العميل",
       "emptyEyebrow": "لا توجد عروض ظاهرة لهذه الهوية المحلية",
       "emptyTitle": "لا يوجد عرض مطابق في هذا Preview",
@@ -526,7 +526,7 @@
     "myOrders": {
       "title": "My Orders",
       "subtitle": "تابع حالة الطلب وتفاصيل الفعالية والمبلغ والعربون المؤقت والخطوة التالية.",
-      "safety": "pending_deposit حالة عمل فقط. Stripe/payment غير مفعّل في هذا النطاق.",
+      "safety": "pending_deposit حالة عمل فقط. دفع العربون غير مفعّل في هذه المعاينة.",
       "search": "ابحث برقم الطلب أو الموقع أو الثيم أو العرض",
       "emptyEyebrow": "لا توجد طلبات ظاهرة لهذه الهوية المحلية",
       "emptyTitle": "لا يوجد طلب مطابق في هذا Preview",
@@ -606,7 +606,7 @@
       "storage": "يقرأ إعداد المشهد من sessionStorage / localStorage ثم يعود إلى Restaurant A Castle Standard عند عدم وجود بيانات.",
       "visualOnly": "للتخطيط البصري فقط، وليس رسم تنفيذ أو مخططاً معمارياً أو رسماً للمورد.",
       "no3dService": "لا يوجد تحرير بالسحب، ولا خدمة 3D خارجية، ولا تحميل نموذج عن بعد.",
-      "noExternal": "لا يشغل PaymentIntent أو webhook أو n8n أو production deploy أو رسالة خارجية."
+      "noExternal": "لا يشغل دفعاً حقيقياً أو webhook أو n8n أو production deploy أو رسالة خارجية."
     },
     "futureInput": "شكل إدخال 3D المستقبلي"
   },

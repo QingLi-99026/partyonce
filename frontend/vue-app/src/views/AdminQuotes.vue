@@ -20,7 +20,7 @@
       type="warning"
       :closable="false"
       show-icon
-      title="Local/staging skeleton only: no Order API, no Stripe/payment, no webhook/n8n, no email/SMS/WhatsApp."
+      title="Local/staging skeleton only: no Order API, no real payment, no webhook/n8n, no email/SMS/WhatsApp."
     />
 
     <section class="stats-grid">

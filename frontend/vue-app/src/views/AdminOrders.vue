@@ -21,7 +21,7 @@
       type="warning"
       :closable="false"
       show-icon
-      :title="`Local/staging UI skeleton. Data source: ${dataSource}. No Stripe/payment, webhook/n8n, or outbound messages.`"
+      :title="`Local/staging UI skeleton. Data source: ${dataSource}. No real payment, webhook/n8n, or outbound messages.`"
     />
 
     <el-alert

@@ -1,9 +1,9 @@
 <template>
   <main class="status-page">
     <section class="status-card">
-      <p class="eyebrow">Stripe test-mode status</p>
+      <p class="eyebrow">Test-mode payment status</p>
       <h1>Test Payment Failed Placeholder</h1>
-      <p>No live payment was attempted. Use this route to verify customer-facing failure copy before real test-mode PaymentIntent work starts.</p>
+      <p>No live payment was attempted. Use this route to verify customer-facing failure copy before real test-mode payment work starts.</p>
       <el-alert class="status-alert" type="warning" :closable="false" show-icon :title="errorMessage" />
       <div class="actions">
         <el-button type="primary" @click="router.push('/payment/deposit')">Back to Readiness</el-button>

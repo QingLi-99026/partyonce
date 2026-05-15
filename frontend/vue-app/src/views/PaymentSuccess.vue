@@ -1,7 +1,7 @@
 <template>
   <main class="status-page">
     <section class="status-card">
-      <p class="eyebrow">Stripe test-mode status</p>
+      <p class="eyebrow">Test-mode payment status</p>
       <h1>Test Payment Success Placeholder</h1>
       <p>This page is for local/staging readiness only. It does not prove a live charge, send confirmation email, or update production order state.</p>
       <dl>

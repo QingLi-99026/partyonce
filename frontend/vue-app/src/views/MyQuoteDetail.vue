@@ -106,7 +106,7 @@
         </el-table>
         <p class="line-item-note">
           Deposit readiness placeholder: {{ formatCustomerMoney(quoteLineItemSummary.deposit_placeholder, quote.currency) }}.
-          This does not create Stripe payment or mark a deposit as paid.
+          This does not start online payment or mark a deposit as paid.
         </p>
       </section>
 

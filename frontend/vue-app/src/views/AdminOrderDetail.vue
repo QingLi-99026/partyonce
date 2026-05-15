@@ -285,7 +285,7 @@
               Save Order Ops Fields
             </el-button>
             <p class="control-note">
-              Saves only local/staging Order skeleton fields. No Stripe, payment, webhook/n8n, or outbound message is triggered.
+              Saves only local/staging Order skeleton fields. No real payment, webhook/n8n, or outbound message is triggered.
             </p>
           </article>
 
@@ -385,7 +385,7 @@ const orderOpsAlerts = computed(() => {
   if (!order.value) return ['Order detail is still loading.']
   const alerts = []
   if (order.value.status === 'pending_deposit') {
-    alerts.push('pending_deposit is a business status only. Stripe payment is still blocked.')
+    alerts.push('pending_deposit is a business status only. Deposit payment is still disabled in this preview.')
   }
   if (!order.value.event?.date || order.value.event.date === '-') alerts.push('Missing event date.')
   if (!order.value.event?.location || order.value.event.location === '-') alerts.push('Missing event location.')

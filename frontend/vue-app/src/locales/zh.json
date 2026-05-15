@@ -467,7 +467,7 @@
     "receivedItem1": "团队可结合 Restaurant A、主题视觉和供应商建议确认方案。",
     "receivedItem2": "您可以在 My Quotes 查看报价进度。",
     "receivedItem3": "后续订单状态可在 My Orders 查看。",
-    "receivedItem4": "这是 staging preview，不会触发 payment、PaymentIntent、webhook、n8n 或外发消息。",
+    "receivedItem4": "这是 staging preview，不会触发真实支付、webhook、n8n 或外发消息。",
     "localizedPackageCopy": "该套餐为 local/staging 预估展示，最终范围需人工复核。",
     "localizedPackagePoint1": "布置、场地和供应商范围会影响最终预估。",
     "localizedPackagePoint2": "更高档位会增加视觉细节和协调服务。",
@@ -517,7 +517,7 @@
     "myQuotes": {
       "title": "My Quotes",
       "subtitle": "查看派对报价状态、套餐快照、金额、有效期和下一步动作。",
-      "safety": "Local/staging 只读视图：不会触发在线支付、Stripe、webhook/n8n 或外发消息。",
+      "safety": "Local/staging 只读视图：不会触发在线支付、webhook/n8n 或外发消息。",
       "search": "搜索报价号、主题、套餐或客户",
       "emptyEyebrow": "当前本地身份暂无可见报价",
       "emptyTitle": "这个 Preview 暂无匹配报价",
@@ -526,7 +526,7 @@
     "myOrders": {
       "title": "My Orders",
       "subtitle": "跟踪订单状态、活动信息、金额、占位订金和下一步动作。",
-      "safety": "pending_deposit 只是业务状态。本工作包没有启用 Stripe/payment。",
+      "safety": "pending_deposit 只是业务状态。当前预览没有启用订金支付。",
       "search": "搜索订单号、地区、主题或报价",
       "emptyEyebrow": "当前本地身份暂无可见订单",
       "emptyTitle": "这个 Preview 暂无匹配订单",
@@ -606,7 +606,7 @@
       "storage": "读取 sessionStorage / localStorage 中的场景配置；如无数据则回退到 Restaurant A Castle Standard。",
       "visualOnly": "仅用于视觉规划：不是施工图、建筑图或供应商执行图。",
       "no3dService": "不支持拖拽编辑，不调用外部 3D 服务，不远程加载模型。",
-      "noExternal": "不触发 PaymentIntent、webhook、n8n、production deploy 或外发消息。"
+      "noExternal": "不触发真实支付、webhook、n8n、production deploy 或外发消息。"
     },
     "futureInput": "未来 3D 输入结构"
   },

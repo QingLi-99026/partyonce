@@ -81,7 +81,7 @@ const seedOrders = [
     payment_reference: null,
     owner: 'Manager review',
     next_action: 'Prepare deposit instructions after payment stage is approved',
-    internal_note: 'Keep deposit_paid disabled until Stripe/payment stage.',
+    internal_note: 'Keep deposit_paid disabled until the approved payment stage.',
     created_at: '2026-05-11T08:20:00.000Z',
     updated_at: now,
     status_flow: [
@@ -153,8 +153,8 @@ export const orderStatuses = ['draft', 'pending_deposit', 'confirmed', 'in_progr
 
 export const blockedOrderActions = [
   'deposit_paid',
-  'Stripe checkout',
-  'PaymentIntent',
+  'Live checkout',
+  'Online payment capture',
   'webhook/n8n',
   'email/SMS/WhatsApp',
   'supplier dispatch',

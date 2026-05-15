@@ -48,7 +48,7 @@ export const aiConciergeQuestions = [
     id: 'budgetRange',
     label: '预算范围',
     prompt: '你希望先按哪个预算层级规划？',
-    helper: '这里只是规划层级，不会触发付款，也不会创建 PaymentIntent。',
+    helper: '这里只是规划层级，不会触发真实付款。',
     type: 'choice',
     required: true,
     options: [

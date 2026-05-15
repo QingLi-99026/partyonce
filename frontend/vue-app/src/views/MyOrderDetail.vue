@@ -21,7 +21,7 @@
         type="warning"
         :closable="false"
         show-icon
-        title="pending_deposit is a business status placeholder. No Stripe payment, PaymentIntent, webhook, or n8n action is triggered."
+        title="pending_deposit is a business status placeholder. Deposit payment is not enabled in this preview; no webhook or n8n action is triggered."
       />
       <el-alert
         class="scope-alert"
@@ -123,7 +123,7 @@
         <small>{{ order.deposit_note }}</small>
         <div class="blocked-actions">
           <el-button disabled>Pay Deposit · blocked</el-button>
-          <el-button disabled>Open Stripe · disabled</el-button>
+          <el-button disabled>Online payment · disabled</el-button>
         </div>
       </section>
 

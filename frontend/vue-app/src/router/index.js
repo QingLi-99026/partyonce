@@ -110,7 +110,7 @@ const routes = [
     path: '/payment/deposit',
     name: 'PaymentDeposit',
     component: () => import('@/views/PaymentDeposit.vue'),
-    meta: { title: 'Stripe test-mode readiness' }
+    meta: { title: 'Test-mode payment readiness' }
   },
   {
     path: '/payment/success',

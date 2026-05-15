@@ -1,12 +1,12 @@
 <template>
   <main class="status-page">
     <section class="status-card">
-      <p class="eyebrow">Stripe test-mode status</p>
+      <p class="eyebrow">Test-mode payment status</p>
       <h1>Payment Cancelled Placeholder</h1>
       <p>This local/staging page confirms cancellation copy and routing only. It does not contact customers or release/hold inventory.</p>
       <dl>
         <div><dt>Order</dt><dd>{{ orderNumber }}</dd></div>
-        <div><dt>Boundary</dt><dd>No PaymentIntent, webhook, n8n, email, SMS, or WhatsApp was triggered.</dd></div>
+        <div><dt>Boundary</dt><dd>No real payment, webhook, n8n, email, SMS, or WhatsApp was triggered.</dd></div>
       </dl>
       <div class="actions">
         <el-button type="primary" @click="router.push('/payment/deposit')">Back to Readiness</el-button>

@@ -196,7 +196,7 @@ export function summarizeQuoteLineItems(items = []) {
       .filter((item) => item.customer_visible)
       .reduce((sum, item) => sum + toAmount(item.amount), 0),
     deposit_placeholder: Math.round(groups.reduce((sum, group) => sum + group.amount, 0) * 0.2),
-    deposit_note: '20% placeholder only. This does not create PaymentIntent, checkout, Stripe status, or real deposit collection.'
+    deposit_note: '20% placeholder only. Deposit payment is not enabled in this preview, and no real payment will be triggered.'
   };
 }
 

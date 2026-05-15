@@ -40,7 +40,7 @@ const orderStatusText = {
 
 const orderNextStep = {
   draft: '运营正在复核订单草稿和活动信息。',
-  pending_deposit: '订金阶段已准备，但本轮不接入 Stripe；请等待人工确认下一步。',
+  pending_deposit: '订金阶段仍为预览占位；当前不会启用真实在线支付，请等待人工确认下一步。',
   confirmed: '订单已人工确认，PartyOnce 团队会继续推进筹备。',
   in_progress: '活动正在筹备中，请留意顾问更新。',
   completed: '活动已完成，可等待后续回访或评价。',
@@ -255,7 +255,7 @@ const normalizeOrder = (order) => {
     currency: order.currency || 'AUD',
     total_amount: Number(order.total_amount || order.final_total || 0),
     deposit_amount: Number(order.deposit_amount || 0),
-    deposit_note: 'pending_deposit 只是业务状态；本轮没有真实 Stripe 支付。',
+    deposit_note: 'pending_deposit 只是业务状态；当前预览不会启用真实在线支付。',
     next_step: order.next_action || orderNextStep[status] || '请联系 PartyOnce 顾问确认下一步。',
     created_at: order.created_at || null,
     updated_at: order.updated_at || null,
@@ -329,7 +329,7 @@ export const saveQuoteConfirmationPlaceholder = (quoteId) => {
 export const customerInteractionBoundary = {
   contactTitle: 'Need help or changes?',
   contactBody: 'Use the note below to capture requested changes for local/staging review. It does not send email, SMS, WhatsApp, webhook, n8n, or payment actions.',
-  quoteConfirmation: 'This records local customer intent only. It does not accept the quote in production, create an order, or start Stripe payment.'
+  quoteConfirmation: 'This records local customer intent only. It does not accept the quote in production, create an order, or start online payment.'
 }
 
 export const bootstrapLocalCustomerFixture = () => {

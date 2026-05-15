@@ -154,8 +154,8 @@ export function startInvestorGuidedDemo() {
     inquiry_id: inquiry.demoSeedId,
     guardrails: [
       'No production deploy',
-      'No Stripe live mode',
-      'No PaymentIntent',
+      'No live payment mode',
+      'No real payment capture',
       'No webhook/n8n',
       'No outbound email/SMS/WhatsApp'
     ]

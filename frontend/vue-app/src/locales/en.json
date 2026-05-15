@@ -467,7 +467,7 @@
     "receivedItem1": "The team can confirm the plan using Restaurant A, theme visuals, and supplier suggestions.",
     "receivedItem2": "You can view quote progress in My Quotes.",
     "receivedItem3": "You can view later order status in My Orders.",
-    "receivedItem4": "This is a staging preview and does not trigger payment, PaymentIntent, webhook, n8n, or outbound messages.",
+    "receivedItem4": "This is a staging preview and does not trigger real payment, webhook, n8n, or outbound messages.",
     "localizedPackageCopy": "This package is shown as a local/staging estimate. Final scope requires human review.",
     "localizedPackagePoint1": "Decor, venue, and supplier scope affect the final estimate.",
     "localizedPackagePoint2": "Higher tiers add stronger visual detail and coordination.",
@@ -517,7 +517,7 @@
     "myQuotes": {
       "title": "My Quotes",
       "subtitle": "View your party quote status, package snapshot, amount, expiry, and next action.",
-      "safety": "Local/staging read-only view: no online payment, Stripe, webhook/n8n, or outbound message is triggered.",
+      "safety": "Local/staging read-only view: no online payment, webhook/n8n, or outbound message is triggered.",
       "search": "Search quote number, theme, package, or customer",
       "emptyEyebrow": "No quote visible for this local identity",
       "emptyTitle": "No matching quote is available in this Preview",
@@ -526,7 +526,7 @@
     "myOrders": {
       "title": "My Orders",
       "subtitle": "Track your order status, event details, amount, placeholder deposit, and next action.",
-      "safety": "pending_deposit is a business status only. Stripe/payment is not enabled in this workpack.",
+      "safety": "pending_deposit is a business status only. Deposit payment is not enabled in this preview.",
       "search": "Search order number, location, theme, or quote",
       "emptyEyebrow": "No order visible for this local identity",
       "emptyTitle": "No matching order is available in this Preview",
@@ -606,7 +606,7 @@
       "storage": "Reads scene config from sessionStorage / localStorage, then falls back to Restaurant A Castle Standard.",
       "visualOnly": "Visual planning only: no construction drawing, no architecture plan, no supplier execution drawing.",
       "no3dService": "No drag editing, no external 3D service, no remote model loading.",
-      "noExternal": "No PaymentIntent, webhook, n8n, production deploy, or outbound message."
+      "noExternal": "No real payment, webhook, n8n, production deploy, or outbound message."
     },
     "futureInput": "Future 3D input shape"
   },

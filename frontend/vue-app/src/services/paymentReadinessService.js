@@ -17,7 +17,7 @@ export const getPaymentReadiness = () => {
   if (!testModeEnabled) blockers.push('VITE_STRIPE_TEST_MODE is not enabled for local/staging.')
   if (!publishableKey) blockers.push('VITE_STRIPE_PUBLISHABLE_KEY is missing.')
   if (hasLivePublishableKey) blockers.push('Live publishable key detected; payment readiness blocks live mode.')
-  if (publishableKey && !hasTestPublishableKey) blockers.push('Publishable key is not a Stripe test key.')
+  if (publishableKey && !hasTestPublishableKey) blockers.push('Publishable key is not a test-mode payment key.')
 
   return {
     mode: testModeEnabled ? 'test-mode' : 'blocked',
@@ -27,7 +27,7 @@ export const getPaymentReadiness = () => {
     hasLivePublishableKey,
     publishableKeyMasked: maskKey(publishableKey),
     blockers,
-    boundary: 'Readiness only: no PaymentIntent, checkout session, webhook, n8n, outbound message, or production payment is triggered.'
+    boundary: 'Payment readiness check only: deposit payment is not enabled in this preview, and no real payment, webhook, n8n, outbound message, or production payment is triggered.'
   }
 }
 

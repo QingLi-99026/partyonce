@@ -26,7 +26,7 @@
       type="warning"
       :closable="false"
       show-icon
-      title="演示边界：本页只写入浏览器 fixture 和 localStorage 示例数据；不会连接生产 DB、不会创建 PaymentIntent、不会触发真实通知。"
+      title="演示边界：本页只写入浏览器 fixture 和 localStorage 示例数据；不会连接生产 DB、不会启动真实支付、不会触发真实通知。"
     />
 
     <section class="demo-progress">
@@ -145,7 +145,7 @@
             <li>生产数据库迁移和备份策略</li>
             <li>真实 customer/admin auth</li>
             <li>真实 supplier 数据审核与权限</li>
-            <li>Stripe test mode 完整闭环后再 production approval</li>
+            <li>测试支付完整闭环后再 production approval</li>
             <li>Webhook / n8n / 通知从 dry-run 升级为受控真实链路</li>
           </ul>
         </article>
@@ -184,7 +184,7 @@ const demoSteps = [
     short: 'AI 推荐',
     title: 'AI 帮我推荐：把模糊需求变成方案',
     description: 'AI Concierge 一步问一个问题，采集年龄、日期、人数、预算、区域、主题偏好、场地状态和联系方式。',
-    points: ['规则式推荐，不接付费 TTS', '推荐主题 / 套餐 / Restaurant A', '不创建 Quote / Order / PaymentIntent'],
+    points: ['规则式推荐，不接付费 TTS', '推荐主题 / 套餐 / Restaurant A', '不创建 Quote / Order / 真实支付'],
     image: '/party-assets/venues/restaurant-a/restaurant-a-space-standard.png',
     previewTitle: 'Space Explorer Standard',
     previewNote: '推荐结果会进入 quote prefill。',
@@ -209,7 +209,7 @@ const demoSteps = [
     short: '客户侧',
     title: '客户侧 Quote / Order',
     description: '客户可以查看自己的报价和订单进度，理解当前状态和下一步。',
-    points: ['My Quotes 显示 Restaurant A 和供应商上下文', 'My Orders 显示业务状态', 'pending_deposit 不是 Stripe 状态'],
+    points: ['My Quotes 显示 Restaurant A 和供应商上下文', 'My Orders 显示业务状态', 'pending_deposit 不是在线付款状态'],
     image: '/party-assets/venues/restaurant-a/restaurant-a-castle-premium.png',
     previewTitle: 'Customer workspace',
     previewNote: '客户侧是 read-only staging fixture。',
@@ -238,7 +238,7 @@ const demoSteps = [
     short: '供应商/支付',
     title: '供应商与支付 readiness',
     description: '供应商页面展示场地/供应商数据库方向；Payment readiness 只证明边界和下一阶段准备，不做真实支付。',
-    points: ['供应商是 local/staging seed', 'Payment readiness 不创建 PaymentIntent', 'Notification dry-run 不外发'],
+    points: ['供应商是 local/staging seed', 'Payment readiness 不启动真实支付', 'Notification dry-run 不外发'],
     image: '/party-assets/packages/package-tier-matrix.png',
     previewTitle: 'Readiness checks',
     previewNote: '这一步用于说明当前 staging 和上线前差距。',

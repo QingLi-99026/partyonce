@@ -666,7 +666,7 @@ const localizedStepCopy = {
   budgetRange: {
     label: 'Budget range',
     prompt: 'Which package level should we plan around first?',
-    helper: 'This is only a planning level. It does not trigger payment or PaymentIntent.',
+    helper: 'This is only a planning level. It does not trigger real payment.',
     options: { basic: 'Basic · controlled budget', standard: 'Standard · complete experience', premium: 'Premium · immersive setup' }
   },
   area: {
@@ -721,7 +721,7 @@ const localizedStepCopy = {
     childAge: { label: '아이 나이', prompt: '생일 주인공은 몇 살인가요?', helper: '나이에 맞는 테마 분위기와 장식 강도를 고릅니다.', options: { '3-5': '3-5세', '6-8': '6-8세', '9-10': '9-10세' } },
     eventDate: { label: '행사 날짜', prompt: '어느 날짜를 생각하고 있나요?', helper: '대략적인 날짜도 괜찮습니다. 담당자가 나중에 확인할 수 있습니다.' },
     guestCount: { label: '예상 인원', prompt: '아이와 보호자를 포함해 몇 명 정도 참석하나요?', helper: '인원은 Restaurant A와 테이블 배치가 맞는지 판단하는 데 필요합니다.', options: { '10-15': '10-15명', '16-25': '16-25명', '26-40': '26-40명' } },
-    budgetRange: { label: '예산 범위', prompt: '어떤 패키지 단계로 먼저 기획할까요?', helper: '기획용 단계일 뿐 결제나 PaymentIntent를 만들지 않습니다.', options: { basic: 'Basic · 예산 중심', standard: 'Standard · 완성형 경험', premium: 'Premium · 몰입형 구성' } },
+    budgetRange: { label: '예산 범위', prompt: '어떤 패키지 단계로 먼저 기획할까요?', helper: '기획용 단계일 뿐 실제 결제를 시작하지 않습니다.', options: { basic: 'Basic · 예산 중심', standard: 'Standard · 완성형 경험', premium: 'Premium · 몰입형 구성' } },
     area: { label: '지역', prompt: '어느 지역에서 파티를 진행하고 싶나요?', helper: '장소와 공급사 서비스 범위를 맞추는 데 사용합니다.' },
     indoorOutdoor: { label: '실내 / 야외', prompt: '실내와 야외 중 어느 쪽을 선호하나요?', helper: '실내는 안정적이고 야외는 숲/자연 테마에 잘 맞습니다.', options: { indoor: '실내 우선', outdoor: '야외 / 정원', flexible: '상관없음, 추천받기' } },
     themePreference: { label: '테마 선호', prompt: '아이가 어떤 테마에 가장 끌릴까요?', helper: '확실하지 않으면 추천을 선택하세요.', options: { castle: '공주 / 성 / 동화', space: '로켓 / 우주 / 과학', forest: '동물 / 숲 / 자연', open: '아직 모름, 추천받기' } },
@@ -735,7 +735,7 @@ const localizedStepCopy = {
     childAge: { label: 'عمر الطفل', prompt: 'كم عمر صاحب الحفل؟', helper: 'نستخدم العمر لاختيار أجواء الثيم ومستوى الديكور.', options: { '3-5': '3-5 سنوات', '6-8': '6-8 سنوات', '9-10': '9-10 سنوات' } },
     eventDate: { label: 'تاريخ الحفل', prompt: 'ما التاريخ الذي تفكر فيه؟', helper: 'تاريخ تقريبي يكفي الآن، ويمكن للمنسق تأكيده لاحقاً.' },
     guestCount: { label: 'عدد الضيوف', prompt: 'كم عدد الأطفال والبالغين المتوقع حضورهم؟', helper: 'يساعد العدد في تقدير ملاءمة Restaurant A وتخطيط الطاولات.', options: { '10-15': '10-15 ضيفاً', '16-25': '16-25 ضيفاً', '26-40': '26-40 ضيفاً' } },
-    budgetRange: { label: 'نطاق الميزانية', prompt: 'أي مستوى باقة نخطط حوله أولاً؟', helper: 'هذا مستوى تخطيط فقط ولا ينشئ دفعاً أو PaymentIntent.', options: { basic: 'Basic · ميزانية مضبوطة', standard: 'Standard · تجربة كاملة', premium: 'Premium · إعداد غامر' } },
+    budgetRange: { label: 'نطاق الميزانية', prompt: 'أي مستوى باقة نخطط حوله أولاً؟', helper: 'هذا مستوى تخطيط فقط ولا يبدأ دفعاً حقيقياً.', options: { basic: 'Basic · ميزانية مضبوطة', standard: 'Standard · تجربة كاملة', premium: 'Premium · إعداد غامر' } },
     area: { label: 'المنطقة', prompt: 'في أي منطقة تريد إقامة الحفل؟', helper: 'يساعد ذلك في مطابقة القاعة ونطاق خدمة الموردين.' },
     indoorOutdoor: { label: 'داخلي / خارجي', prompt: 'هل تفضل مكاناً داخلياً أم خارجياً؟', helper: 'الداخلي أكثر استقراراً، والخارجي مناسب لثيمات الغابة والطبيعة.', options: { indoor: 'أفضل مكان داخلي', outdoor: 'خارجي / حديقة', flexible: 'مرن، دع AI يقترح' } },
     themePreference: { label: 'تفضيل الثيم', prompt: 'أي ثيم قد يجذب الطفل أكثر؟', helper: 'إذا لم تكن متأكداً، اختر توصية مفتوحة.', options: { castle: 'أميرة / قصر / حكاية', space: 'صاروخ / فضاء / علوم', forest: 'حيوانات / غابة / طبيعة', open: 'غير متأكد، اقترح لي' } },

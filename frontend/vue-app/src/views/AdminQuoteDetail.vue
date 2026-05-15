@@ -20,7 +20,7 @@
       type="warning"
       :closable="false"
       show-icon
-      title="Local/staging skeleton only: draft Order creation is allowed only for accepted Quotes; Stripe/payment, webhook/n8n, and outbound messages remain blocked."
+      title="Local/staging skeleton only: draft Order creation is allowed only for accepted Quotes; real payment, webhook/n8n, and outbound messages remain blocked."
     />
 
     <el-alert
