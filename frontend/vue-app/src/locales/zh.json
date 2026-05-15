@@ -63,6 +63,15 @@
       "castle": "进入梦幻城堡",
       "forest": "进入森林秘境"
     },
+    "themeListen": {
+      "kicker": "AI 主题引导",
+      "castle": "梦幻城堡适合喜欢公主、王子和童话氛围的孩子。你想让我基于这个主题帮你继续策划吗？",
+      "space": "星际探险适合喜欢火箭、宇宙和探索任务的孩子。你想让我基于这个主题帮你继续策划吗？",
+      "forest": "森林秘境适合喜欢动物、自然和温暖探索感的孩子。你想让我基于这个主题帮你继续策划吗？",
+      "continue": "继续用这个主题策划",
+      "switchTheme": "换一个主题看看",
+      "aiRecommend": "让 AI 推荐最合适主题"
+    },
     "assetKicker": "投资人预览素材",
     "assetTitle": "视觉展示素材已恢复",
     "assetCopy": "Castle Princess / Space Explorer / Forest Adventure 主题效果、餐厅布局、套餐矩阵和 App mockup 均可从这里打开。",
@@ -270,6 +279,9 @@
       "upgradeTitle": "升级价值",
       "upgradeGeneric1": "更高档位会增加更强的视觉细节。",
       "upgradeGeneric2": "策划支持和供应商协调会更完整。"
+    },
+    "prefill": {
+      "themeLocked": "我已经先记下这个主题。"
     },
     "interaction": {
       "eyebrow": "互动式 AI 派对顾问",

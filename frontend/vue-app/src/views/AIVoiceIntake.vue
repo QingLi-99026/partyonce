@@ -300,8 +300,8 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
   intakeSteps,
@@ -320,6 +320,7 @@ import {
 import { getVisualContext } from '@/data/visualAssets';
 
 const router = useRouter();
+const route = useRoute();
 const { t, locale } = useI18n();
 const activeIndex = ref(0);
 const answers = reactive({});
@@ -342,6 +343,15 @@ const quickDemoAnswers = {
   stylingPreference: 'balanced',
   customerName: 'Quick Demo Parent',
   customerContact: 'quick-demo@example.test'
+};
+
+const queryThemeMap = {
+  castle: 'castle',
+  'castle-princess': 'castle',
+  space: 'space',
+  'space-explorer': 'space',
+  forest: 'forest',
+  'forest-adventure': 'forest'
 };
 
 const answeredCount = computed(() => intakeSteps.filter((step) => hasAnswer(step.id)).length);
@@ -693,6 +703,14 @@ function resetFlow() {
   recommendation.value = null;
 }
 
+function applyThemeQuery() {
+  const queryTheme = queryThemeMap[String(route.query.theme || '').toLowerCase()];
+  if (!queryTheme) return;
+  answers.themePreference = queryTheme;
+  activeIndex.value = intakeSteps.findIndex((step) => step.id === 'childAge');
+  speak(`${t('ai.prefill.themeLocked')} ${displayThemeName(queryTheme)}. ${activePrompt.value}`);
+}
+
 function applyQuickDemoAnswers() {
   Object.keys(answers).forEach((key) => delete answers[key]);
   Object.entries(quickDemoAnswers).forEach(([key, value]) => {
@@ -738,6 +756,10 @@ function goThemes() {
 
 watch(activeIndex, () => {
   draftAnswer.value = answers[activeStep.value?.id] || '';
+});
+
+onMounted(() => {
+  applyThemeQuery();
 });
 </script>
 

@@ -63,6 +63,15 @@
       "castle": "캐슬 입장",
       "forest": "숲 탐험"
     },
+    "themeListen": {
+      "kicker": "AI 테마 안내",
+      "castle": "Castle Princess는 공주, 왕자, 동화 분위기를 좋아하는 아이에게 잘 맞습니다. 이 테마로 계속 기획할까요?",
+      "space": "Space Explorer는 로켓, 우주, 탐험 미션을 좋아하는 아이에게 잘 맞습니다. 이 테마로 계속 기획할까요?",
+      "forest": "Forest Adventure는 동물, 자연, 따뜻한 탐험 분위기를 좋아하는 아이에게 잘 맞습니다. 이 테마로 계속 기획할까요?",
+      "continue": "이 테마로 계속 기획",
+      "switchTheme": "다른 테마 보기",
+      "aiRecommend": "AI가 가장 맞는 테마 추천"
+    },
     "assetKicker": "투자자 미리보기 에셋",
     "assetTitle": "비주얼 쇼케이스 에셋 복원 완료",
     "assetCopy": "Castle Princess, Space Explorer, Forest Adventure, 다이닝 레이아웃, 패키지 매트릭스, 앱 목업을 여기서 확인할 수 있습니다.",
@@ -270,6 +279,9 @@
       "upgradeTitle": "업그레이드 가치",
       "upgradeGeneric1": "상위 등급은 더 강한 비주얼 디테일을 추가합니다.",
       "upgradeGeneric2": "플래너 지원과 공급업체 조율이 더 완성됩니다."
+    },
+    "prefill": {
+      "themeLocked": "이 테마를 먼저 저장했습니다."
     },
     "interaction": {
       "eyebrow": "대화형 AI 파티 상담사",

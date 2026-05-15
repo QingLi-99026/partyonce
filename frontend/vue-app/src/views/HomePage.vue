@@ -49,7 +49,25 @@
       @explore-themes="scrollToThemes"
       @play-voice="handlePlayVoice"
     />
-    <section v-else class="english-theme-hero">
+    <section v-if="isChineseLocale && voiceGuidanceTheme" class="theme-listen-followup">
+      <div class="theme-listen-card">
+        <span class="asset-kicker">{{ $t('home.themeListen.kicker') }}</span>
+        <h2>{{ $t(`themes.${voiceGuidanceTheme}.name`) }}</h2>
+        <p>{{ $t(`home.themeListen.${voiceGuidanceTheme}`) }}</p>
+        <div class="theme-listen-actions">
+          <button class="localized-card-button" @click="continueWithVoiceTheme">
+            {{ $t('home.themeListen.continue') }}
+          </button>
+          <button class="localized-card-button" @click="scrollToThemes">
+            {{ $t('home.themeListen.switchTheme') }}
+          </button>
+          <button class="localized-card-button" @click="goTo('/ai-voice-intake')">
+            {{ $t('home.themeListen.aiRecommend') }}
+          </button>
+        </div>
+      </div>
+    </section>
+    <section v-if="!isChineseLocale" class="english-theme-hero">
       <div class="section-container english-theme-hero-grid">
         <div>
           <span class="asset-kicker">{{ $t('home.englishThemeHeroKicker') }}</span>
@@ -339,7 +357,8 @@ export default {
       investorHero: {
         image: '/party-assets/investor-hero/immersive-homepage-hero.png',
         alt: 'Party Event immersive visual homepage hero'
-      }
+      },
+      voiceGuidanceTheme: null
     };
   },
   
@@ -694,8 +713,17 @@ export default {
       document.getElementById('themes').scrollIntoView({ behavior: 'smooth' });
     },
     
-    handlePlayVoice(text) {
-      console.log('Playing voice:', text);
+    handlePlayVoice() {
+      this.voiceGuidanceTheme = this.currentTheme || 'castle';
+    },
+
+    continueWithVoiceTheme() {
+      const slugs = {
+        castle: 'castle-princess',
+        space: 'space-explorer',
+        forest: 'forest-adventure'
+      };
+      this.$router.push(`/ai-voice-intake?theme=${slugs[this.voiceGuidanceTheme] || 'castle-princess'}`);
     },
     
     handleFinalCTA() {
@@ -916,6 +944,43 @@ export default {
 .english-theme-hero-actions {
   display: grid;
   gap: 12px;
+}
+
+.theme-listen-followup {
+  padding: 0 24px 56px;
+  background: #fff8f0;
+}
+
+.theme-listen-card {
+  max-width: 980px;
+  margin: -28px auto 0;
+  padding: 28px;
+  border: 1px solid rgba(181, 69, 126, 0.18);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(89, 39, 69, 0.14);
+  position: relative;
+  z-index: 3;
+}
+
+.theme-listen-card h2 {
+  margin: 8px 0 10px;
+  color: #2b1d27;
+  font-size: clamp(1.55rem, 3vw, 2.2rem);
+}
+
+.theme-listen-card p {
+  max-width: 720px;
+  margin: 0;
+  color: #5b4653;
+  line-height: 1.7;
+}
+
+.theme-listen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 /* 主题介绍区 */

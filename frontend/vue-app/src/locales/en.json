@@ -63,6 +63,15 @@
       "castle": "Enter the castle",
       "forest": "Explore the forest"
     },
+    "themeListen": {
+      "kicker": "AI theme guidance",
+      "castle": "Castle Princess fits children who like princess, prince, and fairytale moods. Would you like me to keep planning with this theme?",
+      "space": "Space Explorer fits children who like rockets, stars, and discovery missions. Would you like me to keep planning with this theme?",
+      "forest": "Forest Adventure fits children who like animals, nature, and warm discovery moments. Would you like me to keep planning with this theme?",
+      "continue": "Continue with this theme",
+      "switchTheme": "Try another theme",
+      "aiRecommend": "Let AI recommend the best theme"
+    },
     "assetKicker": "Investor preview assets",
     "assetTitle": "Visual showcase assets restored",
     "assetCopy": "Castle Princess, Space Explorer, Forest Adventure, dining layouts, package matrix, and app mockups are available here.",
@@ -270,6 +279,9 @@
       "upgradeTitle": "Upgrade value",
       "upgradeGeneric1": "Higher tiers add stronger visual detail.",
       "upgradeGeneric2": "Planner support and supplier coordination become more complete."
+    },
+    "prefill": {
+      "themeLocked": "I have saved this theme first."
     },
     "interaction": {
       "eyebrow": "Interactive AI party advisor",
