@@ -13,7 +13,7 @@
       <p class="page-subtitle">{{ $t('quotePage.subtitle') }}</p>
     </header>
 
-    <section v-if="aiPrefillNotice" class="ai-prefill-notice">
+    <section v-if="aiExperienceEnabled && aiPrefillNotice" class="ai-prefill-notice">
       <div class="section-container">
         <div class="ai-prefill-card" :style="cardStyle">
           <span class="ai-prefill-kicker">AI Concierge prefill</span>
@@ -355,6 +355,7 @@ import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExpl
 import { buildQuoteLineItemsFromSelection, summarizeQuoteLineItems } from '@/data/quoteLineItems';
 import { readQuotePrefill } from '@/services/aiVoiceIntakeService';
 import { writePartySceneConfig } from '@/services/partyScenePreviewService';
+import { featureFlags } from '@/config/featureFlags';
 
 export default {
   name: 'QuotePageSimple',
@@ -386,6 +387,10 @@ export default {
   },
   
   computed: {
+    aiExperienceEnabled() {
+      return featureFlags.aiExperienceEnabled;
+    },
+
     themeConfig() {
       return getTheme(this.themeId);
     },
@@ -503,7 +508,7 @@ export default {
     },
 
     quoteFlowSummary() {
-      const source = this.aiPrefill ? this.$t('quotePage.aiPrepared') : this.$t('quotePage.currentPlan');
+      const source = this.aiPrefill && this.aiExperienceEnabled ? this.$t('quotePage.aiPrepared') : this.$t('quotePage.currentPlan');
       return {
         title: `${source}: ${this.themeConfig.name} · ${this.packageData.name} · ${this.visualContext.primaryVenue.name}`,
         body: this.$t('quotePage.flowBody')

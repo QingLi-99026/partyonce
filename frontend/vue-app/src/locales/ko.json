@@ -509,7 +509,7 @@
     "allStatuses": "전체 상태",
     "whyFits": "나에게 맞는 이유",
     "priceDrivers": "가격 주요 요소",
-    "sceneConfig": "AI 장면 설정",
+    "sceneConfig": "장면 설정",
     "quoteExplanation": "견적 설명",
     "upgradeValue": "업그레이드 가치",
     "startAi": "AI Concierge로 시작",
@@ -602,7 +602,7 @@
     "boundary": "읽기 전용 범위",
     "sandboxOnly": "Sandbox 전용",
     "boundaryItems": {
-      "storage": "sessionStorage / localStorage / AI prefill을 읽고, 없으면 Restaurant A Castle Standard로 돌아갑니다.",
+      "storage": "sessionStorage / localStorage의 장면 설정을 읽고, 없으면 Restaurant A Castle Standard로 돌아갑니다.",
       "visualOnly": "시각 기획 전용이며 시공도, 건축 도면, 공급사 실행 도면이 아닙니다.",
       "no3dService": "드래그 편집, 외부 3D 서비스, 원격 모델 로딩은 없습니다.",
       "noExternal": "PaymentIntent, webhook, n8n, production deploy 또는 외부 메시지를 실행하지 않습니다."

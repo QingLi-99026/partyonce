@@ -15,10 +15,10 @@
       >
         <el-menu-item index="/"><el-icon><HomeFilled /></el-icon>{{ t('nav.home') }}</el-menu-item>
         <el-menu-item index="/venues"><el-icon><OfficeBuilding /></el-icon>{{ t('nav.venues') }}</el-menu-item>
-        <el-menu-item index="/ai-voice-intake"><el-icon><MagicStick /></el-icon>{{ t('nav.aiGuide') }}</el-menu-item>
-        <el-menu-item index="/experimental/party-3d"><el-icon><View /></el-icon>{{ t('nav.party3d') }}</el-menu-item>
-        <el-menu-item index="/ai-planner"><el-icon><MagicStick /></el-icon>{{ t('nav.aiPlanner') }}</el-menu-item>
-        <el-menu-item index="/3d-designer"><el-icon><View /></el-icon>{{ t('nav.designer3d') }}</el-menu-item>
+        <el-menu-item v-if="featureFlags.aiExperienceEnabled" index="/ai-voice-intake"><el-icon><MagicStick /></el-icon>{{ t('nav.aiGuide') }}</el-menu-item>
+        <el-menu-item v-if="featureFlags.threeDExperienceEnabled" index="/experimental/party-3d"><el-icon><View /></el-icon>{{ t('nav.party3d') }}</el-menu-item>
+        <el-menu-item v-if="featureFlags.aiExperienceEnabled" index="/ai-planner"><el-icon><MagicStick /></el-icon>{{ t('nav.aiPlanner') }}</el-menu-item>
+        <el-menu-item v-if="featureFlags.threeDExperienceEnabled" index="/3d-designer"><el-icon><View /></el-icon>{{ t('nav.designer3d') }}</el-menu-item>
         <el-menu-item index="/quotation"><el-icon><Document /></el-icon>{{ t('nav.quote') }}</el-menu-item>
         <el-menu-item index="/suppliers">{{ t('nav.suppliers') }}</el-menu-item>
         <el-menu-item index="/partner/apply">{{ t('nav.partnerApply') }}</el-menu-item>
@@ -74,6 +74,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import { featureFlags } from '@/config/featureFlags'
 import { bootstrapLocalCustomerFixture } from '@/services/customerExperienceService'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {

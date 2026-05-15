@@ -232,6 +232,14 @@ const fetchVenues = async () => {
 
 // 模拟数据
 const getMockVenues = () => {
+  const localVenueImages = [
+    '/party-assets/venues/restaurant-a/restaurant-a-original.png',
+    '/party-assets/venues/restaurant-a/restaurant-a-castle-standard.png',
+    '/party-assets/venues/restaurant-a/restaurant-a-space-standard.png',
+    '/party-assets/venues/restaurant-a/restaurant-a-forest-standard.png',
+    '/party-assets/venues/restaurant-a/restaurant-a-castle-premium.png',
+    '/party-assets/venues/restaurant-a/restaurant-a-space-premium.png'
+  ]
   const visualVenues = venueDisplaySeeds.map((venue, index) => ({
     id: venue.id,
     name: venue.name,
@@ -251,12 +259,12 @@ const getMockVenues = () => {
   }))
   return [
     ...visualVenues,
-    { id: 1, name: '云端宴会厅', address: '123 市中心大道', city: '悉尼', venue_type: '酒店宴会厅', capacity: 200, regular_price: 2500, is_partner: true, discount_rate: 0.15, description: '豪华宴会厅，配备顶级音响灯光系统', images: ['https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400'], rating: 4.8 },
-    { id: 2, name: '海景花园会所', address: '456 海滨路', city: '墨尔本', venue_type: '私人会所', capacity: 150, regular_price: 1800, is_partner: false, description: '私家花园，尽享海景', images: ['https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400'], rating: 4.6 },
-    { id: 3, name: '星空露台', address: '789 高楼路', city: '布里斯班', venue_type: '屋顶露台', capacity: 80, regular_price: 1200, is_partner: true, discount_rate: 0.10, description: '城市夜景尽收眼底', images: ['https://images.unsplash.com/photo-1510076857177-7470076d4098?w=400'], rating: 4.5 },
-    { id: 4, name: '艺术中心', address: '321 文化街', city: '悉尼', venue_type: '艺术空间', capacity: 300, regular_price: 3500, is_partner: false, description: '工业风格艺术空间', images: ['https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400'], rating: 4.7 },
-    { id: 5, name: '绿茵庄园', address: '654 郊区大道', city: '墨尔本', venue_type: '户外花园', capacity: 250, regular_price: 2200, is_partner: true, discount_rate: 0.20, description: '占地5000平的私人庄园', images: ['https://images.unsplash.com/photo-1478146059778-26028b07395a?w=400'], rating: 4.9 },
-    { id: 6, name: '都市酒廊', address: '987 商业街', city: '悉尼', venue_type: '餐厅包场', capacity: 100, regular_price: 1500, is_partner: false, description: '时尚现代的私人酒廊', images: ['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'], rating: 4.4 }
+    { id: 1, name: '云端宴会厅', address: '123 市中心大道', city: '悉尼', venue_type: '酒店宴会厅', capacity: 200, regular_price: 2500, is_partner: true, discount_rate: 0.15, description: '豪华宴会厅，配备顶级音响灯光系统', images: [localVenueImages[0]], rating: 4.8 },
+    { id: 2, name: '海景花园会所', address: '456 海滨路', city: '墨尔本', venue_type: '私人会所', capacity: 150, regular_price: 1800, is_partner: false, description: '私家花园，尽享海景', images: [localVenueImages[1]], rating: 4.6 },
+    { id: 3, name: '星空露台', address: '789 高楼路', city: '布里斯班', venue_type: '屋顶露台', capacity: 80, regular_price: 1200, is_partner: true, discount_rate: 0.10, description: '城市夜景尽收眼底', images: [localVenueImages[2]], rating: 4.5 },
+    { id: 4, name: '艺术中心', address: '321 文化街', city: '悉尼', venue_type: '艺术空间', capacity: 300, regular_price: 3500, is_partner: false, description: '工业风格艺术空间', images: [localVenueImages[3]], rating: 4.7 },
+    { id: 5, name: '绿茵庄园', address: '654 郊区大道', city: '墨尔本', venue_type: '户外花园', capacity: 250, regular_price: 2200, is_partner: true, discount_rate: 0.20, description: '占地5000平的私人庄园', images: [localVenueImages[4]], rating: 4.9 },
+    { id: 6, name: '都市酒廊', address: '987 商业街', city: '悉尼', venue_type: '餐厅包场', capacity: 100, regular_price: 1500, is_partner: false, description: '时尚现代的私人酒廊', images: [localVenueImages[5]], rating: 4.4 }
   ]
 }
 

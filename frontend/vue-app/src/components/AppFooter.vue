@@ -16,8 +16,8 @@
           <div class="link-group">
             <h4>{{ t('footer.services') }}</h4>
             <a href="/venues">{{ t('footer.venueBooking') }}</a>
-            <a href="/ai-planner">{{ t('footer.aiPlanning') }}</a>
-            <a href="/3d-designer">{{ t('footer.design3d') }}</a>
+            <a v-if="featureFlags.aiExperienceEnabled" href="/ai-planner">{{ t('footer.aiPlanning') }}</a>
+            <a v-if="featureFlags.threeDExperienceEnabled" href="/3d-designer">{{ t('footer.design3d') }}</a>
             <a href="/quotation">{{ t('footer.onlineQuote') }}</a>
           </div>
           
@@ -48,6 +48,7 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { featureFlags } from '@/config/featureFlags'
 
 const { t } = useI18n()
 </script>

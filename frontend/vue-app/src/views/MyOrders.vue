@@ -113,7 +113,7 @@
       <div class="empty-actions">
         <el-button type="primary" @click="router.push('/my/quotes')">{{ t('nav.myQuotes') }}</el-button>
         <el-button @click="router.push('/investor-demo')">{{ t('nav.investorDemo') }}</el-button>
-        <el-button @click="router.push('/ai-voice-intake')">{{ t('customerPages.startAi') }}</el-button>
+        <el-button @click="router.push('/quote')">{{ t('quote.entry') }}</el-button>
       </div>
     </section>
   </main>

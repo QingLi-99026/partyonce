@@ -509,7 +509,7 @@
     "allStatuses": "كل الحالات",
     "whyFits": "لماذا يناسبك",
     "priceDrivers": "السعر يعتمد أساساً على",
-    "sceneConfig": "إعداد مشهد AI",
+    "sceneConfig": "إعداد المشهد",
     "quoteExplanation": "شرح عرض السعر",
     "upgradeValue": "قيمة الترقية",
     "startAi": "ابدأ مع AI Concierge",
@@ -602,7 +602,7 @@
     "boundary": "حدود القراءة فقط",
     "sandboxOnly": "Sandbox فقط",
     "boundaryItems": {
-      "storage": "يقرأ sessionStorage / localStorage / AI prefill ثم يعود إلى Restaurant A Castle Standard عند عدم وجود بيانات.",
+      "storage": "يقرأ إعداد المشهد من sessionStorage / localStorage ثم يعود إلى Restaurant A Castle Standard عند عدم وجود بيانات.",
       "visualOnly": "للتخطيط البصري فقط، وليس رسم تنفيذ أو مخططاً معمارياً أو رسماً للمورد.",
       "no3dService": "لا يوجد تحرير بالسحب، ولا خدمة 3D خارجية، ولا تحميل نموذج عن بعد.",
       "noExternal": "لا يشغل PaymentIntent أو webhook أو n8n أو production deploy أو رسالة خارجية."

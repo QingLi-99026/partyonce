@@ -93,7 +93,7 @@ export const visualAssets = [
     image_path: '/party-assets/investor-hero/immersive-homepage-hero.png',
     preview_url: '/',
     title: 'Investor homepage hero',
-    description: 'Dreamy family-party hero with AI planning cue and clear customer CTA.'
+    description: 'Dreamy family-party hero with theme, venue, package, and quote CTA.'
   },
   {
     id: 'quote-entry-preview',
@@ -201,14 +201,14 @@ export const venueDisplaySeeds = [
     layoutImage: RESTAURANT_A_IMAGES.original,
     renderings: RESTAURANT_A_IMAGES,
     location: 'North Sydney demo district',
-    aiRecommendationRole: 'Primary AI Concierge sample venue',
+    aiRecommendationRole: 'Primary planning sample venue',
     priceRange: '$800-$1,600 room hire',
     price_range: '$800-$1,600 room hire',
     contact: 'Local/staging demo contact',
     notes: '投资人样板场地，用于展示原貌到主题装饰渲染。',
     note: '投资人样板场地，用于展示原貌到主题装饰渲染。',
     operationsNotes: [
-      'Use as the default AI Concierge venue when the customer needs a restaurant sample.',
+      'Use as the default planning venue when the customer needs a restaurant sample.',
       'Confirm availability before moving from staging quote to real production quote.',
       'Rendering variants lock the same table, chair, window, entrance, and movement layout.'
     ]

@@ -116,7 +116,7 @@
         <p>{{ t('customerPages.myQuotes.emptyCopy') }}</p>
       </div>
       <div class="empty-actions">
-        <el-button type="primary" @click="router.push('/ai-voice-intake')">{{ t('customerPages.startAi') }}</el-button>
+        <el-button type="primary" @click="router.push('/quote')">{{ t('quote.entry') }}</el-button>
         <el-button @click="router.push('/investor-demo')">{{ t('nav.investorDemo') }}</el-button>
         <el-button @click="router.push('/my/inquiries')">{{ t('nav.myInquiries') }}</el-button>
       </div>

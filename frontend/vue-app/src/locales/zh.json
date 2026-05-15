@@ -509,7 +509,7 @@
     "allStatuses": "全部状态",
     "whyFits": "为什么适合你",
     "priceDrivers": "价格主要来自",
-    "sceneConfig": "AI 场景配置",
+    "sceneConfig": "场景配置",
     "quoteExplanation": "报价解释",
     "upgradeValue": "升级价值",
     "startAi": "从 AI Concierge 开始",
@@ -602,7 +602,7 @@
     "boundary": "只读边界",
     "sandboxOnly": "仅 Sandbox",
     "boundaryItems": {
-      "storage": "读取 sessionStorage / localStorage / AI prefill，如无数据则回退到 Restaurant A Castle Standard。",
+      "storage": "读取 sessionStorage / localStorage 中的场景配置；如无数据则回退到 Restaurant A Castle Standard。",
       "visualOnly": "仅用于视觉规划：不是施工图、建筑图或供应商执行图。",
       "no3dService": "不支持拖拽编辑，不调用外部 3D 服务，不远程加载模型。",
       "noExternal": "不触发 PaymentIntent、webhook、n8n、production deploy 或外发消息。"

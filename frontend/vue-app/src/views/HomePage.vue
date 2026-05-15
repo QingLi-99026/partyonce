@@ -2,10 +2,10 @@
   <div class="home-page" :style="pageStyle">
     <section class="investor-hero">
       <div class="investor-hero-content">
-        <span class="investor-kicker">{{ $t('home.kicker') }}</span>
-        <h1 class="investor-title">{{ $t('home.title') }}</h1>
+        <span class="investor-kicker">{{ homeKicker }}</span>
+        <h1 class="investor-title">{{ homeTitle }}</h1>
         <p class="investor-copy">
-          {{ $t('home.intro') }}
+          {{ homeIntro }}
         </p>
 
         <div class="investor-actions">
@@ -36,20 +36,20 @@
         </div>
         <div class="visual-stack-meta">
           <span>{{ $t('home.visualMeta') }}</span>
-          <strong>{{ $t('home.visualMetaStrong') }}</strong>
+          <strong>{{ homeVisualMetaStrong }}</strong>
         </div>
       </div>
     </section>
 
     <!-- 沉浸式Hero -->
     <ImmersiveHero
-      v-if="isChineseLocale"
+      v-if="isChineseLocale && aiExperienceEnabled"
       :theme-id="currentTheme"
       @start-planning="handleStartPlanning"
       @explore-themes="scrollToThemes"
       @play-voice="handlePlayVoice"
     />
-    <section v-if="isChineseLocale && voiceGuidanceTheme" class="theme-listen-followup">
+    <section v-if="isChineseLocale && aiExperienceEnabled && voiceGuidanceTheme" class="theme-listen-followup">
       <div class="theme-listen-card">
         <span class="asset-kicker">{{ $t('home.themeListen.kicker') }}</span>
         <h2>{{ $t(`themes.${voiceGuidanceTheme}.name`) }}</h2>
@@ -339,6 +339,7 @@
 import ImmersiveHero from '@/components/ImmersiveHero.vue';
 import SceneShowcase from '@/components/SceneShowcase.vue';
 import PackageShowcase from '@/components/PackageShowcase.vue';
+import { featureFlags } from '@/config/featureFlags';
 import { getTheme } from '@/themes';
 import { getRestaurantAVisuals, getThemePackageVisuals, getVisualAssetsByTheme } from '@/data/visualAssets';
 
@@ -395,24 +396,79 @@ export default {
       ];
     },
 
+    aiExperienceEnabled() {
+      return featureFlags.aiExperienceEnabled;
+    },
+
+    homeKicker() {
+      if (this.aiExperienceEnabled) return this.$t('home.kicker');
+      return this.isChineseLocale ? 'Party planning preview' : 'Party planning preview';
+    },
+
+    homeTitle() {
+      if (this.aiExperienceEnabled) return this.$t('home.title');
+      return this.isChineseLocale
+        ? '欢迎来到 Party Event 派对活动，先看场地、主题和套餐'
+        : 'Plan a warm family party with clear themes, venues, and packages';
+    },
+
+    homeIntro() {
+      if (this.aiExperienceEnabled) return this.$t('home.intro');
+      return this.isChineseLocale
+        ? '从梦幻城堡、星际探险到森林奇境，先比较主题效果、Restaurant A 场地样板和 Basic / Standard / Premium 套餐，再提交清楚的 quote request。'
+        : 'Compare themes, Restaurant A venue samples, and Basic / Standard / Premium packages before submitting a clear quote request.';
+    },
+
+    homeVisualMetaStrong() {
+      if (this.aiExperienceEnabled) return this.$t('home.visualMetaStrong');
+      return this.isChineseLocale ? '主题 · 餐厅 A · 套餐 · 报价' : 'Themes · Restaurant A · Packages · Quote';
+    },
+
     investorActions() {
-      return [
+      const actions = [
         {
           icon: '🎨',
           label: this.$t('home.planYourself'),
           to: '/themes',
           primary: true
-        },
-        {
+        }
+      ];
+      if (this.aiExperienceEnabled) {
+        actions.push({
           icon: '🤖',
           label: this.$t('home.aiRecommend'),
           to: '/ai-voice-intake',
           primary: false
-        }
-      ];
+        });
+      }
+      return actions;
     },
 
     steps() {
+      if (!this.aiExperienceEnabled) {
+        return [
+          {
+            icon: '🎯',
+            title: this.$t('steps.chooseTheme.title'),
+            description: this.$t('steps.chooseTheme.description')
+          },
+          {
+            icon: '🏛️',
+            title: this.$t('steps.venue.title'),
+            description: this.$t('steps.venue.description')
+          },
+          {
+            icon: '🎉',
+            title: this.isChineseLocale ? '比较套餐' : 'Compare packages',
+            description: this.isChineseLocale ? '看清 Basic / Standard / Premium 的布置差异和报价依据' : 'Compare Basic / Standard / Premium scope and pricing basis'
+          },
+          {
+            icon: '📝',
+            title: this.isChineseLocale ? '提交询价' : 'Submit quote request',
+            description: this.isChineseLocale ? '填写联系人、日期、人数和备注后提交 staging inquiry' : 'Submit contact, date, guests, and notes for a staging inquiry'
+          }
+        ];
+      }
       return [
         {
           icon: '🎯',
@@ -706,6 +762,10 @@ export default {
     },
     
     handleStartPlanning(themeId) {
+      if (!this.aiExperienceEnabled) {
+        this.switchToTheme(themeId);
+        return;
+      }
       this.$router.push(`/ai-voice-intake?theme=${themeId}`);
     },
     
@@ -714,10 +774,15 @@ export default {
     },
     
     handlePlayVoice() {
+      if (!this.aiExperienceEnabled) return;
       this.voiceGuidanceTheme = this.currentTheme || 'castle';
     },
 
     continueWithVoiceTheme() {
+      if (!this.aiExperienceEnabled) {
+        this.scrollToThemes();
+        return;
+      }
       const slugs = {
         castle: 'castle-princess',
         space: 'space-explorer',

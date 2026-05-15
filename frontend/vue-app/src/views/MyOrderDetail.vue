@@ -75,7 +75,7 @@
 
       <PartySceneSummary
         class="unified-panel"
-        title="订单场景与 3D Preview"
+        :title="sceneSummaryTitle"
         audience="customer"
         :scene-config="orderPartySceneConfig"
         :visual-context="orderVisualContext"
@@ -198,6 +198,7 @@ import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig } from '@/data/partySceneConfig'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation } from '@/data/packageExplanation'
+import { featureFlags } from '@/config/featureFlags'
 import PartySceneSummary from '@/components/PartySceneSummary.vue'
 import {
   buildDemoShareText,
@@ -217,6 +218,7 @@ const interaction = ref({})
 const supplementNote = ref('')
 const shareCaption = ref('')
 const rewardRefresh = ref(0)
+const sceneSummaryTitle = computed(() => featureFlags.aiExperienceEnabled ? '订单场景与 3D Preview' : '订单场景与视觉预览')
 const orderLineItemSummary = computed(() => summarizeQuoteLineItems(order.value?.line_items || []))
 const rewardSummary = computed(() => {
   rewardRefresh.value
@@ -235,6 +237,7 @@ const orderPartySceneConfig = computed(() => order.value?.party_scene_config || 
 }))
 const orderRecommendationText = computed(() => {
   const explanation = getPackageExplanation(orderPackageTier.value)
+  if (!featureFlags.aiExperienceEnabled) return `${explanation.whyRecommend} ${explanation.customerFit}`
   return order.value?.aiRecommendation?.reasonHeadline || `${explanation.whyRecommend} ${explanation.customerFit}`
 })
 

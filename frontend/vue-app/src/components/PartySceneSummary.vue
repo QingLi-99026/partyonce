@@ -6,7 +6,7 @@
     <div class="summary-copy">
       <p class="eyebrow">{{ audienceLabel }} · unified planning context</p>
       <h2>{{ title }}</h2>
-      <p class="intro">
+      <p v-if="displayRecommendationText" class="intro">
         {{ recommendationText }}
       </p>
       <dl>
@@ -42,6 +42,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { featureFlags } from '@/config/featureFlags';
 import { buildDefaultPartySceneConfig, writePartySceneConfig } from '@/services/partyScenePreviewService';
 import { summarizePartySceneConfig } from '@/data/partySceneConfig';
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets';
@@ -80,6 +81,7 @@ const summary = computed(() => summarizePartySceneConfig(config.value) || {});
 const renderingImage = computed(() => config.value.visuals?.renderedSceneImage || visualContext.value.restaurant.image_path);
 const renderingTitle = computed(() => config.value.visuals?.restaurantTitle || visualContext.value.restaurant.title);
 const audienceLabel = computed(() => props.audience === 'admin' ? 'Admin view' : 'Customer view');
+const displayRecommendationText = computed(() => featureFlags.aiExperienceEnabled || !String(props.recommendationText || '').toLowerCase().includes('ai'));
 const supplierLine = computed(() => {
   const suppliers = Array.isArray(config.value.suppliers) && config.value.suppliers.length
     ? config.value.suppliers

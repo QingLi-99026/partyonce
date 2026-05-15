@@ -509,7 +509,7 @@
     "allStatuses": "All statuses",
     "whyFits": "Why it fits you",
     "priceDrivers": "Price mainly comes from",
-    "sceneConfig": "AI scene config",
+    "sceneConfig": "Scene config",
     "quoteExplanation": "Quote explanation",
     "upgradeValue": "Upgrade value",
     "startAi": "Start with AI Concierge",
@@ -602,7 +602,7 @@
     "boundary": "Read-only Boundary",
     "sandboxOnly": "Sandbox only",
     "boundaryItems": {
-      "storage": "Reads sessionStorage / localStorage / AI prefill, then falls back to Restaurant A Castle Standard.",
+      "storage": "Reads scene config from sessionStorage / localStorage, then falls back to Restaurant A Castle Standard.",
       "visualOnly": "Visual planning only: no construction drawing, no architecture plan, no supplier execution drawing.",
       "no3dService": "No drag editing, no external 3D service, no remote model loading.",
       "noExternal": "No PaymentIntent, webhook, n8n, production deploy, or outbound message."

@@ -8,7 +8,7 @@ export const packageTierExplanations = {
     priceHint: '$899-$1,299',
     positioning: '控制预算，先把主题感和基础拍照点做出来。',
     bestFor: '适合小型生日、预算敏感、已经有场地或只想先确认视觉方向的家庭。',
-    whyRecommend: '当预算选择 Basic、人数较少，或客户希望先轻量试方案时，AI 会优先推荐这一档。',
+    whyRecommend: '当预算选择 Basic、人数较少，或客户希望先轻量试方案时，策划流程会优先推荐这一档。',
     includes: [
       '基础主题桌布和桌面摆件',
       '少量主题气球',
@@ -37,7 +37,7 @@ export const packageTierExplanations = {
     priceHint: '$1,499-$2,399',
     positioning: '完整体验，兼顾预算、视觉冲击和可交付性。',
     bestFor: '适合 15-30 人、希望照片好看、需要甜品台和主题背景的家庭。',
-    whyRecommend: '当客户选择中档预算、人数在 16-25 左右，或希望“有完整派对感但不过度豪华”时，AI 会推荐这一档。',
+    whyRecommend: '当客户选择中档预算、人数在 16-25 左右，或希望“有完整派对感但不过度豪华”时，策划流程会推荐这一档。',
     includes: [
       '完整主题桌布和桌面花艺',
       '中型气球拱门',
@@ -68,7 +68,7 @@ export const packageTierExplanations = {
     priceHint: '$2,800+',
     positioning: '沉浸式视觉，强调仪式感、拍照区和全场包装。',
     bestFor: '适合高预算客户、投资人演示、重要生日或希望现场有强记忆点的活动。',
-    whyRecommend: '当客户选择高预算、希望强视觉效果，或活动需要更完整的现场包装时，AI 会推荐这一档。',
+    whyRecommend: '当客户选择高预算、希望强视觉效果，或活动需要更完整的现场包装时，策划流程会推荐这一档。',
     includes: [
       '大型沉浸式主题拱门',
       '主题灯光层',

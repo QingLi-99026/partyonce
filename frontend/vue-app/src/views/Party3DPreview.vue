@@ -11,7 +11,7 @@
       </div>
       <div class="hero-actions">
         <router-link class="button primary" to="/quote">{{ t('party3d.backQuote') }}</router-link>
-        <router-link class="button secondary" to="/ai-voice-intake">{{ t('party3d.aiConcierge') }}</router-link>
+        <router-link v-if="featureFlags.aiExperienceEnabled" class="button secondary" to="/ai-voice-intake">{{ t('party3d.aiConcierge') }}</router-link>
       </div>
     </section>
 
@@ -87,6 +87,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import PartyScenePreview3D from '@/components/PartyScenePreview3D.vue';
+import { featureFlags } from '@/config/featureFlags';
 import {
   buildDefaultPartySceneConfig,
   readPartySceneConfig,

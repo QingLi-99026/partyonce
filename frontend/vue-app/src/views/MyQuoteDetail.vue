@@ -75,7 +75,7 @@
 
       <PartySceneSummary
         class="unified-panel"
-        title="AI 推荐与场景配置"
+        :title="sceneSummaryTitle"
         audience="customer"
         :scene-config="quotePartySceneConfig"
         :visual-context="quoteVisualContext"
@@ -205,6 +205,7 @@ import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig } from '@/data/partySceneConfig'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation } from '@/data/packageExplanation'
+import { featureFlags } from '@/config/featureFlags'
 import PartySceneSummary from '@/components/PartySceneSummary.vue'
 import SocialRewardsPanel from '@/components/SocialRewardsPanel.vue'
 
@@ -219,6 +220,7 @@ const interaction = ref({})
 const supplementNote = ref('')
 
 const canConfirmQuote = computed(() => ['sent', 'accepted'].includes(quote.value?.status))
+const sceneSummaryTitle = computed(() => featureFlags.aiExperienceEnabled ? 'AI 推荐与场景配置' : '场景配置与视觉规划')
 const quoteLineItemSummary = computed(() => summarizeQuoteLineItems(quote.value?.line_items || []))
 const quoteVisualContext = computed(() => {
   const selection = quote.value?.selection_snapshot || {}
@@ -242,6 +244,7 @@ const quotePartySceneConfig = computed(() => {
 })
 const quoteRecommendationText = computed(() => {
   const explanation = getPackageExplanation(quotePackageTier.value)
+  if (!featureFlags.aiExperienceEnabled) return `${explanation.whyRecommend} ${explanation.customerFit}`
   return quote.value?.aiRecommendation?.reasonHeadline
     || quote.value?.selection_snapshot?.sceneConfigSummary?.label
     || `${explanation.whyRecommend} ${explanation.customerFit}`
