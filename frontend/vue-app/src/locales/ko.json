@@ -316,6 +316,82 @@
       "fallback": "아래 텍스트 박스에 요청을 입력하면 같은 흐름이 계속됩니다.",
       "localOnly": "Local/staging only. 녹음을 업로드하지 않고 외부 음성 서비스를 호출하지 않습니다.",
       "startFailed": "브라우저에서 음성 인식을 시작하지 못했습니다. 텍스트 입력을 사용해 주세요."
+    },
+    "conversation": {
+      "eyebrow": "AI 대화 모드",
+      "title": "AI 파티 어드바이저가 단계별로 안내합니다",
+      "copy": "AI가 한 질문을 하고, 사용자는 음성 또는 텍스트로 답합니다. 로컬 규칙이 이미 아는 정보를 이해하고 다음 부족한 항목으로 이동합니다.",
+      "progress": "Step {current} / {total}",
+      "currentQuestion": "현재 AI 질문",
+      "lastAnswer": "마지막 답변",
+      "understanding": "AI 이해 결과",
+      "noneYet": "아직 답변 없음",
+      "waiting": "답변 대기 중",
+      "unknown": "아직 확인되지 않음",
+      "noFieldsYet": "아직 충분한 정보를 감지하지 못했습니다.",
+      "understoodPrefix": "알겠습니다. 이미 확인한 내용은",
+      "nextPrefix": "다음으로 확인할 항목은",
+      "answerButton": "이 질문에 답하기",
+      "retryButton": "다시 답하기",
+      "textButton": "텍스트로 답하기",
+      "textLabel": "텍스트 답변",
+      "textPlaceholder": "예: 앱을 잘 모르겠어요. 7살 생일 파티, 약 20명, Standard 예산, 장소는 아직 없어요.",
+      "submitText": "답변 보내기",
+      "summaryTitle": "AI 기획 요약",
+      "summaryText": "{theme}, {age}세, {guests}명, {budget} 예산, {venue} 기준으로 기획하고 {package} 패키지를 추천합니다.",
+      "generateQuote": "견적 요청 생성",
+      "userLabel": "나",
+      "themeActive": "현재 테마가 선택되어 있습니다: {theme}",
+      "themePrefilled": "현재 테마가 선택되어 있습니다: {theme}. 이 테마를 유지하고 다음 부족한 정보를 확인하겠습니다.",
+      "stepLabels": {
+        "intent": "의도",
+        "theme": "테마",
+        "age": "나이",
+        "guests": "인원",
+        "budget": "예산",
+        "venue": "장소",
+        "special": "특별 요청",
+        "summary": "요약"
+      },
+      "steps": {
+        "intro": "안녕하세요, Party Event AI 파티 어드바이저입니다. 단계별로 기획을 도와드릴게요. 이렇게 말해도 됩니다: 잘 모르겠으니 기획을 도와주세요.",
+        "intent": "추천을 받고 싶나요, 아니면 이미 마음에 드는 테마가 있나요?",
+        "theme": "Castle Princess, Space Explorer, Forest Adventure 중 어떤 테마가 좋나요, 아니면 추천해 드릴까요?",
+        "age": "아이는 몇 살인가요?",
+        "guests": "대략 몇 명이 참석하나요?",
+        "budget": "예산은 Basic, Standard, Premium 중 어디에 가까운가요, 아니면 아직 모르나요?",
+        "venue": "이미 장소가 있나요, 아니면 장소 추천이 필요한가요?",
+        "special": "케이크, 풍선, 사진, 어린이 엔터테인먼트, 알레르기나 식단 요구가 있나요?",
+        "summary": "견적 요청으로 이어질 기획 요약을 만들 충분한 정보가 있습니다."
+      },
+      "summary": {
+        "intent": "의도",
+        "theme": "테마",
+        "age": "아이 나이",
+        "guests": "인원",
+        "budget": "예산",
+        "venue": "장소 상태",
+        "special": "특별 요청",
+        "package": "추천 패키지"
+      },
+      "intentValues": {
+        "ai_help": "AI가 기획을 도와주기"
+      },
+      "venueValues": {
+        "need_venue": "장소 추천 필요",
+        "has_venue": "이미 장소 있음"
+      },
+      "specialValues": {
+        "planning": "기획",
+        "catering": "케이터링",
+        "photography": "사진",
+        "decor": "장식",
+        "balloons": "풍선",
+        "cake": "케이크",
+        "kids_entertainment": "어린이 엔터테인먼트",
+        "diet_allergy": "식단 / 알레르기",
+        "host": "사회자"
+      }
     }
   },
   "quotePage": {

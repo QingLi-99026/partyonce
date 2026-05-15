@@ -120,19 +120,54 @@ const firstMatch = (text, patterns) => {
 
 const includesAny = (text, words) => words.some((word) => text.includes(word));
 
+const CHINESE_NUMERALS = {
+  零: 0,
+  一: 1,
+  二: 2,
+  两: 2,
+  三: 3,
+  四: 4,
+  五: 5,
+  六: 6,
+  七: 7,
+  八: 8,
+  九: 9,
+  十: 10
+};
+
+function chineseNumberToInt(value = '') {
+  if (!value) return '';
+  if (/^\d+$/.test(value)) return value;
+  if (value === '十') return '10';
+  if (value.includes('十')) {
+    const [tensRaw, onesRaw] = value.split('十');
+    const tens = tensRaw ? CHINESE_NUMERALS[tensRaw] || 1 : 1;
+    const ones = onesRaw ? CHINESE_NUMERALS[onesRaw] || 0 : 0;
+    return String(tens * 10 + ones);
+  }
+  return CHINESE_NUMERALS[value] ? String(CHINESE_NUMERALS[value]) : '';
+}
+
+function firstNumberLikeMatch(original, patterns) {
+  const match = firstMatch(original, patterns);
+  return chineseNumberToInt(match) || match;
+}
+
 export function analyzeFreeTextIntake(rawText = '', locale = 'zh') {
   const original = rawText.trim();
   const text = normalize(original);
 
-  const age = firstMatch(original, [
+  const age = firstNumberLikeMatch(original, [
     /(\d{1,2})\s*岁/,
+    /([一二两三四五六七八九十]{1,3})\s*岁/,
     /(\d{1,2})\s*세/,
     /(\d{1,2})\s*(?:years?|yo|y\/o)/i,
     /عمر(?:ه|ها)?\s*(\d{1,2})/,
     /(\d{1,2})/
   ]);
-  const guestCount = firstMatch(original, [
-    /(\d{1,3})\s*(?:人|位|명|guests?|people|ضيف)/i
+  const guestCount = firstNumberLikeMatch(original, [
+    /(\d{1,3})\s*(?:人|位|个|名|小朋友|명|guests?|people|kids?|children|ضيف)/i,
+    /([一二两三四五六七八九十]{1,3})\s*(?:人|位|个|名|小朋友)/
   ]);
   const date = firstMatch(original, [
     /(\d{4}[-/.]\d{1,2}[-/.]\d{1,2})/,
@@ -188,6 +223,10 @@ export function analyzeFreeTextIntake(rawText = '', locale = 'zh') {
       includesAny(text, ['餐饮', 'catering', 'food', '음식', 'طعام']) ? 'catering' : '',
       includesAny(text, ['摄影', '拍照', 'photo', 'photography', '사진', 'تصوير']) ? 'photography' : '',
       includesAny(text, ['装饰', '布置', 'decor', 'decoration', '장식', 'ديكور']) ? 'decor' : '',
+      includesAny(text, ['气球', 'balloon', '풍선', 'بالون']) ? 'balloons' : '',
+      includesAny(text, ['蛋糕', 'cake', '케이크', 'كعكة']) ? 'cake' : '',
+      includesAny(text, ['娱乐', '儿童娱乐', '表演', 'entertainment', 'show', '놀이', 'ترفيه']) ? 'kids_entertainment' : '',
+      includesAny(text, ['过敏', '饮食', 'allergy', 'allergies', 'diet', 'حساسية']) ? 'diet_allergy' : '',
       includesAny(text, ['主持', 'host', 'mc', '사회자', 'مقدم']) ? 'host' : ''
     ].filter(Boolean)
   };

@@ -316,6 +316,82 @@
       "fallback": "Type the request in the text box below and the same flow will continue.",
       "localOnly": "Local/staging only. No recording upload and no external speech service.",
       "startFailed": "The browser could not start speech recognition. Please use text input."
+    },
+    "conversation": {
+      "eyebrow": "AI conversation mode",
+      "title": "Plan with a step-by-step AI party advisor",
+      "copy": "AI asks one question, you answer by speech or text, then the local rules understand known details and move to the next missing item.",
+      "progress": "Step {current} / {total}",
+      "currentQuestion": "Current AI question",
+      "lastAnswer": "Your last answer",
+      "understanding": "AI understanding",
+      "noneYet": "No answer yet",
+      "waiting": "Waiting for your answer",
+      "unknown": "Not yet known",
+      "noFieldsYet": "I have not detected enough details yet.",
+      "understoodPrefix": "Got it, I know",
+      "nextPrefix": "Next I will confirm",
+      "answerButton": "Answer this question",
+      "retryButton": "Answer again",
+      "textButton": "Use text answer",
+      "textLabel": "Text answer",
+      "textPlaceholder": "Example: I need help planning a 7-year-old birthday for around 20 guests, standard budget, and no venue yet.",
+      "submitText": "Send answer",
+      "summaryTitle": "AI planning summary",
+      "summaryText": "I will plan around {theme}, age {age}, {guests} guests, {budget} budget, {venue}, and recommend {package}.",
+      "generateQuote": "Generate quote request",
+      "userLabel": "You",
+      "themeActive": "Current theme is already selected: {theme}",
+      "themePrefilled": "Current theme is already selected: {theme}. I will keep it and continue with the next missing detail.",
+      "stepLabels": {
+        "intent": "Intent",
+        "theme": "Theme",
+        "age": "Age",
+        "guests": "Guests",
+        "budget": "Budget",
+        "venue": "Venue",
+        "special": "Special needs",
+        "summary": "Summary"
+      },
+      "steps": {
+        "intro": "Hi, I am the Party Event AI party advisor. I will help you plan step by step. You can say: I do not know this app well, please help me plan.",
+        "intent": "Do you want me to recommend a plan, or do you already have a theme you like?",
+        "theme": "Do you prefer Castle Princess, Space Explorer, Forest Adventure, or should I recommend one?",
+        "age": "How old is the child?",
+        "guests": "About how many guests will attend?",
+        "budget": "Is the budget closer to Basic, Standard, Premium, or not sure yet?",
+        "venue": "Do you already have a venue, or do you need venue recommendations?",
+        "special": "Any special needs, such as cake, balloons, photography, kids entertainment, allergies, or dietary requirements?",
+        "summary": "I have enough details to create a quote-ready planning summary."
+      },
+      "summary": {
+        "intent": "Intent",
+        "theme": "Theme",
+        "age": "Age",
+        "guests": "Guests",
+        "budget": "Budget",
+        "venue": "Venue",
+        "special": "Special needs",
+        "package": "Recommended package"
+      },
+      "intentValues": {
+        "ai_help": "AI helps me plan"
+      },
+      "venueValues": {
+        "need_venue": "Needs venue recommendation",
+        "has_venue": "Already has a venue"
+      },
+      "specialValues": {
+        "planning": "Planning",
+        "catering": "Catering",
+        "photography": "Photography",
+        "decor": "Decor",
+        "balloons": "Balloons",
+        "cake": "Cake",
+        "kids_entertainment": "Kids entertainment",
+        "diet_allergy": "Diet / allergy",
+        "host": "Host"
+      }
     }
   },
   "quotePage": {

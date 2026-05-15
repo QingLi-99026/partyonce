@@ -26,6 +26,99 @@
       </div>
     </section>
 
+    <section class="conversation-loop-panel" :dir="isArabicLocale ? 'rtl' : 'ltr'">
+      <div class="conversation-header">
+        <div>
+          <p class="eyebrow">{{ $t('ai.conversation.eyebrow') }}</p>
+          <h2>{{ $t('ai.conversation.title') }}</h2>
+          <p>{{ $t('ai.conversation.copy') }}</p>
+        </div>
+        <div class="conversation-progress">
+          <span>{{ conversationProgressLabel }}</span>
+          <strong>{{ conversationCurrentStepLabel }}</strong>
+        </div>
+      </div>
+
+      <div v-if="lockedThemeName" class="theme-lock-pill">
+        {{ $t('ai.conversation.themeActive', { theme: lockedThemeName }) }}
+      </div>
+
+      <div class="conversation-grid">
+        <div class="conversation-bubbles" aria-live="polite">
+          <article
+            v-for="message in conversationMessages"
+            :key="message.id"
+            class="message-bubble"
+            :class="message.role"
+          >
+            <span>{{ message.role === 'user' ? $t('ai.conversation.userLabel') : 'AI' }}</span>
+            <p>{{ message.text }}</p>
+          </article>
+        </div>
+
+        <aside class="conversation-status-card">
+          <p class="eyebrow">{{ $t('ai.conversation.currentQuestion') }}</p>
+          <h3>{{ conversationCurrentPrompt }}</h3>
+          <dl>
+            <div>
+              <dt>{{ $t('ai.conversation.lastAnswer') }}</dt>
+              <dd>{{ conversationLastUserAnswer || $t('ai.conversation.noneYet') }}</dd>
+            </div>
+            <div>
+              <dt>{{ $t('ai.conversation.understanding') }}</dt>
+              <dd>{{ conversationUnderstanding || $t('ai.conversation.waiting') }}</dd>
+            </div>
+          </dl>
+          <div class="known-fields">
+            <span v-for="item in conversationKnownFields" :key="item.key">
+              {{ item.label }}: {{ item.value }}
+            </span>
+          </div>
+        </aside>
+      </div>
+
+      <div class="conversation-controls">
+        <button class="primary-action" type="button" :disabled="!speechSupported || speechState === 'listening'" @click="startSpeechInput">
+          {{ $t('ai.conversation.answerButton') }}
+        </button>
+        <button class="secondary-action" type="button" @click="retrySpeechInput">
+          {{ $t('ai.conversation.retryButton') }}
+        </button>
+        <button class="secondary-action" type="button" @click="useTextFallback">
+          {{ $t('ai.conversation.textButton') }}
+        </button>
+        <button class="secondary-action" type="button" @click="speak(conversationCurrentPrompt)">
+          {{ $t('ai.listen') }}
+        </button>
+      </div>
+
+      <div v-if="conversationTextFallbackVisible || textFallbackVisible || !speechSupported" class="conversation-text-fallback">
+        <label for="conversationText">{{ $t('ai.conversation.textLabel') }}</label>
+        <textarea
+          id="conversationText"
+          v-model.trim="conversationInput"
+          rows="3"
+          :placeholder="$t('ai.conversation.textPlaceholder')"
+        ></textarea>
+        <button class="primary-action" type="button" :disabled="!conversationInput" @click="submitConversationText">
+          {{ $t('ai.conversation.submitText') }}
+        </button>
+      </div>
+
+      <div v-if="conversationStepId === 'step_8_summary'" class="conversation-summary-card">
+        <h3>{{ $t('ai.conversation.summaryTitle') }}</h3>
+        <dl>
+          <div v-for="item in conversationSummaryItems" :key="item.key">
+            <dt>{{ item.label }}</dt>
+            <dd>{{ item.value }}</dd>
+          </div>
+        </dl>
+        <button class="primary-action" type="button" @click="goQuote">
+          {{ $t('ai.conversation.generateQuote') }}
+        </button>
+      </div>
+    </section>
+
     <section class="concierge-chat-panel" :dir="isArabicLocale ? 'rtl' : 'ltr'">
       <div class="chat-copy">
         <p class="eyebrow">{{ $t('ai.interaction.eyebrow') }}</p>
@@ -370,6 +463,13 @@ const speechTranscript = ref('');
 const speechInterim = ref('');
 const speechError = ref('');
 const textFallbackVisible = ref(false);
+const conversationInput = ref('');
+const conversationTextFallbackVisible = ref(false);
+const conversationStepId = ref('step_1_intent');
+const conversationLastUserAnswer = ref('');
+const conversationUnderstanding = ref('');
+const conversationMessages = ref([]);
+let conversationMessageId = 0;
 let activeRecognizer = null;
 
 const quickDemoAnswers = {
@@ -396,6 +496,27 @@ const queryThemeMap = {
   'forest-adventure': 'forest'
 };
 
+const conversationAnswers = reactive({
+  intent: '',
+  theme: '',
+  age: '',
+  guests: '',
+  budget: '',
+  venue: '',
+  special: []
+});
+
+const conversationFields = ['intent', 'theme', 'age', 'guests', 'budget', 'venue', 'special'];
+const fieldToConversationStep = {
+  intent: 'step_1_intent',
+  theme: 'step_2_theme',
+  age: 'step_3_age',
+  guests: 'step_4_guests',
+  budget: 'step_5_budget',
+  venue: 'step_6_venue',
+  special: 'step_7_special'
+};
+
 const answeredCount = computed(() => intakeSteps.filter((step) => hasAnswer(step.id)).length);
 const progressPercent = computed(() => Math.round((answeredCount.value / intakeSteps.length) * 100));
 const isChineseLocale = computed(() => locale.value === 'zh');
@@ -405,6 +526,7 @@ const activePrompt = computed(() => activeStep.value?.prompt || voiceScripts.wel
 const localizedStarterPrompts = computed(() => starterPromptTemplates[locale.value] || starterPromptTemplates.en);
 const lockedThemeName = computed(() => {
   const theme = answers.themePreference;
+  if (!['castle', 'space', 'forest'].includes(theme)) return '';
   return theme ? displayThemeName(theme) : '';
 });
 const speechStatusText = computed(() => {
@@ -419,6 +541,84 @@ const speechFallbackMessage = computed(() => {
   if (textFallbackVisible.value || !speechSupported.value) return t('ai.speech.fallback');
   return t('ai.speech.localOnly');
 });
+const conversationStepDefinitions = computed(() => ({
+  step_1_intent: {
+    field: 'intent',
+    label: t('ai.conversation.stepLabels.intent'),
+    prompt: t('ai.conversation.steps.intent')
+  },
+  step_2_theme: {
+    field: 'theme',
+    label: t('ai.conversation.stepLabels.theme'),
+    prompt: t('ai.conversation.steps.theme')
+  },
+  step_3_age: {
+    field: 'age',
+    label: t('ai.conversation.stepLabels.age'),
+    prompt: t('ai.conversation.steps.age')
+  },
+  step_4_guests: {
+    field: 'guests',
+    label: t('ai.conversation.stepLabels.guests'),
+    prompt: t('ai.conversation.steps.guests')
+  },
+  step_5_budget: {
+    field: 'budget',
+    label: t('ai.conversation.stepLabels.budget'),
+    prompt: t('ai.conversation.steps.budget')
+  },
+  step_6_venue: {
+    field: 'venue',
+    label: t('ai.conversation.stepLabels.venue'),
+    prompt: t('ai.conversation.steps.venue')
+  },
+  step_7_special: {
+    field: 'special',
+    label: t('ai.conversation.stepLabels.special'),
+    prompt: t('ai.conversation.steps.special')
+  },
+  step_8_summary: {
+    field: 'summary',
+    label: t('ai.conversation.stepLabels.summary'),
+    prompt: t('ai.conversation.steps.summary')
+  }
+}));
+const conversationCurrentStep = computed(() => (
+  conversationStepDefinitions.value[conversationStepId.value] || conversationStepDefinitions.value.step_1_intent
+));
+const conversationCurrentStepLabel = computed(() => conversationCurrentStep.value.label);
+const conversationCurrentPrompt = computed(() => {
+  if (conversationStepId.value === 'step_8_summary') return conversationSummaryText.value;
+  return conversationCurrentStep.value.prompt;
+});
+const conversationProgressLabel = computed(() => {
+  const known = conversationFields.filter((field) => hasConversationField(field)).length;
+  return t('ai.conversation.progress', { current: Math.min(known + 1, 8), total: 8 });
+});
+const conversationKnownFields = computed(() => conversationSummaryItems.value.filter((item) => item.value && item.value !== t('ai.conversation.unknown')));
+const conversationSummaryItems = computed(() => ([
+  { key: 'intent', label: t('ai.conversation.summary.intent'), value: displayConversationValue('intent') },
+  { key: 'theme', label: t('ai.conversation.summary.theme'), value: displayConversationValue('theme') },
+  { key: 'age', label: t('ai.conversation.summary.age'), value: displayConversationValue('age') },
+  { key: 'guests', label: t('ai.conversation.summary.guests'), value: displayConversationValue('guests') },
+  { key: 'budget', label: t('ai.conversation.summary.budget'), value: displayConversationValue('budget') },
+  { key: 'venue', label: t('ai.conversation.summary.venue'), value: displayConversationValue('venue') },
+  { key: 'special', label: t('ai.conversation.summary.special'), value: displayConversationValue('special') },
+  { key: 'package', label: t('ai.conversation.summary.package'), value: conversationRecommendedPackage.value }
+]));
+const conversationRecommendedPackage = computed(() => {
+  if (conversationAnswers.budget === 'Premium') return 'Premium';
+  if (conversationAnswers.budget === 'Basic') return 'Basic';
+  return 'Standard';
+});
+const conversationSummaryText = computed(() => t('ai.conversation.summaryText', {
+  theme: displayConversationValue('theme'),
+  age: displayConversationValue('age'),
+  guests: displayConversationValue('guests'),
+  budget: displayConversationValue('budget'),
+  venue: displayConversationValue('venue'),
+  package: conversationRecommendedPackage.value
+}));
 const recognizedFields = computed(() => {
   if (!freeTextAnalysis.value) return [];
   const extracted = freeTextAnalysis.value.extracted || {};
@@ -692,21 +892,179 @@ function localizeField(field) {
   return localizeFieldLabel(field, locale.value);
 }
 
+function pushConversationMessage(role, text) {
+  if (!text) return;
+  conversationMessages.value.push({
+    id: `${Date.now()}-${conversationMessageId += 1}`,
+    role,
+    text
+  });
+}
+
+function hasConversationField(field) {
+  const value = conversationAnswers[field];
+  return Array.isArray(value) ? value.length > 0 : Boolean(value);
+}
+
+function displayConversationValue(field) {
+  const unknown = t('ai.conversation.unknown');
+  if (field === 'theme') {
+    return conversationAnswers.theme ? displayThemeName(conversationAnswers.theme) : unknown;
+  }
+  if (field === 'intent') {
+    if (!conversationAnswers.intent) return unknown;
+    return t(`ai.conversation.intentValues.${conversationAnswers.intent}`);
+  }
+  if (field === 'budget') return conversationAnswers.budget || unknown;
+  if (field === 'venue') {
+    if (!conversationAnswers.venue) return unknown;
+    return t(`ai.conversation.venueValues.${conversationAnswers.venue}`);
+  }
+  if (field === 'special') {
+    return conversationAnswers.special?.length ? conversationAnswers.special.map((item) => t(`ai.conversation.specialValues.${item}`)).join(' / ') : unknown;
+  }
+  return conversationAnswers[field] || unknown;
+}
+
+function firstMissingConversationField() {
+  return conversationFields.find((field) => !hasConversationField(field)) || '';
+}
+
+function syncConversationStepToMissing() {
+  const missing = firstMissingConversationField();
+  conversationStepId.value = missing ? fieldToConversationStep[missing] : 'step_8_summary';
+}
+
+function normalizeBudgetForConversation(value = '') {
+  if (value === 'premium_leaning' || value === 'premium') return 'Premium';
+  if (value === 'mid_controlled' || value === 'standard') return 'Standard';
+  if (value === 'basic') return 'Basic';
+  return '';
+}
+
+function normalizeThemeForConversation(value = '') {
+  if (['castle', 'space', 'forest'].includes(value)) return value;
+  return '';
+}
+
+function normalizeVenueForConversation(value = '') {
+  if (value === 'need_venue' || value === 'need_restaurant') return 'need_venue';
+  if (value === 'has_venue') return 'has_venue';
+  return '';
+}
+
+function mergeConversationAnalysis(analysis = {}) {
+  const extracted = analysis.extracted || {};
+  if (extracted.intent) conversationAnswers.intent = 'ai_help';
+  if (normalizeThemeForConversation(extracted.theme_preference)) {
+    conversationAnswers.theme = normalizeThemeForConversation(extracted.theme_preference);
+  }
+  if (extracted.age) conversationAnswers.age = `${extracted.age}`;
+  if (extracted.guest_count) conversationAnswers.guests = `${extracted.guest_count}`;
+  const budget = normalizeBudgetForConversation(extracted.budget_range);
+  if (budget) conversationAnswers.budget = budget;
+  const venue = normalizeVenueForConversation(extracted.venue_status);
+  if (venue) conversationAnswers.venue = venue;
+  if (extracted.service_needs?.length) {
+    conversationAnswers.special = [...new Set([...(conversationAnswers.special || []), ...extracted.service_needs])];
+  }
+
+  const currentField = conversationCurrentStep.value.field;
+  if (currentField === 'theme' && !conversationAnswers.theme && extracted.intent) {
+    conversationAnswers.theme = 'castle';
+  }
+  if (currentField === 'intent' && !conversationAnswers.intent && extracted.raw_text) {
+    conversationAnswers.intent = 'ai_help';
+  }
+}
+
+function buildConversationUnderstanding(analysis = {}) {
+  const known = conversationSummaryItems.value
+    .filter((item) => item.value && item.value !== t('ai.conversation.unknown') && item.key !== 'package')
+    .map((item) => `${item.label}: ${item.value}`);
+  if (!known.length) return t('ai.conversation.noFieldsYet');
+  const next = firstMissingConversationField();
+  const nextLabel = next ? t(`ai.conversation.summary.${next}`) : t('ai.conversation.summaryTitle');
+  return `${t('ai.conversation.understoodPrefix')} ${known.join(' · ')}. ${t('ai.conversation.nextPrefix')} ${nextLabel}.`;
+}
+
+function applyAnalysisToLegacyFlow(analysis = {}) {
+  const derivedAnswers = mapAnalysisToAnswers(analysis);
+  Object.entries(derivedAnswers).forEach(([key, value]) => {
+    if (key === 'themePreference' && value === 'open') {
+      return;
+    }
+    if (value) answers[key] = value;
+  });
+  if (conversationAnswers.theme) answers.themePreference = conversationAnswers.theme;
+  if (conversationAnswers.age) {
+    const age = Number(conversationAnswers.age);
+    answers.childAge = age >= 9 ? '9-10' : age <= 5 ? '3-5' : '6-8';
+  }
+  if (conversationAnswers.guests) {
+    const guests = Number(conversationAnswers.guests);
+    answers.guestCount = guests > 25 ? '26-40' : guests <= 15 ? '10-15' : '16-25';
+  }
+  if (conversationAnswers.budget) answers.budgetRange = conversationAnswers.budget.toLowerCase();
+  if (conversationAnswers.venue) answers.venueStatus = conversationAnswers.venue === 'has_venue' ? 'has_venue' : 'need_restaurant';
+  if (conversationAnswers.special?.includes('photography')) answers.scenePriorities = 'photo_arch';
+}
+
+function handleConversationAnswer(text) {
+  if (!text) return;
+  conversationLastUserAnswer.value = text;
+  pushConversationMessage('user', text);
+  freeTextNeed.value = text;
+  speechTranscript.value = text;
+  const analysis = analyzeFreeTextIntake(text, locale.value);
+  mergeConversationAnalysis(analysis);
+  applyAnalysisToLegacyFlow(analysis);
+  freeTextAnalysis.value = analysis;
+  recommendation.value = {
+    ...scoreRecommendation({ ...answers }),
+    quote_ready_summary: analysis.quote_ready_summary,
+    free_text_analysis: analysis,
+    advisor_message: analysis.advisor_message
+  };
+  syncConversationStepToMissing();
+  conversationUnderstanding.value = buildConversationUnderstanding(analysis);
+  const aiText = conversationStepId.value === 'step_8_summary'
+    ? conversationSummaryText.value
+    : `${conversationUnderstanding.value} ${conversationCurrentPrompt.value}`;
+  pushConversationMessage('ai', aiText);
+  speak(aiText);
+}
+
+function submitConversationText() {
+  handleConversationAnswer(conversationInput.value);
+  conversationInput.value = '';
+  conversationTextFallbackVisible.value = false;
+  speechState.value = 'idle';
+}
+
+function resetConversationLoop() {
+  Object.keys(conversationAnswers).forEach((key) => {
+    conversationAnswers[key] = key === 'special' ? [] : '';
+  });
+  conversationStepId.value = 'step_1_intent';
+  conversationLastUserAnswer.value = '';
+  conversationUnderstanding.value = '';
+  conversationInput.value = '';
+  conversationTextFallbackVisible.value = false;
+  conversationMessages.value = [];
+  pushConversationMessage('ai', t('ai.conversation.steps.intro'));
+}
+
 function useStarterPrompt(prompt) {
   freeTextNeed.value = prompt;
-  analyzeFreeText();
+  handleConversationAnswer(prompt);
 }
 
 function analyzeFreeText() {
   if (!freeTextNeed.value) return;
   const analysis = analyzeFreeTextIntake(freeTextNeed.value, locale.value);
-  const derivedAnswers = mapAnalysisToAnswers(analysis);
-  Object.entries(derivedAnswers).forEach(([key, value]) => {
-    if (key === 'themePreference' && value === 'open' && answers.themePreference && answers.themePreference !== 'open') {
-      return;
-    }
-    if (value) answers[key] = value;
-  });
+  mergeConversationAnalysis(analysis);
+  applyAnalysisToLegacyFlow(analysis);
   if (!speechTranscript.value) {
     speechTranscript.value = freeTextNeed.value;
   }
@@ -792,13 +1150,13 @@ function retrySpeechInput() {
 function useTextFallback() {
   stopSpeechInput();
   textFallbackVisible.value = true;
+  conversationTextFallbackVisible.value = true;
   speechError.value = t('ai.speech.fallback');
 }
 
 function applySpeechTranscript(text) {
   if (!text) return;
-  freeTextNeed.value = text;
-  analyzeFreeText();
+  handleConversationAnswer(text);
   speechState.value = 'idle';
 }
 
@@ -851,12 +1209,16 @@ function resetFlow() {
   speechError.value = '';
   speechState.value = 'idle';
   recommendation.value = null;
+  resetConversationLoop();
 }
 
 function applyThemeQuery() {
   const queryTheme = queryThemeMap[String(route.query.theme || '').toLowerCase()];
   if (!queryTheme) return;
   answers.themePreference = queryTheme;
+  conversationAnswers.theme = queryTheme;
+  syncConversationStepToMissing();
+  pushConversationMessage('ai', t('ai.conversation.themePrefilled', { theme: displayThemeName(queryTheme) }));
   activeIndex.value = intakeSteps.findIndex((step) => step.id === 'childAge');
   speak(`${t('ai.prefill.themeLocked')} ${displayThemeName(queryTheme)}. ${activePrompt.value}`);
 }
@@ -885,6 +1247,31 @@ function goQuote() {
   if (!recommendation.value && freeTextNeed.value) {
     analyzeFreeText();
   }
+  if (!recommendation.value) {
+    applyAnalysisToLegacyFlow({
+      extracted: {},
+      quote_ready_summary: {
+        package_recommendation: conversationRecommendedPackage.value
+      }
+    });
+    recommendation.value = {
+      ...scoreRecommendation({ ...answers }),
+      quote_ready_summary: {
+        event_type: 'party_inquiry',
+        age: conversationAnswers.age,
+        guest_count: conversationAnswers.guests,
+        budget_range: conversationAnswers.budget,
+        theme_preference: conversationAnswers.theme,
+        intent: conversationAnswers.intent,
+        venue_status: conversationAnswers.venue,
+        service_needs: conversationAnswers.special,
+        package_recommendation: conversationRecommendedPackage.value,
+        emotional_summary: conversationSummaryText.value,
+        next_questions: []
+      },
+      advisor_message: conversationSummaryText.value
+    };
+  }
   const saved = saveIntakeForQuote({ ...answers }, recommendation.value);
   router.push({
     path: '/quote',
@@ -910,6 +1297,7 @@ watch(activeIndex, () => {
 
 onMounted(() => {
   resolveSpeechSupport();
+  resetConversationLoop();
   applyThemeQuery();
 });
 </script>
@@ -1116,6 +1504,194 @@ button:disabled {
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.84);
   box-shadow: 0 18px 54px rgba(15, 23, 42, 0.09);
+}
+
+.conversation-loop-panel {
+  max-width: 1180px;
+  margin: 0 auto 24px;
+  padding: 24px;
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(239, 246, 255, 0.9));
+  box-shadow: 0 20px 58px rgba(15, 23, 42, 0.10);
+}
+
+.conversation-header {
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.conversation-header h2 {
+  margin: 0 0 8px;
+  font-size: clamp(24px, 3vw, 38px);
+}
+
+.conversation-header p:last-child {
+  max-width: 760px;
+  margin: 0;
+  color: #526174;
+  line-height: 1.65;
+}
+
+.conversation-progress {
+  min-width: 168px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  text-align: center;
+}
+
+.conversation-progress span {
+  display: block;
+  margin-bottom: 4px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.conversation-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.conversation-bubbles {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-height: 220px;
+  max-height: 430px;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 20px;
+  background: #f8fafc;
+}
+
+.message-bubble {
+  width: min(92%, 640px);
+  padding: 12px 14px;
+  border-radius: 18px;
+  color: #1e293b;
+  line-height: 1.55;
+}
+
+.message-bubble span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #475569;
+}
+
+.message-bubble p {
+  margin: 0;
+}
+
+.message-bubble.ai {
+  justify-self: start;
+  background: #fff;
+  border: 1px solid #bfdbfe;
+}
+
+.message-bubble.user {
+  justify-self: end;
+  background: #ede9fe;
+  border: 1px solid #c4b5fd;
+}
+
+.conversation-status-card,
+.conversation-summary-card,
+.conversation-text-fallback {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #ddd6fe;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.conversation-status-card h3,
+.conversation-summary-card h3 {
+  margin: 0;
+  color: #111827;
+  line-height: 1.35;
+}
+
+.conversation-status-card dl,
+.conversation-summary-card dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.conversation-status-card dt,
+.conversation-summary-card dt {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.conversation-status-card dd,
+.conversation-summary-card dd {
+  margin: 2px 0 0;
+  color: #1f2937;
+  font-weight: 800;
+}
+
+.known-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.known-fields span {
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.conversation-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.conversation-text-fallback {
+  margin-top: 14px;
+}
+
+.conversation-text-fallback label {
+  color: #111827;
+  font-weight: 900;
+}
+
+.conversation-text-fallback textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  color: #111827;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.conversation-summary-card {
+  margin-top: 16px;
+  background: #fefce8;
+  border-color: #fde68a;
 }
 
 .chat-copy {
@@ -1551,9 +2127,14 @@ dt {
 @media (max-width: 860px) {
   .intake-hero,
   .question-panel,
+  .conversation-grid,
   .theme-preview-band,
   .recommendation-panel {
     grid-template-columns: 1fr;
+  }
+
+  .conversation-header {
+    display: grid;
   }
 
   .option-grid,

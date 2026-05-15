@@ -316,6 +316,82 @@
       "fallback": "可以直接在下方文字框输入需求，流程会继续。",
       "localOnly": "Local/staging only。不上传录音，不调用外部语音服务。",
       "startFailed": "浏览器没有启动语音识别，请使用文字输入。"
+    },
+    "conversation": {
+      "eyebrow": "AI 对话模式",
+      "title": "让 AI 派对顾问一步步带你策划",
+      "copy": "AI 问一句，你用语音或文字回答一句；本地规则会理解已知信息，并自动跳到下一个缺失问题。",
+      "progress": "Step {current} / {total}",
+      "currentQuestion": "当前 AI 问题",
+      "lastAnswer": "你上一句回答",
+      "understanding": "AI 理解结果",
+      "noneYet": "还没有回答",
+      "waiting": "等待你的回答",
+      "unknown": "暂未确认",
+      "noFieldsYet": "我还没有识别到足够的信息。",
+      "understoodPrefix": "明白了，我已经知道",
+      "nextPrefix": "下一步我会确认",
+      "answerButton": "回答这个问题",
+      "retryButton": "重新回答",
+      "textButton": "用文字回答",
+      "textLabel": "文字回答",
+      "textPlaceholder": "例如：我不太了解这个 App，希望你帮我做一个策划。我想办一个 7 岁孩子的生日派对，大概 20 人，预算中等，还没有场地。",
+      "submitText": "发送回答",
+      "summaryTitle": "AI 策划摘要",
+      "summaryText": "我会按 {theme}、{age} 岁、{guests} 人、{budget} 预算、{venue} 来规划，并建议先看 {package} 套餐。",
+      "generateQuote": "生成报价申请",
+      "userLabel": "你",
+      "themeActive": "当前主题已带入：{theme}",
+      "themePrefilled": "当前主题已带入：{theme}。我会保留这个主题，并继续确认缺失信息。",
+      "stepLabels": {
+        "intent": "意图",
+        "theme": "主题",
+        "age": "年龄",
+        "guests": "人数",
+        "budget": "预算",
+        "venue": "场地",
+        "special": "特殊需求",
+        "summary": "摘要"
+      },
+      "steps": {
+        "intro": "你好，我是 Party Event 的 AI 派对顾问。我会一步一步帮你策划。你可以直接说：我不太了解，请帮我策划。",
+        "intent": "你想让我帮你推荐，还是你已经有喜欢的主题？",
+        "theme": "你喜欢梦幻城堡、星际探险、森林秘境，还是让我推荐？",
+        "age": "孩子几岁？",
+        "guests": "大概多少人参加？",
+        "budget": "预算大概是 Basic、Standard、Premium，还是还不确定？",
+        "venue": "你已经有场地，还是需要我们推荐场地？",
+        "special": "有没有特别需求？比如蛋糕、气球、摄影、儿童娱乐、过敏或饮食要求。",
+        "summary": "我已经有足够信息，可以生成 quote-ready 策划摘要。"
+      },
+      "summary": {
+        "intent": "客户意图",
+        "theme": "推荐主题",
+        "age": "孩子年龄",
+        "guests": "人数",
+        "budget": "预算层级",
+        "venue": "场地状态",
+        "special": "特殊需求",
+        "package": "推荐套餐"
+      },
+      "intentValues": {
+        "ai_help": "希望 AI 帮忙策划"
+      },
+      "venueValues": {
+        "need_venue": "需要推荐场地",
+        "has_venue": "已有场地"
+      },
+      "specialValues": {
+        "planning": "策划",
+        "catering": "餐饮",
+        "photography": "摄影",
+        "decor": "布置",
+        "balloons": "气球",
+        "cake": "蛋糕",
+        "kids_entertainment": "儿童娱乐",
+        "diet_allergy": "饮食/过敏",
+        "host": "主持"
+      }
     }
   },
   "quotePage": {
