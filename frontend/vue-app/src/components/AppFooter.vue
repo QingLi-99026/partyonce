@@ -5,11 +5,7 @@
         <div class="footer-brand">
           <h3>Party Event</h3>
           <p>{{ t('footer.tagline') }}</p>
-          <div class="social-links">
-            <el-icon><Platform /></el-icon>
-            <el-icon><ChatDotRound /></el-icon>
-            <el-icon><Message /></el-icon>
-          </div>
+          <SocialLinks class="footer-social-links" />
         </div>
         
         <div class="footer-links">
@@ -49,6 +45,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { featureFlags } from '@/config/featureFlags'
+import SocialLinks from '@/components/SocialLinks.vue'
 
 const { t } = useI18n()
 </script>
@@ -86,20 +83,8 @@ const { t } = useI18n()
   line-height: 1.6;
 }
 
-.social-links {
-  display: flex;
-  gap: 16px;
-}
-
-.social-links .el-icon {
-  font-size: 24px;
-  cursor: pointer;
-  color: #9d366c;
-  transition: color 0.3s;
-}
-
-.social-links .el-icon:hover {
-  color: #d84a8f;
+.footer-social-links {
+  margin-top: 8px;
 }
 
 .footer-links {
