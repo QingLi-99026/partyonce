@@ -36,6 +36,19 @@
       </div>
     </section>
 
+    <section v-if="venueFinderPrefill" class="ai-prefill-notice venue-prefill-notice">
+      <div class="section-container">
+        <div class="ai-prefill-card" :style="cardStyle">
+          <span class="ai-prefill-kicker">Venue Finder prefill · local/staging</span>
+          <strong>{{ venueFinderPrefill.selection?.venueName }} · {{ venueFinderPrefill.customerInfo?.guestCount }} guests</strong>
+          <p>
+            Area {{ venueFinderPrefill.customerInfo?.area }} · Budget {{ venueFinderPrefill.customerInfo?.budgetRange }}.
+            This is a demo venue selection and does not create a booking.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <section class="quote-flow-summary">
       <div class="section-container">
         <div class="quote-flow-card" :style="cardStyle">
@@ -355,6 +368,7 @@ import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExpl
 import { buildQuoteLineItemsFromSelection, summarizeQuoteLineItems } from '@/data/quoteLineItems';
 import { readQuotePrefill } from '@/services/aiVoiceIntakeService';
 import { writePartySceneConfig } from '@/services/partyScenePreviewService';
+import { readVenueFinderQuotePrefill } from '@/services/venueFinderService';
 import { featureFlags } from '@/config/featureFlags';
 
 export default {
@@ -382,6 +396,7 @@ export default {
       isSubmittingInquiry: false,
       submittedNextSteps: null,
       aiPrefill: null,
+      venueFinderPrefill: null,
       quoteSource: this.$route.query.source || 'web_quote'
     };
   },
@@ -508,9 +523,14 @@ export default {
     },
 
     quoteFlowSummary() {
-      const source = this.aiPrefill && this.aiExperienceEnabled ? this.$t('quotePage.aiPrepared') : this.$t('quotePage.currentPlan');
+      const source = this.venueFinderPrefill
+        ? 'Venue Finder selected'
+        : this.aiPrefill && this.aiExperienceEnabled
+          ? this.$t('quotePage.aiPrepared')
+          : this.$t('quotePage.currentPlan');
+      const venueName = this.aiPrefill?.selection?.venueName || this.visualContext.primaryVenue.name;
       return {
-        title: `${source}: ${this.themeConfig.name} · ${this.packageData.name} · ${this.visualContext.primaryVenue.name}`,
+        title: `${source}: ${this.themeConfig.name} · ${this.packageData.name} · ${venueName}`,
         body: this.$t('quotePage.flowBody')
       };
     },
@@ -889,11 +909,33 @@ export default {
         notes: prefill.customerInfo?.notes || ''
       };
       this.showForm = true;
+    },
+
+    applyVenueFinderPrefill() {
+      const prefill = readVenueFinderQuotePrefill();
+      if (!prefill || this.$route.query.source !== 'venue_finder') {
+        return;
+      }
+
+      this.venueFinderPrefill = prefill;
+      this.aiPrefill = prefill;
+      this.quoteSource = 'venue_finder';
+      this.themeId = this.$route.query.theme || prefill.selection?.themeId || this.themeId;
+      this.sceneId = this.$route.query.scene || prefill.selection?.sceneId || 'restaurant-a';
+      this.packageId = this.$route.query.package || prefill.selection?.packageId || this.packageId;
+      this.inquiryForm = {
+        name: '',
+        contact: '',
+        date: prefill.customerInfo?.preferredDate || '',
+        notes: prefill.customerInfo?.notes || ''
+      };
+      this.showForm = true;
     }
   },
 
   mounted() {
     this.applyAiConciergePrefill();
+    this.applyVenueFinderPrefill();
     this.loadSavedQuote();
     
     // Debug: 暴露方法到全局，供验证使用

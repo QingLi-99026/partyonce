@@ -46,6 +46,18 @@ const routes = [
     meta: { title: '场地列表' }
   },
   {
+    path: '/venue-finder',
+    name: 'VenueFinder',
+    component: () => import('@/views/VenueFinder.vue'),
+    meta: { title: 'Venue Finder' }
+  },
+  {
+    path: '/venue-finder/:id',
+    name: 'VenueFinderDetail',
+    component: () => import('@/views/VenueFinder.vue'),
+    meta: { title: 'Venue Finder Detail' }
+  },
+  {
     path: '/venues/:id',
     name: 'VenueDetail',
     component: () => import('@/views/VenueDetail.vue'),

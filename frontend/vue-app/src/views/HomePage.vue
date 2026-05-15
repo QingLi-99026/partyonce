@@ -427,10 +427,16 @@ export default {
     investorActions() {
       const actions = [
         {
+          icon: '🔎',
+          label: this.isChineseLocale ? '查找适合场地' : 'Find a venue',
+          to: '/venue-finder',
+          primary: true
+        },
+        {
           icon: '🎨',
           label: this.$t('home.planYourself'),
           to: '/themes',
-          primary: true
+          primary: false
         }
       ];
       if (this.aiExperienceEnabled) {

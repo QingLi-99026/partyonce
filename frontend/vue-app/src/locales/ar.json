@@ -9,6 +9,7 @@
   "nav": {
     "home": "الرئيسية",
     "venues": "القاعات",
+    "venueFinder": "البحث عن قاعة",
     "aiGuide": "إرشاد AI",
     "party3d": "معاينة 3D",
     "aiPlanner": "مخطط AI",

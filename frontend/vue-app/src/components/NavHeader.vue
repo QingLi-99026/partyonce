@@ -15,6 +15,7 @@
       >
         <el-menu-item index="/"><el-icon><HomeFilled /></el-icon>{{ t('nav.home') }}</el-menu-item>
         <el-menu-item index="/venues"><el-icon><OfficeBuilding /></el-icon>{{ t('nav.venues') }}</el-menu-item>
+        <el-menu-item v-if="featureFlags.venueFilterEnabled" index="/venue-finder"><el-icon><Search /></el-icon>{{ t('nav.venueFinder') }}</el-menu-item>
         <el-menu-item v-if="featureFlags.aiExperienceEnabled" index="/ai-voice-intake"><el-icon><MagicStick /></el-icon>{{ t('nav.aiGuide') }}</el-menu-item>
         <el-menu-item v-if="featureFlags.threeDExperienceEnabled" index="/experimental/party-3d"><el-icon><View /></el-icon>{{ t('nav.party3d') }}</el-menu-item>
         <el-menu-item v-if="featureFlags.aiExperienceEnabled" index="/ai-planner"><el-icon><MagicStick /></el-icon>{{ t('nav.aiPlanner') }}</el-menu-item>
@@ -85,6 +86,7 @@ import {
   MagicStick,
   OfficeBuilding,
   Present,
+  Search,
   SwitchButton,
   User,
   UserFilled,
