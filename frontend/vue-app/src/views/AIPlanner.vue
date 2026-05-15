@@ -215,6 +215,7 @@ import { MagicStick } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { aiAPI } from '@/api/modules'
 import { usePlanStore } from '@/store'
+import { featureFlags } from '@/config/featureFlags'
 
 const router = useRouter()
 const planStore = usePlanStore()
@@ -360,8 +361,8 @@ const confirmPlan = () => {
     selectedPlanIndex: selectedPlan.value
   })
   
-  ElMessage.success('方案已保存，跳转到3D设计器')
-  router.push('/3d-designer')
+  ElMessage.success(featureFlags.threeDExperienceEnabled ? '方案已保存，跳转到3D设计器' : '方案已保存，跳转到报价页')
+  router.push(featureFlags.threeDExperienceEnabled ? '/3d-designer' : '/quote')
 }
 </script>
 

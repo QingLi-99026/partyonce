@@ -389,7 +389,7 @@
                 <li>Layout: {{ recommendation.sceneConfigSummary.layout }}</li>
                 <li>Decor: {{ recommendation.sceneConfigSummary.decor }}</li>
                 <li>Venue: {{ recommendation.sceneConfigSummary.venue }}</li>
-                <li>Future 3D ready: {{ recommendation.party_scene_config.future3d.engineReady ? 'yes' : 'no' }}</li>
+                <li v-if="featureFlags.threeDExperienceEnabled">Future 3D ready: {{ recommendation.party_scene_config.future3d.engineReady ? 'yes' : 'no' }}</li>
               </ul>
             </dd>
           </div>
@@ -445,6 +445,7 @@ import {
   getBrowserSpeechSupport,
   speechLangForLocale
 } from '@/services/browserSpeechService';
+import { featureFlags } from '@/config/featureFlags';
 import { getVisualContext } from '@/data/visualAssets';
 
 const router = useRouter();

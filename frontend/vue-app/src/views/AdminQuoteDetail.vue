@@ -357,9 +357,10 @@
               <strong>party_scene_config</strong>
               <p>{{ quoteSceneConfigSummary.layout }}</p>
               <span>{{ quoteSceneConfigSummary.decor }}</span>
-              <el-button size="small" plain @click="openParty3DPreview">
+              <el-button v-if="featureFlags.threeDExperienceEnabled" size="small" plain @click="openParty3DPreview">
                 View experimental 3D preview
               </el-button>
+              <small v-else>3D Preview is hidden by feature flag for this staging build.</small>
             </div>
             <p class="body-text">
               {{ quotePackageExplanation.positioning }}
@@ -414,7 +415,7 @@
 
         <section class="panel-grid">
           <PartySceneSummary
-            title="Unified AI / Visual / 3D Context"
+            :title="featureFlags.threeDExperienceEnabled ? 'Unified AI / Visual / 3D Context' : 'Unified AI / Visual Context'"
             audience="admin"
             :scene-config="quotePartySceneConfig"
             :visual-context="quoteVisualContext"
@@ -456,6 +457,7 @@ import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExpl
 import { buildQuoteLineItemsFromSelection, normalizeQuoteLineItem, normalizeQuoteLineItems, quoteLineItemOrder, quoteLineItemTypes, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
 import { writePartySceneConfig } from '@/services/partyScenePreviewService'
+import { featureFlags } from '@/config/featureFlags'
 import PartySceneSummary from '@/components/PartySceneSummary.vue'
 import SocialRewardsPanel from '@/components/SocialRewardsPanel.vue'
 
@@ -819,6 +821,7 @@ const createDraftOrder = async () => {
 }
 
 const openParty3DPreview = () => {
+  if (!featureFlags.threeDExperienceEnabled) return
   writePartySceneConfig(quotePartySceneConfig.value)
   router.push('/experimental/party-3d')
 }

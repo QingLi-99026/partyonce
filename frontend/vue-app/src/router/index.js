@@ -1,6 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/store'
 import { ElMessage } from 'element-plus'
+import { featureFlags } from '@/config/featureFlags'
+
+const party3DComponent = () => featureFlags.threeDExperienceEnabled
+  ? import('@/views/Party3DPreview.vue')
+  : import('@/views/FeatureUnavailable3D.vue')
+
+const designer3DComponent = () => featureFlags.threeDExperienceEnabled
+  ? import('@/views/Designer3D.vue')
+  : import('@/views/FeatureUnavailable3D.vue')
 
 const routes = [
   {
@@ -77,16 +86,17 @@ const routes = [
   },
   {
     path: '/experimental/party-3d',
+    alias: ['/party-3d', '/3d-preview'],
     name: 'Party3DPreview',
-    component: () => import('@/views/Party3DPreview.vue'),
-    meta: { title: 'Experimental Party 3D Preview' }
+    component: party3DComponent,
+    meta: { title: '3D Preview status' }
   },
   {
     path: '/designer',
     alias: '/3d-designer',
     name: 'Designer3D',
-    component: () => import('@/views/Designer3D.vue'),
-    meta: { title: '3D派对设计预览' }
+    component: designer3DComponent,
+    meta: { title: '3D Design status' }
   },
   {
     path: '/quotation',
@@ -175,6 +185,12 @@ const routes = [
     name: 'MyRewards',
     component: () => import('@/views/MyRewards.vue'),
     meta: { title: '我的分享奖励', customerFixture: true }
+  },
+  {
+    path: '/share',
+    name: 'ShareRewards',
+    component: () => import('@/views/MyRewards.vue'),
+    meta: { title: '有奖分享', customerFixture: true }
   },
   
   // ========== Partner Portal 供应商端 ==========

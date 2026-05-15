@@ -100,7 +100,8 @@
           <strong>客户看到什么</strong>
           <ul>
             <li>AI 推荐摘要、主题 / 套餐 / Restaurant A 渲染图</li>
-            <li>实验性 3D Preview 入口和场景配置摘要（视觉规划预览，非施工图 / 非供应商执行图）</li>
+            <li v-if="featureFlags.threeDExperienceEnabled">实验性 3D Preview 入口和场景配置摘要（视觉规划预览，非施工图 / 非供应商执行图）</li>
+            <li v-else>3D Preview 已从客户可见演示中隐藏，后续质量验证后再恢复为卖点</li>
             <li>简化报价 line items、供应商 / 场地上下文</li>
             <li>分享奖励入口、审核中 / 已奖励状态和下一步动作</li>
           </ul>
@@ -109,7 +110,7 @@
           <strong>后台看到什么</strong>
           <ul>
             <li>客户需求摘要、AI 推荐理由和完整 party_scene_config</li>
-            <li>2D 渲染图、3D Preview（非施工图）、供应商职责和报价依据</li>
+            <li>2D 渲染图、供应商职责和报价依据</li>
             <li>editable line items、运营备注、owner、next action</li>
             <li>UGC 分享奖励状态，仍然不外发、不触发 webhook/n8n</li>
           </ul>
@@ -120,7 +121,7 @@
         <el-button @click="go('/my/orders/order-local-1001')">查看客户订单详情</el-button>
         <el-button @click="bootstrapAdmin(); go('/admin/quotes/1')">查看后台报价详情</el-button>
         <el-button @click="bootstrapAdmin(); go('/admin/orders/1')">查看后台订单详情</el-button>
-        <el-button @click="go('/experimental/party-3d')">查看 3D Preview（非施工图）</el-button>
+        <el-button v-if="featureFlags.threeDExperienceEnabled" @click="go('/experimental/party-3d')">查看 3D Preview（非施工图）</el-button>
         <el-button @click="go('/my/rewards')">查看分享奖励</el-button>
       </div>
     </section>
@@ -163,6 +164,7 @@ import {
   clearInvestorGuidedDemo,
   startInvestorGuidedDemo
 } from '@/services/investorDemoService';
+import { featureFlags } from '@/config/featureFlags';
 
 const router = useRouter();
 const activeStepIndex = ref(0);
@@ -281,7 +283,7 @@ const routeGroups = [
     routes: [
       { label: 'Suppliers', path: '/suppliers' },
       { label: 'Venues', path: '/venues' },
-      { label: '3D Preview', path: '/experimental/party-3d' },
+      ...(featureFlags.threeDExperienceEnabled ? [{ label: '3D Preview', path: '/experimental/party-3d' }] : []),
       { label: 'My Rewards', path: '/my/rewards' },
       { label: 'Partner Apply', path: '/partner/apply' },
       { label: 'Payment Readiness', path: '/payment/deposit' }

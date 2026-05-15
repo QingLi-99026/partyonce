@@ -4,9 +4,12 @@
       <div>
         <p class="eyebrow">Admin Review · local/staging</p>
         <h1>Social Sharing Rewards Review</h1>
-        <p>Review UGC submissions, approve or reject placeholder points, and attach voucher placeholders. This page does not post to social platforms or send customer messages.</p>
+        <p>
+          Review customer UGC proof, approve placeholder points and voucher status, or reject with a visible reason.
+          This page updates only in-app localStorage status and never posts to social platforms or sends customer messages.
+        </p>
       </div>
-      <el-button @click="router.push('/my/rewards')">Open My Rewards</el-button>
+      <el-button @click="router.push('/my/rewards')">Open customer rewards</el-button>
     </header>
 
     <el-alert
@@ -30,6 +33,10 @@
         <span>Approved points</span>
         <strong>{{ approvedPoints }}</strong>
       </article>
+      <article class="summary-card">
+        <span>Issued placeholders</span>
+        <strong>{{ voucherCount }}</strong>
+      </article>
     </section>
 
     <section class="panel">
@@ -41,10 +48,10 @@
             <small>{{ row.order_number || row.order_id }}</small>
           </template>
         </el-table-column>
-        <el-table-column label="Share" min-width="260">
+        <el-table-column label="Proof" min-width="280">
           <template #default="{ row }">
-            <strong>{{ row.channel }}</strong>
-            <small>{{ row.caption || row.post_url || '-' }}</small>
+            <strong>{{ platformLabel(row.platform || row.channel) }} · {{ row.proof_type }}</strong>
+            <small>{{ row.proof_url || row.post_url || row.proof_note || 'No proof detail' }}</small>
           </template>
         </el-table-column>
         <el-table-column label="Signals" min-width="220">
@@ -55,13 +62,25 @@
         </el-table-column>
         <el-table-column label="Status" width="150">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'approved' ? 'success' : row.status === 'rejected' ? 'danger' : 'warning'">{{ row.status }}</el-tag>
+            <el-tag :type="statusType(row.review_status || row.status)">{{ row.review_status || row.status }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Points" width="130">
-          <template #default="{ row }">{{ row.points_awarded || row.points_pending }}</template>
+        <el-table-column label="Review note" min-width="280">
+          <template #default="{ row }">
+            <el-input
+              v-model="reviewForm(row).review_reason"
+              type="textarea"
+              :rows="2"
+              maxlength="260"
+              show-word-limit
+              placeholder="Reason shown to customer in-app"
+            />
+            <el-select v-model="reviewForm(row).voucher_placeholder_id" class="voucher-select">
+              <el-option v-for="voucher in voucherPlaceholders" :key="voucher.id" :label="voucher.title" :value="voucher.id" />
+            </el-select>
+          </template>
         </el-table-column>
-        <el-table-column label="Actions" width="260">
+        <el-table-column label="Actions" width="220" fixed="right">
           <template #default="{ row }">
             <el-button size="small" type="success" @click="approve(row)">Approve</el-button>
             <el-button size="small" type="danger" plain @click="reject(row)">Reject</el-button>
@@ -89,7 +108,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import {
@@ -97,36 +116,55 @@ import {
   reviewRewardSubmission,
   rewardPointRules,
   seedRewardDemoIfEmpty,
+  socialSharePlatforms,
   voucherPlaceholders
 } from '@/services/socialRewardsService'
 
 const router = useRouter()
 const submissions = ref([])
+const reviewForms = reactive({})
 
 const refresh = () => {
   submissions.value = listRewardSubmissions()
+  submissions.value.forEach((row) => reviewForm(row))
 }
 
-const pendingCount = computed(() => submissions.value.filter((item) => item.status === 'pending_review').length)
+const reviewForm = (row) => {
+  if (!reviewForms[row.id]) {
+    reviewForms[row.id] = {
+      review_reason: row.review_reason || row.review_note || '',
+      voucher_placeholder_id: row.voucher_placeholder_id || 'voucher-500-20'
+    }
+  }
+  return reviewForms[row.id]
+}
+
+const pendingCount = computed(() => submissions.value.filter((item) => (item.review_status || item.status) === 'pending_review').length)
 const approvedPoints = computed(() => submissions.value.reduce((sum, item) => sum + Number(item.points_awarded || 0), 0))
+const voucherCount = computed(() => submissions.value.filter((item) => item.voucher_placeholder_id).length)
+
+const platformLabel = (id) => socialSharePlatforms.find((item) => item.id === id)?.label || id
+const statusType = (status) => status === 'approved' ? 'success' : status === 'rejected' ? 'danger' : 'warning'
 
 const approve = (row) => {
+  const form = reviewForm(row)
   reviewRewardSubmission(row.id, {
     status: 'approved',
-    voucher_placeholder_id: 'voucher-500-20',
-    review_note: 'Approved in local/staging admin review. Voucher remains a placeholder.'
+    voucher_placeholder_id: form.voucher_placeholder_id,
+    review_reason: form.review_reason || 'Approved in local/staging admin review. Voucher remains a placeholder.'
   })
   refresh()
-  ElMessage.success('Reward approved locally. No external notification was sent.')
+  ElMessage.success('Reward approved locally. In-app status updated; no external notification was sent.')
 }
 
 const reject = (row) => {
+  const form = reviewForm(row)
   reviewRewardSubmission(row.id, {
     status: 'rejected',
-    review_note: 'Rejected in local/staging review. Customer can resubmit with clearer social proof.'
+    review_reason: form.review_reason || 'Proof was not clear enough for local/staging review. Please resubmit with a public link or clearer screenshot note.'
   })
   refresh()
-  ElMessage.warning('Reward rejected locally. No external notification was sent.')
+  ElMessage.warning('Reward rejected locally. In-app status updated; no external notification was sent.')
 }
 
 onMounted(() => {
@@ -216,6 +254,11 @@ h2 {
   display: block;
   margin-top: 6px;
   font-size: 26px;
+}
+
+.voucher-select {
+  width: 100%;
+  margin-top: 8px;
 }
 
 @media (max-width: 820px) {

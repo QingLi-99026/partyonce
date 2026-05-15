@@ -155,7 +155,8 @@
       <section class="panel rewards-panel">
         <h2>Share & Rewards</h2>
         <p class="panel-intro">
-          Share your party story for local/staging review. Points and vouchers are placeholders until production reward rules are approved.
+          Share after party and claim reward. Use your own social account, then submit proof for local/staging review.
+          Points and vouchers are placeholders until production reward rules are approved.
         </p>
         <div class="reward-summary">
           <div><span>Approved points</span><strong>{{ rewardSummary.approvedPoints }}</strong></div>
@@ -171,7 +172,8 @@
           :placeholder="buildDemoShareText(order)"
         />
         <div class="blocked-actions">
-          <el-button type="primary" @click="submitShareReward">Submit share for reward review</el-button>
+          <el-button type="primary" @click="submitShareReward">Submit quick proof for review</el-button>
+          <el-button @click="router.push('/share')">Open reward submission</el-button>
           <el-button @click="router.push('/my/rewards')">Open My Rewards</el-button>
         </div>
         <small>No social post, email, SMS, WhatsApp, webhook, n8n, or payment action is triggered.</small>
@@ -218,7 +220,7 @@ const interaction = ref({})
 const supplementNote = ref('')
 const shareCaption = ref('')
 const rewardRefresh = ref(0)
-const sceneSummaryTitle = computed(() => featureFlags.aiExperienceEnabled ? '订单场景与 3D Preview' : '订单场景与视觉预览')
+const sceneSummaryTitle = computed(() => featureFlags.threeDExperienceEnabled ? '订单场景与 3D Preview' : '订单场景与视觉预览')
 const orderLineItemSummary = computed(() => summarizeQuoteLineItems(order.value?.line_items || []))
 const rewardSummary = computed(() => {
   rewardRefresh.value
@@ -287,8 +289,13 @@ const submitShareReward = () => {
     customer_name: identity.value?.name || 'Local Demo Customer',
     order_id: order.value.id,
     order_number: order.value.order_number,
+    platform: 'instagram',
     channel: 'instagram',
+    copy_template_id: 'venue_theme_story',
+    share_text: shareCaption.value || buildDemoShareText(order.value),
     caption: shareCaption.value || buildDemoShareText(order.value),
+    proof_type: 'order_detail_note',
+    proof_note: 'Quick reward proof submitted from My Order Detail. Customer should complete full proof in /share if needed.',
     permission_to_reuse: true,
     includes_partyonce_tag: true,
     includes_venue_or_theme: true

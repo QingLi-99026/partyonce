@@ -31,7 +31,7 @@
       </div>
       
       <!-- 3D设计 - 高级入口 -->
-      <div class="entry-card entry-card--3d" @click="$router.push('/3d-designer')" data-testid="entry-3d">
+      <div v-if="featureFlags.threeDExperienceEnabled" class="entry-card entry-card--3d" @click="$router.push('/3d-designer')" data-testid="entry-3d">
         <div class="entry-icon">
           <el-icon><View /></el-icon>
         </div>
@@ -51,6 +51,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import QuickWizard from './QuickWizard.vue'
+import { featureFlags } from '@/config/featureFlags'
 
 const router = useRouter()
 const showWizard = ref(false)

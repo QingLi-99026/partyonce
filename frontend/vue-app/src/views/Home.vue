@@ -7,7 +7,7 @@
     <section class="hero-section">
       <div class="hero-content">
         <h1>让每一个派对都独一无二</h1>
-        <p>AI智能策划 · 精选场地 · 3D设计 · 一站式派对服务</p>
+        <p>AI智能策划 · 精选场地 · 一站式派对服务</p>
         <div class="hero-actions">
           <el-button type="primary" size="large" @click="$router.push('/ai-planner')">
             <el-icon><Magic /></el-icon>
@@ -55,7 +55,7 @@
           <p>严选500+优质场地，涵盖酒店、会所、户外等多种类型，满足不同规模派对需求。</p>
         </div>
         
-        <div class="feature-card" @click="$router.push('/3d-designer')">
+        <div v-if="featureFlags.threeDExperienceEnabled" class="feature-card" @click="$router.push('/3d-designer')">
           <div class="feature-icon purple"><el-icon><View /></el-icon></div>
           <h3>3D场景设计</h3>
           <p>可视化派对布置效果，实时调整桌椅、灯光、装饰，提前预览完美派对。</p>
@@ -121,6 +121,7 @@
 <script setup>
 import { ref } from 'vue'
 import QuickStartCards from '../components/QuickStartCards.vue'
+import { featureFlags } from '@/config/featureFlags'
 
 const popularVenues = ref([
   { id: 1, name: '云端宴会厅', city: '悉尼', capacity: 200, price: '2,500', image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400', isPartner: true },

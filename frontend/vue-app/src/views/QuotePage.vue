@@ -231,14 +231,15 @@
               <dt>Suppliers</dt>
               <dd>{{ partySceneConfig.suppliers.map((item) => `${item.categoryLabel || item.category}: ${item.name}`).join(' / ') }}</dd>
             </div>
-            <div>
+            <div v-if="featureFlags.threeDExperienceEnabled">
               <dt>Future 3D</dt>
               <dd>{{ partySceneConfig.future3d.suggestedRoute }} · {{ partySceneConfig.future3d.layoutCoordinateSystem }}</dd>
             </div>
           </dl>
-          <button class="scene-preview-btn" type="button" @click="openParty3DPreview">
+          <button v-if="featureFlags.threeDExperienceEnabled" class="scene-preview-btn" type="button" @click="openParty3DPreview">
             {{ $t('quotePage.view3dPreview') }}
           </button>
+          <p v-else class="scene-preview-note">3D / scene preview is temporarily hidden in this customer preview.</p>
         </div>
       </div>
     </section>
@@ -645,6 +646,7 @@ export default {
     },
 
     openParty3DPreview() {
+      if (!featureFlags.threeDExperienceEnabled) return;
       if (this.partySceneConfig) {
         writePartySceneConfig(this.partySceneConfig);
       }

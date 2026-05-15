@@ -1,6 +1,6 @@
 export const featureFlags = {
   aiExperienceEnabled: false,
-  threeDExperienceEnabled: true,
+  threeDExperienceEnabled: false,
   venueFilterEnabled: true
 }
 

@@ -3,10 +3,16 @@
     <header class="page-hero">
       <div>
         <p class="eyebrow">Social Sharing Rewards · local/staging</p>
-        <h1>My Rewards</h1>
-        <p>Submit UGC shares, track review status, and preview future voucher rewards. No real social posting, payment, webhook, n8n, email, SMS, or WhatsApp is triggered.</p>
+        <h1>Share after party and claim reward</h1>
+        <p>
+          Use your own TikTok, 小红书, Instagram, Facebook, or private channel to share party photos or videos, then submit proof for local/staging review.
+          We never collect social account passwords and no outbound message is sent.
+        </p>
       </div>
-      <el-button type="primary" @click="router.push('/my/orders')">Open My Orders</el-button>
+      <div class="hero-actions">
+        <el-button @click="router.push('/my/orders')">Open My Orders</el-button>
+        <el-button type="primary" @click="router.push('/share')">Open /share</el-button>
+      </div>
     </header>
 
     <el-alert
@@ -14,7 +20,8 @@
       type="warning"
       :closable="false"
       show-icon
-      title="Staging only: voucher and points are placeholders until production reward policy is approved."
+      title="Staging only: points and vouchers are placeholders until production reward policy is approved."
+      description="No real coupon, payment discount, webhook, n8n, email, SMS, WhatsApp, or social platform API is triggered."
     />
 
     <section class="summary-grid">
@@ -32,73 +39,130 @@
       </article>
       <article class="summary-card">
         <span>Voucher placeholders</span>
-        <strong>{{ summary.voucherPlaceholders.length }}</strong>
+        <strong>{{ summary.availableVouchers.length }} available</strong>
       </article>
     </section>
 
     <section class="content-grid">
       <article class="panel">
-        <h2>Submit a social share</h2>
-        <p class="panel-intro">Paste a post link or describe the share. The team reviews it before points are approved.</p>
+        <h2>1. Choose a platform and copy a caption</h2>
+        <p class="panel-intro">
+          Publish from your own account. If a platform does not support direct web upload, copy the caption and open the app manually.
+        </p>
+
         <label>
-          Channel
-          <el-select v-model="form.channel">
-            <el-option label="Instagram" value="instagram" />
-            <el-option label="TikTok" value="tiktok" />
-            <el-option label="Facebook" value="facebook" />
-            <el-option label="WeChat / private share" value="wechat_private" />
+          Platform
+          <el-select v-model="form.platform" @change="syncTemplateText">
+            <el-option v-for="platform in socialSharePlatforms" :key="platform.id" :label="platform.label" :value="platform.id" />
           </el-select>
         </label>
+
         <label>
-          Post URL / placeholder
-          <el-input v-model="form.post_url" placeholder="https://example.com/your-party-post" />
+          Caption template
+          <el-select v-model="form.copy_template_id" @change="syncTemplateText">
+            <el-option v-for="template in shareCopyTemplates" :key="template.id" :label="template.label" :value="template.id" />
+          </el-select>
         </label>
+
         <label>
-          Caption / notes
-          <el-input v-model="form.caption" type="textarea" :rows="4" maxlength="500" show-word-limit />
+          Share caption / free text
+          <el-input v-model="form.share_text" type="textarea" :rows="5" maxlength="700" show-word-limit />
         </label>
-        <div class="checks">
-          <el-checkbox v-model="form.permission_to_reuse">PartyOnce may reuse this content in staging/investor demo</el-checkbox>
-          <el-checkbox v-model="form.includes_partyonce_tag">Post mentions PartyOnce</el-checkbox>
-          <el-checkbox v-model="form.includes_venue_or_theme">Post mentions theme or venue</el-checkbox>
+
+        <div class="button-row">
+          <el-button type="primary" @click="copyShareText">Copy caption</el-button>
+          <el-button @click="openPlatform">Open platform</el-button>
         </div>
-        <el-button type="primary" @click="submitShare">Submit for review</el-button>
+        <p class="platform-note">{{ currentPlatform.instruction }}</p>
+        <el-alert
+          v-if="copyFallback"
+          class="manual-copy"
+          type="info"
+          :closable="false"
+          title="Clipboard was not available. Please copy the caption manually from the text box above."
+        />
       </article>
 
       <article class="panel">
-        <h2>Reward rules</h2>
-        <ul class="rules-list">
-          <li v-for="rule in summary.rewardPointRules" :key="rule.id">
-            <strong>{{ rule.label }} · {{ rule.points }} pts</strong>
-            <span>{{ rule.customerText }}</span>
-          </li>
-        </ul>
+        <h2>2. Submit proof for review</h2>
+        <p class="panel-intro">
+          After posting, paste a public post link or describe the screenshot/proof. File upload is mocked in this preview, so screenshot evidence is captured as a note.
+        </p>
+
+        <label>
+          Proof type
+          <el-select v-model="form.proof_type">
+            <el-option label="Post URL" value="post_url" />
+            <el-option label="Screenshot filename / note" value="screenshot_note" />
+            <el-option label="Private share note" value="private_share_note" />
+          </el-select>
+        </label>
+
+        <label>
+          Post URL
+          <el-input v-model="form.proof_url" placeholder="https://example.com/your-party-post" />
+        </label>
+
+        <label>
+          Screenshot / proof note
+          <el-input v-model="form.proof_note" type="textarea" :rows="4" maxlength="500" show-word-limit placeholder="Example: uploaded screenshot filename, post time, platform handle visible, or private share explanation." />
+        </label>
+
+        <div class="checks">
+          <el-checkbox v-model="form.permission_to_reuse">PartyOnce may reuse this content in staging/investor demo</el-checkbox>
+          <el-checkbox v-model="form.includes_partyonce_tag">Post mentions PartyOnce / Party Event</el-checkbox>
+          <el-checkbox v-model="form.includes_venue_or_theme">Post mentions theme or venue</el-checkbox>
+        </div>
+
+        <el-button type="primary" @click="submitShare">Submit for review</el-button>
       </article>
+    </section>
+
+    <section class="panel">
+      <h2>Reward rules</h2>
+      <ul class="rules-list">
+        <li v-for="rule in summary.rewardPointRules" :key="rule.id">
+          <strong>{{ rule.label }} · {{ rule.points }} pts</strong>
+          <span>{{ rule.customerText }}</span>
+        </li>
+      </ul>
     </section>
 
     <section class="panel">
       <h2>Submission status</h2>
       <el-table :data="summary.submissions" empty-text="No share submissions yet">
-        <el-table-column prop="channel" label="Channel" width="130" />
-        <el-table-column prop="caption" label="Caption / notes" min-width="260" />
+        <el-table-column label="Platform" width="150">
+          <template #default="{ row }">{{ platformLabel(row.platform || row.channel) }}</template>
+        </el-table-column>
+        <el-table-column label="Proof" min-width="260">
+          <template #default="{ row }">
+            <strong>{{ row.proof_url || row.post_url || row.proof_type }}</strong>
+            <small>{{ row.proof_note || row.caption || row.share_text }}</small>
+          </template>
+        </el-table-column>
         <el-table-column label="Status" width="150">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'approved' ? 'success' : row.status === 'rejected' ? 'danger' : 'warning'">{{ row.status }}</el-tag>
+            <el-tag :type="statusType(row.review_status || row.status)">{{ row.review_status || row.status }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Points" width="150">
+        <el-table-column label="Reward" min-width="210">
           <template #default="{ row }">
-            {{ row.points_awarded || row.points_pending }} {{ row.status === 'approved' ? 'approved' : 'pending' }}
+            <strong>{{ row.points_awarded || row.points_pending }} {{ row.status === 'approved' ? 'approved' : 'pending' }} pts</strong>
+            <small v-if="row.voucher_placeholder_id">{{ voucherTitle(row.voucher_placeholder_id) }} · {{ row.voucher_status }}</small>
           </template>
         </el-table-column>
-        <el-table-column prop="review_note" label="Review note" min-width="240" />
+        <el-table-column label="Review result" min-width="260">
+          <template #default="{ row }">
+            <span>{{ row.review_reason || row.review_note }}</span>
+          </template>
+        </el-table-column>
       </el-table>
     </section>
 
     <section class="panel">
       <h2>Voucher placeholders</h2>
       <div class="voucher-grid">
-        <article v-for="voucher in summary.voucherPlaceholders" :key="voucher.id" class="voucher-card">
+        <article v-for="voucher in summary.voucherPlaceholders" :key="voucher.id" class="voucher-card" :class="{ active: summary.availableVouchers.some((item) => item.id === voucher.id) }">
           <span>{{ voucher.value }}</span>
           <strong>{{ voucher.title }}</strong>
           <p>{{ voucher.pointsRequired }} points required</p>
@@ -114,48 +178,98 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import {
+  buildShareTemplateText,
   createRewardSubmission,
   getRewardSummary,
-  seedRewardDemoIfEmpty
+  seedRewardDemoIfEmpty,
+  shareCopyTemplates,
+  socialSharePlatforms
 } from '@/services/socialRewardsService'
 
 const router = useRouter()
 const customerId = 'customer-local-41'
 const refreshToken = ref(0)
+const copyFallback = ref(false)
+
 const form = reactive({
-  channel: 'instagram',
-  post_url: '',
-  caption: '',
+  platform: 'instagram',
+  copy_template_id: 'venue_theme_story',
+  share_text: '',
+  proof_type: 'post_url',
+  proof_url: '',
+  proof_note: '',
   permission_to_reuse: true,
   includes_partyonce_tag: true,
   includes_venue_or_theme: true
 })
+
+const demoOrder = {
+  theme: 'Castle Princess',
+  event_location: 'Marrickville Family Dining Room'
+}
 
 const summary = computed(() => {
   refreshToken.value
   return getRewardSummary(customerId)
 })
 
+const currentPlatform = computed(() => socialSharePlatforms.find((item) => item.id === form.platform) || socialSharePlatforms[0])
+
+const syncTemplateText = () => {
+  form.share_text = buildShareTemplateText(form.copy_template_id, demoOrder)
+}
+
+const platformLabel = (id) => socialSharePlatforms.find((item) => item.id === id)?.label || id
+const voucherTitle = (id) => summary.value.voucherPlaceholders.find((item) => item.id === id)?.title || id
+const statusType = (status) => status === 'approved' ? 'success' : status === 'rejected' ? 'danger' : 'warning'
+
+const copyShareText = async () => {
+  copyFallback.value = false
+  try {
+    await navigator.clipboard.writeText(form.share_text)
+    ElMessage.success('Caption copied. Publish from your own social account.')
+  } catch (error) {
+    copyFallback.value = true
+    ElMessage.info('Clipboard unavailable. Please copy the caption manually.')
+  }
+}
+
+const openPlatform = () => {
+  if (!currentPlatform.value.openUrl) {
+    ElMessage.info(currentPlatform.value.instruction)
+    return
+  }
+  window.open(currentPlatform.value.openUrl, '_blank', 'noopener')
+}
+
 const submitShare = () => {
-  if (!form.caption.trim() && !form.post_url.trim()) {
-    ElMessage.warning('Add a caption or post URL for review.')
+  if (!form.share_text.trim()) {
+    ElMessage.warning('Add or copy a caption before submitting.')
+    return
+  }
+  if (!form.proof_url.trim() && !form.proof_note.trim()) {
+    ElMessage.warning('Add a post URL or proof note for review.')
     return
   }
   createRewardSubmission({
     ...form,
+    channel: form.platform,
+    caption: form.share_text,
+    post_url: form.proof_url,
     customer_id: customerId,
     customer_name: 'Local Demo Customer',
     order_id: 'order-local-1001',
     order_number: 'PO-LOCAL-1001'
   })
-  form.post_url = ''
-  form.caption = ''
+  form.proof_url = ''
+  form.proof_note = ''
   refreshToken.value += 1
-  ElMessage.success('Share submitted for local/staging review. No external post or message was sent.')
+  ElMessage.success('Share proof submitted for local/staging review. No external message was sent.')
 }
 
 onMounted(() => {
   seedRewardDemoIfEmpty()
+  syncTemplateText()
   refreshToken.value += 1
 })
 </script>
@@ -172,6 +286,13 @@ onMounted(() => {
   justify-content: space-between;
   gap: 20px;
   align-items: flex-start;
+}
+
+.hero-actions,
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .eyebrow {
@@ -191,7 +312,10 @@ h2 {
 .page-hero p,
 .panel-intro,
 .rules-list span,
-.voucher-card small {
+.voucher-card small,
+.platform-note,
+:deep(.el-table small) {
+  display: block;
   color: #64748b;
   line-height: 1.6;
 }
@@ -199,7 +323,8 @@ h2 {
 .scope-alert,
 .summary-grid,
 .content-grid,
-.panel {
+.panel,
+.manual-copy {
   margin-top: 18px;
 }
 
@@ -215,7 +340,7 @@ h2 {
 }
 
 .content-grid {
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.8fr);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .voucher-grid {
@@ -260,23 +385,25 @@ label,
 }
 
 .rules-list li {
-  border-radius: 8px;
-  background: #f8fafc;
+  display: grid;
+  gap: 5px;
   padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
 }
 
-.rules-list span,
-.rules-list strong,
-.voucher-card span,
-.voucher-card strong,
-.voucher-card small {
-  display: block;
+.voucher-card.active {
+  border-color: #22c55e;
+  background: #f0fdf4;
 }
 
 @media (max-width: 820px) {
-  .page-hero,
-  .content-grid {
+  .page-hero {
     display: block;
+  }
+
+  .hero-actions {
+    margin-top: 14px;
   }
 }
 </style>

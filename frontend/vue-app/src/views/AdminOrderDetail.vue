@@ -191,7 +191,7 @@
 
         <section class="panel-grid">
           <PartySceneSummary
-            title="Unified AI / Scene / 3D Order Context"
+            :title="featureFlags.threeDExperienceEnabled ? 'Unified AI / Scene / 3D Order Context' : 'Unified AI / Scene Order Context'"
             audience="admin"
             :scene-config="orderPartySceneConfig"
             :visual-context="orderVisualContext"
@@ -357,6 +357,7 @@ import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visu
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
 import { normalizeQuoteLineItems, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
+import { featureFlags } from '@/config/featureFlags'
 import PartySceneSummary from '@/components/PartySceneSummary.vue'
 import SocialRewardsPanel from '@/components/SocialRewardsPanel.vue'
 import {

@@ -186,16 +186,17 @@
               <template #header>
                 <div class="section-header">
                   <span>我的设计方案</span>
-                  <el-button type="primary" @click="$router.push('/3d-designer')">新建设计</el-button>
+                  <el-button v-if="featureFlags.threeDExperienceEnabled" type="primary" @click="$router.push('/3d-designer')">新建设计</el-button>
                 </div>
               </template>
 
               <div v-if="designs.length === 0" class="empty-state">
                 <el-empty description="暂无设计方案">
                   <template #footer>
-                    <el-button type="primary" @click="$router.push('/3d-designer')">
+                    <el-button v-if="featureFlags.threeDExperienceEnabled" type="primary" @click="$router.push('/3d-designer')">
                       创建第一个设计
                     </el-button>
+                    <p v-else class="feature-disabled-note">3D 设计暂未开放；请先使用 Venue Finder 和 Quote 流程。</p>
                   </template>
                 </el-empty>
               </div>
@@ -287,6 +288,7 @@ import { User, UserFilled, Medal, MagicStick, View, Document } from '@element-pl
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { userAPI, aiAPI, quotationAPI } from '@/api/modules'
 import { useUserStore, usePlanStore } from '@/store'
+import { featureFlags } from '@/config/featureFlags'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -453,7 +455,7 @@ const viewPlan = (plan) => {
 
 const continuePlan = (plan) => {
   planStore.setCurrentPlan(plan)
-  router.push('/3d-designer')
+  router.push(featureFlags.threeDExperienceEnabled ? '/3d-designer' : '/quote')
 }
 
 const deletePlan = async (planId) => {
@@ -471,6 +473,10 @@ const deletePlan = async (planId) => {
 }
 
 const loadDesign = (design) => {
+  if (!featureFlags.threeDExperienceEnabled) {
+    router.push('/quote')
+    return
+  }
   router.push({ path: '/3d-designer', query: { designId: design.id } })
 }
 
