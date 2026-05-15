@@ -393,6 +393,26 @@ export default {
     isChineseLocale() {
       return this.$i18n.locale === 'zh';
     },
+
+    pageStyle() {
+      return {};
+    },
+
+    titleStyle() {
+      return {};
+    },
+
+    cardStyle() {
+      return {};
+    },
+
+    selectionItemStyle() {
+      return {};
+    },
+
+    formStyle() {
+      return {};
+    },
     
     sceneData() {
       const scenes = {

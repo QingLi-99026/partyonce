@@ -44,6 +44,36 @@
         </button>
       </div>
 
+      <div class="speech-input-card" :class="{ listening: speechState === 'listening' }">
+        <div>
+          <p class="eyebrow">{{ $t('ai.speech.eyebrow') }}</p>
+          <h3>{{ $t('ai.speech.title') }}</h3>
+          <p>{{ speechStatusText }}</p>
+        </div>
+        <div v-if="lockedThemeName" class="theme-lock-pill">
+          {{ $t('ai.speech.themeActive', { theme: lockedThemeName }) }}
+        </div>
+        <div class="speech-actions">
+          <button class="primary-action" type="button" :disabled="!speechSupported || speechState === 'listening'" @click="startSpeechInput">
+            {{ $t('ai.speech.start') }}
+          </button>
+          <button class="secondary-action" type="button" :disabled="speechState !== 'listening'" @click="stopSpeechInput">
+            {{ $t('ai.speech.stop') }}
+          </button>
+          <button class="secondary-action" type="button" @click="retrySpeechInput">
+            {{ $t('ai.speech.retry') }}
+          </button>
+          <button class="secondary-action" type="button" @click="useTextFallback">
+            {{ $t('ai.speech.useText') }}
+          </button>
+        </div>
+        <div class="speech-feedback" aria-live="polite">
+          <span v-if="speechInterim">{{ $t('ai.speech.hearing') }} {{ speechInterim }}</span>
+          <span v-else-if="speechTranscript">{{ $t('ai.speech.heard') }} {{ speechTranscript }}</span>
+          <span v-else>{{ speechFallbackMessage }}</span>
+        </div>
+      </div>
+
       <div class="chat-input-card">
         <label for="freeTextNeed">{{ $t('ai.interaction.inputLabel') }}</label>
         <textarea
@@ -317,6 +347,11 @@ import {
   mapAnalysisToAnswers,
   starterPromptTemplates
 } from '@/services/aiConciergeService';
+import {
+  createOneShotSpeechRecognizer,
+  getBrowserSpeechSupport,
+  speechLangForLocale
+} from '@/services/browserSpeechService';
 import { getVisualContext } from '@/data/visualAssets';
 
 const router = useRouter();
@@ -329,6 +364,13 @@ const freeTextNeed = ref('');
 const freeTextAnalysis = ref(null);
 const recommendation = ref(null);
 const voiceEnabled = ref(false);
+const speechState = ref('idle');
+const speechSupported = ref(false);
+const speechTranscript = ref('');
+const speechInterim = ref('');
+const speechError = ref('');
+const textFallbackVisible = ref(false);
+let activeRecognizer = null;
 
 const quickDemoAnswers = {
   childAge: '6-8',
@@ -361,6 +403,22 @@ const isArabicLocale = computed(() => locale.value === 'ar');
 const activeStep = computed(() => localizedIntakeSteps.value[activeIndex.value]);
 const activePrompt = computed(() => activeStep.value?.prompt || voiceScripts.welcome);
 const localizedStarterPrompts = computed(() => starterPromptTemplates[locale.value] || starterPromptTemplates.en);
+const lockedThemeName = computed(() => {
+  const theme = answers.themePreference;
+  return theme ? displayThemeName(theme) : '';
+});
+const speechStatusText = computed(() => {
+  if (speechState.value === 'listening') return t('ai.speech.listening');
+  if (speechState.value === 'processing') return t('ai.speech.processing');
+  if (speechTranscript.value) return t('ai.speech.ready');
+  if (!speechSupported.value) return t('ai.speech.unsupported');
+  return t('ai.speech.idle');
+});
+const speechFallbackMessage = computed(() => {
+  if (speechError.value) return speechError.value;
+  if (textFallbackVisible.value || !speechSupported.value) return t('ai.speech.fallback');
+  return t('ai.speech.localOnly');
+});
 const recognizedFields = computed(() => {
   if (!freeTextAnalysis.value) return [];
   const extracted = freeTextAnalysis.value.extracted || {};
@@ -644,8 +702,14 @@ function analyzeFreeText() {
   const analysis = analyzeFreeTextIntake(freeTextNeed.value, locale.value);
   const derivedAnswers = mapAnalysisToAnswers(analysis);
   Object.entries(derivedAnswers).forEach(([key, value]) => {
+    if (key === 'themePreference' && value === 'open' && answers.themePreference && answers.themePreference !== 'open') {
+      return;
+    }
     if (value) answers[key] = value;
   });
+  if (!speechTranscript.value) {
+    speechTranscript.value = freeTextNeed.value;
+  }
   recommendation.value = {
     ...scoreRecommendation({ ...answers }),
     quote_ready_summary: analysis.quote_ready_summary,
@@ -654,6 +718,88 @@ function analyzeFreeText() {
   };
   freeTextAnalysis.value = analysis;
   speak(analysis.advisor_message);
+}
+
+function resolveSpeechSupport() {
+  const support = getBrowserSpeechSupport();
+  speechSupported.value = support.supported;
+  if (!support.supported) {
+    speechError.value = support.reason;
+    textFallbackVisible.value = true;
+  }
+}
+
+function startSpeechInput() {
+  resolveSpeechSupport();
+  if (!speechSupported.value) return;
+  speechError.value = '';
+  speechTranscript.value = '';
+  speechInterim.value = '';
+  speechState.value = 'listening';
+  activeRecognizer = createOneShotSpeechRecognizer({
+    lang: speechLangForLocale(locale.value),
+    onStart: () => {
+      speechState.value = 'listening';
+    },
+    onInterim: (text) => {
+      speechInterim.value = text;
+    },
+    onResult: (text) => {
+      speechTranscript.value = text;
+      speechInterim.value = '';
+      speechState.value = 'processing';
+      applySpeechTranscript(text);
+    },
+    onError: (error) => {
+      speechError.value = error.message;
+      textFallbackVisible.value = true;
+      speechState.value = 'idle';
+    },
+    onEnd: () => {
+      if (speechState.value === 'listening') {
+        speechState.value = 'idle';
+      }
+      activeRecognizer = null;
+    }
+  });
+
+  try {
+    activeRecognizer?.start();
+  } catch (error) {
+    speechError.value = t('ai.speech.startFailed');
+    textFallbackVisible.value = true;
+    speechState.value = 'idle';
+  }
+}
+
+function stopSpeechInput() {
+  if (activeRecognizer) {
+    activeRecognizer.stop();
+  }
+  speechState.value = speechTranscript.value ? 'processing' : 'idle';
+}
+
+function retrySpeechInput() {
+  stopSpeechInput();
+  speechTranscript.value = '';
+  speechInterim.value = '';
+  speechError.value = '';
+  freeTextNeed.value = '';
+  freeTextAnalysis.value = null;
+  startSpeechInput();
+}
+
+function useTextFallback() {
+  stopSpeechInput();
+  textFallbackVisible.value = true;
+  speechError.value = t('ai.speech.fallback');
+}
+
+function applySpeechTranscript(text) {
+  if (!text) return;
+  freeTextNeed.value = text;
+  analyzeFreeText();
+  speechState.value = 'idle';
 }
 
 function clearFreeText() {
@@ -700,6 +846,10 @@ function resetFlow() {
   draftAnswer.value = '';
   freeTextNeed.value = '';
   freeTextAnalysis.value = null;
+  speechTranscript.value = '';
+  speechInterim.value = '';
+  speechError.value = '';
+  speechState.value = 'idle';
   recommendation.value = null;
 }
 
@@ -759,6 +909,7 @@ watch(activeIndex, () => {
 });
 
 onMounted(() => {
+  resolveSpeechSupport();
   applyThemeQuery();
 });
 </script>
@@ -1001,6 +1152,60 @@ button:disabled {
   color: #6d28d9;
   font-weight: 800;
   cursor: pointer;
+}
+
+.speech-input-card {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  background: #eff6ff;
+}
+
+.speech-input-card.listening {
+  border-color: #38bdf8;
+  background: #ecfeff;
+  box-shadow: 0 16px 36px rgba(14, 165, 233, 0.16);
+}
+
+.speech-input-card h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.speech-input-card p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.speech-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.speech-feedback {
+  min-height: 42px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #fff;
+  color: #1e293b;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.theme-lock-pill {
+  width: fit-content;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .chat-input-card {

@@ -289,7 +289,7 @@
       "copy": "Type naturally like you are talking to a human planner. The page uses local rules to detect age, style, budget, and missing details. No external AI is called.",
       "inputLabel": "Your party idea",
       "placeholder": "Example: My daughter is turning 18. I want it to feel elegant, not childish, photo-friendly, and not too expensive.",
-      "voicePreview": "Voice preview / Coming soon / Local only",
+      "voicePreview": "Browser speech + text fallback / Local only",
       "analyze": "Analyze and recommend",
       "clear": "Clear",
       "recognized": "Recognized details",
@@ -297,6 +297,25 @@
       "recommendation": "Advisor recommendation",
       "quoteReady": "Quote-ready summary",
       "editAnswers": "Edit answers"
+    },
+    "speech": {
+      "eyebrow": "Browser speech input",
+      "title": "Say one party planning request",
+      "themeActive": "Current theme is already selected: {theme}",
+      "start": "Start speaking",
+      "stop": "Stop",
+      "retry": "Say again",
+      "useText": "Use text input",
+      "idle": "Press start and the browser will ask for microphone permission, then convert speech to text locally in the browser.",
+      "listening": "Listening to you...",
+      "processing": "I heard you. Organizing the request now.",
+      "ready": "I heard:",
+      "hearing": "Listening:",
+      "heard": "I heard:",
+      "unsupported": "This browser does not support native SpeechRecognition. Text input is available.",
+      "fallback": "Type the request in the text box below and the same flow will continue.",
+      "localOnly": "Local/staging only. No recording upload and no external speech service.",
+      "startFailed": "The browser could not start speech recognition. Please use text input."
     }
   },
   "quotePage": {

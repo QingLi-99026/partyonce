@@ -289,7 +289,7 @@
       "copy": "실제 플래너에게 말하듯 입력하세요. 이 페이지는 로컬 규칙으로 나이, 스타일, 예산, 누락 정보를 분석하며 외부 AI를 호출하지 않습니다.",
       "inputLabel": "파티 아이디어",
       "placeholder": "예: 딸이 곧 18살인데 너무 유치하지 않고 고급스럽고 사진이 예쁘게 나오면 좋겠어요. 예산은 너무 과하지 않았으면 해요.",
-      "voicePreview": "Voice preview / Coming soon / Local only",
+      "voicePreview": "Browser speech + text fallback / Local only",
       "analyze": "분석하고 추천하기",
       "clear": "지우기",
       "recognized": "인식된 정보",
@@ -297,6 +297,25 @@
       "recommendation": "상담사 추천",
       "quoteReady": "견적 준비 요약",
       "editAnswers": "답변 수정"
+    },
+    "speech": {
+      "eyebrow": "브라우저 음성 입력",
+      "title": "파티 요청을 한 문장으로 말해 주세요",
+      "themeActive": "현재 테마가 선택되어 있습니다: {theme}",
+      "start": "말하기 시작",
+      "stop": "중지",
+      "retry": "다시 말하기",
+      "useText": "텍스트 입력 사용",
+      "idle": "시작을 누르면 브라우저가 마이크 권한을 요청하고 브라우저에서 음성을 텍스트로 변환합니다.",
+      "listening": "듣고 있습니다...",
+      "processing": "들었습니다. 요청을 정리하고 있습니다.",
+      "ready": "들은 내용:",
+      "hearing": "듣는 중:",
+      "heard": "들은 내용:",
+      "unsupported": "이 브라우저는 기본 SpeechRecognition을 지원하지 않습니다. 텍스트 입력을 사용할 수 있습니다.",
+      "fallback": "아래 텍스트 박스에 요청을 입력하면 같은 흐름이 계속됩니다.",
+      "localOnly": "Local/staging only. 녹음을 업로드하지 않고 외부 음성 서비스를 호출하지 않습니다.",
+      "startFailed": "브라우저에서 음성 인식을 시작하지 못했습니다. 텍스트 입력을 사용해 주세요."
     }
   },
   "quotePage": {

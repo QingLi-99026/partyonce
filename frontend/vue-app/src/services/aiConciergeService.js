@@ -9,6 +9,8 @@ const FIELD_LABELS = {
     budget_range: '预算',
     theme_preference: '主题偏好',
     indoor_outdoor: '室内/户外',
+    intent: '意图',
+    venue_status: '场地状态',
     service_needs: '服务需求'
   },
   en: {
@@ -21,6 +23,8 @@ const FIELD_LABELS = {
     budget_range: 'Budget',
     theme_preference: 'Theme preference',
     indoor_outdoor: 'Indoor / outdoor',
+    intent: 'Intent',
+    venue_status: 'Venue status',
     service_needs: 'Service needs'
   },
   ko: {
@@ -33,6 +37,8 @@ const FIELD_LABELS = {
     budget_range: '예산',
     theme_preference: '테마 선호',
     indoor_outdoor: '실내 / 야외',
+    intent: '의도',
+    venue_status: '장소 상태',
     service_needs: '서비스 필요'
   },
   ar: {
@@ -45,6 +51,8 @@ const FIELD_LABELS = {
     budget_range: 'الميزانية',
     theme_preference: 'تفضيل الثيم',
     indoor_outdoor: 'داخلي / خارجي',
+    intent: 'النية',
+    venue_status: 'حالة القاعة',
     service_needs: 'الخدمات المطلوبة'
   }
 };
@@ -133,6 +141,9 @@ export function analyzeFreeTextIntake(rawText = '', locale = 'zh') {
   ]);
 
   const extracted = {
+    intent: includesAny(text, ['帮我做一个策划', '帮我策划', '不太了解', '我不懂', '推荐', 'plan for me', 'help me plan', 'recommend', '추천', 'ساعدني', 'اقترح'])
+      ? 'needs_ai_planning'
+      : '',
     event_type: includesAny(text, ['birthday', '生日', '생일', 'عيد ميلاد']) ? 'birthday_party' : '',
     age,
     gender_preference: includesAny(text, ['女儿', '女孩', 'girl', 'daughter', '여자', '딸', 'بنت', 'ابنت'])
@@ -146,7 +157,9 @@ export function analyzeFreeTextIntake(rawText = '', locale = 'zh') {
       /(悉尼|北区|市中心|차스우드|시드니|سيدني)/
     ]),
     guest_count: guestCount,
-    budget_range: includesAny(text, ['预算有限', '别太夸张', '控制', 'limited budget', 'not too expensive', '예산', 'ميزانية محدودة'])
+    budget_range: includesAny(text, ['中等', '适中', '标准', 'standard', 'medium', 'moderate', '보통', 'متوسطة'])
+      ? 'standard'
+      : includesAny(text, ['预算有限', '别太夸张', '控制', 'limited budget', 'not too expensive', '예산', 'ميزانية محدودة'])
       ? 'mid_controlled'
       : includesAny(text, ['高级', '高端', 'premium', 'luxury', '고급', 'راق'])
         ? 'premium_leaning'
@@ -165,7 +178,13 @@ export function analyzeFreeTextIntake(rawText = '', locale = 'zh') {
       : includesAny(text, ['户外', '花园', 'outdoor', 'garden', '야외', 'حديقة'])
         ? 'outdoor'
         : '',
+    venue_status: includesAny(text, ['没有场地', '还没场地', '还没有场地', '需要场地', 'need venue', 'no venue', 'venue recommendation', '장소 추천', 'لا توجد قاعة'])
+      ? 'need_venue'
+      : includesAny(text, ['已有场地', '有场地', 'already have a venue', 'have venue', '장소가 있음'])
+        ? 'has_venue'
+        : '',
     service_needs: [
+      includesAny(text, ['策划', '推荐', 'plan', 'planning', 'recommend', '기획', 'تخطيط']) ? 'planning' : '',
       includesAny(text, ['餐饮', 'catering', 'food', '음식', 'طعام']) ? 'catering' : '',
       includesAny(text, ['摄影', '拍照', 'photo', 'photography', '사진', 'تصوير']) ? 'photography' : '',
       includesAny(text, ['装饰', '布置', 'decor', 'decoration', '장식', 'ديكور']) ? 'decor' : '',
@@ -179,7 +198,7 @@ export function analyzeFreeTextIntake(rawText = '', locale = 'zh') {
 
   const packageRecommendation = extracted.budget_range === 'premium_leaning'
     ? 'Premium'
-    : extracted.budget_range === 'mid_controlled'
+    : ['mid_controlled', 'standard'].includes(extracted.budget_range)
       ? 'Standard'
       : 'Standard';
   const themeRecommendation = extracted.theme_preference === 'space'
@@ -199,8 +218,12 @@ export function analyzeFreeTextIntake(rawText = '', locale = 'zh') {
     guest_count: extracted.guest_count || '',
     budget_range: extracted.budget_range || '',
     theme_preference: extracted.theme_preference || '',
+    intent: extracted.intent || '',
+    venue_status: extracted.venue_status || '',
     package_recommendation: packageRecommendation,
-    venue_recommendation: extracted.indoor_outdoor === 'outdoor'
+    venue_recommendation: extracted.venue_status === 'need_venue'
+      ? 'Need venue recommendation'
+      : extracted.indoor_outdoor === 'outdoor'
       ? 'Outdoor venue with indoor backup'
       : 'Restaurant A / private dining room sample',
     emotional_summary: buildEmotionalSummary(extracted, packageRecommendation, locale),
@@ -248,7 +271,11 @@ export function mapAnalysisToAnswers(analysis = {}) {
         : extracted.theme_preference === 'castle'
           ? 'castle'
           : 'open',
-    venueStatus: extracted.indoor_outdoor === 'indoor' ? 'need_restaurant' : 'unsure',
+    venueStatus: extracted.venue_status === 'has_venue'
+      ? 'has_venue'
+      : extracted.venue_status === 'need_venue' || extracted.indoor_outdoor === 'indoor'
+        ? 'need_restaurant'
+        : 'unsure',
     scenePriorities: extracted.service_needs?.includes('photography') ? 'photo_arch' : 'dessert_backdrop',
     stylingPreference: analysis.quote_ready_summary?.package_recommendation === 'Premium' ? 'immersive' : 'balanced',
     customerName: '',
@@ -322,6 +349,13 @@ function buildEmotionalSummary(extracted, tier, locale) {
 }
 
 function buildAdvisorMessage(summary, locale) {
+  if (locale === 'zh' && summary.intent === 'needs_ai_planning') {
+    const ageText = summary.age ? `${summary.age} 岁孩子` : '孩子';
+    const guestText = summary.guest_count ? `约 ${summary.guest_count} 人` : '待确认人数';
+    const budgetText = summary.package_recommendation === 'Standard' ? '中等预算' : `${summary.package_recommendation} 预算`;
+    const venueText = summary.venue_status === 'need_venue' ? '需要场地推荐' : summary.venue_recommendation;
+    return `明白了，我会按 ${ageText}、${guestText}、${budgetText}、${venueText} 来帮你策划。我们先从主题开始。`;
+  }
   if (locale === 'ko') {
     return `${summary.emotional_summary} 먼저 ${summary.package_recommendation}와 ${summary.venue_recommendation} 방향으로 잡고, ${summary.next_questions.join(' / ')} 를 확인하면 견적 요청으로 넘어갈 수 있습니다.`;
   }

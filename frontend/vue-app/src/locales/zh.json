@@ -289,7 +289,7 @@
       "copy": "你可以像和真人顾问聊天一样输入一句话。我会本地规则分析年龄、风格、预算和缺失信息，不调用外部 AI。",
       "inputLabel": "你的派对想法",
       "placeholder": "例如：我女儿快18岁了，想办得高级一点，不要太幼稚，拍照要好看，预算别太夸张。",
-      "voicePreview": "Voice preview / Coming soon / Local only",
+      "voicePreview": "浏览器语音 + 文字 fallback / Local only",
       "analyze": "分析并推荐",
       "clear": "清空",
       "recognized": "已识别信息",
@@ -297,6 +297,25 @@
       "recommendation": "顾问推荐",
       "quoteReady": "Quote-ready summary",
       "editAnswers": "编辑答案"
+    },
+    "speech": {
+      "eyebrow": "浏览器语音输入",
+      "title": "说一句你的派对需求",
+      "themeActive": "当前主题已带入：{theme}",
+      "start": "开始说话",
+      "stop": "停止",
+      "retry": "重新说",
+      "useText": "使用文字输入",
+      "idle": "点击开始说话后，浏览器会请求麦克风权限，并只在本机把语音转成文字。",
+      "listening": "正在听你说……",
+      "processing": "我听到了，正在帮你整理一下。",
+      "ready": "我听到的是：",
+      "hearing": "正在听你说：",
+      "heard": "我听到的是：",
+      "unsupported": "当前浏览器不支持原生 SpeechRecognition，已切换到文字输入。",
+      "fallback": "可以直接在下方文字框输入需求，流程会继续。",
+      "localOnly": "Local/staging only。不上传录音，不调用外部语音服务。",
+      "startFailed": "浏览器没有启动语音识别，请使用文字输入。"
     }
   },
   "quotePage": {
