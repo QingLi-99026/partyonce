@@ -36,15 +36,24 @@
       </div>
     </section>
 
-    <section v-if="venueFinderPrefill" class="ai-prefill-notice venue-prefill-notice">
+    <section v-if="venueFinderPrefill && venueFinderVisual" class="ai-prefill-notice venue-prefill-notice">
       <div class="section-container">
-        <div class="ai-prefill-card" :style="cardStyle">
-          <span class="ai-prefill-kicker">Venue Finder prefill · local/staging</span>
-          <strong>{{ venueFinderPrefill.selection?.venueName }} · {{ venueFinderPrefill.customerInfo?.guestCount }} guests</strong>
-          <p>
-            Area {{ venueFinderPrefill.customerInfo?.area }} · Budget {{ venueFinderPrefill.customerInfo?.budgetRange }}.
-            This is a demo venue selection and does not create a booking.
-          </p>
+        <div class="venue-prefill-card" :style="cardStyle">
+          <div class="venue-prefill-media">
+            <img :src="venueFinderVisual.image" :alt="venueFinderVisual.venueName" />
+            <span>Venue Finder sample</span>
+          </div>
+          <div class="venue-prefill-copy">
+            <span class="ai-prefill-kicker">Venue Finder prefill · local/staging</span>
+            <h2>{{ venueFinderVisual.venueName }} · {{ venueFinderVisual.guests }} guests</h2>
+            <p>{{ venueFinderVisual.summary }}</p>
+            <div class="venue-prefill-stats">
+              <div><small>Theme</small><strong>{{ venueFinderVisual.theme }}</strong></div>
+              <div><small>Package</small><strong>{{ venueFinderVisual.package }}</strong></div>
+              <div><small>Area</small><strong>{{ venueFinderVisual.area }}</strong></div>
+              <div><small>Budget</small><strong>{{ venueFinderVisual.budget }}</strong></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -368,7 +377,7 @@ import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExpl
 import { buildQuoteLineItemsFromSelection, summarizeQuoteLineItems } from '@/data/quoteLineItems';
 import { readQuotePrefill } from '@/services/aiVoiceIntakeService';
 import { writePartySceneConfig } from '@/services/partyScenePreviewService';
-import { readVenueFinderQuotePrefill } from '@/services/venueFinderService';
+import { buildVenueFinderQuotePrefill, readVenueFinderQuotePrefill } from '@/services/venueFinderService';
 import { featureFlags } from '@/config/featureFlags';
 
 export default {
@@ -520,6 +529,33 @@ export default {
       return this.aiPrefill?.quote_ready_summary
         || this.aiPrefill?.aiRecommendation?.quote_ready_summary
         || null;
+    },
+
+    venueFinderVisual() {
+      if (!this.venueFinderPrefill) return null;
+      const selectedVenue = this.venueFinderPrefill.venueFinder?.selectedVenue || {};
+      const selection = this.venueFinderPrefill.selection || {};
+      const customerInfo = this.venueFinderPrefill.customerInfo || {};
+      const image = selectedVenue.image
+        || selection.venueLayoutImage
+        || this.visualContext.restaurant.image_path;
+      const venueName = selection.venueName || selectedVenue.name || this.visualContext.primaryVenue.name;
+      const guests = customerInfo.guestCount || selectedVenue.capacityMax || this.visualContext.primaryVenue.capacity;
+      const theme = selection.themeName || this.themeConfig.name;
+      const packageName = selection.packageName || this.packageData.name;
+      const area = customerInfo.area || selectedVenue.suburb || 'Selected suburb';
+      const budget = customerInfo.budgetRange || selectedVenue.priceRange || 'Staging estimate';
+
+      return {
+        image,
+        venueName,
+        guests,
+        theme,
+        package: packageName,
+        area,
+        budget,
+        summary: `${venueName} is selected from Venue Finder as a demo/staging venue for ${guests} guests. The quote request keeps the venue, theme, package, area, and budget context together without creating a real booking or payment.`
+      };
     },
 
     quoteFlowSummary() {
@@ -912,10 +948,18 @@ export default {
     },
 
     applyVenueFinderPrefill() {
-      const prefill = readVenueFinderQuotePrefill();
-      if (!prefill || this.$route.query.source !== 'venue_finder') {
+      if (this.$route.query.source !== 'venue_finder') {
         return;
       }
+      const prefill = readVenueFinderQuotePrefill()
+        || buildVenueFinderQuotePrefill(this.$route.query.venue, {
+          area: this.$route.query.area,
+          adults: this.$route.query.adults || 10,
+          kids: this.$route.query.kids || 20,
+          budgetPerPerson: this.$route.query.budget || '25_45',
+          radiusKm: this.$route.query.radius || 5
+        });
+      if (!prefill) return;
 
       this.venueFinderPrefill = prefill;
       this.aiPrefill = prefill;
@@ -1011,6 +1055,10 @@ export default {
   margin-bottom: 28px;
 }
 
+.venue-prefill-notice .section-container {
+  max-width: 1100px;
+}
+
 .ai-prefill-card {
   display: grid;
   gap: 8px;
@@ -1028,6 +1076,95 @@ export default {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.venue-prefill-card {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+  gap: 18px;
+  align-items: stretch;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(125, 211, 252, 0.34);
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.2), rgba(37, 99, 235, 0.12)),
+    rgba(255, 255, 255, 0.08);
+}
+
+.venue-prefill-media {
+  position: relative;
+  min-height: 220px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.24);
+  background: rgba(15, 23, 42, 0.24);
+}
+
+.venue-prefill-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.venue-prefill-media span {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.venue-prefill-copy {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+}
+
+.venue-prefill-copy h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.venue-prefill-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+  line-height: 1.65;
+}
+
+.venue-prefill-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.venue-prefill-stats div {
+  border: 1px solid rgba(226, 232, 240, 0.2);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.22);
+  padding: 10px;
+}
+
+.venue-prefill-stats small {
+  display: block;
+  color: #bae6fd;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.venue-prefill-stats strong {
+  display: block;
+  margin-top: 4px;
+  color: #fff;
 }
 
 .ai-summary-grid {
@@ -1806,6 +1943,11 @@ export default {
 
 /* 移动端适配 */
 @media (max-width: 768px) {
+  .venue-prefill-card,
+  .venue-prefill-stats {
+    grid-template-columns: 1fr;
+  }
+
   .selection-grid {
     grid-template-columns: 1fr;
   }

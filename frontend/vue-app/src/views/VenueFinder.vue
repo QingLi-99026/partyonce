@@ -21,6 +21,18 @@
       </div>
     </section>
 
+    <section class="showcase-strip">
+      <div class="showcase-copy">
+        <p class="eyebrow">Restaurant A visual planning pack</p>
+        <h2>Compare the same room before and after theme styling</h2>
+        <p>
+          This local/staging asset keeps the room structure stable while showing how
+          Castle, Space, and Forest decor layers change the customer-facing quote story.
+        </p>
+      </div>
+      <img src="/party-assets/venues/restaurant-a/restaurant-a-showcase.png" alt="Restaurant A visual planning set" />
+    </section>
+
     <section class="finder-layout">
       <aside class="filter-panel">
         <div class="panel-heading">
@@ -159,7 +171,18 @@
             class="venue-card"
             :class="{ 'is-selected': selectedVenue?.id === venue.id }"
           >
-            <img :src="venue.image" :alt="venue.name" />
+            <div class="venue-card-media">
+              <img :src="venue.image" :alt="venue.name" />
+              <span class="demo-badge">Demo venue</span>
+              <div class="media-thumbs" aria-label="Theme preview images">
+                <img
+                  v-for="preview in themePreviewImages(venue)"
+                  :key="preview"
+                  :src="preview"
+                  alt=""
+                />
+              </div>
+            </div>
             <div class="venue-card-body">
               <div class="venue-card-title">
                 <div>
@@ -167,6 +190,9 @@
                   <h3>{{ venue.name }}</h3>
                 </div>
                 <strong>{{ venue.distance }}km</strong>
+              </div>
+              <div class="match-bar" aria-hidden="true">
+                <span :style="{ width: `${venue.match.score}%` }"></span>
               </div>
               <p>{{ venue.shortDescription }}</p>
               <div class="tag-row">
@@ -178,16 +204,54 @@
               <div class="tag-row is-muted">
                 <span v-for="theme in venue.suitableThemes" :key="theme">{{ themeLabel(theme) }}</span>
               </div>
+              <div class="fit-grid">
+                <div>
+                  <small>Best for</small>
+                  <strong>{{ venue.packageFit.join(' / ') }}</strong>
+                </div>
+                <div>
+                  <small>Visual fit</small>
+                  <strong>{{ visualFitLabel(venue) }}</strong>
+                </div>
+              </div>
               <p class="why-match">{{ venue.match.reasons.join(' · ') || venue.whyMatch }}</p>
               <div class="card-actions">
                 <button type="button" @click="openVenue(venue)">View venue</button>
-                <button type="button" @click="compareVenue(venue)">Compare</button>
+                <button type="button" :class="{ selected: isCompared(venue) }" @click="compareVenue(venue)">
+                  {{ isCompared(venue) ? 'Compared' : 'Compare' }}
+                </button>
                 <button class="primary" type="button" @click="useVenueForQuote(venue)">Use this venue for quote</button>
               </div>
             </div>
           </article>
         </div>
       </section>
+    </section>
+
+    <section v-if="compareVenues.length" class="compare-panel">
+      <div class="compare-heading">
+        <div>
+          <p class="eyebrow">Venue comparison</p>
+          <h2>Compare up to 3 shortlisted venues</h2>
+        </div>
+        <button type="button" @click="clearCompare">Clear compare</button>
+      </div>
+      <div class="compare-grid">
+        <article v-for="venue in compareVenues" :key="venue.id" class="compare-card">
+          <img :src="venue.image" :alt="venue.name" />
+          <h3>{{ venue.name }}</h3>
+          <dl>
+            <div><dt>Distance</dt><dd>{{ venue.distance }}km from {{ filters.area }}</dd></div>
+            <div><dt>Capacity</dt><dd>{{ venue.capacityMin }}-{{ venue.capacityMax }} guests</dd></div>
+            <div><dt>Budget</dt><dd>${{ venue.pricePerPersonMin }}-${{ venue.pricePerPersonMax }} pp</dd></div>
+            <div><dt>Package fit</dt><dd>{{ venue.packageFit.join(' / ') }}</dd></div>
+            <div><dt>Theme fit</dt><dd>{{ venue.suitableThemes.map(themeLabel).join(' / ') }}</dd></div>
+            <div><dt>Watch-outs</dt><dd>{{ venue.restrictions.join(' · ') }}</dd></div>
+          </dl>
+          <button class="primary" type="button" @click="useVenueForQuote(venue)">Use for quote</button>
+          <button type="button" @click="compareVenue(venue)">Remove</button>
+        </article>
+      </div>
     </section>
 
     <section v-if="selectedVenue" class="detail-panel" :id="selectedVenue.id">
@@ -215,6 +279,14 @@
           <span v-if="selectedVenue.hasDessertTableSpace">Dessert table space</span>
           <span v-if="selectedVenue.hasPhotoZoneSpace">Photo zone space</span>
           <span v-if="selectedVenue.balloonSetupPossible">Balloon setup possible</span>
+        </div>
+        <div class="detail-render-strip">
+          <img
+            v-for="preview in themePreviewImages(selectedVenue)"
+            :key="preview"
+            :src="preview"
+            alt="Restaurant A theme preview"
+          />
         </div>
         <div class="restriction-box">
           <strong>Still needs manual confirmation</strong>
@@ -273,6 +345,7 @@ const filters = reactive({
 
 const sortBy = ref('match');
 const selectedVenue = ref(null);
+const compareSelectedIds = ref([]);
 
 const areaOptions = venueFinderAreaOptions;
 
@@ -332,6 +405,15 @@ const sortedVenues = computed(() => {
   return result.sort((a, b) => b.match.score - a.match.score);
 });
 
+const compareVenues = computed(() => compareSelectedIds.value
+  .map((id) => sortedVenues.value.find((venue) => venue.id === id) || venueFinderFixtures.find((venue) => venue.id === id))
+  .filter(Boolean)
+  .map((venue) => {
+    if (venue.match) return venue;
+    const match = scoreVenueMatch(venue, normalizeVenueFinderFilters(filters));
+    return { ...venue, match, distance: match.distance };
+  }));
+
 function venueTypeLabel(type) {
   return venueTypeLabels[type] || type;
 }
@@ -342,6 +424,28 @@ function spaceTypeLabel(type) {
 
 function themeLabel(theme) {
   return themeLabels[theme] || theme;
+}
+
+function themePreviewImages(venue) {
+  const themeToImage = {
+    castle: '/party-assets/venues/restaurant-a/restaurant-a-castle-standard.png',
+    space: '/party-assets/venues/restaurant-a/restaurant-a-space-standard.png',
+    forest: '/party-assets/venues/restaurant-a/restaurant-a-forest-standard.png',
+    neutral: '/party-assets/venues/restaurant-a/restaurant-a-original.png'
+  };
+  return (venue.suitableThemes || []).slice(0, 3).map((theme) => themeToImage[theme]).filter(Boolean);
+}
+
+function visualFitLabel(venue) {
+  const strengths = [];
+  if (venue.hasDessertTableSpace) strengths.push('dessert table');
+  if (venue.hasPhotoZoneSpace) strengths.push('photo zone');
+  if (venue.balloonSetupPossible) strengths.push('balloon setup');
+  return strengths.slice(0, 2).join(' + ') || 'light styling';
+}
+
+function isCompared(venue) {
+  return compareSelectedIds.value.includes(venue.id);
 }
 
 function applyFamilySample() {
@@ -388,6 +492,7 @@ function resetFilters() {
   filters.hasDessertTableSpace = false;
   filters.hasPhotoZoneSpace = false;
   filters.balloonSetupPossible = false;
+  compareSelectedIds.value = [];
 }
 
 function openVenue(venue) {
@@ -399,7 +504,20 @@ function openVenue(venue) {
 }
 
 function compareVenue(venue) {
+  const index = compareSelectedIds.value.indexOf(venue.id);
+  if (index >= 0) {
+    compareSelectedIds.value.splice(index, 1);
+    return;
+  }
+  if (compareSelectedIds.value.length >= 3) {
+    compareSelectedIds.value.shift();
+  }
+  compareSelectedIds.value.push(venue.id);
   selectedVenue.value = venue;
+}
+
+function clearCompare() {
+  compareSelectedIds.value = [];
 }
 
 function useVenueForQuote(venue) {
@@ -436,7 +554,9 @@ watch(
 }
 
 .finder-hero,
+.showcase-strip,
 .finder-layout,
+.compare-panel,
 .detail-panel {
   max-width: 1240px;
   margin: 0 auto 24px;
@@ -506,6 +626,44 @@ button.primary {
   border-color: #2563eb;
   background: #2563eb;
   color: #fff;
+}
+
+button.selected {
+  border-color: #7c3aed;
+  background: #f3e8ff;
+  color: #5b21b6;
+}
+
+.showcase-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(360px, 1.28fr);
+  gap: 20px;
+  align-items: center;
+  border: 1px solid #e1e8f4;
+  border-radius: 8px;
+  background: #fff;
+  padding: 18px;
+  box-shadow: 0 14px 35px rgba(31, 42, 68, 0.06);
+}
+
+.showcase-copy h2 {
+  margin: 0 0 10px;
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.08;
+}
+
+.showcase-copy p:last-child {
+  color: #5a6578;
+  line-height: 1.65;
+}
+
+.showcase-strip > img {
+  width: 100%;
+  min-height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5eaf3;
+  display: block;
 }
 
 .hero-card {
@@ -661,13 +819,50 @@ button.primary {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-.venue-card img,
+.venue-card-media {
+  position: relative;
+  min-height: 240px;
+  overflow: hidden;
+  background: #eef2f7;
+}
+
+.venue-card-media > img,
 .detail-media img {
   width: 100%;
   height: 100%;
   min-height: 220px;
   object-fit: cover;
   display: block;
+}
+
+.demo-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 6px 9px;
+}
+
+.media-thumbs {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  gap: 6px;
+}
+
+.media-thumbs img {
+  width: 48px;
+  height: 42px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
 }
 
 .venue-card-body {
@@ -694,6 +889,21 @@ button.primary {
   padding: 4px 8px;
 }
 
+.match-bar {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5eaf3;
+  margin: 8px 0 12px;
+}
+
+.match-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #38bdf8, #2563eb, #7c3aed);
+}
+
 .tag-row,
 .capability-list {
   display: flex;
@@ -717,9 +927,95 @@ button.primary {
   color: #475569;
 }
 
+.fit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.fit-grid div {
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #edf1f7;
+  padding: 10px;
+}
+
+.fit-grid small {
+  display: block;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.fit-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: #172033;
+}
+
 .why-match {
   color: #475467;
   font-weight: 700;
+}
+
+.compare-panel {
+  border: 1px solid #dbe4f2;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  padding: 22px;
+  box-shadow: 0 14px 35px rgba(31, 42, 68, 0.06);
+}
+
+.compare-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.compare-heading h2 {
+  margin: 0;
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.compare-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #e1e8f4;
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px;
+}
+
+.compare-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.compare-card h3 {
+  margin: 0;
+}
+
+.compare-card dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.compare-card dl div {
+  border-radius: 6px;
+  background: #f8fafc;
+  padding: 8px;
 }
 
 .detail-panel {
@@ -767,8 +1063,24 @@ dd {
   padding: 14px;
 }
 
+.detail-render-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.detail-render-strip img {
+  width: 100%;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5eaf3;
+}
+
 @media (max-width: 960px) {
   .finder-hero,
+  .showcase-strip,
   .finder-layout,
   .detail-panel,
   .venue-card {
