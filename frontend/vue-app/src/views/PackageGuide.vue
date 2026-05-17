@@ -94,12 +94,9 @@
 
     <section class="family-choice-panel">
       <div class="section-heading">
-        <p class="eyebrow">Staging sample patterns</p>
-        <h2>How similar families usually narrow the choice</h2>
-        <p>
-          These are not real testimonials. They are preview patterns for checking whether parents can understand
-          the package ladder and high-value add-ons before a human quote review.
-        </p>
+        <p class="eyebrow">{{ familyChoiceCopy.kicker }}</p>
+        <h2>{{ familyChoiceCopy.title }}</h2>
+        <p>{{ familyChoiceCopy.copy }}</p>
       </div>
       <div class="family-choice-grid">
         <article v-for="choice in familyChoices" :key="choice.id">
@@ -140,7 +137,46 @@ import { packageTierExplanations, tierOrder } from '@/data/packageExplanation'
 const { t, locale } = useI18n()
 const router = useRouter()
 const trustChecklist = getTrustChecklist()
-const familyChoices = getPopularFamilyChoices()
+
+const zhFamilyChoices = [
+  {
+    id: 'standard-30-guests',
+    title: '多数家庭的实用起点',
+    familyProfile: '25-35 人 · 中等预算 · 餐厅 / 包间',
+    recommendedPackage: '标准套餐',
+    addOns: ['布置 / 撤场', '蛋糕或甜品台', '拍照角'],
+    whyItWorks: '基础套餐范围清楚，同时加入家长最常需要的省心服务。'
+  },
+  {
+    id: 'basic-budget-control',
+    title: '控制预算路线',
+    familyProfile: '15-25 人 · 简单场地 · 较低预算',
+    recommendedPackage: '基础套餐',
+    addOns: ['气球小组合', '简单蛋糕桌'],
+    whyItWorks: '适合只需要整洁布置、不想承担高额造型费用的家庭。'
+  },
+  {
+    id: 'premium-visual-event',
+    title: '强视觉照片路线',
+    familyProfile: '30-50 人 · 重要生日 · 更高视觉期待',
+    recommendedPackage: '高级套餐',
+    addOns: ['主持 / 现场引导', '拍照区', '摄影'],
+    whyItWorks: '适合希望派对更精致、更适合分享和留念的家庭。'
+  }
+]
+
+const familyChoices = computed(() => locale.value === 'zh' ? zhFamilyChoices : getPopularFamilyChoices())
+const familyChoiceCopy = computed(() => locale.value === 'zh'
+  ? {
+      kicker: '家庭选择样例',
+      title: '相似家庭通常如何缩小选择',
+      copy: '这些不是客户真实评价，而是预览测试用的决策样例，用来检查家长是否能在人工复核前理解套餐层级和高价值附加服务。'
+    }
+  : {
+      kicker: 'Staging sample patterns',
+      title: 'How similar families usually narrow the choice',
+      copy: 'These are not real testimonials. They are preview patterns for checking whether parents can understand the package ladder and high-value add-ons before a human quote review.'
+    })
 
 const safeFlowSteps = computed(() => [1, 2, 3, 4].map((step) => t(`quotePage.reviewTimeline.step${step}.title`)))
 

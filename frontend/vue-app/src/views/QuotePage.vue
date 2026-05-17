@@ -234,7 +234,7 @@
               <strong>{{ displayLineItemGroup(group) }}</strong>
               <span>{{ formatPrice(group.amount) }}</span>
               <p>{{ isChineseLocale ? group.description : $t('quotePage.lineItemGenericDescription') }}</p>
-              <small>{{ group.items.map((item) => item.amount_basis).filter(Boolean).join(' / ') }}</small>
+              <small>{{ displayAmountBasisList(group.items) }}</small>
             </article>
           </div>
           <p class="pricing-explainer-note">
@@ -391,7 +391,7 @@
                     <dd>{{ story.text.after }}</dd>
                   </div>
                 </dl>
-                <p>{{ story.text.proofPoint }}</p>
+                <p>{{ displayPackageText(story.text.proofPoint) }}</p>
                 <div class="story-services">
                   <button
                     v-for="service in story.services"
@@ -737,7 +737,7 @@ export default {
     },
 
     displayPackageExplanationLabel() {
-      return this.isChineseLocale ? this.packageExplanation.label : this.packageData.name;
+      return this.isChineseLocale ? this.packageExplanation.labelZh : this.packageData.name;
     },
 
     upgradeExplanation() {
@@ -917,6 +917,34 @@ export default {
     },
 
     popularFamilyChoices() {
+      if (this.isChineseLocale) {
+        return [
+          {
+            id: 'standard-30-guests',
+            title: '多数家庭的实用起点',
+            familyProfile: '25-35 人 · 中等预算 · 餐厅 / 包间',
+            recommendedPackage: '标准套餐',
+            addOns: ['布置 / 撤场', '蛋糕或甜品台', '拍照角'],
+            whyItWorks: '基础套餐范围清楚，同时加入家长最常需要的省心服务。'
+          },
+          {
+            id: 'basic-budget-control',
+            title: '控制预算路线',
+            familyProfile: '15-25 人 · 简单场地 · 较低预算',
+            recommendedPackage: '基础套餐',
+            addOns: ['气球小组合', '简单蛋糕桌'],
+            whyItWorks: '适合只需要整洁布置、不想承担高额造型费用的家庭。'
+          },
+          {
+            id: 'premium-visual-event',
+            title: '强视觉照片路线',
+            familyProfile: '30-50 人 · 重要生日 · 更高视觉期待',
+            recommendedPackage: '高级套餐',
+            addOns: ['主持 / 现场引导', '拍照区', '摄影'],
+            whyItWorks: '适合希望派对更精致、更适合分享和留念的家庭。'
+          }
+        ];
+      }
       return getPopularFamilyChoices();
     }
   },
@@ -931,14 +959,23 @@ export default {
     },
 
     displayPackageText(text) {
-      return this.isChineseLocale ? text : this.$t('quotePage.localizedPackageCopy');
+      if (!this.isChineseLocale) return this.$t('quotePage.localizedPackageCopy');
+      return String(text || '')
+        .replaceAll('Basic', '基础套餐')
+        .replaceAll('Standard', '标准套餐')
+        .replaceAll('Premium', '高级套餐');
     },
 
     displayPackageList(items) {
-      return this.isChineseLocale ? items : [
+      return this.isChineseLocale ? items.map((item) => this.displayPackageText(item)) : [
         this.$t('quotePage.localizedPackagePoint1'),
         this.$t('quotePage.localizedPackagePoint2')
       ];
+    },
+
+    displayAmountBasisList(items = []) {
+      const text = items.map((item) => item.amount_basis).filter(Boolean).join(' / ');
+      return this.displayPackageText(text);
     },
 
     goBack() {

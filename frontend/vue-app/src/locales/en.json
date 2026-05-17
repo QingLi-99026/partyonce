@@ -704,6 +704,61 @@
     },
     "futureInput": "Future 3D input shape"
   },
+  "trustConversionV1": {
+    "packageComparison": {
+      "kicker": "Package comparison",
+      "title": "Compare scope before requesting a quote",
+      "subtitle": "Basic, Standard, and Premium show what is included, who it suits, and what usually changes the estimate.",
+      "includedScope": "Included scope",
+      "bestFor": "Best for",
+      "upgradeValue": "Upgrade value",
+      "reviewRequired": "Final scope requires human review"
+    },
+    "quoteReviewTimeline": {
+      "kicker": "Review timeline",
+      "title": "From inquiry to quote confirmation",
+      "inquiry": "Inquiry submitted",
+      "plannerReview": "Planner reviews date, guests, venue, and supplier availability",
+      "quoteReady": "Quote is ready for customer review",
+      "depositReady": "Deposit readiness appears only after quote confirmation",
+      "noAutoOrder": "Submitting an inquiry does not create an automatic order"
+    },
+    "paymentSafety": {
+      "kicker": "Payment safety",
+      "title": "No live payment on this preview",
+      "estimateOnly": "Prices are estimates until a planner confirms scope and availability.",
+      "noCharge": "No card, wallet, deposit, webhook, or outbound payment is triggered here.",
+      "depositAfterReview": "Deposit steps appear only after the reviewed quote is accepted."
+    },
+    "shareRewardRules": {
+      "kicker": "Share reward rules",
+      "title": "Share rewards stay reviewable",
+      "eligibleAfterReview": "Rewards become eligible only after a valid referred inquiry is reviewed.",
+      "noSelfReferral": "Self-referrals, duplicate contacts, and test submissions are not eligible.",
+      "approvalRequired": "Reward approval is manual and can be adjusted for cancellations or invalid details.",
+      "stagingOnly": "In staging, rewards are status labels only and do not trigger payout."
+    },
+    "ageGuestLabels": {
+      "age": "Age",
+      "ageRange": "Age range",
+      "childAge": "Child age",
+      "guestCount": "Guest count",
+      "guestRange": "Guest range",
+      "adultGuests": "Adult guests",
+      "childGuests": "Child guests",
+      "ageGuests": "Age / guests"
+    },
+    "venueVerification": {
+      "kicker": "Venue verification",
+      "verified": "Verified venue",
+      "partnerVenue": "Partner venue",
+      "availabilityReview": "Availability needs review",
+      "capacityChecked": "Capacity checked",
+      "rulesChecked": "Venue rules checked",
+      "insurancePending": "Insurance / compliance pending",
+      "manualReview": "Manual venue review required"
+    }
+  },
   "footer": {
     "tagline": "One-stop party planning for family celebrations",
     "services": "Services",

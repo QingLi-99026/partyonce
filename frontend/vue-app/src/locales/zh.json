@@ -704,6 +704,61 @@
     },
     "futureInput": "未来 3D 输入结构"
   },
+  "trustConversionV1": {
+    "packageComparison": {
+      "kicker": "套餐对比",
+      "title": "提交报价前先比较服务范围",
+      "subtitle": "基础、标准、高级会说明包含内容、适合人群，以及通常影响预估价格的因素。",
+      "includedScope": "包含范围",
+      "bestFor": "适合对象",
+      "upgradeValue": "升级价值",
+      "reviewRequired": "最终范围需人工复核"
+    },
+    "quoteReviewTimeline": {
+      "kicker": "复核时间线",
+      "title": "从提交需求到确认报价",
+      "inquiry": "需求已提交",
+      "plannerReview": "策划师复核日期、人数、场地和供应商档期",
+      "quoteReady": "报价可供客户复核",
+      "depositReady": "只有报价确认后才显示订金准备",
+      "noAutoOrder": "提交需求不会自动创建订单"
+    },
+    "paymentSafety": {
+      "kicker": "支付安全",
+      "title": "当前预览不触发真实支付",
+      "estimateOnly": "价格在策划师确认范围和档期前均为预估。",
+      "noCharge": "这里不会触发银行卡、钱包、订金、webhook 或外部支付。",
+      "depositAfterReview": "订金步骤只会在已复核报价被接受后出现。"
+    },
+    "shareRewardRules": {
+      "kicker": "分享奖励规则",
+      "title": "分享奖励保持可复核",
+      "eligibleAfterReview": "只有有效转介绍需求完成复核后，奖励才可能符合条件。",
+      "noSelfReferral": "自我推荐、重复联系方式和测试提交不符合奖励条件。",
+      "approvalRequired": "奖励需人工审核，取消或信息无效时可调整。",
+      "stagingOnly": "在 staging 中，奖励只是状态标签，不触发真实 payout。"
+    },
+    "ageGuestLabels": {
+      "age": "年龄",
+      "ageRange": "年龄范围",
+      "childAge": "孩子年龄",
+      "guestCount": "宾客人数",
+      "guestRange": "人数范围",
+      "adultGuests": "成人宾客",
+      "childGuests": "儿童宾客",
+      "ageGuests": "年龄 / 人数"
+    },
+    "venueVerification": {
+      "kicker": "场地验证",
+      "verified": "已验证场地",
+      "partnerVenue": "合作场地",
+      "availabilityReview": "需复核档期",
+      "capacityChecked": "容量已核对",
+      "rulesChecked": "场地规则已核对",
+      "insurancePending": "保险 / 合规待确认",
+      "manualReview": "需要人工复核场地"
+    }
+  },
   "footer": {
     "tagline": "派对活动一站式策划平台",
     "services": "服务",
