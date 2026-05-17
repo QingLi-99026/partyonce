@@ -52,7 +52,14 @@ export function normalizeVenueFinderFilters(filters = {}) {
     themes: Array.isArray(filters.themes) ? filters.themes : [],
     hasDessertTableSpace: Boolean(filters.hasDessertTableSpace),
     hasPhotoZoneSpace: Boolean(filters.hasPhotoZoneSpace),
-    balloonSetupPossible: Boolean(filters.balloonSetupPossible)
+    balloonSetupPossible: Boolean(filters.balloonSetupPossible),
+    halalFriendly: Boolean(filters.halalFriendly),
+    noPorkFriendly: Boolean(filters.noPorkFriendly),
+    noAlcoholFriendly: Boolean(filters.noAlcoholFriendly),
+    vegetarianFriendly: Boolean(filters.vegetarianFriendly),
+    egglessCakeFriendly: Boolean(filters.egglessCakeFriendly),
+    allergyAware: Boolean(filters.allergyAware),
+    privateFamilyArea: Boolean(filters.privateFamilyArea)
   };
 }
 
@@ -103,7 +110,14 @@ export function scoreVenueMatch(venue, filters = {}) {
     ['publicTransportNearby', 'public transport nearby'],
     ['hasDessertTableSpace', 'dessert table space'],
     ['hasPhotoZoneSpace', 'photo zone space'],
-    ['balloonSetupPossible', 'balloon setup possible']
+    ['balloonSetupPossible', 'balloon setup possible'],
+    ['halalFriendly', 'halal-friendly planning'],
+    ['noPorkFriendly', 'no-pork planning'],
+    ['noAlcoholFriendly', 'no-alcohol planning'],
+    ['vegetarianFriendly', 'vegetarian-friendly planning'],
+    ['egglessCakeFriendly', 'eggless cake possible'],
+    ['allergyAware', 'allergy-aware review'],
+    ['privateFamilyArea', 'private family area']
   ];
 
   boolChecks.forEach(([key, label]) => {
@@ -138,10 +152,23 @@ export function buildVenueFinderQuotePrefill(venueOrId, filters = {}) {
   const themeId = chooseThemeForVenue(venue, normalized.childAgeRange);
   const packageId = budgetToPackageTier(normalized.budgetPerPerson);
   const recommendedAddons = recommendAddOnServicesForVenue(venue, normalized, 'en');
+  const culturalRequirements = [
+    normalized.halalFriendly && 'Halal-friendly food planning',
+    normalized.noPorkFriendly && 'No pork menu planning',
+    normalized.noAlcoholFriendly && 'No alcohol family setting',
+    normalized.vegetarianFriendly && 'Vegetarian options',
+    normalized.egglessCakeFriendly && 'Eggless cake option',
+    normalized.allergyAware && 'Allergy-aware review',
+    normalized.privateFamilyArea && 'Private/family area preferred'
+  ].filter(Boolean);
+  const culturalRequirementNote = culturalRequirements.length
+    ? `${culturalRequirements.join('; ')}. These items are staging filters and must be confirmed manually with the venue/caterer before formal quote.`
+    : '';
   const verificationChecklist = [
     'Confirm date and time availability with the venue.',
     'Confirm capacity, seating layout, pram/access needs and kids supervision rules.',
     'Confirm food menu, cake policy, allergy handling and any outside-food restrictions.',
+    'Confirm halal, no pork, no alcohol, vegetarian, eggless cake or other cultural/religious family requirements if requested.',
     'Confirm minimum spend, room hire, deposit policy and cancellation terms.',
     'Confirm decoration setup time, pack-down time, balloon/backdrop rules and noise limits.'
   ];
@@ -165,7 +192,8 @@ export function buildVenueFinderQuotePrefill(venueOrId, filters = {}) {
       guestCount: normalized.totalGuests,
       budgetRange: budgetToLabel(normalized.budgetPerPerson),
       area: normalized.area,
-      venuePreference: venue.name
+      venuePreference: venue.name,
+      culturalRequirements: culturalRequirementNote
     },
     selection: {
       themeId,
@@ -207,6 +235,17 @@ export function buildVenueFinderQuotePrefill(venueOrId, filters = {}) {
         publicSourceNotes: venue.publicSourceNotes || '',
         foodOptions: venue.foodOptions || [],
         allergyNotes: venue.allergyNotes || [],
+        culturalFitNotes: venue.culturalFitNotes || [],
+        dietaryTags: [
+          venue.halalFriendly && 'halal-friendly planning',
+          venue.noPorkFriendly && 'no-pork planning',
+          venue.noAlcoholFriendly && 'no-alcohol planning',
+          venue.vegetarianFriendly && 'vegetarian-friendly',
+          venue.egglessCakeFriendly && 'eggless cake possible',
+          venue.allergyAware && 'allergy-aware review',
+          venue.privateFamilyArea && 'private family area'
+        ].filter(Boolean),
+        requestedCulturalRequirements: culturalRequirements,
         roomHireHint: venue.roomHireHint || '',
         minimumSpendHint: venue.minimumSpendHint || '',
         restrictions: venue.restrictions || [],

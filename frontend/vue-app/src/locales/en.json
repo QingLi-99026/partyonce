@@ -468,6 +468,8 @@
     "foodNotesPlaceholder": "Example: shared banquet, kids menu, vegetarian options, or bring-your-own food questions",
     "allergyNotes": "Allergy and dietary notes",
     "allergyNotesPlaceholder": "Example: nut-free, halal, gluten-free, egg allergy, or no known allergies",
+    "culturalRequirements": "Cultural / religious requirements",
+    "culturalRequirementsPlaceholder": "Example: halal-friendly, no pork, no alcohol, vegetarian, prayer-friendly timing, or other family requirements",
     "cakeNeeds": "Cake and dessert needs",
     "cakeNeedsPlaceholder": "Example: need a cake supplier, bring own cake, dessert table, or cupcake tower",
     "parentPriorities": "Parent priorities",

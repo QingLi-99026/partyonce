@@ -57,6 +57,8 @@
               <strong>Manual venue checks before formal quote</strong>
               <span>Food: {{ venueFinderOps.foodOptions.join(' · ') }}</span>
               <span>Allergy: {{ venueFinderOps.allergyNotes.join(' · ') }}</span>
+              <span v-if="venueFinderOps.dietaryTags.length">Cultural fit: {{ venueFinderOps.dietaryTags.join(' · ') }}</span>
+              <span>Cultural notes: {{ venueFinderOps.culturalFitNotes.join(' · ') }}</span>
               <span>Room/minimum spend: {{ venueFinderOps.roomHireHint }} · {{ venueFinderOps.minimumSpendHint }}</span>
             </div>
             <div v-if="venueFinderVerification" class="venue-verification-panel">
@@ -554,6 +556,10 @@
             <textarea v-model="inquiryForm.allergyNotes" rows="2" :placeholder="$t('quotePage.allergyNotesPlaceholder')"></textarea>
           </div>
           <div class="form-group">
+            <label>{{ $t('quotePage.culturalRequirements') }}</label>
+            <textarea v-model="inquiryForm.culturalRequirements" rows="2" :placeholder="$t('quotePage.culturalRequirementsPlaceholder')"></textarea>
+          </div>
+          <div class="form-group">
             <label>{{ $t('quotePage.cakeNeeds') }}</label>
             <textarea v-model="inquiryForm.cakeNeeds" rows="2" :placeholder="$t('quotePage.cakeNeedsPlaceholder')"></textarea>
           </div>
@@ -622,6 +628,7 @@ export default {
         notes: '',
         foodNotes: '',
         allergyNotes: '',
+        culturalRequirements: '',
         cakeNeeds: '',
         parentPriorities: ''
       },
@@ -791,6 +798,8 @@ export default {
         return {
           foodOptions: verification.foodOptions?.length ? verification.foodOptions : ['Food options require manual confirmation'],
           allergyNotes: verification.allergyNotes?.length ? verification.allergyNotes : ['Allergy handling requires manual confirmation'],
+          culturalFitNotes: verification.culturalFitNotes?.length ? verification.culturalFitNotes : ['Cultural or religious requirements require manual confirmation'],
+          dietaryTags: verification.dietaryTags?.length ? verification.dietaryTags : [],
           roomHireHint: verification.roomHireHint || 'Room hire requires manual confirmation',
           minimumSpendHint: verification.minimumSpendHint || 'Minimum spend requires manual confirmation',
           verificationStatus: verification.status || 'manual_review_required'
@@ -1007,6 +1016,7 @@ export default {
         ['Notes', customerInfo.notes],
         ['Food / catering', customerInfo.foodNotes],
         ['Allergy / dietary', customerInfo.allergyNotes],
+        ['Cultural / religious requirements', customerInfo.culturalRequirements],
         ['Cake / dessert', customerInfo.cakeNeeds],
         ['Parent priorities', customerInfo.parentPriorities]
       ].filter(([, value]) => value && String(value).trim());
@@ -1095,6 +1105,7 @@ export default {
           notes: this.inquiryForm.notes,
           foodNotes: this.inquiryForm.foodNotes,
           allergyNotes: this.inquiryForm.allergyNotes,
+          culturalRequirements: this.inquiryForm.culturalRequirements,
           cakeNeeds: this.inquiryForm.cakeNeeds,
           parentPriorities: this.inquiryForm.parentPriorities,
           customerBrief: this.aiPrefill?.customerInfo?.customerBrief || null,
@@ -1214,6 +1225,7 @@ export default {
           notes: '',
           foodNotes: '',
           allergyNotes: '',
+          culturalRequirements: '',
           cakeNeeds: '',
           parentPriorities: ''
         };
@@ -1295,6 +1307,7 @@ export default {
         notes: prefill.customerInfo?.notes || '',
         foodNotes: prefill.customerInfo?.foodNotes || '',
         allergyNotes: prefill.customerInfo?.allergyNotes || '',
+        culturalRequirements: prefill.customerInfo?.culturalRequirements || '',
         cakeNeeds: prefill.customerInfo?.cakeNeeds || '',
         parentPriorities: prefill.customerInfo?.parentPriorities || ''
       };
@@ -1311,7 +1324,14 @@ export default {
           adults: this.$route.query.adults || 10,
           kids: this.$route.query.kids || 20,
           budgetPerPerson: this.$route.query.budget || '25_45',
-          radiusKm: this.$route.query.radius || 5
+          radiusKm: this.$route.query.radius || 5,
+          halalFriendly: this.$route.query.halal === '1',
+          noPorkFriendly: this.$route.query.noPork === '1',
+          noAlcoholFriendly: this.$route.query.noAlcohol === '1',
+          vegetarianFriendly: this.$route.query.vegetarian === '1',
+          egglessCakeFriendly: this.$route.query.egglessCake === '1',
+          allergyAware: this.$route.query.allergyAware === '1',
+          privateFamilyArea: this.$route.query.privateFamilyArea === '1'
         });
       if (!prefill) return;
 
@@ -1328,6 +1348,7 @@ export default {
         notes: prefill.customerInfo?.notes || '',
         foodNotes: prefill.customerInfo?.foodNotes || '',
         allergyNotes: prefill.customerInfo?.allergyNotes || '',
+        culturalRequirements: prefill.customerInfo?.culturalRequirements || '',
         cakeNeeds: prefill.customerInfo?.cakeNeeds || '',
         parentPriorities: prefill.customerInfo?.parentPriorities || ''
       };

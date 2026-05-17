@@ -171,6 +171,16 @@
         </div>
 
         <div class="panel-divider"></div>
+        <p class="eyebrow">Dietary & cultural fit</p>
+        <p class="filter-helper">Use these as planning filters only. The team still confirms details with the venue or caterer.</p>
+        <div class="check-grid">
+          <label v-for="check in culturalFilters" :key="check.key" class="check-row">
+            <input v-model="filters[check.key]" type="checkbox" />
+            <span>{{ check.label }}</span>
+          </label>
+        </div>
+
+        <div class="panel-divider"></div>
         <p class="eyebrow">Theme fit</p>
         <div class="check-grid">
           <label v-for="theme in themeFilters" :key="theme.value" class="check-row">
@@ -242,6 +252,9 @@
               <div class="tag-row is-muted">
                 <span v-for="theme in venue.suitableThemes" :key="theme">{{ themeLabel(theme) }}</span>
               </div>
+              <div v-if="culturalFitLabels(venue).length" class="tag-row cultural-fit-row">
+                <span v-for="label in culturalFitLabels(venue).slice(0, 4)" :key="label">{{ label }}</span>
+              </div>
               <p v-if="venue.researchSeed" class="research-note">
                 Public source found · owner call required before customer quote.
               </p>
@@ -304,6 +317,7 @@
             <div><dt>Add-on upside</dt><dd>{{ recommendedAddOns(venue).slice(0, 3).map((item) => item.name).join(' / ') }}</dd></div>
             <div><dt>Food check</dt><dd>{{ venueOps(venue).foodOptions[0] }}</dd></div>
             <div><dt>Allergy check</dt><dd>{{ venueOps(venue).allergyNotes[0] }}</dd></div>
+            <div><dt>Cultural fit</dt><dd>{{ culturalFitLabels(venue).join(' / ') || 'Manual family requirements review' }}</dd></div>
             <div><dt>Min spend</dt><dd>{{ venueOps(venue).minimumSpendHint }}</dd></div>
             <div><dt>Watch-outs</dt><dd>{{ venue.restrictions.join(' · ') }}</dd></div>
           </dl>
@@ -348,6 +362,7 @@
           <span v-if="selectedVenue.hasDessertTableSpace">Dessert table space</span>
           <span v-if="selectedVenue.hasPhotoZoneSpace">Photo zone space</span>
           <span v-if="selectedVenue.balloonSetupPossible">Balloon setup possible</span>
+          <span v-for="label in culturalFitLabels(selectedVenue)" :key="label">{{ label }}</span>
         </div>
         <div class="detail-render-strip">
           <img
@@ -380,6 +395,8 @@
           <dl>
             <div><dt>Food options</dt><dd>{{ venueOps(selectedVenue).foodOptions.join(' · ') }}</dd></div>
             <div><dt>Allergy notes</dt><dd>{{ venueOps(selectedVenue).allergyNotes.join(' · ') }}</dd></div>
+            <div><dt>Dietary / cultural fit</dt><dd>{{ culturalFitLabels(selectedVenue).join(' · ') || 'Manual review required' }}</dd></div>
+            <div v-if="selectedVenue.culturalFitNotes?.length"><dt>Cultural planning notes</dt><dd>{{ selectedVenue.culturalFitNotes.join(' · ') }}</dd></div>
             <div><dt>Room hire</dt><dd>{{ venueOps(selectedVenue).roomHireHint }}</dd></div>
             <div><dt>Minimum spend</dt><dd>{{ venueOps(selectedVenue).minimumSpendHint }}</dd></div>
             <div><dt>Verification</dt><dd>{{ venueOps(selectedVenue).verificationStatus }}</dd></div>
@@ -441,7 +458,14 @@ const filters = reactive({
   themes: [],
   hasDessertTableSpace: true,
   hasPhotoZoneSpace: true,
-  balloonSetupPossible: true
+  balloonSetupPossible: true,
+  halalFriendly: false,
+  noPorkFriendly: false,
+  noAlcoholFriendly: false,
+  vegetarianFriendly: false,
+  egglessCakeFriendly: false,
+  allergyAware: false,
+  privateFamilyArea: false
 });
 
 const sortBy = ref('match');
@@ -463,6 +487,16 @@ const checkFilters = [
   { key: 'hasDessertTableSpace', label: 'Dessert table space' },
   { key: 'hasPhotoZoneSpace', label: 'Photo zone space' },
   { key: 'balloonSetupPossible', label: 'Balloon setup possible' }
+];
+
+const culturalFilters = [
+  { key: 'halalFriendly', label: 'Halal-friendly planning' },
+  { key: 'noPorkFriendly', label: 'No pork menu planning' },
+  { key: 'noAlcoholFriendly', label: 'No alcohol family setting' },
+  { key: 'vegetarianFriendly', label: 'Vegetarian-friendly options' },
+  { key: 'egglessCakeFriendly', label: 'Eggless cake possible' },
+  { key: 'allergyAware', label: 'Allergy-aware review' },
+  { key: 'privateFamilyArea', label: 'Private / family area' }
 ];
 
 const themeFilters = [
@@ -492,7 +526,7 @@ const filteredVenues = computed(() => scoredVenues.value.filter((venue) => {
   if (filters.venueType && venue.venueType !== filters.venueType) return false;
   if (filters.spaceType && venue.spaceType !== filters.spaceType) return false;
 
-  const boolKeys = checkFilters.map((item) => item.key);
+  const boolKeys = [...checkFilters, ...culturalFilters].map((item) => item.key);
   if (boolKeys.some((key) => filters[key] && !venue[key])) return false;
 
   if (filters.themes.length && !filters.themes.some((theme) => venue.suitableThemes.includes(theme))) return false;
@@ -548,6 +582,19 @@ function visualFitLabel(venue) {
   return strengths.slice(0, 2).join(' + ') || 'light styling';
 }
 
+function culturalFitLabels(venue) {
+  const checks = [
+    ['halalFriendly', 'Halal-friendly'],
+    ['noPorkFriendly', 'No pork'],
+    ['noAlcoholFriendly', 'No alcohol'],
+    ['vegetarianFriendly', 'Vegetarian'],
+    ['egglessCakeFriendly', 'Eggless cake'],
+    ['allergyAware', 'Allergy-aware'],
+    ['privateFamilyArea', 'Private family area']
+  ];
+  return checks.filter(([key]) => venue?.[key]).map(([, label]) => label);
+}
+
 function recommendedAddOns(venue) {
   return recommendAddOnServicesForVenue(venue, normalizeVenueFinderFilters(filters), 'en');
 }
@@ -580,6 +627,13 @@ function applyFamilySample() {
   filters.hasDessertTableSpace = true;
   filters.hasPhotoZoneSpace = true;
   filters.balloonSetupPossible = true;
+  filters.halalFriendly = false;
+  filters.noPorkFriendly = false;
+  filters.noAlcoholFriendly = false;
+  filters.vegetarianFriendly = true;
+  filters.egglessCakeFriendly = true;
+  filters.allergyAware = true;
+  filters.privateFamilyArea = false;
 }
 
 function resetFilters() {
@@ -604,6 +658,13 @@ function resetFilters() {
   filters.hasDessertTableSpace = false;
   filters.hasPhotoZoneSpace = false;
   filters.balloonSetupPossible = false;
+  filters.halalFriendly = false;
+  filters.noPorkFriendly = false;
+  filters.noAlcoholFriendly = false;
+  filters.vegetarianFriendly = false;
+  filters.egglessCakeFriendly = false;
+  filters.allergyAware = false;
+  filters.privateFamilyArea = false;
   compareSelectedIds.value = [];
 }
 
@@ -643,7 +704,14 @@ function useVenueForQuote(venue) {
       venue: venue.id,
       theme,
       scene: 'restaurant-a',
-      package: pkg
+      package: pkg,
+      halal: filters.halalFriendly ? '1' : undefined,
+      noPork: filters.noPorkFriendly ? '1' : undefined,
+      noAlcohol: filters.noAlcoholFriendly ? '1' : undefined,
+      vegetarian: filters.vegetarianFriendly ? '1' : undefined,
+      egglessCake: filters.egglessCakeFriendly ? '1' : undefined,
+      allergyAware: filters.allergyAware ? '1' : undefined,
+      privateFamilyArea: filters.privateFamilyArea ? '1' : undefined
     }
   });
 }
@@ -989,6 +1057,13 @@ button.selected {
   min-height: 16px;
 }
 
+.filter-helper {
+  margin: -6px 0 10px;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .results-panel {
   padding: 22px;
 }
@@ -1161,6 +1236,11 @@ button.selected {
 .tag-row.is-muted span {
   background: #f1f5f9;
   color: #475569;
+}
+
+.tag-row.cultural-fit-row span {
+  background: #ecfdf3;
+  color: #047857;
 }
 
 .fit-grid {

@@ -229,6 +229,7 @@ const readInquiryQuotes = () => {
         customer_requirements: {
           food_notes: inquiry.customerInfo?.foodNotes || '',
           allergy_notes: inquiry.customerInfo?.allergyNotes || '',
+          cultural_requirements: inquiry.customerInfo?.culturalRequirements || '',
           cake_needs: inquiry.customerInfo?.cakeNeeds || '',
           parent_priorities: inquiry.customerInfo?.parentPriorities || ''
         }
@@ -236,6 +237,7 @@ const readInquiryQuotes = () => {
       customer_requirements: {
         food_notes: inquiry.customerInfo?.foodNotes || '',
         allergy_notes: inquiry.customerInfo?.allergyNotes || '',
+        cultural_requirements: inquiry.customerInfo?.culturalRequirements || '',
         cake_needs: inquiry.customerInfo?.cakeNeeds || '',
         parent_priorities: inquiry.customerInfo?.parentPriorities || ''
       },

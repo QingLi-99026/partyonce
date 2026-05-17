@@ -468,6 +468,8 @@
     "foodNotesPlaceholder": "예: 가족 식사 메뉴, 어린이 메뉴, 채식 옵션, 음식 반입 문의",
     "allergyNotes": "알레르기 및 식단 제한",
     "allergyNotesPlaceholder": "예: 견과류 제외, 할랄, 글루텐 프리, 달걀 알레르기, 또는 알려진 알레르기 없음",
+    "culturalRequirements": "문화 / 종교 요청",
+    "culturalRequirementsPlaceholder": "예: 할랄 친화, 돼지고기 제외, 무알코올, 채식, 기도 시간 배려 또는 기타 가족 요청",
     "cakeNeeds": "케이크 및 디저트 요청",
     "cakeNeedsPlaceholder": "예: 케이크 업체 필요, 케이크 반입, 디저트 테이블, 컵케이크 타워",
     "parentPriorities": "부모님이 가장 중요하게 보는 점",

@@ -95,6 +95,10 @@
                 <dt>Allergy / dietary</dt>
                 <dd>{{ customerRequirements.allergy_notes }}</dd>
               </div>
+              <div v-if="customerRequirements.cultural_requirements">
+                <dt>Cultural / religious requirements</dt>
+                <dd>{{ customerRequirements.cultural_requirements }}</dd>
+              </div>
               <div v-if="customerRequirements.cake_needs">
                 <dt>Cake / dessert</dt>
                 <dd>{{ customerRequirements.cake_needs }}</dd>
@@ -787,6 +791,7 @@ const buildFallbackQuoteDetail = () => {
       customer_requirements: {
         food_notes: 'Family sharing menu with kids options.',
         allergy_notes: 'Confirm nut-free dessert options before final quote.',
+        cultural_requirements: 'Halal/no pork/no alcohol requirements should be confirmed with venue or caterer before sending a formal quote.',
         cake_needs: 'Cake or dessert table options requested.',
         parent_priorities: 'Easy setup and strong photo moments.'
       }
@@ -794,6 +799,7 @@ const buildFallbackQuoteDetail = () => {
     customer_requirements: {
       food_notes: 'Family sharing menu with kids options.',
       allergy_notes: 'Confirm nut-free dessert options before final quote.',
+      cultural_requirements: 'Halal/no pork/no alcohol requirements should be confirmed with venue or caterer before sending a formal quote.',
       cake_needs: 'Cake or dessert table options requested.',
       parent_priorities: 'Easy setup and strong photo moments.'
     },

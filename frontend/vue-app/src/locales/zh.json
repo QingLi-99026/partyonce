@@ -468,6 +468,8 @@
     "foodNotesPlaceholder": "例如：家庭套餐、儿童餐、素食、自带食物或餐厅菜单问题",
     "allergyNotes": "过敏与饮食禁忌",
     "allergyNotesPlaceholder": "例如：坚果过敏、清真、无麸质、鸡蛋过敏，或暂无已知过敏",
+    "culturalRequirements": "文化 / 宗教需求",
+    "culturalRequirementsPlaceholder": "例如：清真友好、无猪肉、无酒精、素食、祷告时间安排或其他家庭需求",
     "cakeNeeds": "蛋糕与甜品需求",
     "cakeNeedsPlaceholder": "例如：需要蛋糕供应商、自带蛋糕、甜品台或纸杯蛋糕塔",
     "parentPriorities": "家长最在意的点",
