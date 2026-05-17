@@ -209,7 +209,9 @@
           >
             <div class="venue-card-media">
               <img :src="venue.image" :alt="venue.name" />
-              <span class="demo-badge">Demo venue</span>
+              <span class="demo-badge" :class="{ 'is-research': venue.researchSeed }">
+                {{ venue.researchSeed ? 'Public research seed' : 'Demo venue' }}
+              </span>
               <div class="media-thumbs" aria-label="Theme preview images">
                 <img
                   v-for="preview in themePreviewImages(venue)"
@@ -240,6 +242,9 @@
               <div class="tag-row is-muted">
                 <span v-for="theme in venue.suitableThemes" :key="theme">{{ themeLabel(theme) }}</span>
               </div>
+              <p v-if="venue.researchSeed" class="research-note">
+                Public source found · owner call required before customer quote.
+              </p>
               <div class="fit-grid">
                 <div>
                   <small>Best for</small>
@@ -311,9 +316,19 @@
     <section v-if="selectedVenue" class="detail-panel" :id="selectedVenue.id">
       <div class="detail-media">
         <img :src="selectedVenue.image" :alt="selectedVenue.name" />
+        <div v-if="selectedVenue.beforeImage && selectedVenue.afterImage" class="before-after-strip">
+          <figure>
+            <img :src="selectedVenue.beforeImage" :alt="`${selectedVenue.name} before styling`" />
+            <figcaption>Before venue reference</figcaption>
+          </figure>
+          <figure>
+            <img :src="selectedVenue.afterImage" :alt="`${selectedVenue.name} after styling concept`" />
+            <figcaption>After styling concept</figcaption>
+          </figure>
+        </div>
       </div>
       <article>
-        <p class="eyebrow">Venue detail · staging fixture</p>
+        <p class="eyebrow">{{ selectedVenue.researchSeed ? 'Venue detail · public research seed' : 'Venue detail · staging fixture' }}</p>
         <h2>{{ selectedVenue.name }}</h2>
         <p>{{ selectedVenue.shortDescription }}</p>
         <dl class="detail-list">
@@ -368,8 +383,13 @@
             <div><dt>Room hire</dt><dd>{{ venueOps(selectedVenue).roomHireHint }}</dd></div>
             <div><dt>Minimum spend</dt><dd>{{ venueOps(selectedVenue).minimumSpendHint }}</dd></div>
             <div><dt>Verification</dt><dd>{{ venueOps(selectedVenue).verificationStatus }}</dd></div>
+            <div v-if="selectedVenue.publicSourceLabel"><dt>Public source</dt><dd>{{ selectedVenue.publicSourceLabel }}</dd></div>
           </dl>
           <p>These values are local/staging planning fields. Formal quotes require direct venue confirmation.</p>
+          <p v-if="selectedVenue.publicSourceUrl" class="source-link">
+            Source URL for owner verification:
+            <a :href="selectedVenue.publicSourceUrl" target="_blank" rel="noopener noreferrer">{{ selectedVenue.publicSourceUrl }}</a>
+          </p>
         </div>
         <div class="hero-actions">
           <button class="primary" type="button" @click="useVenueForQuote(selectedVenue)">Use this venue for quote</button>
@@ -510,6 +530,7 @@ function themeLabel(theme) {
 }
 
 function themePreviewImages(venue) {
+  if (venue.beforeImage && venue.afterImage) return [venue.beforeImage, venue.afterImage, venue.image].filter(Boolean);
   const themeToImage = {
     castle: '/party-assets/venues/restaurant-a/restaurant-a-castle-standard.png',
     space: '/party-assets/venues/restaurant-a/restaurant-a-space-standard.png',
@@ -1047,6 +1068,21 @@ button.selected {
   padding: 6px 9px;
 }
 
+.demo-badge.is-research {
+  background: rgba(14, 116, 144, 0.86);
+}
+
+.research-note {
+  margin: 8px 0 0;
+  border-left: 3px solid #0891b2;
+  background: #ecfeff;
+  color: #155e75;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
 .media-thumbs {
   position: absolute;
   right: 12px;
@@ -1300,6 +1336,47 @@ button.selected {
   overflow: hidden;
   border-radius: 8px;
   background: #eef2f7;
+}
+
+.before-after-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px;
+  background: #f8fafc;
+}
+
+.before-after-strip figure {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.before-after-strip img {
+  width: 100%;
+  height: 150px;
+  min-height: 150px;
+  object-fit: cover;
+}
+
+.before-after-strip figcaption {
+  padding: 8px 10px;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.source-link {
+  overflow-wrap: anywhere;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.source-link a {
+  color: #0f766e;
+  font-weight: 800;
 }
 
 .detail-list {
