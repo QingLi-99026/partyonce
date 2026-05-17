@@ -37,7 +37,7 @@
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-avatar :size="32" :icon="UserFilled" />
-              <span class="username">{{ userStore.userInfo.full_name }}</span>
+              <span class="username">{{ displayUsername }}</span>
               <el-icon><ArrowDown /></el-icon>
             </span>
             <template #dropdown>
@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store'
@@ -92,6 +92,13 @@ const router = useRouter()
 const userStore = useUserStore()
 const showLoginModal = inject('showLogin')
 const { t } = useI18n()
+
+const displayUsername = computed(() => {
+  const rawName = String(userStore.userInfo?.full_name || userStore.userInfo?.name || '').trim()
+  if (!rawName) return t('nav.profile')
+  if (/(staging|fixture|local|demo)/i.test(rawName)) return t('nav.previewUser')
+  return rawName
+})
 
 const showLogin = () => {
   showLoginModal.value = true
