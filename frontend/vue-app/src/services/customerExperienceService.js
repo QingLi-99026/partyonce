@@ -64,6 +64,12 @@ const quoteFixtures = [
       guest_count: 18,
       event_date: '2026-06-14'
     },
+    customer_requirements: {
+      food_notes: 'Family sharing menu with simple kids options.',
+      allergy_notes: 'Confirm nut-free dessert options before final quote.',
+      cake_needs: 'Premium cake or cupcake tower options requested.',
+      parent_priorities: 'Beautiful photos, easy setup, and low parent workload.'
+    },
     currency: 'AUD',
     amount: 1680,
     valid_until: '2026-05-25',
@@ -73,7 +79,23 @@ const quoteFixtures = [
       { type: 'decor_fee', name: 'Premium castle room styling', amount: 760 },
       { type: 'supplier_fee', name: 'Cake and activity supplier allowance', amount: 280 },
       { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
-      { type: 'service_fee', name: 'Planning service', amount: 60 }
+      { type: 'service_fee', name: 'Planning service', amount: 60 },
+      {
+        type: 'optional_upgrade',
+        name: 'Photo zone / backdrop upgrade',
+        amount: 360,
+        amount_basis: 'Customer-selected visual upgrade for stronger family photos and social sharing.',
+        customer_explanation: 'Adds a styled photo corner with backdrop, balloons, and theme signage.',
+        admin_edit_hint: 'Confirm backdrop size, venue wall access, and setup time before formal quote.'
+      },
+      {
+        type: 'optional_upgrade',
+        name: 'Kids party host / MC',
+        amount: 320,
+        amount_basis: 'Customer-selected host support for games, cake moment, and activity flow.',
+        customer_explanation: 'Keeps the party lively and organised so parents are not running every moment.',
+        admin_edit_hint: 'Confirm host language, duration, run sheet, and talent availability.'
+      }
     ]
   },
   {
@@ -92,6 +114,12 @@ const quoteFixtures = [
       guest_count: 14,
       event_date: '2026-06-22'
     },
+    customer_requirements: {
+      food_notes: 'Casual dining with kids-friendly snack table.',
+      allergy_notes: 'Check gluten-free snack options.',
+      cake_needs: 'Bring-own cake may be preferred.',
+      parent_priorities: 'Good activity flow and clear setup timing.'
+    },
     currency: 'AUD',
     amount: 1240,
     valid_until: '2026-05-28',
@@ -101,7 +129,15 @@ const quoteFixtures = [
       { type: 'decor_fee', name: 'Standard space room styling', amount: 520 },
       { type: 'supplier_fee', name: 'Activity materials supplier allowance', amount: 220 },
       { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
-      { type: 'transport_fee', name: 'Transport and handling', amount: 60 }
+      { type: 'transport_fee', name: 'Transport and handling', amount: 60 },
+      {
+        type: 'optional_upgrade',
+        name: 'Sound / microphone starter pack',
+        amount: 180,
+        amount_basis: 'Customer-selected audio support for host, music, or activity announcements.',
+        customer_explanation: 'Adds basic sound and microphone support for a smoother party flow.',
+        admin_edit_hint: 'Confirm venue sound restrictions, access to power, and equipment pickup.'
+      }
     ]
   },
   {
@@ -189,7 +225,19 @@ const readInquiryQuotes = () => {
         venue: inquiry.selection?.sceneName || '-',
         guest_count: inquiry.customerInfo?.guestCount || '-',
         event_date: inquiry.customerInfo?.preferredDate || '-',
-        party_scene_config: inquiry.party_scene_config || inquiry.selection?.party_scene_config || inquiry.aiRecommendation?.party_scene_config || null
+        party_scene_config: inquiry.party_scene_config || inquiry.selection?.party_scene_config || inquiry.aiRecommendation?.party_scene_config || null,
+        customer_requirements: {
+          food_notes: inquiry.customerInfo?.foodNotes || '',
+          allergy_notes: inquiry.customerInfo?.allergyNotes || '',
+          cake_needs: inquiry.customerInfo?.cakeNeeds || '',
+          parent_priorities: inquiry.customerInfo?.parentPriorities || ''
+        }
+      },
+      customer_requirements: {
+        food_notes: inquiry.customerInfo?.foodNotes || '',
+        allergy_notes: inquiry.customerInfo?.allergyNotes || '',
+        cake_needs: inquiry.customerInfo?.cakeNeeds || '',
+        parent_priorities: inquiry.customerInfo?.parentPriorities || ''
       },
       party_scene_config: inquiry.party_scene_config || inquiry.selection?.party_scene_config || inquiry.aiRecommendation?.party_scene_config || null,
       currency: 'AUD',
@@ -225,8 +273,10 @@ const normalizeQuote = (quote) => {
       package: snapshot.packageName || snapshot.package || quote.package || '-',
       venue: snapshot.venueName || snapshot.venue || snapshot.location || '-',
       guest_count: snapshot.guestCount || snapshot.guest_count || '-',
-      event_date: snapshot.eventDate || snapshot.event_date || snapshot.preferredDate || '-'
+      event_date: snapshot.eventDate || snapshot.event_date || snapshot.preferredDate || '-',
+      customer_requirements: quote.customer_requirements || snapshot.customer_requirements || {}
     },
+    customer_requirements: quote.customer_requirements || snapshot.customer_requirements || {},
     party_scene_config: quote.party_scene_config || snapshot.party_scene_config || quote.aiRecommendation?.party_scene_config || null,
     currency: quote.currency || 'AUD',
     amount: Number(quote.amount || quote.final_total || quote.total_amount || 0),
@@ -260,6 +310,7 @@ const normalizeOrder = (order) => {
     created_at: order.created_at || null,
     updated_at: order.updated_at || null,
     party_scene_config: order.party_scene_config || order.selection_snapshot?.party_scene_config || order.quote?.party_scene_config || null,
+    customer_requirements: order.customer_requirements || order.selection_snapshot?.customer_requirements || order.quote?.customer_requirements || {},
     line_items: normalizeQuoteLineItems(order.line_items)
   }
 }

@@ -22,7 +22,7 @@
     </section>
 
     <section class="package-section">
-      <h2>Basic / Standard / Premium</h2>
+      <h2>{{ t('tiers.heading') }}</h2>
       <div class="package-grid">
         <article v-for="tier in tiers" :key="tier.id" class="package-card">
           <span>{{ tier.icon }}</span>
@@ -80,19 +80,19 @@ const tiers = computed(() => [
     id: 'basic',
     icon: '🎈',
     label: t('tiers.basic'),
-    description: 'Essential table styling, theme balloons, welcome sign, and a light photo corner.'
+    description: t('tiers.basicDescription')
   },
   {
     id: 'standard',
     icon: '🎂',
     label: t('tiers.standard'),
-    description: 'Full theme table styling, balloon arch, dessert table, backdrop, and supplier guidance.'
+    description: t('tiers.standardDescription')
   },
   {
     id: 'premium',
     icon: '✨',
     label: t('tiers.premium'),
-    description: 'Immersive backdrop, lighting layer, custom standees, hero photo zone, and on-site coordination.'
+    description: t('tiers.premiumDescription')
   }
 ])
 </script>

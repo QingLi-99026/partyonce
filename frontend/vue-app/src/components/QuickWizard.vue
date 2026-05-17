@@ -310,8 +310,7 @@ const finish = () => {
   const eventId = createdEvent.value?.id || 'new'
   emit('complete', { ...form.value, eventId })
   close()
-  // 跳转到事件详情或AI策划页
-  window.location.href = `/ai-planner?eventId=${eventId}&fromWizard=1`
+  window.location.href = `/quote?eventId=${eventId}&fromWizard=1`
 }
 
 const close = () => {

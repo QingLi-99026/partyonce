@@ -14,8 +14,8 @@ export const getPaymentReadiness = () => {
   const testModeEnabled = ['1', 'true', 'yes', 'test'].includes(testModeFlag)
   const blockers = []
 
-  if (!testModeEnabled) blockers.push('VITE_STRIPE_TEST_MODE is not enabled for local/staging.')
-  if (!publishableKey) blockers.push('VITE_STRIPE_PUBLISHABLE_KEY is missing.')
+  if (!testModeEnabled) blockers.push('Test-mode payment preparation is not enabled for this local/staging preview.')
+  if (!publishableKey) blockers.push('Test payment key is not configured for this local/staging preview.')
   if (hasLivePublishableKey) blockers.push('Live publishable key detected; payment readiness blocks live mode.')
   if (publishableKey && !hasTestPublishableKey) blockers.push('Publishable key is not a test-mode payment key.')
 

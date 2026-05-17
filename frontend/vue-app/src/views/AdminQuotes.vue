@@ -23,6 +23,31 @@
       title="Local/staging skeleton only: no Order API, no real payment, no webhook/n8n, no email/SMS/WhatsApp."
     />
 
+    <section class="ops-guidance-panel">
+      <div>
+        <p class="eyebrow">Ops quote explanation</p>
+        <h2>Use the queue to explain value, not just status</h2>
+        <p>
+          Before a formal quote is sent, confirm venue rules, food/allergy handling, supplier availability,
+          and which optional upgrades are worth recommending to the family.
+        </p>
+      </div>
+      <div class="ops-guidance-grid">
+        <article>
+          <strong>Human review checklist</strong>
+          <ul>
+            <li v-for="item in trustChecklist" :key="item">{{ item }}</li>
+          </ul>
+        </article>
+        <article>
+          <strong>High-margin add-ons to explain</strong>
+          <ul>
+            <li v-for="item in priorityAddOns" :key="item.id">{{ item.name }} · {{ formatMoney(item.price) }}</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
     <section class="stats-grid">
       <article class="stat-card">
         <span>Total Quotes</span>
@@ -270,6 +295,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import apiClient from '@/api'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
+import { getAddOnServices } from '@/data/addOnServices'
+import { getTrustChecklist } from '@/data/parentTrustContent'
 
 const router = useRouter()
 
@@ -289,13 +316,19 @@ const bulkOwner = ref('')
 const bulkNextAction = ref('')
 const bulkStatus = ref('')
 const bulkLoading = ref(false)
+const trustChecklist = getTrustChecklist()
+const priorityAddOns = getAddOnServices('en')
+  .filter((item) => ['event-styling', 'setup-packdown', 'host-mc', 'cake-dessert'].includes(item.id))
+  .map((item) => ({ ...item, name: item.text.name }))
 
 const shouldUseStaticPreviewFallback = () => {
   if (typeof window === 'undefined') return false
   if (import.meta.env.VITE_ENABLE_REMOTE_QUOTE_API === 'true') return false
   const isVercelPreview = /vercel\.app$/i.test(window.location.hostname)
   const isViteStaticPreview = /^417\d$/.test(window.location.port)
-  return isVercelPreview || isViteStaticPreview
+  const isLocalFrontendPreview = ['127.0.0.1', 'localhost'].includes(window.location.hostname)
+    && /^51\d\d$/.test(window.location.port)
+  return isVercelPreview || isViteStaticPreview || isLocalFrontendPreview
 }
 
 const staticPreviewQuoteRows = [
@@ -622,6 +655,7 @@ onMounted(loadQuotes)
 .stats-grid,
 .toolbar,
 .status-guide,
+.ops-guidance-panel,
 .table-shell {
   max-width: 1280px;
   margin-left: auto;
@@ -630,6 +664,57 @@ onMounted(loadQuotes)
 
 .scope-alert {
   margin-bottom: 18px;
+}
+
+.ops-guidance-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #eef2ff, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.ops-guidance-panel h2 {
+  margin: 0 0 8px;
+  color: #312e81;
+}
+
+.ops-guidance-panel p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.ops-guidance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ops-guidance-grid article {
+  border: 1px solid #e0e7ff;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+}
+
+.ops-guidance-grid strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #1e293b;
+}
+
+.ops-guidance-grid ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+  line-height: 1.45;
 }
 
 .stats-grid {
@@ -833,8 +918,10 @@ onMounted(loadQuotes)
   }
 
   .stats-grid,
+  .ops-guidance-panel,
+  .ops-guidance-grid,
   .status-guide {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .search-input,

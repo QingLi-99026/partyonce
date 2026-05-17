@@ -82,6 +82,96 @@
         :recommendation-text="orderRecommendationText"
       />
 
+      <section class="panel package-fit-panel">
+        <h2>套餐、报价与下一步</h2>
+        <p class="panel-intro">
+          订单页展示的是 staging/demo 交付上下文，帮助家长理解场地、套餐、附加服务和支付准备的关系。不会自动派单、扣款或外发消息。
+        </p>
+        <div class="process-grid">
+          <article v-for="(step, index) in quoteProcessSteps" :key="step.id">
+            <span>{{ index + 1 }}</span>
+            <strong>{{ step.customerTitle }}</strong>
+            <small>{{ step.body }}</small>
+          </article>
+        </div>
+        <div class="package-fit-grid">
+          <article>
+            <span>当前套餐</span>
+            <strong>{{ packageDetails.labelZh }} · {{ packageDetails.priceHint }}</strong>
+            <p>{{ packageDetails.customerFit }}</p>
+          </article>
+          <article>
+            <span>为什么适合</span>
+            <strong>{{ packageDetails.bestFor }}</strong>
+            <p>{{ packageDetails.quoteExplanation }}</p>
+          </article>
+          <article>
+            <span>人工确认事项</span>
+            <strong>食物、过敏、场地最低消费</strong>
+            <p>{{ venueOperationalNotes.foodOptions.join(' · ') }} · {{ venueOperationalNotes.minimumSpendHint }}</p>
+          </article>
+        </div>
+        <ol class="review-steps">
+          <li>确认正式报价</li>
+          <li>确认场地 / 供应商可用性</li>
+          <li>进入订金准备页面</li>
+          <li>当前 preview 不会真实扣款</li>
+        </ol>
+      </section>
+
+      <section v-if="hasCustomerRequirements" class="panel requirements-panel">
+        <h2>家庭餐食与现场需求</h2>
+        <p class="panel-intro">
+          这些信息来自报价 / 订单上下文，用于人工确认餐厅、蛋糕、供应商和现场执行细节。当前不会自动通知供应商。
+        </p>
+        <dl class="detail-list requirements-list">
+          <div v-if="customerRequirements.food_notes">
+            <dt>餐食需求</dt>
+            <dd>{{ customerRequirements.food_notes }}</dd>
+          </div>
+          <div v-if="customerRequirements.allergy_notes">
+            <dt>过敏 / 饮食限制</dt>
+            <dd>{{ customerRequirements.allergy_notes }}</dd>
+          </div>
+          <div v-if="customerRequirements.cake_needs">
+            <dt>蛋糕 / 甜品</dt>
+            <dd>{{ customerRequirements.cake_needs }}</dd>
+          </div>
+          <div v-if="customerRequirements.parent_priorities">
+            <dt>家长优先级</dt>
+            <dd>{{ customerRequirements.parent_priorities }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="panel parent-faq-panel">
+        <h2>家长常见疑问</h2>
+        <p class="panel-intro">
+          当前订单仍是 staging/demo skeleton。下面这些规则帮助家长理解哪些内容已经可预览，哪些内容必须人工确认。
+        </p>
+        <div class="parent-faq-grid">
+          <article v-for="item in parentTrustFaq" :key="item.id">
+            <strong>{{ item.question }}</strong>
+            <p>{{ item.answer }}</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel family-choice-panel">
+        <h2>类似家庭通常怎么选</h2>
+        <p class="panel-intro">
+          这些是 staging sample planning patterns，不是真实评价。它们帮助家长理解订单里套餐和附加服务的组合逻辑。
+        </p>
+        <div class="family-choice-grid">
+          <article v-for="choice in familyChoices" :key="choice.id">
+            <span>{{ choice.title }}</span>
+            <strong>{{ choice.recommendedPackage }}</strong>
+            <p>{{ choice.familyProfile }}</p>
+            <small>{{ choice.addOns.join(' · ') }}</small>
+          </article>
+        </div>
+      </section>
+
       <section class="panel">
         <h2>简化订单组成</h2>
         <p class="panel-intro">
@@ -113,7 +203,32 @@
             <div><dt>Rendering</dt><dd>{{ orderVisualContext.restaurant.title }}</dd></div>
             <div><dt>Suppliers</dt><dd>{{ orderVisualContext.suppliers.map((item) => `${item.categoryLabel || item.category}: ${item.name}`).join(' / ') }}</dd></div>
             <div><dt>Supplier roles</dt><dd>{{ orderVisualContext.suppliers.map((item) => item.responsibility || item.operationsRole).join(' / ') }}</dd></div>
+            <div><dt>Food / allergy checks</dt><dd>{{ venueOperationalNotes.foodOptions.join(' · ') }} · {{ venueOperationalNotes.allergyNotes.join(' · ') }}</dd></div>
+            <div><dt>Room / minimum spend</dt><dd>{{ venueOperationalNotes.roomHireHint }} · {{ venueOperationalNotes.minimumSpendHint }}</dd></div>
           </dl>
+        </div>
+      </section>
+
+      <section v-if="orderAddOnRows.length" class="panel addon-value-panel">
+        <h2>附加服务与现场执行</h2>
+        <p class="panel-intro">
+          这些增值项目解释了订单中除场地和主题套餐以外的利润服务：现场布置、主持、音响、表演、蛋糕或拍照区等。当前仍为 staging 展示，不会自动派单或扣款。
+        </p>
+        <div class="addon-value-grid">
+          <article v-for="item in orderAddOnRows" :key="item.id || item.name">
+            <strong>{{ item.name }}</strong>
+            <span>{{ formatCustomerMoney(item.amount, order.currency) }}</span>
+            <p>{{ item.customer_explanation || item.description }}</p>
+            <small>{{ item.amount_basis }}</small>
+          </article>
+        </div>
+        <div class="addon-story-grid">
+          <article v-for="story in addOnValueStories" :key="story.id">
+            <small>{{ story.text.subtitle }}</small>
+            <strong>{{ story.text.title }}</strong>
+            <p>{{ story.text.after }}</p>
+            <span>{{ story.text.proofPoint }}</span>
+          </article>
         </div>
       </section>
 
@@ -122,7 +237,9 @@
         <p>{{ order.next_step }}</p>
         <small>{{ order.deposit_note }}</small>
         <div class="blocked-actions">
-          <el-button disabled>Pay Deposit · blocked</el-button>
+          <el-button type="primary" @click="router.push({ path: '/payment/deposit', query: { order_number: order.order_number, amount: order.deposit_amount, event_date: order.event_date, venue_name: order.event_location } })">
+            Open payment readiness
+          </el-button>
           <el-button disabled>Online payment · disabled</el-button>
         </div>
       </section>
@@ -200,6 +317,10 @@ import { summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig } from '@/data/partySceneConfig'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation } from '@/data/packageExplanation'
+import { getAddOnValueStories } from '@/data/addOnServices'
+import { getVenueOperationalReadiness } from '@/data/supplierVenueImportTemplate'
+import { getParentTrustFaq, getQuoteProcessSteps } from '@/data/parentTrustContent'
+import { getPopularFamilyChoices } from '@/data/parentSocialProof'
 import { featureFlags } from '@/config/featureFlags'
 import PartySceneSummary from '@/components/PartySceneSummary.vue'
 import {
@@ -222,6 +343,8 @@ const shareCaption = ref('')
 const rewardRefresh = ref(0)
 const sceneSummaryTitle = computed(() => featureFlags.threeDExperienceEnabled ? '订单场景与 3D Preview' : '订单场景与视觉预览')
 const orderLineItemSummary = computed(() => summarizeQuoteLineItems(order.value?.line_items || []))
+const orderAddOnRows = computed(() => orderLineItemSummary.value.items.filter((item) => item.type === 'optional_upgrade'))
+const addOnValueStories = computed(() => getAddOnValueStories().slice(0, 3))
 const rewardSummary = computed(() => {
   rewardRefresh.value
   return getRewardSummary(identity.value?.id || 'customer-local-41')
@@ -231,6 +354,11 @@ const orderVisualContext = computed(() => getVisualContext(
   normalizeTierId(order.value?.package || order.value?.package_tier || order.value?.selection_snapshot?.package)
 ))
 const orderPackageTier = computed(() => normalizeTierId(order.value?.package || order.value?.package_tier || order.value?.selection_snapshot?.package))
+const packageDetails = computed(() => getPackageExplanation(orderPackageTier.value))
+const quoteProcessSteps = getQuoteProcessSteps()
+const familyChoices = getPopularFamilyChoices()
+const venueOperationalNotes = computed(() => getVenueOperationalReadiness(orderVisualContext.value.primaryVenue || {}))
+const parentTrustFaq = computed(() => getParentTrustFaq())
 const orderPartySceneConfig = computed(() => order.value?.party_scene_config || order.value?.selection_snapshot?.party_scene_config || buildPartySceneConfig({}, {
   theme: orderVisualContext.value.packageVisual.theme,
   tier: orderPackageTier.value,
@@ -242,6 +370,8 @@ const orderRecommendationText = computed(() => {
   if (!featureFlags.aiExperienceEnabled) return `${explanation.whyRecommend} ${explanation.customerFit}`
   return order.value?.aiRecommendation?.reasonHeadline || `${explanation.whyRecommend} ${explanation.customerFit}`
 })
+const customerRequirements = computed(() => order.value?.customer_requirements || order.value?.selection_snapshot?.customer_requirements || {})
+const hasCustomerRequirements = computed(() => Object.values(customerRequirements.value).some((value) => String(value || '').trim()))
 
 const orderTagType = (status) => ({
   draft: 'info',
@@ -371,6 +501,223 @@ h2 {
 
 .context-grid .detail-list {
   margin: 0;
+}
+
+.addon-value-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.addon-value-grid article {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 14px;
+}
+
+.addon-value-grid strong,
+.addon-value-grid span {
+  display: block;
+}
+
+.addon-value-grid span {
+  margin-top: 6px;
+  color: #0f766e;
+  font-weight: 800;
+}
+
+.addon-value-grid p,
+.addon-value-grid small {
+  display: block;
+  margin: 8px 0 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.addon-story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.addon-story-grid article {
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: #fffbeb;
+  padding: 14px;
+}
+
+.addon-story-grid small,
+.addon-story-grid strong,
+.addon-story-grid span {
+  display: block;
+}
+
+.addon-story-grid small {
+  color: #92400e;
+  font-weight: 800;
+}
+
+.addon-story-grid strong {
+  margin-top: 5px;
+  color: #1f2937;
+}
+
+.addon-story-grid p,
+.addon-story-grid span {
+  margin: 8px 0 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.package-fit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.package-fit-grid article {
+  border-radius: 10px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  padding: 14px;
+}
+
+.package-fit-grid span {
+  display: block;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.package-fit-grid strong {
+  display: block;
+  margin-top: 6px;
+  color: #78350f;
+}
+
+.package-fit-grid p {
+  margin: 8px 0 0;
+  color: #92400e;
+  line-height: 1.55;
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.process-grid article {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  padding: 12px;
+}
+
+.process-grid span {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 900;
+}
+
+.process-grid strong,
+.process-grid small {
+  display: block;
+  margin-top: 8px;
+}
+
+.process-grid small {
+  color: #475569;
+  line-height: 1.45;
+}
+
+.parent-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.parent-faq-grid article {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 14px;
+}
+
+.parent-faq-grid strong {
+  display: block;
+  color: #0f172a;
+}
+
+.parent-faq-grid p {
+  margin: 8px 0 0;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.family-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.family-choice-grid article {
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f0fdf4, #fff);
+  padding: 14px;
+}
+
+.family-choice-grid span,
+.family-choice-grid strong,
+.family-choice-grid small {
+  display: block;
+}
+
+.family-choice-grid span {
+  color: #166534;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.family-choice-grid strong {
+  margin-top: 7px;
+  color: #14532d;
+}
+
+.family-choice-grid p,
+.family-choice-grid small {
+  margin: 8px 0 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.review-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-steps li {
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 9px 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 :deep(.el-table small) {
@@ -518,8 +865,17 @@ dd {
 @media (max-width: 820px) {
   .page-hero,
   .content-grid,
-  .context-grid {
+  .context-grid,
+  .process-grid,
+  .package-fit-grid,
+  .review-steps {
     display: block;
+  }
+
+  .process-grid article,
+  .package-fit-grid article,
+  .review-steps li {
+    margin-bottom: 10px;
   }
 }
 </style>

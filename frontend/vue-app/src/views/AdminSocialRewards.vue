@@ -40,6 +40,21 @@
     </section>
 
     <section class="panel">
+      <h2>Customer-facing fixed rewards</h2>
+      <p class="panel-intro">
+        Keep the public rule simple. Admin can still use points as local/staging accounting, but customers should see
+        fixed vouchers or free upgrade placeholders after manual review.
+      </p>
+      <div class="rules-grid">
+        <article v-for="offer in fixedRewardOffers" :key="offer.id">
+          <strong>{{ offer.title }}</strong>
+          <span>{{ offer.trigger }}</span>
+          <p>{{ offer.adminCheck }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
       <h2>UGC submission queue</h2>
       <el-table :data="submissions" empty-text="No reward submissions">
         <el-table-column label="Customer / Order" min-width="180">
@@ -112,6 +127,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import {
+  fixedRewardOffers,
   listRewardSubmissions,
   reviewRewardSubmission,
   rewardPointRules,
@@ -201,6 +217,7 @@ h2 {
 }
 
 .page-hero p,
+.panel-intro,
 .rules-grid p,
 :deep(.el-table small) {
   color: #64748b;

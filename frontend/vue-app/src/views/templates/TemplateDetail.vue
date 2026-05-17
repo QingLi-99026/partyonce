@@ -159,7 +159,7 @@ const includeLabel = (item) => {
 
 const useTemplate = () => {
   router.push({
-    path: '/ai-planner',
+    path: '/quote',
     query: { template: templateId }
   })
 }

@@ -34,6 +34,12 @@ const seedOrders = [
     owner: 'Ops review',
     next_action: 'Confirm event timing and parent contact details',
     internal_note: 'Local-only skeleton record. No payment or outbound message is triggered.',
+    customer_requirements: {
+      food_notes: 'Family sharing menu with simple kids options.',
+      allergy_notes: 'Confirm nut-free dessert options before final quote.',
+      cake_needs: 'Premium cake or cupcake tower options requested.',
+      parent_priorities: 'Beautiful photos, easy setup, and low parent workload.'
+    },
     created_at: '2026-05-11T08:00:00.000Z',
     updated_at: now,
     status_flow: [
@@ -48,7 +54,23 @@ const seedOrders = [
       { type: 'decor_fee', name: 'Premium castle room styling', amount: 760 },
       { type: 'supplier_fee', name: 'Cake and activity station supplier allowance', amount: 280 },
       { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
-      { type: 'service_fee', name: 'Planning service', amount: 60 }
+      { type: 'service_fee', name: 'Planning service', amount: 60 },
+      {
+        type: 'optional_upgrade',
+        name: 'Photo zone / backdrop upgrade',
+        amount: 360,
+        amount_basis: 'Customer-selected visual upgrade for stronger family photos and social sharing.',
+        customer_explanation: 'Adds a styled photo corner with backdrop, balloons, and theme signage.',
+        admin_edit_hint: 'Confirm backdrop size, venue wall access, and setup time before formal quote.'
+      },
+      {
+        type: 'optional_upgrade',
+        name: 'Kids party host / MC',
+        amount: 320,
+        amount_basis: 'Customer-selected host support for games, cake moment, and activity flow.',
+        customer_explanation: 'Keeps the party lively and organised so parents are not running every moment.',
+        admin_edit_hint: 'Confirm host language, duration, run sheet, and talent availability.'
+      }
     ]
   },
   {
@@ -82,6 +104,12 @@ const seedOrders = [
     owner: 'Manager review',
     next_action: 'Prepare deposit instructions after payment stage is approved',
     internal_note: 'Keep deposit_paid disabled until the approved payment stage.',
+    customer_requirements: {
+      food_notes: 'Casual dining with kids-friendly snack table.',
+      allergy_notes: 'Check gluten-free snack options.',
+      cake_needs: 'Bring-own cake may be preferred.',
+      parent_priorities: 'Good activity flow and clear setup timing.'
+    },
     created_at: '2026-05-11T08:20:00.000Z',
     updated_at: now,
     status_flow: [
@@ -96,7 +124,15 @@ const seedOrders = [
       { type: 'decor_fee', name: 'Standard space room styling', amount: 520 },
       { type: 'supplier_fee', name: 'Activity materials supplier allowance', amount: 220 },
       { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
-      { type: 'transport_fee', name: 'Transport and handling', amount: 60 }
+      { type: 'transport_fee', name: 'Transport and handling', amount: 60 },
+      {
+        type: 'optional_upgrade',
+        name: 'Sound / microphone starter pack',
+        amount: 180,
+        amount_basis: 'Customer-selected audio support for host, music, or activity announcements.',
+        customer_explanation: 'Adds basic sound and microphone support for a smoother party flow.',
+        admin_edit_hint: 'Confirm venue sound restrictions, access to power, and equipment pickup.'
+      }
     ]
   },
   {
@@ -130,6 +166,12 @@ const seedOrders = [
     owner: 'Ops confirmed',
     next_action: 'Confirm supplier availability manually',
     internal_note: 'Confirmed is an operational skeleton status only, not a payment confirmation.',
+    customer_requirements: {
+      food_notes: 'Simple cafe menu and water station.',
+      allergy_notes: 'Ask family to confirm allergies before event week.',
+      cake_needs: 'Small themed cake table only.',
+      parent_priorities: 'Keep the package affordable and low-mess.'
+    },
     created_at: '2026-05-11T08:35:00.000Z',
     updated_at: now,
     status_flow: [

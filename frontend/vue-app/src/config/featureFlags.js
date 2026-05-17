@@ -2,7 +2,8 @@ export const featureFlags = {
   aiExperienceEnabled: false,
   threeDExperienceEnabled: false,
   venueFilterEnabled: true,
-  showSocialLinks: true
+  showSocialLinks: true,
+  showInternalDemoNavigation: false
 }
 
 export const isFeatureEnabled = (flagName) => Boolean(featureFlags[flagName])

@@ -8,6 +8,7 @@
   },
   "nav": {
     "home": "首页",
+    "themes": "主题",
     "venues": "场地",
     "venueFinder": "找场地",
     "aiGuide": "AI引导",
@@ -38,7 +39,8 @@
     "confirm": "确定",
     "cancel": "取消",
     "loggedOut": "已退出登录",
-    "localCustomerReady": "已启用 local/staging 客户 demo 身份：customer-local-41"
+    "localCustomerReady": "已启用 local/staging 客户 demo 身份：customer-local-41",
+    "packages": "套餐"
   },
   "home": {
     "navThemes": "主题",
@@ -47,11 +49,15 @@
     "navCta": "开始策划",
     "kicker": "Welcome · AI Party Concierge",
     "title": "欢迎来到 Party Event 派对活动，让孩子的派对先被看见",
-    "intro": "从梦幻城堡、星际探险到森林奇境，先看主题、餐厅布置和套餐差异，再让 AI 帮你整理成清楚的 quote request。",
+    "intro": "先比较场地、主题、套餐和预算，再提交清晰的人工复核报价申请。",
+    "planningPreviewKicker": "派对策划预览",
+    "planningPreviewTitle": "欢迎来到 Party Event 派对活动，先看场地、主题和套餐",
+    "planningPreviewIntro": "从梦幻城堡、星际探险到森林奇境，先比较主题效果、Restaurant A 场地样板和基础、标准、高级三档套餐，再提交清楚的报价申请。",
+    "planningPreviewMeta": "主题 · 餐厅 A · 套餐 · 报价",
     "planYourself": "自己来策划",
     "aiRecommend": "AI 帮我推荐",
     "visualMeta": "温暖的客户预览",
-    "visualMetaStrong": "AI · 主题 · 餐厅 A · 报价",
+    "visualMetaStrong": "场地筛选 · 主题 · Restaurant A · 报价",
     "heroMockupFallbackTitle": "策划一场温暖、可视化的儿童派对",
     "heroMockupFallbackCopy": "英文模式会用干净的 UI 卡片替代带中文标注的 mockup 截图。",
     "englishThemeHeroKicker": "主题预览",
@@ -65,13 +71,13 @@
       "forest": "进入森林秘境"
     },
     "themeListen": {
-      "kicker": "AI 主题引导",
+      "kicker": "主题说明",
       "castle": "梦幻城堡适合喜欢公主、王子和童话氛围的孩子。你想让我基于这个主题帮你继续策划吗？",
       "space": "星际探险适合喜欢火箭、宇宙和探索任务的孩子。你想让我基于这个主题帮你继续策划吗？",
       "forest": "森林秘境适合喜欢动物、自然和温暖探索感的孩子。你想让我基于这个主题帮你继续策划吗？",
       "continue": "继续用这个主题策划",
       "switchTheme": "换一个主题看看",
-      "aiRecommend": "让 AI 推荐最合适主题"
+      "aiRecommend": "帮我比较主题"
     },
     "assetKicker": "投资人预览素材",
     "assetTitle": "视觉展示素材已恢复",
@@ -98,21 +104,21 @@
     },
     "packageKicker": "三主题 · 九套餐视觉",
     "packageTitle": "三主题九套餐体系",
-    "packageCopy": "每个主题已绑定 Basic / Standard / Premium 的装饰、材料、价格层级和适合场地说明。",
+    "packageCopy": "每个主题已绑定基础、标准、高级三档装饰、材料、价格层级和适合场地说明。",
     "packageFallbackKicker": "套餐矩阵",
     "packageFallbackTitle": "英文说明套餐层级",
     "packageFallbackCopy": "原套餐截图含中文文字，因此英文模式先使用文字卡片说明。",
     "packageFallbackCards": {
       "basic": {
-        "title": "Basic 基础布置",
+        "title": "基础布置",
         "copy": "基础桌面造型、轻主题装饰和简洁拍照角，适合控制预算。"
       },
       "standard": {
-        "title": "Standard 标准布置",
+        "title": "标准布置",
         "copy": "更完整的派对体验，包含主题装饰、背景板、甜品台造型和供应商建议。"
       },
       "premium": {
-        "title": "Premium 高级布置",
+        "title": "高级布置",
         "copy": "更沉浸的视觉体验，包含灯光层、定制板、主拍照区和现场协调。"
       }
     },
@@ -156,11 +162,11 @@
     "localizedPackagesSubtitle": "按预算、视觉期待和派对规模选择合适层级。",
     "localizedPackages": {
       "basic": {
-        "title": "Basic 基础配置",
+        "title": "基础配置",
         "copy": "控制预算的轻量布置，包含桌面造型、轻主题装饰和简洁拍照角。"
       },
       "standard": {
-        "title": "Standard 标准体验",
+        "title": "标准体验",
         "copy": "完整派对感，包含更强主题装饰、背景板、甜品台造型和供应商建议。"
       },
       "premium": {
@@ -194,9 +200,13 @@
     "englishImageFallback": "英文预览占位。英文模式会隐藏带中文标注的图片。"
   },
   "tiers": {
-    "basic": "Basic",
-    "standard": "Standard",
-    "premium": "Premium"
+    "heading": "基础 / 标准 / 高级",
+    "basic": "基础套餐",
+    "standard": "标准套餐",
+    "premium": "高级套餐",
+    "basicDescription": "基础桌面造型、主题气球、欢迎牌和轻量拍照角，适合预算清晰的小型派对。",
+    "standardDescription": "完整主题桌面、气球拱门、甜品台、背景板和供应商建议，适合多数家庭生日派对。",
+    "premiumDescription": "沉浸式背景、灯光层次、定制立牌、主视觉拍照区和现场协调，适合更重视仪式感的派对。"
   },
   "steps": {
     "chooseTheme": {
@@ -230,7 +240,7 @@
   "ai": {
     "eyebrow": "AI Concierge · local/staging only",
     "title": "让 AI Concierge 帮你把派对需求整理成报价咨询",
-    "intro": "每一步只问一个问题。AI 会根据年龄、人数、预算、主题偏好和场地状态，推荐 Castle / Space / Forest 主题、套餐层级和 Restaurant A 样板，并自动预填 quote request。",
+    "intro": "每一步只问一个问题。系统会根据年龄、人数、预算、主题偏好和场地状态，推荐城堡、太空、森林主题、套餐层级和 Restaurant A 样板，并自动预填报价申请。",
     "quickDemo": "Quick demo recommendation",
     "sampleToQuote": "Use sample and go Quote",
     "listen": "听当前问题",
@@ -414,6 +424,12 @@
     "edit": "修改",
     "priceDetails": "价格明细",
     "estimatedTotal": "预估总价",
+    "trustKicker": "报价可信度",
+    "trustTitle": "这是可复核的预估，不是自动扣款",
+    "trustCopy": "当前金额用于帮助客户理解预算、范围和下一步。最终报价需要人工确认日期、人数、场地档期和供应商可用性。",
+    "trustPointEstimate": "预估价会显示主要组成项，方便比较套餐和加减项目。",
+    "trustPointReview": "提交 inquiry 后进入人工复核，不会自动创建正式订单。",
+    "trustPointPayment": "订金和支付仍处于 readiness / placeholder 状态，不触发真实 payment。",
     "lineItemsKicker": "标准化报价项",
     "lineItemsTitle": "报价由哪些稳定类型构成",
     "lineItemsCopy": "场地、布置、供应商、人力、运输、服务和可选升级费用都会进入报价快照，方便人工复核。",
@@ -432,7 +448,8 @@
     "quoteBasis": "报价依据",
     "view3dPreview": "查看实验性 3D 场景预览（不是施工图）",
     "sceneConfigKicker": "场景配置",
-    "optionalAddons": "可选升级",
+    "optionalAddons": "可选附加服务",
+    "addonsLead": "附加服务只在真正解决家长问题时推荐：少操心布置、更好出片、孩子更有参与感，或活动后更省心。当前仍为 staging 预估，需人工复核档期和供应商。",
     "selectedAddons": "已选 {count} 项，小计 {total}",
     "restoredNotice": "已恢复上次保存的方案",
     "savedNotice": "方案已保存。总计 {total}",
@@ -447,6 +464,14 @@
     "eventDate": "活动日期",
     "notes": "备注",
     "notesPlaceholder": "描述特殊需求或问题",
+    "foodNotes": "餐食与用餐需求",
+    "foodNotesPlaceholder": "例如：家庭套餐、儿童餐、素食、自带食物或餐厅菜单问题",
+    "allergyNotes": "过敏与饮食禁忌",
+    "allergyNotesPlaceholder": "例如：坚果过敏、清真、无麸质、鸡蛋过敏，或暂无已知过敏",
+    "cakeNeeds": "蛋糕与甜品需求",
+    "cakeNeedsPlaceholder": "例如：需要蛋糕供应商、自带蛋糕、甜品台或纸杯蛋糕塔",
+    "parentPriorities": "家长最在意的点",
+    "parentPrioritiesPlaceholder": "例如：省心布置、拍照好看、安静包间、方便停车或少清理",
     "noticeEstimate": "* 价格为预估，会根据日期、人数、场地和供应商档期调整。",
     "noticeFollowup": "提交后，策划师可在 staging 中人工跟进。",
     "aiPrefillBody": "AI Concierge 已预填联系人、日期、人数、预算、场地偏好和推荐备注。确认后只提交 local/staging inquiry skeleton。",
@@ -486,15 +511,15 @@
     },
     "packages": {
       "basic": {
-        "name": "Basic 套餐",
+        "name": "基础套餐",
         "description": "基础布置与短时场地使用"
       },
       "standard": {
-        "name": "Standard 套餐",
+        "name": "标准套餐",
         "description": "完整布置、更长场地使用和策划支持"
       },
       "premium": {
-        "name": "Premium 套餐",
+        "name": "高级套餐",
         "description": "VIP 定制、全天场地使用和专属支持"
       }
     },
@@ -502,6 +527,73 @@
       "cake": "定制主题蛋糕",
       "photo": "专业摄影",
       "catering": "餐饮服务"
+    },
+    "reviewTimeline": {
+      "kicker": "报价流程说明",
+      "title": "先提交需求，再人工复核，最后才进入订金准备",
+      "copy": "这个页面展示的是预算和方案范围，帮助家长做决定；它不会即时扣款，也不会自动创建真实订单。",
+      "step1": {
+        "title": "选择场地 / 主题 / 套餐",
+        "body": "先确认人数、区域、预算和喜欢的派对风格。"
+      },
+      "step2": {
+        "title": "提交需求",
+        "body": "留下联系方式、日期和特殊要求，进入 staging inquiry。"
+      },
+      "step3": {
+        "title": "人工复核正式报价",
+        "body": "团队确认场地档期、供应商、食物和布置限制。"
+      },
+      "step4": {
+        "title": "订金准备",
+        "body": "只有正式报价确认后，才进入 test-mode 订金准备；当前不会扣款。"
+      }
+    },
+    "packageComparison": {
+      "title": "基础 / 标准 / 高级套餐对比",
+      "copy": "家长可以先看每档到底多了什么，再决定是否加入主持、蛋糕、拍照区等附加服务。",
+      "dimension": "比较项",
+      "basic": "基础套餐",
+      "standard": "标准套餐",
+      "premium": "高级套餐",
+      "rows": {
+        "visual": {
+          "label": "视觉目标",
+          "basic": "主题感清楚",
+          "standard": "完整派对感",
+          "premium": "沉浸式高级感"
+        },
+        "included": {
+          "label": "包含内容",
+          "basic": "桌布、少量气球、小主题牌",
+          "standard": "气球拱门、背景板、甜品台",
+          "premium": "大型拱门、灯光、拍照区、定制板"
+        },
+        "bestFor": {
+          "label": "适合家庭",
+          "basic": "预算敏感或小型活动",
+          "standard": "多数中产家庭的完整体验",
+          "premium": "高预算、重要生日或强视觉需求"
+        },
+        "ageGuests": {
+          "label": "适合年龄 / 人数",
+          "basic": "3-8 岁，约 10-18 人",
+          "standard": "5-12 岁，约 15-35 人",
+          "premium": "8 岁以上或大型活动，约 25-60 人"
+        },
+        "priceRange": {
+          "label": "价格区间提示",
+          "basic": "约 $899-$1,299 起",
+          "standard": "约 $1,499-$2,399 起",
+          "premium": "约 $2,800+，需人工复核"
+        },
+        "upgrade": {
+          "label": "升级多了什么",
+          "basic": "保留基础拍照点",
+          "standard": "增加背景、甜品台和协调",
+          "premium": "增加定制、灯光和全场包装"
+        }
+      }
     }
   },
   "customerPages": {
@@ -513,24 +605,24 @@
     "sceneConfig": "场景配置",
     "quoteExplanation": "报价解释",
     "upgradeValue": "升级价值",
-    "startAi": "从 AI Concierge 开始",
+    "startAi": "从场地筛选开始",
     "myQuotes": {
-      "title": "My Quotes",
+      "title": "我的报价",
       "subtitle": "查看派对报价状态、套餐快照、金额、有效期和下一步动作。",
       "safety": "Local/staging 只读视图：不会触发在线支付、webhook/n8n 或外发消息。",
       "search": "搜索报价号、主题、套餐或客户",
       "emptyEyebrow": "当前本地身份暂无可见报价",
       "emptyTitle": "这个 Preview 暂无匹配报价",
-      "emptyCopy": "可从 AI Concierge 或 Investor Demo 开始。真实客户报价会在这里展示主题、Restaurant A、价格和下一步状态。"
+      "emptyCopy": "建议先从 Venue Finder 选择场地，再提交报价需求。客户报价会在这里显示主题、场地、价格和下一步状态。"
     },
     "myOrders": {
-      "title": "My Orders",
+      "title": "我的订单",
       "subtitle": "跟踪订单状态、活动信息、金额、占位订金和下一步动作。",
       "safety": "pending_deposit 只是业务状态。当前预览没有启用订金支付。",
       "search": "搜索订单号、地区、主题或报价",
       "emptyEyebrow": "当前本地身份暂无可见订单",
       "emptyTitle": "这个 Preview 暂无匹配订单",
-      "emptyCopy": "正常流程是 AI Concierge → Quote request → My Quotes → My Orders。Demo 数据可从 Investor Demo 开始。"
+      "emptyCopy": "常规流程是 Venue Finder → Quote request → My Quotes → My Orders。当前 demo 订单用于说明状态和订金准备。"
     }
   },
   "venues": {
@@ -614,8 +706,8 @@
     "tagline": "派对活动一站式策划平台",
     "services": "服务",
     "venueBooking": "场地预订",
-    "aiPlanning": "AI策划",
-    "design3d": "3D设计",
+    "aiPlanning": "派对策划",
+    "design3d": "视觉预览",
     "onlineQuote": "在线报价",
     "about": "关于",
     "aboutUs": "关于我们",
@@ -652,5 +744,24 @@
       "nextTitle": "下一步",
       "nextCopy": "正式 3D 编辑、拖拽设计和供应商施工图会在后续工作包中单独评估。"
     }
+  },
+  "packageGuide": {
+    "kicker": "套餐说明",
+    "title": "先比较基础、标准、高级，再提交报价需求",
+    "subtitle": "先选择你希望的服务层级，再根据场地规则和人工复核加入附加升级。",
+    "findVenue": "先找场地",
+    "startQuote": "开始报价申请",
+    "safeFlowTitle": "安全报价流程",
+    "compareKicker": "套餐层级",
+    "compareTitle": "三档套餐对应不同家庭预算",
+    "compareCopy": "套餐是基础策划层，附加服务单独展示，让家长知道额外便利和照片效果来自哪里。",
+    "tableKicker": "详细对比",
+    "addonsKicker": "高价值附加服务",
+    "addonsTitle": "附加服务是省心和视觉升级的主要来源",
+    "addonsCopy": "这些服务都是可选项，正式报价前仍需确认场地规则和供应商可用性。",
+    "trustKicker": "家长信任边界",
+    "trustTitle": "本页不会即时预订或真实扣款",
+    "trustCopy": "本页只解释服务范围和预算层级。正式报价仍需人工复核日期、场地、供应商、餐饮和过敏信息。",
+    "chooseTier": "使用这一档"
   }
 }

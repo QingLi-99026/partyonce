@@ -5,8 +5,9 @@
         <p class="eyebrow">Social Sharing Rewards · local/staging</p>
         <h1>Share after party and claim reward</h1>
         <p>
-          Use your own TikTok, 小红书, Instagram, Facebook, or private channel to share party photos or videos, then submit proof for local/staging review.
-          We never collect social account passwords and no outbound message is sent.
+          A simple customer-friendly reward loop: share the party from your own social account,
+          submit proof, and let the team review a fixed voucher or free upgrade placeholder.
+          We never collect social passwords and no outbound message is sent.
         </p>
       </div>
       <div class="hero-actions">
@@ -20,17 +21,54 @@
       type="warning"
       :closable="false"
       show-icon
-      title="Staging only: points and vouchers are placeholders until production reward policy is approved."
+      title="Staging only: rewards are voucher / upgrade placeholders until production policy is approved."
       description="No real coupon, payment discount, webhook, n8n, email, SMS, WhatsApp, or social platform API is triggered."
     />
 
+    <section class="reward-process panel">
+      <h2>How the reward works</h2>
+      <div class="reward-process-grid">
+        <article>
+          <span>1</span>
+          <strong>Share with your own account</strong>
+          <p>Post a party photo, short video, or private recommendation. Use your own TikTok, Instagram, 小红书, Facebook, or private channel.</p>
+        </article>
+        <article>
+          <span>2</span>
+          <strong>Friend submits a quote or you submit proof</strong>
+          <p>In staging, we collect a post link or screenshot note. Future production can connect this to referral quote submissions.</p>
+        </article>
+        <article>
+          <span>3</span>
+          <strong>Team reviews and issues a placeholder reward</strong>
+          <p>Approval can unlock a $30 voucher, free balloon upgrade, or free photo-corner upgrade placeholder.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel fixed-rewards-panel">
+      <h2>Simple reward options</h2>
+      <p class="panel-intro">
+        Parents should not need to understand a complex points ladder. The visible customer promise stays simple:
+        submit a real share proof, wait for manual review, then receive one fixed voucher or free upgrade placeholder.
+      </p>
+      <div class="fixed-reward-grid">
+        <article v-for="offer in summary.fixedRewardOffers" :key="offer.id">
+          <span>{{ offer.shortTitle }}</span>
+          <strong>{{ offer.title }}</strong>
+          <p>{{ offer.customerText }}</p>
+          <small>{{ offer.trigger }}</small>
+        </article>
+      </div>
+    </section>
+
     <section class="summary-grid">
       <article class="summary-card">
-        <span>Approved points</span>
+        <span>Approved review credit</span>
         <strong>{{ summary.approvedPoints }}</strong>
       </article>
       <article class="summary-card">
-        <span>Pending points</span>
+        <span>Pending review credit</span>
         <strong>{{ summary.pendingPoints }}</strong>
       </article>
       <article class="summary-card">
@@ -120,6 +158,10 @@
 
     <section class="panel">
       <h2>Reward rules</h2>
+      <p class="panel-intro">
+        Keep production rules simple: no complicated point tiers for parents. The current point display is a staging
+        accounting layer for admin review only; customer-facing rewards should be fixed vouchers or free upgrades.
+      </p>
       <ul class="rules-list">
         <li v-for="rule in summary.rewardPointRules" :key="rule.id">
           <strong>{{ rule.label }} · {{ rule.points }} pts</strong>
@@ -330,13 +372,56 @@ h2 {
 
 .summary-grid,
 .content-grid,
-.voucher-grid {
+.voucher-grid,
+.fixed-reward-grid {
   display: grid;
   gap: 16px;
 }
 
 .summary-grid {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.reward-process {
+  background:
+    linear-gradient(135deg, rgba(255, 247, 237, 0.96), rgba(239, 246, 255, 0.96)),
+    #fff;
+}
+
+.reward-process-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.reward-process-grid article {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px;
+}
+
+.reward-process-grid span {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 900;
+}
+
+.reward-process-grid strong {
+  color: #0f172a;
+}
+
+.reward-process-grid p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.55;
 }
 
 .content-grid {
@@ -347,9 +432,14 @@ h2 {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.fixed-reward-grid {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
 .summary-card,
 .panel,
-.voucher-card {
+.voucher-card,
+.fixed-reward-grid article {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #fff;
@@ -358,10 +448,36 @@ h2 {
 }
 
 .summary-card span,
-.voucher-card span {
+.voucher-card span,
+.fixed-reward-grid span {
   color: #64748b;
   font-size: 12px;
   font-weight: 700;
+}
+
+.fixed-rewards-panel {
+  border-color: #facc15;
+  background:
+    linear-gradient(135deg, rgba(255, 251, 235, 0.92), rgba(255, 255, 255, 0.98)),
+    #fff;
+}
+
+.fixed-reward-grid article {
+  display: grid;
+  gap: 8px;
+  box-shadow: none;
+}
+
+.fixed-reward-grid strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.fixed-reward-grid p,
+.fixed-reward-grid small {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.55;
 }
 
 .summary-card strong {

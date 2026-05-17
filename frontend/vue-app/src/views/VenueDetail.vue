@@ -19,9 +19,50 @@
           <div><span>Price range</span><strong>{{ venue.priceRange }}</strong></div>
         </div>
         <div class="cta-row">
-          <button class="primary" @click="router.push('/quote')">Use in Quote Request</button>
+          <button class="primary" @click="useVenueInQuote">Use in Quote Request</button>
+          <button @click="router.push('/venue-finder')">Compare in Venue Finder</button>
           <button @click="router.push('/suppliers')">View Supplier Match</button>
         </div>
+      </article>
+    </section>
+
+    <section v-if="venue" class="content-grid">
+      <article class="panel trust-panel">
+        <p class="eyebrow">Parent decision checks</p>
+        <h2>What families should confirm before quote</h2>
+        <div class="ops-grid">
+          <div>
+            <span>Food options</span>
+            <strong>{{ venueOps.foodOptions.join(' · ') }}</strong>
+          </div>
+          <div>
+            <span>Allergy handling</span>
+            <strong>{{ venueOps.allergyNotes.join(' · ') }}</strong>
+          </div>
+          <div>
+            <span>Room hire</span>
+            <strong>{{ venueOps.roomHireHint }}</strong>
+          </div>
+          <div>
+            <span>Minimum spend</span>
+            <strong>{{ venueOps.minimumSpendHint }}</strong>
+          </div>
+        </div>
+        <p class="review-note">
+          Local/staging preview only. PartyOnce must manually confirm capacity, food rules,
+          cakeage, allergy handling, setup window, supplier access, and final cost before a formal quote.
+        </p>
+      </article>
+
+      <article class="panel trust-panel">
+        <p class="eyebrow">Quote process</p>
+        <h2>No instant charge or venue guarantee</h2>
+        <ol class="process-list">
+          <li v-for="step in quoteProcessSteps" :key="step.id">
+            <strong>{{ step.title }}</strong>
+            <span>{{ step.body }}</span>
+          </li>
+        </ol>
       </article>
     </section>
 
@@ -97,13 +138,25 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { getQuoteProcessSteps } from '@/data/parentTrustContent'
+import { getVenueFinderById } from '@/data/venueFinderFixtures'
+import { getVenueOperationalReadiness } from '@/data/supplierVenueImportTemplate'
 import { getRecommendedSuppliers, restaurantAVisuals, venueDisplaySeeds } from '@/data/visualAssets'
+import { saveVenueFinderQuotePrefill } from '@/services/venueFinderService'
 
 const route = useRoute()
 const router = useRouter()
 
 const venue = computed(() => venueDisplaySeeds.find((item) => String(item.id) === String(route.params.id)) || null)
 const selectedImage = ref(venue.value?.image_path || '')
+const quoteProcessSteps = getQuoteProcessSteps()
+const quoteVenue = computed(() => {
+  const directMatch = getVenueFinderById(String(route.params.id))
+  if (directMatch) return directMatch
+  if (venue.value?.id === 'restaurant-a') return getVenueFinderById('venue-marrickville-family-room')
+  return null
+})
+const venueOps = computed(() => getVenueOperationalReadiness(quoteVenue.value || venue.value || {}))
 
 const venueRenderings = computed(() => {
   if (!venue.value) return []
@@ -123,6 +176,44 @@ const recommendedSuppliers = computed(() => {
   const tier = venue.value?.bestPackageTiers?.includes('standard') ? 'standard' : venue.value?.bestPackageTiers?.[0] || 'basic'
   return getRecommendedSuppliers(theme, tier)
 })
+
+function useVenueInQuote() {
+  const selected = quoteVenue.value
+  if (!selected) {
+    router.push('/quote')
+    return
+  }
+
+  const payload = saveVenueFinderQuotePrefill(selected, {
+    area: selected.suburb || 'Marrickville',
+    radiusKm: 5,
+    adults: 10,
+    kids: 20,
+    childAgeRange: '9_12',
+    budgetPerPerson: '25_45',
+    allowsDecorations: true,
+    allowsCake: true,
+    hasDessertTableSpace: true,
+    hasPhotoZoneSpace: true,
+    balloonSetupPossible: true
+  })
+
+  router.push({
+    path: '/quote',
+    query: {
+      source: 'venue_finder',
+      venue: selected.id,
+      theme: payload?.selection?.themeId || 'castle',
+      scene: 'restaurant-a',
+      package: payload?.selection?.packageId || 'standard',
+      area: selected.suburb || 'Marrickville',
+      adults: 10,
+      kids: 20,
+      budget: '25_45',
+      radius: 5
+    }
+  })
+}
 </script>
 
 <style scoped>
@@ -210,14 +301,16 @@ h2 {
 }
 
 .fact-grid div,
-.detail-list div {
+.detail-list div,
+.ops-grid div {
   background: #f7f9fc;
   border-radius: 8px;
   padding: 12px;
 }
 
 .fact-grid span,
-dt {
+dt,
+.ops-grid span {
   display: block;
   color: #667085;
   font-size: 12px;
@@ -226,7 +319,8 @@ dt {
 }
 
 .fact-grid strong,
-dd {
+dd,
+.ops-grid strong {
   margin: 0;
   color: #172033;
   font-weight: 800;
@@ -300,6 +394,44 @@ dd {
   list-style: none;
 }
 
+.ops-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.review-note {
+  margin: 16px 0 0;
+  color: #5c667a;
+  line-height: 1.65;
+}
+
+.process-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.process-list li {
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fffaf3;
+}
+
+.process-list strong,
+.process-list span {
+  display: block;
+}
+
+.process-list span {
+  margin-top: 4px;
+  color: #667085;
+  line-height: 1.55;
+}
+
 .supplier-list li {
   display: grid;
   grid-template-columns: 82px minmax(0, 1fr);
@@ -330,6 +462,10 @@ dd {
 
   .rendering-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ops-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

@@ -1,4 +1,5 @@
 import { getVenueFinderById } from '@/data/venueFinderFixtures';
+import { recommendAddOnServicesForVenue } from '@/data/addOnServices';
 
 export const VENUE_FINDER_QUOTE_PREFILL_KEY = 'partyonce_venue_finder_quote_prefill_v1';
 
@@ -136,6 +137,7 @@ export function buildVenueFinderQuotePrefill(venueOrId, filters = {}) {
   const match = scoreVenueMatch(venue, normalized);
   const themeId = chooseThemeForVenue(venue, normalized.childAgeRange);
   const packageId = budgetToPackageTier(normalized.budgetPerPerson);
+  const recommendedAddons = recommendAddOnServicesForVenue(venue, normalized, 'en');
   const notes = [
     `Venue Finder selected ${venue.name} in ${venue.suburb}.`,
     `${normalized.adults} adults + ${normalized.kids} kids = ${normalized.totalGuests} guests.`,
@@ -172,6 +174,7 @@ export function buildVenueFinderQuotePrefill(venueOrId, filters = {}) {
       venueSuburb: venue.suburb,
       guestCount: normalized.totalGuests,
       budgetRange: budgetToLabel(normalized.budgetPerPerson),
+      addonSuggestions: recommendedAddons,
       supplierSuggestions: []
     },
     pricing: {
@@ -185,7 +188,8 @@ export function buildVenueFinderQuotePrefill(venueOrId, filters = {}) {
     venueFinder: {
       selectedVenue: venue,
       filters: normalized,
-      match
+      match,
+      recommendedAddons
     },
     saved_at: new Date().toISOString()
   };

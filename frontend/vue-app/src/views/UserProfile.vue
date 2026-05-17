@@ -48,7 +48,7 @@
                 <el-icon><User /></el-icon>
                 <span>个人信息</span>
               </el-menu-item>
-              <el-menu-item index="plans">
+              <el-menu-item v-if="featureFlags.aiExperienceEnabled" index="plans">
                 <el-icon><MagicStick /></el-icon>
                 <span>我的策划方案</span>
               </el-menu-item>
@@ -140,15 +140,15 @@
               <template #header>
                 <div class="section-header">
                   <span>我的策划方案</span>
-                  <el-button type="primary" @click="$router.push('/ai-planner')">新建方案</el-button>
+                  <el-button type="primary" @click="$router.push('/quote')">新建报价</el-button>
                 </div>
               </template>
 
               <div v-if="plans.length === 0" class="empty-state">
                 <el-empty description="暂无策划方案">
                   <template #footer>
-                    <el-button type="primary" @click="$router.push('/ai-planner')">
-                      创建第一个方案
+                    <el-button type="primary" @click="$router.push('/quote')">
+                      创建第一个报价
                     </el-button>
                   </template>
                 </el-empty>
@@ -450,7 +450,7 @@ const formatDate = (dateString) => {
 
 const viewPlan = (plan) => {
   planStore.setCurrentPlan(plan)
-  router.push('/ai-planner')
+  router.push('/quote')
 }
 
 const continuePlan = (plan) => {

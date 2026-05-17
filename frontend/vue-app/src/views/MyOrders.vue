@@ -28,6 +28,25 @@
       :description="apiNotice || identity.accessBoundary"
     />
 
+    <section class="trust-strip">
+      <div>
+        <p class="eyebrow">Order readiness promise</p>
+        <h2>订单状态仍需人工确认场地与供应商</h2>
+        <p>这里展示的是 staging/demo 订单上下文。订金准备只是流程说明，不会自动扣款、派单或外发消息。</p>
+      </div>
+      <ul>
+        <li v-for="item in trustChecklist" :key="item">{{ item }}</li>
+      </ul>
+    </section>
+
+    <section class="process-strip">
+      <article v-for="step in quoteProcessSteps" :key="step.id">
+        <span>{{ step.customerTitle }}</span>
+        <strong>{{ step.title }}</strong>
+        <p>{{ step.body }}</p>
+      </article>
+    </section>
+
     <section class="toolbar">
       <el-input v-model="searchQuery" clearable :placeholder="t('customerPages.myOrders.search')" />
       <el-select v-model="statusFilter" clearable :placeholder="t('customerPages.status')">
@@ -112,7 +131,6 @@
       </div>
       <div class="empty-actions">
         <el-button type="primary" @click="router.push('/my/quotes')">{{ t('nav.myQuotes') }}</el-button>
-        <el-button @click="router.push('/investor-demo')">{{ t('nav.investorDemo') }}</el-button>
         <el-button @click="router.push('/quote')">{{ t('quote.entry') }}</el-button>
       </div>
     </section>
@@ -133,6 +151,7 @@ import {
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation } from '@/data/packageExplanation'
 import { summarizePartySceneConfig } from '@/data/partySceneConfig'
+import { getQuoteProcessSteps, getTrustChecklist } from '@/data/parentTrustContent'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -143,6 +162,8 @@ const statusFilter = ref('')
 const dataSource = ref('not loaded')
 const apiNotice = ref('')
 const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
+const trustChecklist = getTrustChecklist()
+const quoteProcessSteps = getQuoteProcessSteps()
 
 const filteredOrders = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -247,6 +268,80 @@ h1 {
 .scope-alert,
 .toolbar {
   margin-bottom: 18px;
+}
+
+.trust-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fffbeb, #f0fdf4);
+}
+
+.trust-strip h2 {
+  margin: 0 0 8px;
+  color: #78350f;
+}
+
+.trust-strip p {
+  margin: 0;
+  color: #92400e;
+  line-height: 1.6;
+}
+
+.trust-strip ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trust-strip li {
+  border-radius: 999px;
+  background: #fff;
+  color: #92400e;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.process-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.process-strip article {
+  border: 1px solid #dcfce7;
+  border-radius: 8px;
+  background: #f7fef9;
+  padding: 12px;
+}
+
+.process-strip span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.process-strip strong {
+  display: block;
+  margin-top: 5px;
+  color: #14532d;
+}
+
+.process-strip p {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .toolbar {
@@ -433,6 +528,11 @@ dd {
 }
 
 @media (max-width: 760px) {
+  .trust-strip,
+  .process-strip {
+    grid-template-columns: 1fr;
+  }
+
   .page-hero,
   .hero-actions,
   .toolbar {

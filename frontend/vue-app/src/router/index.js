@@ -67,6 +67,12 @@ const routes = [
     meta: { title: 'Venue Finder Detail' }
   },
   {
+    path: '/packages',
+    name: 'PackageGuide',
+    component: () => import('@/views/PackageGuide.vue'),
+    meta: { title: 'Package Guide' }
+  },
+  {
     path: '/venues/:id',
     name: 'VenueDetail',
     component: () => import('@/views/VenueDetail.vue'),
@@ -369,6 +375,11 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
+
+  if (!featureFlags.aiExperienceEnabled && ['AIPlanner', 'AIVoiceIntake'].includes(to.name)) {
+    next('/quote')
+    return
+  }
   
   // 设置页面标题
   if (to.meta.title) {

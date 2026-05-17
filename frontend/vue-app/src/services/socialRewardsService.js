@@ -9,14 +9,14 @@ export const rewardPointRules = [
     label: 'Share submission',
     points: 20,
     status: 'pending_review',
-    customerText: 'Submit a party photo, caption, or social post link for review.'
+    customerText: 'Share from your own account, then submit a post link or screenshot note for review.'
   },
   {
     id: 'ugc_approved',
     label: 'Approved UGC share',
     points: 120,
     status: 'approved',
-    customerText: 'Awarded after the team approves the shared content.'
+    customerText: 'Approval can unlock a fixed voucher or free upgrade placeholder in this preview.'
   },
   {
     id: 'venue_tag_bonus',
@@ -30,26 +30,64 @@ export const rewardPointRules = [
     label: 'Referral placeholder',
     points: 80,
     status: 'future',
-    customerText: 'Future referral reward. Not connected to external tracking in staging.'
+    customerText: 'Future version: when a friend submits a quote, both sides can receive a fixed reward.'
   }
 ]
 
 export const voucherPlaceholders = [
   {
     id: 'voucher-500-20',
-    title: '$20 party upgrade voucher',
-    pointsRequired: 500,
-    value: '$20',
+    title: '$30 party upgrade voucher',
+    pointsRequired: 120,
+    value: '$30',
     status: 'placeholder',
     terms: 'Staging placeholder only. Not redeemable, not connected to payment, and not sent externally.'
   },
   {
-    id: 'voucher-1000-dessert',
-    title: 'Dessert table upgrade placeholder',
-    pointsRequired: 1000,
-    value: 'Dessert styling upgrade',
+    id: 'voucher-balloon-upgrade',
+    title: 'Free balloon upgrade placeholder',
+    pointsRequired: 120,
+    value: 'Balloon upgrade',
+    status: 'placeholder',
+    terms: 'A future production reward could upgrade a small balloon cluster to a stronger visual moment.'
+  },
+  {
+    id: 'voucher-photo-corner',
+    title: 'Free photo-corner upgrade placeholder',
+    pointsRequired: 150,
+    value: 'Photo corner upgrade',
     status: 'placeholder',
     terms: 'Requires future production approval and supplier confirmation.'
+  }
+]
+
+export const fixedRewardOffers = [
+  {
+    id: 'offer-30-voucher',
+    title: '$30 party voucher',
+    shortTitle: '$30 voucher',
+    trigger: 'Approved share proof or future friend quote submission',
+    customerText: 'Use as a simple future party discount after manual review.',
+    adminCheck: 'Confirm post/proof is real and mentions Party Event or the selected venue/theme.',
+    voucher_placeholder_id: 'voucher-500-20'
+  },
+  {
+    id: 'offer-balloon-upgrade',
+    title: 'Free balloon upgrade',
+    shortTitle: 'Balloon upgrade',
+    trigger: 'Approved photo/video share with visible party setup',
+    customerText: 'Upgrade a small balloon cluster to a stronger visual moment in a future quote.',
+    adminCheck: 'Confirm the share includes clear party visuals and customer permission to reuse.',
+    voucher_placeholder_id: 'voucher-balloon-upgrade'
+  },
+  {
+    id: 'offer-photo-corner',
+    title: 'Free photo-corner upgrade',
+    shortTitle: 'Photo-corner upgrade',
+    trigger: 'Approved share plus theme/venue mention',
+    customerText: 'Add a simple photo-corner upgrade placeholder after manual approval.',
+    adminCheck: 'Confirm theme or venue is mentioned and the proof is reviewable.',
+    voucher_placeholder_id: 'voucher-photo-corner'
   }
 ]
 
@@ -232,6 +270,7 @@ export const getRewardSummary = (customerId = 'customer-local-41') => {
     submissions,
     rewardPointRules: clone(rewardPointRules),
     voucherPlaceholders: clone(voucherPlaceholders),
+    fixedRewardOffers: clone(fixedRewardOffers),
     availableVouchers
   }
 }

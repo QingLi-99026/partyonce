@@ -34,6 +34,31 @@
       @close="fallbackNotice = ''"
     />
 
+    <section class="ops-guidance-panel">
+      <div>
+        <p class="eyebrow">Ops delivery readiness</p>
+        <h2>Confirm service delivery before treating this as real</h2>
+        <p>
+          The order queue helps ops explain what has been selected, what is still a placeholder,
+          and which profitable services need supplier confirmation before payment readiness.
+        </p>
+      </div>
+      <div class="ops-guidance-grid">
+        <article>
+          <strong>Manual readiness checklist</strong>
+          <ul>
+            <li v-for="item in trustChecklist" :key="item">{{ item }}</li>
+          </ul>
+        </article>
+        <article>
+          <strong>High-margin delivery services</strong>
+          <ul>
+            <li v-for="item in priorityAddOns" :key="item.id">{{ item.name }} · {{ formatMoney(item.price) }}</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
     <section class="stats-grid" aria-label="Order review summary">
       <article class="stat-card">
         <span>Total Orders</span>
@@ -255,6 +280,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { orderStatuses } from '@/mock/adminOrders'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
+import { getAddOnServices } from '@/data/addOnServices'
+import { getTrustChecklist } from '@/data/parentTrustContent'
 import {
   ORDER_SOURCE_API,
   ORDER_SOURCE_FALLBACK,
@@ -280,6 +307,10 @@ const bulkOwner = ref('')
 const bulkNextAction = ref('')
 const bulkStatus = ref('')
 const bulkLoading = ref(false)
+const trustChecklist = getTrustChecklist()
+const priorityAddOns = getAddOnServices('en')
+  .filter((item) => ['event-styling', 'setup-packdown', 'host-mc', 'cake-dessert'].includes(item.id))
+  .map((item) => ({ ...item, name: item.text.name }))
 
 const canApplyOrderOps = computed(() => {
   return selectedOrders.value.length > 0 && !bulkLoading.value && (
@@ -526,6 +557,7 @@ onMounted(loadOrders)
 .stats-grid,
 .toolbar,
 .bulk-panel,
+.ops-guidance-panel,
 .table-shell {
   max-width: 1280px;
   margin-left: auto;
@@ -534,6 +566,57 @@ onMounted(loadOrders)
 
 .scope-alert {
   margin-bottom: 18px;
+}
+
+.ops-guidance-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f0fdf4, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.ops-guidance-panel h2 {
+  margin: 0 0 8px;
+  color: #14532d;
+}
+
+.ops-guidance-panel p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.ops-guidance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ops-guidance-grid article {
+  border: 1px solid #dcfce7;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+}
+
+.ops-guidance-grid strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #1e293b;
+}
+
+.ops-guidance-grid ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+  line-height: 1.45;
 }
 
 .stats-grid {
@@ -708,8 +791,10 @@ onMounted(loadOrders)
     align-items: stretch;
   }
 
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .stats-grid,
+  .ops-guidance-panel,
+  .ops-guidance-grid {
+    grid-template-columns: 1fr;
   }
 
   .search-input,

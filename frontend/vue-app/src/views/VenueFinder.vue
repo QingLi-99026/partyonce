@@ -33,6 +33,42 @@
       <img src="/party-assets/venues/restaurant-a/restaurant-a-showcase.png" alt="Restaurant A visual planning set" />
     </section>
 
+    <section class="trust-strip">
+      <div>
+        <p class="eyebrow">For parents comparing venues</p>
+        <h2>Use this as a shortlist, then we confirm the real details</h2>
+        <p>
+          Venue Finder helps you narrow options by guests, budget, suburb, food needs,
+          room rules and party styling fit. It does not make a live booking or charge a deposit.
+        </p>
+      </div>
+      <ul>
+        <li v-for="item in trustChecklist" :key="item">{{ item }}</li>
+      </ul>
+    </section>
+
+    <section class="choice-proof-strip">
+      <div class="choice-proof-heading">
+        <p class="eyebrow">Common family choices · staging samples</p>
+        <h2>How most parents can start without overthinking</h2>
+        <p>
+          These are not real customer reviews. They are sample planning patterns for testing
+          whether Australian families can understand package and add-on choices quickly.
+        </p>
+      </div>
+      <div class="choice-proof-grid">
+        <article v-for="choice in popularFamilyChoices" :key="choice.id">
+          <span>{{ choice.title }}</span>
+          <h3>{{ choice.recommendedPackage }}</h3>
+          <p>{{ choice.familyProfile }}</p>
+          <ul>
+            <li v-for="addon in choice.addOns" :key="addon">{{ addon }}</li>
+          </ul>
+          <small>{{ choice.whyItWorks }}</small>
+        </article>
+      </div>
+    </section>
+
     <section class="finder-layout">
       <aside class="filter-panel">
         <div class="panel-heading">
@@ -214,6 +250,20 @@
                   <strong>{{ visualFitLabel(venue) }}</strong>
                 </div>
               </div>
+              <div class="parent-checks">
+                <small>Parent checks before quote</small>
+                <span>{{ venueOps(venue).foodOptions[0] }}</span>
+                <span>{{ venueOps(venue).allergyNotes[0] }}</span>
+                <span>{{ venueOps(venue).minimumSpendHint }}</span>
+              </div>
+              <div class="recommended-addons">
+                <small>Useful add-ons for this venue</small>
+                <div>
+                  <span v-for="addon in recommendedAddOns(venue).slice(0, 3)" :key="addon.id">
+                    {{ addon.icon }} {{ addon.name }}
+                  </span>
+                </div>
+              </div>
               <p class="why-match">{{ venue.match.reasons.join(' · ') || venue.whyMatch }}</p>
               <div class="card-actions">
                 <button type="button" @click="openVenue(venue)">View venue</button>
@@ -246,6 +296,10 @@
             <div><dt>Budget</dt><dd>${{ venue.pricePerPersonMin }}-${{ venue.pricePerPersonMax }} pp</dd></div>
             <div><dt>Package fit</dt><dd>{{ venue.packageFit.join(' / ') }}</dd></div>
             <div><dt>Theme fit</dt><dd>{{ venue.suitableThemes.map(themeLabel).join(' / ') }}</dd></div>
+            <div><dt>Add-on upside</dt><dd>{{ recommendedAddOns(venue).slice(0, 3).map((item) => item.name).join(' / ') }}</dd></div>
+            <div><dt>Food check</dt><dd>{{ venueOps(venue).foodOptions[0] }}</dd></div>
+            <div><dt>Allergy check</dt><dd>{{ venueOps(venue).allergyNotes[0] }}</dd></div>
+            <div><dt>Min spend</dt><dd>{{ venueOps(venue).minimumSpendHint }}</dd></div>
             <div><dt>Watch-outs</dt><dd>{{ venue.restrictions.join(' · ') }}</dd></div>
           </dl>
           <button class="primary" type="button" @click="useVenueForQuote(venue)">Use for quote</button>
@@ -288,11 +342,34 @@
             alt="Restaurant A theme preview"
           />
         </div>
+        <div class="recommended-addons is-detail">
+          <small>Recommended high-value add-ons</small>
+          <div>
+            <span v-for="addon in recommendedAddOns(selectedVenue)" :key="addon.id">
+              {{ addon.icon }} {{ addon.name }} · +${{ addon.price }}
+            </span>
+          </div>
+          <p>
+            These are staging suggestions only. A human planner still confirms availability,
+            supplier fit, and final quote details before any deposit readiness step.
+          </p>
+        </div>
         <div class="restriction-box">
           <strong>Still needs manual confirmation</strong>
           <ul>
             <li v-for="item in selectedVenue.restrictions" :key="item">{{ item }}</li>
           </ul>
+        </div>
+        <div class="restriction-box ops-readiness-box">
+          <strong>Food, allergy and venue commercial checks</strong>
+          <dl>
+            <div><dt>Food options</dt><dd>{{ venueOps(selectedVenue).foodOptions.join(' · ') }}</dd></div>
+            <div><dt>Allergy notes</dt><dd>{{ venueOps(selectedVenue).allergyNotes.join(' · ') }}</dd></div>
+            <div><dt>Room hire</dt><dd>{{ venueOps(selectedVenue).roomHireHint }}</dd></div>
+            <div><dt>Minimum spend</dt><dd>{{ venueOps(selectedVenue).minimumSpendHint }}</dd></div>
+            <div><dt>Verification</dt><dd>{{ venueOps(selectedVenue).verificationStatus }}</dd></div>
+          </dl>
+          <p>These values are local/staging planning fields. Formal quotes require direct venue confirmation.</p>
         </div>
         <div class="hero-actions">
           <button class="primary" type="button" @click="useVenueForQuote(selectedVenue)">Use this venue for quote</button>
@@ -314,6 +391,10 @@ import {
   venueFinderFixtures,
   venueTypeLabels
 } from '@/data/venueFinderFixtures';
+import { recommendAddOnServicesForVenue } from '@/data/addOnServices';
+import { getTrustChecklist } from '@/data/parentTrustContent';
+import { getPopularFamilyChoices } from '@/data/parentSocialProof';
+import { getVenueOperationalReadiness } from '@/data/supplierVenueImportTemplate';
 import { normalizeVenueFinderFilters, saveVenueFinderQuotePrefill, scoreVenueMatch } from '@/services/venueFinderService';
 
 const route = useRoute();
@@ -346,6 +427,8 @@ const filters = reactive({
 const sortBy = ref('match');
 const selectedVenue = ref(null);
 const compareSelectedIds = ref([]);
+const trustChecklist = getTrustChecklist();
+const popularFamilyChoices = getPopularFamilyChoices();
 
 const areaOptions = venueFinderAreaOptions;
 
@@ -442,6 +525,14 @@ function visualFitLabel(venue) {
   if (venue.hasPhotoZoneSpace) strengths.push('photo zone');
   if (venue.balloonSetupPossible) strengths.push('balloon setup');
   return strengths.slice(0, 2).join(' + ') || 'light styling';
+}
+
+function recommendedAddOns(venue) {
+  return recommendAddOnServicesForVenue(venue, normalizeVenueFinderFilters(filters), 'en');
+}
+
+function venueOps(venue) {
+  return getVenueOperationalReadiness(venue);
 }
 
 function isCompared(venue) {
@@ -555,6 +646,7 @@ watch(
 
 .finder-hero,
 .showcase-strip,
+.trust-strip,
 .finder-layout,
 .compare-panel,
 .detail-panel {
@@ -644,6 +736,114 @@ button.selected {
   background: #fff;
   padding: 18px;
   box-shadow: 0 14px 35px rgba(31, 42, 68, 0.06);
+}
+
+.trust-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.9fr);
+  gap: 18px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #eff6ff, #fff7ed);
+  padding: 22px;
+  box-shadow: 0 14px 36px rgba(31, 42, 68, 0.07);
+}
+
+.choice-proof-strip {
+  max-width: 1240px;
+  margin: 0 auto 24px;
+  border: 1px solid #f5d0fe;
+  border-radius: 8px;
+  background: #fff;
+  padding: 22px;
+  box-shadow: 0 14px 36px rgba(31, 42, 68, 0.06);
+}
+
+.choice-proof-heading {
+  max-width: 760px;
+  margin-bottom: 16px;
+}
+
+.choice-proof-heading h2 {
+  margin: 0 0 8px;
+}
+
+.choice-proof-heading p {
+  margin: 0;
+  color: #5a6578;
+  line-height: 1.65;
+}
+
+.choice-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.choice-proof-grid article {
+  border-radius: 8px;
+  background: linear-gradient(135deg, #faf5ff, #fff7ed);
+  padding: 16px;
+}
+
+.choice-proof-grid span {
+  color: #7c3aed;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.choice-proof-grid h3 {
+  margin: 6px 0;
+}
+
+.choice-proof-grid p,
+.choice-proof-grid small {
+  color: #5a6578;
+  line-height: 1.55;
+}
+
+.choice-proof-grid ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.choice-proof-grid li {
+  border-radius: 999px;
+  background: #fff;
+  color: #6d28d9;
+  padding: 6px 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.trust-strip h2 {
+  margin: 0 0 8px;
+}
+
+.trust-strip p {
+  margin: 0;
+  color: #475569;
+}
+
+.trust-strip ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trust-strip li {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #1e3a8a;
+  padding: 10px 12px;
+  font-weight: 650;
 }
 
 .showcase-copy h2 {
@@ -955,6 +1155,77 @@ button.selected {
   color: #172033;
 }
 
+.parent-checks {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: #fffbeb;
+  padding: 10px;
+}
+
+.parent-checks small {
+  color: #92400e;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.parent-checks span {
+  color: #78350f;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.recommended-addons {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  border: 1px solid #e3ecfb;
+  border-radius: 8px;
+  background: #f8fbff;
+  padding: 10px;
+}
+
+.recommended-addons small {
+  color: #31537d;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.recommended-addons div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.recommended-addons span {
+  border: 1px solid #d8e4f5;
+  border-radius: 999px;
+  background: #fff;
+  color: #243b5a;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 8px;
+}
+
+.recommended-addons.is-detail {
+  margin: 16px 0;
+  background: #fff8ed;
+  border-color: #fed7aa;
+}
+
+.recommended-addons.is-detail p {
+  margin: 0;
+  color: #7c4a03;
+  line-height: 1.55;
+}
+
 .why-match {
   color: #475467;
   font-weight: 700;
@@ -1063,6 +1334,42 @@ dd {
   padding: 14px;
 }
 
+.restriction-box dl {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+}
+
+.restriction-box dl div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.restriction-box dt {
+  font-weight: 900;
+}
+
+.restriction-box dd {
+  margin: 0;
+  color: #7c2d12;
+}
+
+.ops-readiness-box {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.ops-readiness-box dd {
+  color: #312e81;
+}
+
+.ops-readiness-box p {
+  margin: 10px 0 0;
+  color: #4338ca;
+  line-height: 1.55;
+}
+
 .detail-render-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1081,6 +1388,8 @@ dd {
 @media (max-width: 960px) {
   .finder-hero,
   .showcase-strip,
+  .trust-strip,
+  .choice-proof-grid,
   .finder-layout,
   .detail-panel,
   .venue-card {

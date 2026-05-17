@@ -138,6 +138,12 @@ export function normalizeQuoteLineItem(item = {}, index = 0) {
   const amount = toAmount(
     item.amount ?? item.final_amount ?? item.finalAmount ?? item.total ?? item.price ?? item.unit_price
   );
+  const estimatedCost = toAmount(item.estimated_cost ?? item.estimatedCost ?? item.cost_placeholder);
+  const grossMarginPlaceholder = toAmount(
+    item.gross_margin_placeholder
+      ?? item.grossMarginPlaceholder
+      ?? (estimatedCost > 0 ? Math.max(0, amount - estimatedCost) : 0)
+  );
   return {
     schema_version: item.schema_version || QUOTE_LINE_ITEM_SCHEMA_VERSION,
     id: item.id || item.key || `${type}-${index + 1}`,
@@ -153,6 +159,17 @@ export function normalizeQuoteLineItem(item = {}, index = 0) {
     calculation_note: item.calculation_note || item.calculationNote || '',
     customer_explanation: item.customer_explanation || item.customerExplanation || meta.customerExplanation,
     admin_edit_hint: item.admin_edit_hint || item.adminEditHint || meta.adminEditHint,
+    estimated_cost: estimatedCost,
+    gross_margin_placeholder: grossMarginPlaceholder,
+    margin_note: item.margin_note || item.marginNote || (estimatedCost > 0
+      ? 'Local/staging operating estimate only. Confirm supplier quote before formal customer quote.'
+      : ''),
+    supplier_category: item.supplier_category || item.supplierCategory || '',
+    ops_checklist: Array.isArray(item.ops_checklist)
+      ? item.ops_checklist
+      : Array.isArray(item.opsChecklist)
+        ? item.opsChecklist
+        : [],
     quantity: Number(item.quantity || 1),
     source: item.source || item.quoteRole || item.operationsRole || 'quote_snapshot',
     party_scene_config_path: item.party_scene_config_path || item.sceneConfigPath || '',
@@ -312,11 +329,18 @@ export function buildQuoteLineItemsFromSelection({
     ...selectedAddonRows.map((addon) => ({
       id: addon.id,
       type: 'optional_upgrade',
-      name: addon.name,
-      description: 'Optional customer-selected upgrade item.',
+      name: addon.name || addon.text?.name || 'Optional upgrade',
+      description: addon.description || addon.text?.short || addon.text?.customerValue || 'Optional customer-selected upgrade item.',
       amount: toAmount(addon.price),
-      amount_basis: 'Explicit customer-selected optional upgrade.',
-      calculation_note: 'Keep only if confirmed by customer before formal quote.',
+      amount_basis: addon.amount_basis || addon.text?.basis || 'Explicit customer-selected optional upgrade.',
+      customer_explanation: addon.customer_explanation || addon.text?.customerValue || quoteLineItemTypes.optional_upgrade.customerExplanation,
+      admin_edit_hint: addon.admin_edit_hint || `${addon.marginRole || 'Optional service margin'}; confirm scope, supplier availability, and customer approval before formal quote.`,
+      calculation_note: addon.calculation_note || 'Keep only if confirmed by customer before formal quote.',
+      estimated_cost: addon.estimatedCost,
+      gross_margin_placeholder: addon.grossMarginPlaceholder,
+      margin_note: 'Optional add-on margin placeholder for local/staging planning; confirm supplier cost before formal quote.',
+      supplier_category: addon.supplierCategory,
+      ops_checklist: addon.opsChecklist,
       source: 'customer_selected_addon',
       party_scene_config_path: 'optionalUpgrades',
       currency

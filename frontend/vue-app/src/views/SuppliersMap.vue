@@ -1,5 +1,32 @@
 <template>
   <div class="suppliers-page">
+    <header class="suppliers-hero">
+      <span class="map-kicker">Supplier directory · local/staging</span>
+      <h1>Party suppliers and venue support</h1>
+      <p>Browse demo suppliers for venues, flowers, balloons, cakes, kids entertainment, photography, and setup. No supplier is contacted from this preview.</p>
+    </header>
+
+    <section class="readiness-panel">
+      <div>
+        <span class="map-kicker">Real data readiness</span>
+        <h2>What we need before replacing fixture suppliers</h2>
+        <p>
+          This Preview shows the operating shape only. Real suppliers and venues should be imported with price,
+          capacity, allergy, lead-time and verification fields before external launch.
+        </p>
+      </div>
+      <div class="readiness-grid">
+        <article>
+          <strong>Venue import fields</strong>
+          <span v-for="field in venueImportPreview" :key="field.key">{{ field.label }}</span>
+        </article>
+        <article>
+          <strong>Supplier import fields</strong>
+          <span v-for="field in supplierImportPreview" :key="field.key">{{ field.label }}</span>
+        </article>
+      </div>
+    </section>
+
     <!-- 搜索栏 -->
     <div class="search-bar">
       <div class="location-input">
@@ -115,6 +142,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { listSupplierDisplayItems } from '@/services/supplierLightService'
+import { supplierImportFields, venueImportFields } from '@/data/supplierVenueImportTemplate'
 
 const router = useRouter()
 const mapContainer = ref(null)
@@ -127,6 +155,8 @@ const sortBy = ref('distance')
 const suppliers = ref([])
 const selectedId = ref(null)
 const dataSource = ref('not loaded')
+const venueImportPreview = venueImportFields.slice(0, 6)
+const supplierImportPreview = supplierImportFields.slice(0, 6)
 
 const sortedSuppliers = computed(() => suppliers.value)
 const supplierRoles = computed(() => {
@@ -166,11 +196,82 @@ const resetMap = () => {}
 <style scoped>
 /* ========== 全局背景：纯白，无灰色蒙版 ========== */
 .suppliers-page {
-  padding: 20px;
+  padding: 96px 20px 20px;
   max-width: 1400px;
   margin: 0 auto;
   background: #ffffff;
   min-height: 100vh;
+}
+
+.suppliers-hero {
+  margin-bottom: 18px;
+  padding: 18px 0 6px;
+}
+
+.suppliers-hero h1 {
+  margin: 6px 0 8px;
+  color: #111827;
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1.08;
+}
+
+.suppliers-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.65;
+}
+
+.readiness-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 18px;
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 2px solid #c7d2fe;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8fafc, #eef2ff);
+}
+
+.readiness-panel h2 {
+  margin: 6px 0 8px;
+  color: #111827;
+}
+
+.readiness-panel p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.readiness-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.readiness-grid article {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+}
+
+.readiness-grid strong {
+  width: 100%;
+  color: #1e3a8a;
+}
+
+.readiness-grid span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 /* ========== 搜索栏：白底 + 深灰边框 ========== */

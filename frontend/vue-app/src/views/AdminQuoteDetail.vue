@@ -85,6 +85,34 @@
           </article>
 
           <article class="panel">
+            <h2>Family Requirements Review</h2>
+            <dl v-if="hasCustomerRequirements">
+              <div v-if="customerRequirements.food_notes">
+                <dt>Food / catering</dt>
+                <dd>{{ customerRequirements.food_notes }}</dd>
+              </div>
+              <div v-if="customerRequirements.allergy_notes">
+                <dt>Allergy / dietary</dt>
+                <dd>{{ customerRequirements.allergy_notes }}</dd>
+              </div>
+              <div v-if="customerRequirements.cake_needs">
+                <dt>Cake / dessert</dt>
+                <dd>{{ customerRequirements.cake_needs }}</dd>
+              </div>
+              <div v-if="customerRequirements.parent_priorities">
+                <dt>Parent priorities</dt>
+                <dd>{{ customerRequirements.parent_priorities }}</dd>
+              </div>
+            </dl>
+            <p v-else class="control-note">
+              No customer-specific food, allergy, cake, or parent priority notes captured yet. Confirm before formal quote.
+            </p>
+            <p class="control-note">
+              Ops should verify these items with the venue and suppliers before sending a formal quote or deposit instruction.
+            </p>
+          </article>
+
+          <article class="panel">
             <h2>Quote Controls</h2>
             <label class="field-label" for="quote-status-select">Status</label>
             <el-select
@@ -111,6 +139,26 @@
               Enabled only for accepted Quotes. This calls POST /api/orders and never opens payment or outbound automation.
             </p>
           </article>
+        </section>
+
+        <section class="panel">
+          <div class="ops-process-heading">
+            <div>
+              <p class="eyebrow">Ops quote-to-deposit checklist</p>
+              <h2>Use the same explanation customers see</h2>
+            </div>
+            <span>Preview only · no payment action</span>
+          </div>
+          <ol class="ops-process-list">
+            <li v-for="step in quoteProcessSteps" :key="step.id">
+              <strong>{{ step.title }}</strong>
+              <p>{{ step.body }}</p>
+            </li>
+          </ol>
+          <p class="control-note">
+            Before sending a formal quote, confirm venue rules, supplier availability, food and allergy notes,
+            selected add-ons, minimum spend, and setup / pack-down windows. Deposit readiness starts only after that review.
+          </p>
         </section>
 
         <section class="panel-grid">
@@ -382,6 +430,23 @@
                 <li v-for="item in quoteUpgradeExplanation.items" :key="item">{{ item }}</li>
               </ul>
             </div>
+            <div v-if="quoteOptionalUpgradeRows.length" class="explanation-block">
+              <h3>高利润附加服务</h3>
+              <ul class="blocked-list">
+                <li v-for="item in quoteOptionalUpgradeRows" :key="item.id || item.name">
+                  <strong>{{ item.name }} · {{ formatMoney(item.amount, quote.currency) }}</strong>
+                  <span>{{ item.admin_edit_hint || item.customer_explanation }}</span>
+                  <small v-if="item.estimated_cost || item.gross_margin_placeholder">
+                    Ops placeholder: supplier category {{ item.supplier_category || 'pending' }},
+                    estimated cost {{ formatMoney(item.estimated_cost, quote.currency) }},
+                    margin {{ formatMoney(item.gross_margin_placeholder, quote.currency) }}.
+                  </small>
+                  <small v-if="item.ops_checklist?.length">
+                    Checklist: {{ item.ops_checklist.join(' · ') }}
+                  </small>
+                </li>
+              </ul>
+            </div>
           </article>
 
           <article class="panel ops-explainer-panel">
@@ -454,6 +519,7 @@ import apiClient from '@/api'
 import { createDraftOrderFromQuote } from '@/services/adminOrderService'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
+import { getQuoteProcessSteps } from '@/data/parentTrustContent'
 import { buildQuoteLineItemsFromSelection, normalizeQuoteLineItem, normalizeQuoteLineItems, quoteLineItemOrder, quoteLineItemTypes, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
 import { writePartySceneConfig } from '@/services/partyScenePreviewService'
@@ -478,13 +544,24 @@ const quoteOps = ref({
   updatedAt: ''
 })
 
+const shouldUseStaticPreviewFallback = () => {
+  if (typeof window === 'undefined') return false
+  if (import.meta.env.VITE_ENABLE_REMOTE_QUOTE_API === 'true') return false
+  const isVercelPreview = /vercel\.app$/i.test(window.location.hostname)
+  const isViteStaticPreview = /^417\d$/.test(window.location.port)
+  const isLocalFrontendPreview = ['127.0.0.1', 'localhost'].includes(window.location.hostname)
+  return isVercelPreview || isViteStaticPreview || isLocalFrontendPreview
+}
+
 const quoteLineItemTypeOptions = quoteLineItemOrder.map((type) => ({
   type,
   ...quoteLineItemTypes[type]
 }))
+const quoteProcessSteps = getQuoteProcessSteps()
 const lineItems = computed(() => normalizeQuoteLineItems(lineItemDraftRows.value.length ? lineItemDraftRows.value : quote.value?.line_items))
 const lineItemSummary = computed(() => summarizeQuoteLineItems(lineItems.value))
 const lineItemDraftSummary = computed(() => summarizeQuoteLineItems(lineItemDraftRows.value))
+const quoteOptionalUpgradeRows = computed(() => lineItemSummary.value.items.filter((item) => item.type === 'optional_upgrade'))
 const canCreateDraftOrder = computed(() => quote.value?.status === 'accepted')
 const quoteVisualContext = computed(() => {
   const selection = quote.value?.selection_snapshot || {}
@@ -524,6 +601,8 @@ const quotePriceBasis = computed(() => {
     ...lineItemBasis
   ].filter(Boolean)
 })
+const customerRequirements = computed(() => quote.value?.customer_requirements || quote.value?.selection_snapshot?.customer_requirements || {})
+const hasCustomerRequirements = computed(() => Object.values(customerRequirements.value).some((value) => String(value || '').trim()))
 const quoteCustomerScript = computed(() => {
   const context = quoteVisualContext.value
   const explanation = quotePackageExplanation.value
@@ -576,7 +655,7 @@ const readStoredLineItemDraft = () => {
 }
 
 const loadLineItemDraft = async () => {
-  if (quote.value?.id) {
+  if (quote.value?.id && !shouldUseStaticPreviewFallback()) {
     try {
       const response = await apiClient.get(`/quotes/${quote.value.id}/line-items`)
       if (Array.isArray(response.items) && response.items.length) {
@@ -704,7 +783,19 @@ const buildFallbackQuoteDetail = () => {
     selection_snapshot: {
       theme: 'castle',
       package: 'standard',
-      venueName: visualContext.primaryVenue.name
+      venueName: visualContext.primaryVenue.name,
+      customer_requirements: {
+        food_notes: 'Family sharing menu with kids options.',
+        allergy_notes: 'Confirm nut-free dessert options before final quote.',
+        cake_needs: 'Cake or dessert table options requested.',
+        parent_priorities: 'Easy setup and strong photo moments.'
+      }
+    },
+    customer_requirements: {
+      food_notes: 'Family sharing menu with kids options.',
+      allergy_notes: 'Confirm nut-free dessert options before final quote.',
+      cake_needs: 'Cake or dessert table options requested.',
+      parent_priorities: 'Easy setup and strong photo moments.'
     },
     line_items: lineItems,
     created_at: new Date().toISOString(),
@@ -759,6 +850,15 @@ const saveQuoteOpsState = () => {
 const loadQuote = async () => {
   loading.value = true
   message.value = ''
+  if (shouldUseStaticPreviewFallback()) {
+    quote.value = buildFallbackQuoteDetail()
+    loadQuoteOpsState()
+    await loadLineItemDraft()
+    message.value = 'Static preview fallback: Admin Quote Detail is using local/staging fixture data and does not request the backend Quote API.'
+    messageType.value = 'info'
+    loading.value = false
+    return
+  }
   try {
     quote.value = await apiClient.get(`/quotes/${route.params.quoteId}`)
     loadQuoteOpsState()
@@ -961,6 +1061,50 @@ onMounted(loadQuote)
   margin-bottom: 18px;
 }
 
+.ops-process-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.ops-process-heading span {
+  border-radius: 999px;
+  background: #fff4e6;
+  color: #b7791f;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 10px;
+}
+
+.ops-process-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ops-process-list li {
+  border: 1px solid #e7f5ff;
+  border-radius: 8px;
+  background: #f8fbff;
+  padding: 12px;
+}
+
+.ops-process-list strong {
+  display: block;
+  color: #1c4a7c;
+}
+
+.ops-process-list p {
+  margin: 6px 0 0;
+  color: #495057;
+  line-height: 1.5;
+}
+
 .panel h2 {
   margin: 0 0 14px;
   font-size: 18px;
@@ -1104,6 +1248,18 @@ dd {
   line-height: 1.7;
 }
 
+.blocked-list li strong,
+.blocked-list li span,
+.blocked-list li small {
+  display: block;
+}
+
+.blocked-list li small {
+  margin-top: 4px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
 pre {
   max-height: 320px;
   overflow: auto;
@@ -1206,6 +1362,7 @@ pre {
 
   .summary-grid,
   .panel-grid,
+  .ops-process-list,
   .line-item-form-grid {
     grid-template-columns: 1fr;
   }

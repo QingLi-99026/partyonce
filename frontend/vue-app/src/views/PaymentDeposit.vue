@@ -19,6 +19,33 @@
       title="Readiness only: no live payment, no webhook/n8n, and no outbound message."
     />
 
+    <section class="parent-trust-panel">
+      <div>
+        <p class="eyebrow">Parent-safe payment boundary</p>
+        <h2>No card charge happens in this preview</h2>
+        <p>
+          This page is a staging readiness check only. Families should first receive a
+          human-reviewed quote, confirm venue and supplier availability, then move to
+          a separate approved deposit step.
+        </p>
+      </div>
+      <ul>
+        <li v-for="item in trustChecklist" :key="item">{{ item }}</li>
+      </ul>
+    </section>
+
+    <section class="process-panel">
+      <p class="eyebrow">Quote-to-deposit path</p>
+      <h2>Four steps before any future deposit</h2>
+      <div class="process-grid">
+        <article v-for="(step, index) in quoteProcessSteps" :key="step.id">
+          <span>{{ index + 1 }}</span>
+          <strong>{{ step.title }}</strong>
+          <small>{{ step.body }}</small>
+        </article>
+      </div>
+    </section>
+
     <section class="content-grid">
       <article class="panel">
         <h2>Order Snapshot</h2>
@@ -87,12 +114,15 @@ import {
   getPaymentReadiness,
   savePaymentReadinessSnapshot
 } from '@/services/paymentReadinessService'
+import { getQuoteProcessSteps, getTrustChecklist } from '@/data/parentTrustContent'
 
 const route = useRoute()
 const router = useRouter()
 const readiness = ref(getPaymentReadiness())
 const cardMountRef = ref(null)
 const stripeMounted = ref(false)
+const trustChecklist = getTrustChecklist()
+const quoteProcessSteps = getQuoteProcessSteps()
 const snapshot = ref(buildPaymentReadinessSnapshot({
   order_number: route.query.order_number,
   amount: route.query.amount,
@@ -164,6 +194,7 @@ dt {
 }
 
 .scope-alert,
+.parent-trust-panel,
 .content-grid,
 .panel {
   margin-bottom: 18px;
@@ -181,6 +212,75 @@ dt {
   background: #fff;
   padding: 18px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.parent-trust-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  gap: 16px;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff7ed, #fffbeb);
+  padding: 18px;
+}
+
+.parent-trust-panel ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.process-panel {
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  margin-bottom: 18px;
+  padding: 18px;
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.process-grid article {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+}
+
+.process-grid span {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 900;
+}
+
+.process-grid strong,
+.process-grid small {
+  display: block;
+  margin-top: 8px;
+}
+
+.process-grid small {
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.parent-trust-panel li {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #92400e;
+  padding: 10px 12px;
+  font-weight: 650;
 }
 
 .detail-list {
@@ -274,6 +374,14 @@ dd {
 @media (max-width: 720px) {
   .page-hero {
     display: block;
+  }
+
+  .parent-trust-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .process-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

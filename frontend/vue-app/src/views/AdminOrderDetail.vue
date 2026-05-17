@@ -101,6 +101,54 @@
               </div>
             </dl>
           </article>
+
+          <article class="panel">
+            <h2>Family Requirements Review</h2>
+            <dl v-if="hasCustomerRequirements">
+              <div v-if="customerRequirements.food_notes">
+                <dt>Food / catering</dt>
+                <dd>{{ customerRequirements.food_notes }}</dd>
+              </div>
+              <div v-if="customerRequirements.allergy_notes">
+                <dt>Allergy / dietary</dt>
+                <dd>{{ customerRequirements.allergy_notes }}</dd>
+              </div>
+              <div v-if="customerRequirements.cake_needs">
+                <dt>Cake / dessert</dt>
+                <dd>{{ customerRequirements.cake_needs }}</dd>
+              </div>
+              <div v-if="customerRequirements.parent_priorities">
+                <dt>Parent priorities</dt>
+                <dd>{{ customerRequirements.parent_priorities }}</dd>
+              </div>
+            </dl>
+            <p v-else class="control-note">
+              No customer-specific food, allergy, cake, or parent priority notes captured yet.
+            </p>
+            <p class="control-note">
+              Verify these points before supplier dispatch, run sheet preparation, or any future deposit instruction.
+            </p>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="ops-process-heading">
+            <div>
+              <p class="eyebrow">Ops quote-to-deposit checklist</p>
+              <h2>Keep operations aligned with customer wording</h2>
+            </div>
+            <span>Preview only · no payment action</span>
+          </div>
+          <ol class="ops-process-list">
+            <li v-for="step in quoteProcessSteps" :key="step.id">
+              <strong>{{ step.title }}</strong>
+              <p>{{ step.body }}</p>
+            </li>
+          </ol>
+          <p class="control-note">
+            Treat pending_deposit as a business status only. Before any future deposit instruction,
+            confirm the formal quote, venue conditions, supplier responsibilities, food / allergy notes, and customer add-ons.
+          </p>
         </section>
 
         <section class="panel-grid">
@@ -234,6 +282,23 @@
                 <li v-for="item in orderUpgradeExplanation.items" :key="item">{{ item }}</li>
               </ul>
             </div>
+            <div v-if="orderOptionalUpgradeRows.length" class="explanation-block">
+              <h3>高利润附加服务</h3>
+              <ul class="blocked-list">
+                <li v-for="item in orderOptionalUpgradeRows" :key="item.id || item.name">
+                  <strong>{{ item.name }} · {{ formatMoney(item.amount, order.currency) }}</strong>
+                  <span>{{ item.admin_edit_hint || item.customer_explanation }}</span>
+                  <small v-if="item.estimated_cost || item.gross_margin_placeholder">
+                    Ops placeholder: supplier category {{ item.supplier_category || 'pending' }},
+                    estimated cost {{ formatMoney(item.estimated_cost, order.currency) }},
+                    margin {{ formatMoney(item.gross_margin_placeholder, order.currency) }}.
+                  </small>
+                  <small v-if="item.ops_checklist?.length">
+                    Checklist: {{ item.ops_checklist.join(' · ') }}
+                  </small>
+                </li>
+              </ul>
+            </div>
           </article>
 
           <article class="panel ops-explainer-panel">
@@ -355,6 +420,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { blockedOrderActions, orderStatuses } from '@/mock/adminOrders'
 import { getVisualContext, normalizeThemeId, normalizeTierId } from '@/data/visualAssets'
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation'
+import { getQuoteProcessSteps } from '@/data/parentTrustContent'
 import { normalizeQuoteLineItems, summarizeQuoteLineItems } from '@/data/quoteLineItems'
 import { buildPartySceneConfig, summarizePartySceneConfig } from '@/data/partySceneConfig'
 import { featureFlags } from '@/config/featureFlags'
@@ -374,6 +440,7 @@ const order = ref(null)
 const loading = ref(false)
 const dataSource = ref('loading')
 const fallbackNotice = ref('')
+const quoteProcessSteps = getQuoteProcessSteps()
 const opsForm = ref({
   event_date: '',
   event_location: '',
@@ -411,6 +478,9 @@ const orderPartySceneConfig = computed(() => order.value?.party_scene_config || 
 }))
 const orderSceneConfigSummary = computed(() => summarizePartySceneConfig(orderPartySceneConfig.value))
 const orderLineItemSummary = computed(() => summarizeQuoteLineItems(normalizeQuoteLineItems(order.value?.line_items)))
+const orderOptionalUpgradeRows = computed(() => orderLineItemSummary.value.items.filter((item) => item.type === 'optional_upgrade'))
+const customerRequirements = computed(() => order.value?.customer_requirements || order.value?.selection_snapshot?.customer_requirements || order.value?.quote?.customer_requirements || {})
+const hasCustomerRequirements = computed(() => Object.values(customerRequirements.value).some((value) => String(value || '').trim()))
 const orderPriceBasis = computed(() => {
   const context = orderVisualContext.value
   const explanation = orderPackageExplanation.value
@@ -623,6 +693,50 @@ onMounted(loadOrder)
   padding: 18px;
 }
 
+.ops-process-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.ops-process-heading span {
+  border-radius: 999px;
+  background: #fff4e6;
+  color: #b7791f;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 10px;
+}
+
+.ops-process-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ops-process-list li {
+  border: 1px solid #d8f5e5;
+  border-radius: 8px;
+  background: #fbfffd;
+  padding: 12px;
+}
+
+.ops-process-list strong {
+  display: block;
+  color: #087f5b;
+}
+
+.ops-process-list p {
+  margin: 6px 0 0;
+  color: #495057;
+  line-height: 1.5;
+}
+
 .panel h2 {
   margin: 0 0 14px;
   font-size: 18px;
@@ -696,6 +810,18 @@ dd {
 .blocked-list li,
 .status-flow li {
   margin-bottom: 10px;
+}
+
+.blocked-list li strong,
+.blocked-list li span,
+.blocked-list li small {
+  display: block;
+}
+
+.blocked-list li small {
+  margin-top: 4px;
+  color: #64748b;
+  line-height: 1.45;
 }
 
 .alerts-list {
@@ -810,7 +936,8 @@ dd {
   }
 
   .summary-grid,
-  .panel-grid {
+  .panel-grid,
+  .ops-process-list {
     grid-template-columns: 1fr;
   }
 

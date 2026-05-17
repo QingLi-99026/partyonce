@@ -53,6 +53,12 @@
               <div><small>Area</small><strong>{{ venueFinderVisual.area }}</strong></div>
               <div><small>Budget</small><strong>{{ venueFinderVisual.budget }}</strong></div>
             </div>
+            <div class="venue-ops-notes">
+              <strong>Manual venue checks before formal quote</strong>
+              <span>Food: {{ venueFinderOps.foodOptions.join(' · ') }}</span>
+              <span>Allergy: {{ venueFinderOps.allergyNotes.join(' · ') }}</span>
+              <span>Room/minimum spend: {{ venueFinderOps.roomHireHint }} · {{ venueFinderOps.minimumSpendHint }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -72,6 +78,20 @@
             <span>3. {{ $t('quotePage.steps.package') }}</span>
             <span>4. {{ $t('quotePage.steps.pricing') }}</span>
             <span>5. {{ $t('quotePage.steps.inquiry') }}</span>
+          </div>
+        </div>
+        <div class="human-review-card" :style="cardStyle">
+          <div class="pricing-explainer-header">
+            <span class="visual-kicker">{{ $t('quotePage.reviewTimeline.kicker') }}</span>
+            <h3>{{ $t('quotePage.reviewTimeline.title') }}</h3>
+            <p>{{ $t('quotePage.reviewTimeline.copy') }}</p>
+          </div>
+          <div class="human-review-steps">
+            <article v-for="step in humanReviewSteps" :key="step.title">
+              <span>{{ step.index }}</span>
+              <strong>{{ step.title }}</strong>
+              <p>{{ step.body }}</p>
+            </article>
           </div>
         </div>
       </div>
@@ -131,6 +151,55 @@
           </div>
         </div>
 
+        <div class="quote-trust-card" :style="cardStyle">
+          <div>
+            <span class="visual-kicker">{{ $t('quotePage.trustKicker') }}</span>
+            <h3>{{ $t('quotePage.trustTitle') }}</h3>
+            <p>{{ $t('quotePage.trustCopy') }}</p>
+          </div>
+          <ul>
+            <li>{{ $t('quotePage.trustPointEstimate') }}</li>
+            <li>{{ $t('quotePage.trustPointReview') }}</li>
+            <li>{{ $t('quotePage.trustPointPayment') }}</li>
+          </ul>
+        </div>
+
+        <div class="parent-faq-card" :style="cardStyle">
+          <div class="pricing-explainer-header">
+            <span class="visual-kicker">Parent trust FAQ</span>
+            <h3>What parents should know before submitting</h3>
+            <p>
+              This keeps the quote request honest: no instant booking, no hidden payment, and no supplier promise
+              until the team completes human review.
+            </p>
+          </div>
+          <div class="parent-faq-grid">
+            <article v-for="item in parentTrustFaq" :key="item.id">
+              <strong>{{ item.question }}</strong>
+              <p>{{ item.answer }}</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="parent-proof-card" :style="cardStyle">
+          <div class="pricing-explainer-header">
+            <span class="visual-kicker">Family decision patterns · staging samples</span>
+            <h3>How parents usually make this choice</h3>
+            <p>
+              These are sample planning patterns, not real testimonials. They help check whether
+              the package and add-on story is easy for families to understand before formal launch.
+            </p>
+          </div>
+          <div class="parent-proof-grid">
+            <article v-for="choice in popularFamilyChoices" :key="choice.id">
+              <strong>{{ choice.title }}</strong>
+              <span>{{ choice.familyProfile }}</span>
+              <p>{{ choice.recommendedPackage }} · {{ choice.whyItWorks }}</p>
+              <small>{{ choice.addOns.join(' / ') }}</small>
+            </article>
+          </div>
+        </div>
+
         <div class="line-item-card" :style="cardStyle">
           <div class="pricing-explainer-header">
             <span class="visual-kicker">{{ $t('quotePage.lineItemsKicker') }}</span>
@@ -155,6 +224,26 @@
             <span class="visual-kicker">{{ $t('quotePage.packageExplanationKicker') }}</span>
             <h3>{{ displayPackageExplanationLabel }} {{ $t('quotePage.packageDifference') }}</h3>
             <p>{{ displayPackageText(packageExplanation.positioning) }}</p>
+          </div>
+          <div class="package-comparison-card">
+            <div>
+              <h4>{{ $t('quotePage.packageComparison.title') }}</h4>
+              <p>{{ $t('quotePage.packageComparison.copy') }}</p>
+            </div>
+            <div class="package-comparison-table" role="table" :aria-label="$t('quotePage.packageComparison.title')">
+              <div class="comparison-row comparison-head" role="row">
+                <span role="columnheader">{{ $t('quotePage.packageComparison.dimension') }}</span>
+                <strong role="columnheader">{{ $t('quotePage.packageComparison.basic') }}</strong>
+                <strong role="columnheader">{{ $t('quotePage.packageComparison.standard') }}</strong>
+                <strong role="columnheader">{{ $t('quotePage.packageComparison.premium') }}</strong>
+              </div>
+              <div v-for="row in packageComparisonRows" :key="row.label" class="comparison-row" role="row">
+                <span role="cell">{{ row.label }}</span>
+                <p role="cell">{{ row.basic }}</p>
+                <p role="cell">{{ row.standard }}</p>
+                <p role="cell">{{ row.premium }}</p>
+              </div>
+            </div>
           </div>
           <div class="pricing-explainer-grid">
             <div>
@@ -248,24 +337,110 @@
     <section class="addons-section">
       <div class="section-container">
         <h2 class="section-title" :style="titleStyle">{{ $t('quotePage.optionalAddons') }}</h2>
+        <p class="addons-lead">{{ $t('quotePage.addonsLead') }}</p>
+        <div class="addon-value-story-panel">
+          <div class="pricing-explainer-header">
+            <span class="visual-kicker">Add-on value guide · staging</span>
+            <h3>Why families add services after choosing a venue</h3>
+            <p>
+              These cards explain the commercial value in parent language. They are planning examples,
+              not supplier commitments; final inclusion still needs human review.
+            </p>
+          </div>
+          <div class="addon-value-story-grid">
+            <article
+              v-for="story in addOnValueStories"
+              :key="story.id"
+              class="addon-value-story"
+              :class="`tone-${story.visualTone}`"
+            >
+              <span class="story-visual">{{ story.services.map((service) => service.icon).join(' ') }}</span>
+              <div>
+                <small>{{ story.text.subtitle }}</small>
+                <h4>{{ story.text.title }}</h4>
+                <dl>
+                  <div>
+                    <dt>Before</dt>
+                    <dd>{{ story.text.before }}</dd>
+                  </div>
+                  <div>
+                    <dt>After</dt>
+                    <dd>{{ story.text.after }}</dd>
+                  </div>
+                </dl>
+                <p>{{ story.text.proofPoint }}</p>
+                <div class="story-services">
+                  <button
+                    v-for="service in story.services"
+                    :key="service.id"
+                    type="button"
+                    :class="{ 'is-selected': selectedAddons.includes(service.id) }"
+                    @click="toggleAddon(service)"
+                  >
+                    {{ service.text.name }} · +{{ formatPrice(service.price) }}
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div v-if="recommendedVenueAddons.length" class="recommended-addon-panel">
+          <div>
+            <span class="visual-kicker">Venue Finder add-on suggestions</span>
+            <h3>High-value services that fit this venue</h3>
+            <p>
+              These are not automatically added. They help parents understand where the
+              party can be upgraded after a human review confirms venue rules and supplier availability.
+            </p>
+          </div>
+          <div class="recommended-addon-list">
+            <button
+              v-for="addon in recommendedVenueAddons"
+              :key="addon.id"
+              type="button"
+              :class="{ 'is-selected': selectedAddons.includes(addon.id) }"
+              @click="toggleAddon(addon)"
+            >
+              <span>{{ addon.icon }} {{ addon.name }}</span>
+              <small>{{ addon.customerValue }}</small>
+              <strong>+{{ formatPrice(addon.price) }}</strong>
+            </button>
+          </div>
+        </div>
         <div v-if="selectedAddons.length > 0" class="addons-subtotal">
           {{ $t('quotePage.selectedAddons', { count: selectedAddons.length, total: formatPrice(addonsTotal) }) }}
         </div>
-        <div class="addons-grid">
-          <div 
-            v-for="addon in addons" 
-            :key="addon.id"
-            class="addon-card"
-            :class="{ 'is-selected': selectedAddons.includes(addon.id) }"
-            @click="toggleAddon(addon)"
-          >
-            <div class="addon-icon">{{ addon.icon }}</div>
-            <div class="addon-info">
-              <span class="addon-name">{{ addon.name }}</span>
-              <span class="addon-price">+{{ formatPrice(addon.price) }}</span>
+        <div class="addon-group-list">
+          <article v-for="group in addonGroups" :key="group.id" class="addon-group">
+            <header>
+              <span class="addon-group-icon">{{ group.icon }}</span>
+              <div>
+                <h3>{{ group.text.title }}</h3>
+                <p>{{ group.text.subtitle }}</p>
+              </div>
+            </header>
+            <div class="addons-grid">
+              <button
+                v-for="addon in group.items"
+                :key="addon.id"
+                type="button"
+                class="addon-card"
+                :class="{ 'is-selected': selectedAddons.includes(addon.id) }"
+                @click="toggleAddon(addon)"
+              >
+                <div class="addon-icon">{{ addon.icon }}</div>
+                <div class="addon-info">
+                  <span class="addon-name">{{ addon.name }}</span>
+                  <span class="addon-description">{{ addon.description }}</span>
+                  <small>{{ addon.customerValue }}</small>
+                </div>
+                <div class="addon-price-wrap">
+                  <span class="addon-price">+{{ formatPrice(addon.price) }}</span>
+                  <div v-if="selectedAddons.includes(addon.id)" class="addon-check">✓</div>
+                </div>
+              </button>
             </div>
-            <div v-if="selectedAddons.includes(addon.id)" class="addon-check">✓</div>
-          </div>
+          </article>
         </div>
       </div>
     </section>
@@ -349,6 +524,22 @@
             <label>{{ $t('quotePage.notes') }}</label>
             <textarea v-model="inquiryForm.notes" rows="3" :placeholder="$t('quotePage.notesPlaceholder')"></textarea>
           </div>
+          <div class="form-group">
+            <label>{{ $t('quotePage.foodNotes') }}</label>
+            <textarea v-model="inquiryForm.foodNotes" rows="2" :placeholder="$t('quotePage.foodNotesPlaceholder')"></textarea>
+          </div>
+          <div class="form-group">
+            <label>{{ $t('quotePage.allergyNotes') }}</label>
+            <textarea v-model="inquiryForm.allergyNotes" rows="2" :placeholder="$t('quotePage.allergyNotesPlaceholder')"></textarea>
+          </div>
+          <div class="form-group">
+            <label>{{ $t('quotePage.cakeNeeds') }}</label>
+            <textarea v-model="inquiryForm.cakeNeeds" rows="2" :placeholder="$t('quotePage.cakeNeedsPlaceholder')"></textarea>
+          </div>
+          <div class="form-group">
+            <label>{{ $t('quotePage.parentPriorities') }}</label>
+            <textarea v-model="inquiryForm.parentPriorities" rows="2" :placeholder="$t('quotePage.parentPrioritiesPlaceholder')"></textarea>
+          </div>
           <div class="form-summary">
             <span>{{ $t('quotePage.estimatedTotal') }}:</span>
             <strong>{{ formatPrice(finalTotal) }}</strong>
@@ -376,6 +567,16 @@ import { getTheme } from '@/themes';
 import { getVisualContext } from '@/data/visualAssets';
 import { getPackageExplanation, getUpgradeExplanation } from '@/data/packageExplanation';
 import { buildQuoteLineItemsFromSelection, summarizeQuoteLineItems } from '@/data/quoteLineItems';
+import {
+  getAddOnServiceById,
+  getAddOnServiceGroups,
+  getAddOnServices,
+  getAddOnValueStories,
+  summarizeSelectedAddOns
+} from '@/data/addOnServices';
+import { getVenueOperationalReadiness } from '@/data/supplierVenueImportTemplate';
+import { getParentTrustFaq } from '@/data/parentTrustContent';
+import { getPopularFamilyChoices } from '@/data/parentSocialProof';
 import { readQuotePrefill } from '@/services/aiVoiceIntakeService';
 import { writePartySceneConfig } from '@/services/partyScenePreviewService';
 import { buildVenueFinderQuotePrefill, readVenueFinderQuotePrefill } from '@/services/venueFinderService';
@@ -397,7 +598,11 @@ export default {
         name: '',
         contact: '',
         date: '',
-        notes: ''
+        notes: '',
+        foodNotes: '',
+        allergyNotes: '',
+        cakeNeeds: '',
+        parentPriorities: ''
       },
       restoredFromSave: false,
       submitSuccess: false,
@@ -559,6 +764,10 @@ export default {
       };
     },
 
+    venueFinderOps() {
+      return getVenueOperationalReadiness(this.venueFinderPrefill?.venueFinder?.selectedVenue || {});
+    },
+
     quoteFlowSummary() {
       const source = this.venueFinderPrefill
         ? 'Venue Finder selected'
@@ -573,10 +782,11 @@ export default {
     },
     
     addonsTotal() {
-      return this.selectedAddons.reduce((sum, id) => {
-        const addon = this.addons.find(a => a.id === id);
-        return sum + (addon ? addon.price : 0);
-      }, 0);
+      return this.selectedAddOnSummary.total;
+    },
+
+    selectedAddOnSummary() {
+      return summarizeSelectedAddOns(this.selectedAddons, this.$i18n.locale);
     },
 
     standardizedLineItems() {
@@ -596,16 +806,74 @@ export default {
       return summarizeQuoteLineItems(this.standardizedLineItems);
     },
 
+    humanReviewSteps() {
+      return [1, 2, 3, 4].map((index) => ({
+        index,
+        title: this.$t(`quotePage.reviewTimeline.step${index}.title`),
+        body: this.$t(`quotePage.reviewTimeline.step${index}.body`)
+      }));
+    },
+
+    packageComparisonRows() {
+      return ['visual', 'included', 'bestFor', 'ageGuests', 'priceRange', 'upgrade'].map((key) => ({
+        label: this.$t(`quotePage.packageComparison.rows.${key}.label`),
+        basic: this.$t(`quotePage.packageComparison.rows.${key}.basic`),
+        standard: this.$t(`quotePage.packageComparison.rows.${key}.standard`),
+        premium: this.$t(`quotePage.packageComparison.rows.${key}.premium`)
+      }));
+    },
+
     finalTotal() {
       return this.lineItemSummary.total;
     },
     
     addons() {
-      return [
-        { id: 'cake', name: this.$t('quotePage.addons.cake'), icon: '🎂', price: 150 },
-        { id: 'photo', name: this.$t('quotePage.addons.photo'), icon: '📷', price: 300 },
-        { id: 'catering', name: this.$t('quotePage.addons.catering'), icon: '🍽️', price: 500 }
-      ];
+      return getAddOnServices(this.$i18n.locale).map((addon) => ({
+        ...addon,
+        name: addon.text.name,
+        description: addon.text.short,
+        amount_basis: addon.text.basis,
+        customer_explanation: addon.text.customerValue,
+        customerValue: addon.text.customerValue,
+        admin_edit_hint: `${addon.marginRole}; confirm local supplier availability and customer approval before formal quote.`
+      }));
+    },
+
+    addonGroups() {
+      const services = this.addons;
+      return getAddOnServiceGroups(this.$i18n.locale)
+        .map((group) => ({
+          ...group,
+          items: services.filter((addon) => addon.group === group.id)
+        }))
+        .filter((group) => group.items.length > 0);
+    },
+
+    addOnValueStories() {
+      return getAddOnValueStories(this.$i18n.locale);
+    },
+
+    recommendedVenueAddons() {
+      const suggestions = this.venueFinderPrefill?.venueFinder?.recommendedAddons
+        || this.venueFinderPrefill?.selection?.addonSuggestions
+        || [];
+      return suggestions
+        .map((item) => getAddOnServiceById(item.id, this.$i18n.locale))
+        .filter(Boolean)
+        .map((addon) => ({
+          ...addon,
+          name: addon.text.name,
+          description: addon.text.short,
+          customerValue: addon.text.customerValue
+        }));
+    },
+
+    parentTrustFaq() {
+      return getParentTrustFaq();
+    },
+
+    popularFamilyChoices() {
+      return getPopularFamilyChoices();
     }
   },
   
@@ -699,6 +967,22 @@ export default {
       return ['local_only', 'dual_write_skeleton'].includes(mode) ? mode : 'local_only';
     },
 
+    buildIntakeNotes(customerInfo = {}) {
+      const sections = [
+        ['Notes', customerInfo.notes],
+        ['Food / catering', customerInfo.foodNotes],
+        ['Allergy / dietary', customerInfo.allergyNotes],
+        ['Cake / dessert', customerInfo.cakeNeeds],
+        ['Parent priorities', customerInfo.parentPriorities]
+      ].filter(([, value]) => value && String(value).trim());
+
+      if (!sections.length) {
+        return null;
+      }
+
+      return sections.map(([label, value]) => `${label}: ${String(value).trim()}`).join('\n');
+    },
+
     buildLeadPayloadFromInquiry(inquiryData) {
       return {
         customer: {
@@ -706,7 +990,7 @@ export default {
           contact: inquiryData.customerInfo.contact
         },
         preferred_event_date: inquiryData.customerInfo.preferredDate || null,
-        intake_notes: inquiryData.customerInfo.notes || null,
+        intake_notes: this.buildIntakeNotes(inquiryData.customerInfo),
         customer_brief: inquiryData.customerInfo.customerBrief || null,
         selection: inquiryData.selection || {},
         pricing_snapshot: inquiryData.pricing || {},
@@ -774,6 +1058,10 @@ export default {
           contact: this.inquiryForm.contact,
           preferredDate: this.inquiryForm.date,
           notes: this.inquiryForm.notes,
+          foodNotes: this.inquiryForm.foodNotes,
+          allergyNotes: this.inquiryForm.allergyNotes,
+          cakeNeeds: this.inquiryForm.cakeNeeds,
+          parentPriorities: this.inquiryForm.parentPriorities,
           customerBrief: this.aiPrefill?.customerInfo?.customerBrief || null,
           guestCount: this.aiPrefill?.customerInfo?.guestCount || null,
           budgetRange: this.aiPrefill?.customerInfo?.budgetRange || null,
@@ -807,10 +1095,26 @@ export default {
             role: item.quoteRole,
             responsibility: item.responsibility || item.operationsRole
           })),
+          addonSuggestions: this.recommendedVenueAddons.map((addon) => ({
+            id: addon.id,
+            group: addon.group,
+            name: addon.name,
+            price: addon.price,
+            customerValue: addon.customerValue
+          })),
           addons: this.selectedAddons.map(id => {
             const addon = this.addons.find(a => a.id === id);
-            return { id, name: addon?.name, price: addon?.price };
-          })
+            return {
+              id,
+              group: addon?.group,
+              name: addon?.name,
+              price: addon?.price,
+              description: addon?.description,
+              customerValue: addon?.customerValue,
+              amount_basis: addon?.amount_basis
+            };
+          }),
+          addonServiceSummary: this.selectedAddOnSummary
         },
         pricing: {
           packagePrice: this.packageData.price,
@@ -868,7 +1172,16 @@ export default {
         this.showForm = false;
 
         // 重置表单
-        this.inquiryForm = { name: '', contact: '', date: '', notes: '' };
+        this.inquiryForm = {
+          name: '',
+          contact: '',
+          date: '',
+          notes: '',
+          foodNotes: '',
+          allergyNotes: '',
+          cakeNeeds: '',
+          parentPriorities: ''
+        };
 
         // 3秒后隐藏成功提示
         setTimeout(() => {
@@ -944,7 +1257,11 @@ export default {
         name: prefill.customerInfo?.name || '',
         contact: prefill.customerInfo?.contact || '',
         date: prefill.customerInfo?.preferredDate || '',
-        notes: prefill.customerInfo?.notes || ''
+        notes: prefill.customerInfo?.notes || '',
+        foodNotes: prefill.customerInfo?.foodNotes || '',
+        allergyNotes: prefill.customerInfo?.allergyNotes || '',
+        cakeNeeds: prefill.customerInfo?.cakeNeeds || '',
+        parentPriorities: prefill.customerInfo?.parentPriorities || ''
       };
       this.showForm = true;
     },
@@ -973,9 +1290,13 @@ export default {
         name: '',
         contact: '',
         date: prefill.customerInfo?.preferredDate || '',
-        notes: prefill.customerInfo?.notes || ''
+        notes: prefill.customerInfo?.notes || '',
+        foodNotes: prefill.customerInfo?.foodNotes || '',
+        allergyNotes: prefill.customerInfo?.allergyNotes || '',
+        cakeNeeds: prefill.customerInfo?.cakeNeeds || '',
+        parentPriorities: prefill.customerInfo?.parentPriorities || ''
       };
-      this.showForm = true;
+      this.showForm = false;
     }
   },
 
@@ -1169,6 +1490,23 @@ export default {
   color: #fff;
 }
 
+.venue-ops-notes {
+  display: grid;
+  gap: 6px;
+  margin-top: 2px;
+  padding: 12px;
+  border: 1px solid rgba(254, 215, 170, 0.38);
+  border-radius: 12px;
+  background: rgba(67, 56, 202, 0.22);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.venue-ops-notes strong {
+  color: #fed7aa;
+}
+
 .ai-summary-grid {
   margin-top: 8px;
   padding: 14px;
@@ -1223,6 +1561,52 @@ export default {
   margin: 0;
   color: rgba(255, 255, 255, 0.8);
   line-height: 1.7;
+}
+
+.human-review-card {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 26px;
+  color: #fff;
+  border: 1px solid rgba(34, 197, 94, 0.32);
+  background: rgba(14, 116, 144, 0.18);
+}
+
+.human-review-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.human-review-steps article {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 14px;
+}
+
+.human-review-steps span {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: #22c55e;
+  color: #052e16;
+  font-weight: 900;
+}
+
+.human-review-steps strong {
+  display: block;
+  margin-top: 10px;
+  color: #fff;
+}
+
+.human-review-steps p {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.55;
 }
 
 .quote-flow-steps {
@@ -1466,6 +1850,112 @@ export default {
   color: #eaf8ff;
 }
 
+.parent-faq-card {
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+  padding: 28px;
+  color: #eaf8ff;
+}
+
+.parent-proof-card {
+  margin-top: 24px;
+  padding: 28px;
+  border: 1px solid rgba(236, 72, 153, 0.18);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(253, 242, 248, 0.95), rgba(255, 247, 237, 0.95));
+}
+
+.parent-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.parent-proof-grid article {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 16px;
+}
+
+.parent-proof-grid strong {
+  display: block;
+  color: #831843;
+  font-size: 15px;
+}
+
+.parent-proof-grid span,
+.parent-proof-grid small {
+  display: block;
+  margin-top: 6px;
+  color: #7c2d12;
+  font-weight: 700;
+}
+
+.parent-proof-grid p {
+  color: #5b3b2e;
+  line-height: 1.6;
+}
+
+.parent-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.parent-faq-grid article {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.parent-faq-grid strong {
+  display: block;
+  color: #fff;
+}
+
+.parent-faq-grid p {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.55;
+}
+
+.quote-trust-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  gap: 18px;
+  margin-top: 18px;
+  padding: 24px 28px;
+  color: #eaf8ff;
+  border: 1px solid rgba(34, 197, 94, 0.32);
+  background: rgba(15, 118, 110, 0.18);
+}
+
+.quote-trust-card h3 {
+  margin: 8px 0;
+  color: #fff;
+  font-size: 1.35rem;
+}
+
+.quote-trust-card p,
+.quote-trust-card li {
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.65;
+}
+
+.quote-trust-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+:global([dir='rtl']) .quote-trust-card ul {
+  padding-right: 18px;
+  padding-left: 0;
+}
+
 .line-item-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1553,16 +2043,300 @@ export default {
   background: rgba(0, 0, 0, 0.2);
 }
 
+.addons-lead {
+  max-width: 760px;
+  margin: -6px 0 20px;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.7;
+}
+
 .addons-subtotal {
   margin-bottom: 20px;
   color: #ffd700;
   font-weight: 600;
 }
 
+.addon-value-story-panel {
+  display: grid;
+  gap: 18px;
+  margin: 0 0 24px;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(252, 211, 77, 0.18), transparent 32%),
+    radial-gradient(circle at 86% 6%, rgba(244, 114, 182, 0.16), transparent 34%),
+    rgba(255, 255, 255, 0.055);
+}
+
+.addon-value-story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.addon-value-story {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  min-height: 100%;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.addon-value-story.tone-execution {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.16), rgba(255, 255, 255, 0.07));
+}
+
+.addon-value-story.tone-visual {
+  background: linear-gradient(135deg, rgba(244, 114, 182, 0.16), rgba(255, 255, 255, 0.07));
+}
+
+.addon-value-story.tone-experience {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(255, 255, 255, 0.07));
+}
+
+.story-visual {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 1.35rem;
+}
+
+.addon-value-story small,
+.addon-value-story p,
+.addon-value-story dd {
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+}
+
+.addon-value-story h4 {
+  margin: 4px 0 12px;
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.addon-value-story dl {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.addon-value-story dl div {
+  padding-left: 10px;
+  border-left: 2px solid rgba(255, 255, 255, 0.16);
+}
+
+.addon-value-story dt {
+  color: #fef3c7;
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.addon-value-story dd {
+  margin: 2px 0 0;
+  font-size: 0.86rem;
+}
+
+.story-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.story-services button {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.story-services button.is-selected {
+  border-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.18);
+  color: #fef3c7;
+}
+
+.recommended-addon-panel {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 22px;
+  padding: 22px;
+  border: 1px solid rgba(253, 186, 116, 0.34);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(251, 146, 60, 0.16), rgba(255, 255, 255, 0.06)),
+    rgba(255, 255, 255, 0.05);
+}
+
+.recommended-addon-panel h3 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.recommended-addon-panel p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.65;
+}
+
+.recommended-addon-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.recommended-addon-list button {
+  display: grid;
+  gap: 6px;
+  min-height: 116px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  padding: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.recommended-addon-list button.is-selected {
+  border-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.16);
+}
+
+.recommended-addon-list span {
+  font-weight: 900;
+}
+
+.recommended-addon-list small {
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.45;
+}
+
+.recommended-addon-list strong {
+  color: #ffd700;
+}
+
+.addon-group-list {
+  display: grid;
+  gap: 18px;
+}
+
+.addon-group {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+  padding: 18px;
+}
+
+.addon-group header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.addon-group h3 {
+  margin: 0 0 4px;
+  color: #fff;
+}
+
+.addon-group p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.addon-group-icon {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 1.35rem;
+}
+
 .addons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 12px;
+}
+
+.package-comparison-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.package-comparison-card h4 {
+  margin: 0 0 6px;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.package-comparison-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.55;
+}
+
+.package-comparison-table {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+}
+
+.comparison-row {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, minmax(0, 1.15fr));
+}
+
+.comparison-row > * {
+  margin: 0;
+  min-width: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 11px;
+}
+
+.comparison-row:first-child > * {
+  border-top: 0;
+}
+
+.comparison-row > * + * {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:global([dir='rtl']) .comparison-row > * + * {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 0;
+}
+
+.comparison-head {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.comparison-head span,
+.comparison-head strong,
+.comparison-row span {
+  color: #fff;
+  font-weight: 900;
 }
 
 @media (max-width: 760px) {
@@ -1577,16 +2351,32 @@ export default {
   .line-item-grid {
     grid-template-columns: 1fr;
   }
+
+  .quote-trust-card {
+    grid-template-columns: 1fr;
+  }
+
+  .human-review-steps,
+  .comparison-row {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-row > * + * {
+    border-left: 0;
+  }
 }
 
 .addon-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+  width: 100%;
   padding: 16px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
   transition: all 0.3s;
 }
@@ -1606,17 +2396,38 @@ export default {
 
 .addon-info {
   flex: 1;
+  min-width: 0;
 }
 
 .addon-name {
   display: block;
   font-size: 0.9375rem;
   margin-bottom: 4px;
+  font-weight: 800;
+}
+
+.addon-description,
+.addon-info small {
+  display: block;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.45;
+}
+
+.addon-info small {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.addon-price-wrap {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
 }
 
 .addon-price {
   font-size: 0.875rem;
-  opacity: 0.7;
+  color: #ffd700;
+  font-weight: 800;
 }
 
 .addon-check {

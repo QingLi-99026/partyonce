@@ -18,8 +18,7 @@
         <el-button type="primary" class="entry-btn">选择模板</el-button>
       </div>
       
-      <!-- AI策划 - 问答式 -->
-      <div class="entry-card entry-card--ai" @click="startWizard" data-testid="entry-ai">
+      <div v-if="featureFlags.aiExperienceEnabled" class="entry-card entry-card--ai" @click="startWizard" data-testid="entry-ai">
         <div class="entry-badge entry-badge--hot">推荐</div>
         <div class="entry-icon">
           <el-icon><Magic /></el-icon>
@@ -61,9 +60,8 @@ const startWizard = () => {
 }
 
 const onWizardComplete = (data) => {
-  // 完成后跳转到 AI Planner 或结果页
   router.push({
-    path: '/ai-planner',
+    path: '/quote',
     query: { ...data, fromWizard: '1' }
   })
 }

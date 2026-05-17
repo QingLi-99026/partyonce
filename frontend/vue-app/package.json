@@ -6,7 +6,8 @@
     "serve": "vite preview",
     "build": "vite build",
     "lint": "eslint .",
-    "dev": "vite"
+    "dev": "vite",
+    "check:i18n": "node scripts/check-i18n-residue.mjs"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

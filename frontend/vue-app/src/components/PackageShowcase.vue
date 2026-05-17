@@ -81,7 +81,7 @@
       <!-- 价格说明 -->
       <div class="price-notice" :style="noticeStyle">
         <p>* 以上价格为{{ currentThemeName }}主题基础报价，最终价格根据具体场景、人数、日期等因素调整</p>
-        <p>Basic 控制预算，Standard 提供完整派对感，Premium 强调沉浸式视觉和拍照区。</p>
+        <p>基础套餐控制预算，标准套餐提供完整派对感，高级套餐强调沉浸式视觉和拍照区。</p>
       </div>
     </div>
   </section>
@@ -123,7 +123,7 @@ export default {
             ...getPackageExplanation('basic').includes
           ],
           explanation: getPackageExplanation('basic'),
-          addonHint: '可添加：蛋糕、摄影师',
+          addonHint: '可添加：蛋糕、基础布置、撤场支持',
           ctaText: '选择基础包',
           popular: false
         },
@@ -137,7 +137,7 @@ export default {
             ...getPackageExplanation('standard').includes
           ],
           explanation: getPackageExplanation('standard'),
-          addonHint: '可添加： Catering、表演',
+          addonHint: '可添加：主持、音响、拍照区、表演',
           ctaText: '选择标准包',
           popular: true,
           badge: '最受欢迎'
@@ -152,7 +152,7 @@ export default {
             ...getPackageExplanation('premium').includes
           ],
           explanation: getPackageExplanation('premium'),
-          addonHint: '可添加： 明星表演、直升机',
+          addonHint: '可添加：高级花艺、沉浸式拍照区、专属主持',
           ctaText: '选择尊享包',
           popular: false
         }

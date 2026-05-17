@@ -7,11 +7,11 @@
     <section class="hero-section">
       <div class="hero-content">
         <h1>让每一个派对都独一无二</h1>
-        <p>AI智能策划 · 精选场地 · 一站式派对服务</p>
+        <p>精选场地 · 主题套餐 · 一站式派对服务</p>
         <div class="hero-actions">
-          <el-button type="primary" size="large" @click="$router.push('/ai-planner')">
-            <el-icon><Magic /></el-icon>
-            AI策划派对
+          <el-button type="primary" size="large" @click="$router.push('/venue-finder')">
+            <el-icon><OfficeBuilding /></el-icon>
+            查找场地
           </el-button>
           <el-button size="large" @click="$router.push('/venues')">
             <el-icon><OfficeBuilding /></el-icon>
@@ -43,10 +43,10 @@
       </div>
       
       <div class="features-grid">
-        <div class="feature-card" @click="$router.push('/ai-planner')">
+        <div class="feature-card" @click="$router.push('/themes')">
           <div class="feature-icon"><el-icon><Magic /></el-icon></div>
-          <h3>AI智能策划</h3>
-          <p>只需输入您的需求，AI即刻生成专属派对方案，包含场地、布置、餐饮等全方位建议。</p>
+          <h3>主题套餐策划</h3>
+          <p>从梦幻城堡、星际探险和森林奇境中选择主题，再查看场地、布置、餐饮等建议。</p>
         </div>
         
         <div class="feature-card" @click="$router.push('/venues')">
@@ -109,8 +109,8 @@
     <section class="cta-section">
       <div class="cta-content">
         <h2>准备好开始您的派对了吗？</h2>
-        <p>立即使用AI策划，让梦想派对成为现实</p>
-        <el-button type="primary" size="large" @click="$router.push('/ai-planner')">
+        <p>从场地、主题和报价开始，让梦想派对成为现实</p>
+        <el-button type="primary" size="large" @click="$router.push('/quote')">
           免费开始策划
         </el-button>
       </div>

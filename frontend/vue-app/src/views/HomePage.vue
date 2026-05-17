@@ -402,26 +402,22 @@ export default {
 
     homeKicker() {
       if (this.aiExperienceEnabled) return this.$t('home.kicker');
-      return this.isChineseLocale ? 'Party planning preview' : 'Party planning preview';
+      return this.$t('home.planningPreviewKicker');
     },
 
     homeTitle() {
       if (this.aiExperienceEnabled) return this.$t('home.title');
-      return this.isChineseLocale
-        ? '欢迎来到 Party Event 派对活动，先看场地、主题和套餐'
-        : 'Plan a warm family party with clear themes, venues, and packages';
+      return this.$t('home.planningPreviewTitle');
     },
 
     homeIntro() {
       if (this.aiExperienceEnabled) return this.$t('home.intro');
-      return this.isChineseLocale
-        ? '从梦幻城堡、星际探险到森林奇境，先比较主题效果、Restaurant A 场地样板和 Basic / Standard / Premium 套餐，再提交清楚的 quote request。'
-        : 'Compare themes, Restaurant A venue samples, and Basic / Standard / Premium packages before submitting a clear quote request.';
+      return this.$t('home.planningPreviewIntro');
     },
 
     homeVisualMetaStrong() {
       if (this.aiExperienceEnabled) return this.$t('home.visualMetaStrong');
-      return this.isChineseLocale ? '主题 · 餐厅 A · 套餐 · 报价' : 'Themes · Restaurant A · Packages · Quote';
+      return this.$t('home.planningPreviewMeta');
     },
 
     investorActions() {
@@ -466,7 +462,7 @@ export default {
           {
             icon: '🎉',
             title: this.isChineseLocale ? '比较套餐' : 'Compare packages',
-            description: this.isChineseLocale ? '看清 Basic / Standard / Premium 的布置差异和报价依据' : 'Compare Basic / Standard / Premium scope and pricing basis'
+            description: this.isChineseLocale ? '看清基础、标准、高级三档套餐的布置差异和报价依据' : 'Compare Basic / Standard / Premium scope and pricing basis'
           },
           {
             icon: '📝',

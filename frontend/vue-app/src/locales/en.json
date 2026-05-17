@@ -8,6 +8,7 @@
   },
   "nav": {
     "home": "Home",
+    "themes": "Themes",
     "venues": "Venues",
     "venueFinder": "Venue Finder",
     "aiGuide": "AI Guide",
@@ -38,7 +39,8 @@
     "confirm": "Confirm",
     "cancel": "Cancel",
     "loggedOut": "Logged out",
-    "localCustomerReady": "Local/staging customer demo enabled: customer-local-41"
+    "localCustomerReady": "Local/staging customer demo enabled: customer-local-41",
+    "packages": "Packages"
   },
   "home": {
     "navThemes": "Themes",
@@ -47,11 +49,15 @@
     "navCta": "Start planning",
     "kicker": "Welcome · AI Party Concierge",
     "title": "Welcome to Party Event, where every party is visible before it happens",
-    "intro": "Preview castle, space, and forest themes, compare dining layouts and package levels, then let AI turn the idea into a clear quote request.",
+    "intro": "Compare venues, themes, packages, and budget first, then submit a clear human-reviewed quote request.",
+    "planningPreviewKicker": "Party planning preview",
+    "planningPreviewTitle": "Plan a warm family party with clear themes, venues, and packages",
+    "planningPreviewIntro": "Compare themes, Restaurant A venue samples, and Basic / Standard / Premium packages before submitting a clear quote request.",
+    "planningPreviewMeta": "Themes · Restaurant A · Packages · Quote",
     "planYourself": "Plan myself",
     "aiRecommend": "AI recommends",
     "visualMeta": "Warm customer preview",
-    "visualMetaStrong": "AI · Themes · Restaurant A · Quote",
+    "visualMetaStrong": "Venue Finder · Themes · Restaurant A · Quote",
     "heroMockupFallbackTitle": "Plan a warm, visual children’s party",
     "heroMockupFallbackCopy": "English preview uses clean UI cards instead of Chinese-labelled mockup screenshots.",
     "englishThemeHeroKicker": "Theme preview",
@@ -65,13 +71,13 @@
       "forest": "Explore the forest"
     },
     "themeListen": {
-      "kicker": "AI theme guidance",
+      "kicker": "Theme guidance",
       "castle": "Castle Princess fits children who like princess, prince, and fairytale moods. Would you like me to keep planning with this theme?",
       "space": "Space Explorer fits children who like rockets, stars, and discovery missions. Would you like me to keep planning with this theme?",
       "forest": "Forest Adventure fits children who like animals, nature, and warm discovery moments. Would you like me to keep planning with this theme?",
       "continue": "Continue with this theme",
       "switchTheme": "Try another theme",
-      "aiRecommend": "Let AI recommend the best theme"
+      "aiRecommend": "Compare themes for me"
     },
     "assetKicker": "Investor preview assets",
     "assetTitle": "Visual showcase assets restored",
@@ -194,9 +200,13 @@
     "englishImageFallback": "English preview placeholder. Chinese-labelled artwork is hidden in English mode."
   },
   "tiers": {
+    "heading": "Basic / Standard / Premium",
     "basic": "Basic",
     "standard": "Standard",
-    "premium": "Premium"
+    "premium": "Premium",
+    "basicDescription": "Essential table styling, theme balloons, welcome sign, and a light photo corner for a controlled budget.",
+    "standardDescription": "Full theme table styling, balloon arch, dessert table, backdrop, and supplier guidance for most family birthday parties.",
+    "premiumDescription": "Immersive backdrop, lighting layers, custom standees, hero photo zone, and on-site coordination for a more polished celebration."
   },
   "steps": {
     "chooseTheme": {
@@ -414,6 +424,12 @@
     "edit": "Edit",
     "priceDetails": "Price details",
     "estimatedTotal": "Estimated total",
+    "trustKicker": "Quote trust",
+    "trustTitle": "A reviewable estimate, not an automatic charge",
+    "trustCopy": "This amount helps customers understand budget, scope, and next steps. A final quote still needs human review of date, guest count, venue availability, and supplier availability.",
+    "trustPointEstimate": "The estimate shows major line items so parents can compare packages and adjustments.",
+    "trustPointReview": "Submitting an inquiry enters human review and does not create a formal order automatically.",
+    "trustPointPayment": "Deposit and payment remain readiness / placeholder only; no real payment is triggered.",
     "lineItemsKicker": "Standardized line items",
     "lineItemsTitle": "What stable line item types make up the quote",
     "lineItemsCopy": "Venue, decor, supplier, labor, transport, service, and optional upgrade costs are captured in the quote snapshot for review.",
@@ -432,7 +448,8 @@
     "quoteBasis": "Quote basis",
     "view3dPreview": "View experimental 3D scene preview (not a construction drawing)",
     "sceneConfigKicker": "Scene config",
-    "optionalAddons": "Optional add-ons",
+    "optionalAddons": "Optional add-on services",
+    "addonsLead": "Add services only when they solve a real parent problem: less setup work, stronger photos, better kids engagement, or a cleaner venue handover. They remain staging estimates until a planner reviews availability.",
     "selectedAddons": "Selected {count} items, subtotal {total}",
     "restoredNotice": "Restored your previously saved plan",
     "savedNotice": "Plan saved. Total {total}",
@@ -447,6 +464,14 @@
     "eventDate": "Event date",
     "notes": "Notes",
     "notesPlaceholder": "Describe special needs or questions",
+    "foodNotes": "Food and catering notes",
+    "foodNotesPlaceholder": "Example: shared banquet, kids menu, vegetarian options, or bring-your-own food questions",
+    "allergyNotes": "Allergy and dietary notes",
+    "allergyNotesPlaceholder": "Example: nut-free, halal, gluten-free, egg allergy, or no known allergies",
+    "cakeNeeds": "Cake and dessert needs",
+    "cakeNeedsPlaceholder": "Example: need a cake supplier, bring own cake, dessert table, or cupcake tower",
+    "parentPriorities": "Parent priorities",
+    "parentPrioritiesPlaceholder": "Example: easy setup, beautiful photos, quiet private room, parking, or low mess",
     "noticeEstimate": "* Prices are estimates and may change based on date, guest count, venue, and supplier availability.",
     "noticeFollowup": "After inquiry submission, a planner can follow up manually in staging.",
     "aiPrefillBody": "AI Concierge prefilled contact, date, guest count, budget, venue preference, and recommendation notes. Confirming only submits a local/staging inquiry skeleton.",
@@ -502,6 +527,73 @@
       "cake": "Custom theme cake",
       "photo": "Professional photography",
       "catering": "Catering service"
+    },
+    "reviewTimeline": {
+      "kicker": "Quote process",
+      "title": "Inquiry first, human review next, deposit readiness last",
+      "copy": "This page shows an estimate and scope so parents can decide. It does not charge immediately or create a real order automatically.",
+      "step1": {
+        "title": "Choose venue / theme / package",
+        "body": "Start with guests, area, budget, and the party look."
+      },
+      "step2": {
+        "title": "Submit inquiry",
+        "body": "Leave contact, date, and special needs for staging review."
+      },
+      "step3": {
+        "title": "Human quote review",
+        "body": "The team checks venue availability, suppliers, food, and setup limits."
+      },
+      "step4": {
+        "title": "Deposit readiness",
+        "body": "Only after quote confirmation does test-mode deposit readiness apply; no payment is charged here."
+      }
+    },
+    "packageComparison": {
+      "title": "Basic / Standard / Premium comparison",
+      "copy": "Parents can see what each tier adds before choosing host, cake, photo zone, or other add-on services.",
+      "dimension": "Dimension",
+      "basic": "Basic package",
+      "standard": "Standard package",
+      "premium": "Premium package",
+      "rows": {
+        "visual": {
+          "label": "Visual goal",
+          "basic": "Clear theme feel",
+          "standard": "Complete party feel",
+          "premium": "Immersive premium look"
+        },
+        "included": {
+          "label": "Included scope",
+          "basic": "Tablecloth, light balloons, small theme sign",
+          "standard": "Balloon arch, backdrop, dessert table",
+          "premium": "Large arch, lighting, photo zone, custom board"
+        },
+        "bestFor": {
+          "label": "Best for",
+          "basic": "Budget-sensitive or small parties",
+          "standard": "Most middle-income families wanting a full experience",
+          "premium": "Higher budget, milestone birthday, strong visual impact"
+        },
+        "ageGuests": {
+          "label": "Age / guests",
+          "basic": "Ages 3-8, about 10-18 guests",
+          "standard": "Ages 5-12, about 15-35 guests",
+          "premium": "Older kids or larger events, about 25-60 guests"
+        },
+        "priceRange": {
+          "label": "Price range guide",
+          "basic": "From about $899-$1,299",
+          "standard": "From about $1,499-$2,399",
+          "premium": "About $2,800+, human review required"
+        },
+        "upgrade": {
+          "label": "What upgrade adds",
+          "basic": "Keeps key photo moment",
+          "standard": "Adds backdrop, dessert table, coordination",
+          "premium": "Adds customization, lighting, full-room styling"
+        }
+      }
     }
   },
   "customerPages": {
@@ -513,7 +605,7 @@
     "sceneConfig": "Scene config",
     "quoteExplanation": "Quote explanation",
     "upgradeValue": "Upgrade value",
-    "startAi": "Start with AI Concierge",
+    "startAi": "Start with Venue Finder",
     "myQuotes": {
       "title": "My Quotes",
       "subtitle": "View your party quote status, package snapshot, amount, expiry, and next action.",
@@ -521,7 +613,7 @@
       "search": "Search quote number, theme, package, or customer",
       "emptyEyebrow": "No quote visible for this local identity",
       "emptyTitle": "No matching quote is available in this Preview",
-      "emptyCopy": "Start from AI Concierge or Investor Demo. Real customer quotes will show theme, Restaurant A, pricing, and next status here."
+      "emptyCopy": "Start by choosing a venue in Venue Finder, then submit a quote request. Customer quotes will appear here with theme, venue, price, and next status."
     },
     "myOrders": {
       "title": "My Orders",
@@ -530,7 +622,7 @@
       "search": "Search order number, location, theme, or quote",
       "emptyEyebrow": "No order visible for this local identity",
       "emptyTitle": "No matching order is available in this Preview",
-      "emptyCopy": "The normal flow is AI Concierge → Quote request → My Quotes → My Orders. Demo data can be started from Investor Demo."
+      "emptyCopy": "The normal flow is Venue Finder → Quote request → My Quotes → My Orders. The current demo order explains status and deposit readiness."
     }
   },
   "venues": {
@@ -614,8 +706,8 @@
     "tagline": "One-stop party planning for family celebrations",
     "services": "Services",
     "venueBooking": "Venue booking",
-    "aiPlanning": "AI planning",
-    "design3d": "3D design",
+    "aiPlanning": "Party planning",
+    "design3d": "Visual preview",
     "onlineQuote": "Online quote",
     "about": "About",
     "aboutUs": "About us",
@@ -652,5 +744,24 @@
       "nextTitle": "Next step",
       "nextCopy": "Formal 3D editing, drag-and-drop design, and supplier execution drawings will be evaluated in a later workpack."
     }
+  },
+  "packageGuide": {
+    "kicker": "Package guide",
+    "title": "Compare Basic, Standard, and Premium before requesting a quote",
+    "subtitle": "Choose the level of party support you want first, then add venue-specific upgrades after human review.",
+    "findVenue": "Find a venue first",
+    "startQuote": "Start quote request",
+    "safeFlowTitle": "Safe quote flow",
+    "compareKicker": "Package levels",
+    "compareTitle": "Three clear levels for different family budgets",
+    "compareCopy": "The package is the base planning layer. Add-ons stay visible so parents can choose extra support without hidden costs.",
+    "tableKicker": "Detailed comparison",
+    "addonsKicker": "High-margin optional services",
+    "addonsTitle": "Add-ons are where parents buy convenience and stronger photos",
+    "addonsCopy": "These services are optional. They are reviewed with venue rules and supplier availability before a formal quote.",
+    "trustKicker": "Parent trust boundary",
+    "trustTitle": "No instant booking or live payment from this page",
+    "trustCopy": "This guide explains scope and budget only. A formal quote still requires human review of date, venue, supplier availability, food notes and allergy handling.",
+    "chooseTier": "Use this package"
   }
 }
