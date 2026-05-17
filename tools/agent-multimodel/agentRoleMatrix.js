@@ -5,49 +5,57 @@ const agentRoleMatrix = [
     role_id: 'ceo_strategy_owner',
     primary: 'openai_codex',
     challenger: 'gemini',
-    task: 'Strategic judgment, commercial priority, launch risk'
+    judge: 'openai_codex',
+    task: 'Strategic judgment, product direction, launch risk, resource priority'
   },
   {
     role_id: 'product_manager',
     primary: 'openai_codex',
     challenger: 'kimi',
-    task: 'Product journey, user needs, feature priority'
+    judge: 'openai_codex',
+    task: 'User journey, feature priority, requirement breakdown, acceptance criteria'
   },
   {
     role_id: 'ux_ui_designer',
     primary: 'gemini',
     challenger: 'openai_codex',
-    task: 'Screenshots, layout, overflow, clickability, visual trust'
+    judge: 'openai_codex',
+    task: 'Screenshot observation, visual overflow, layout, card clickability, page trust'
   },
   {
     role_id: 'frontend_engineer',
     primary: 'openai_codex',
     challenger: 'gemini',
-    task: 'Routes, components, CSS, build, interaction bugs'
+    judge: 'openai_codex',
+    task: 'Vue components, routes, CSS, button behavior, build, console errors'
   },
   {
     role_id: 'qa_tester',
     primary: 'gemini',
     challenger: 'openai_codex',
-    task: 'Page-by-page, button-by-button, copy-by-copy, DOM and screenshot evidence'
+    judge: 'openai_codex',
+    task: 'Real Chrome, page-by-page, button-by-button, copy-by-copy, screenshot evidence, DOM evidence'
   },
   {
     role_id: 'localization_reviewer',
     primary: 'kimi',
     challenger: 'openai_codex',
-    task: 'Chinese naturalness, multilingual copy, localization residue'
+    judge: 'openai_codex',
+    task: 'Chinese naturalness, multilingual residue, system keys, exposed English technical terms'
   },
   {
     role_id: 'security_compliance_reviewer',
     primary: 'openai_codex',
     challenger: 'gemini',
-    task: 'Payment, privacy, API, external systems, safety boundaries'
+    judge: 'openai_codex',
+    task: 'Payment, privacy, external APIs, safety boundaries, production environment risk'
   },
   {
     role_id: 'marketing_growth_reviewer',
     primary: 'kimi',
     challenger: 'openai_codex',
-    task: 'Chinese parent market, Xiaohongshu, sharing vouchers, conversion copy'
+    judge: 'openai_codex',
+    task: 'Chinese parents, Xiaohongshu, sharing vouchers, promotion copy, conversion path'
   }
 ];
 

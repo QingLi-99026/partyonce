@@ -23,6 +23,7 @@ async function main() {
     persona_or_role_id: employeeCase.role_id,
     model_primary: employeeCase.primary,
     model_challenger: employeeCase.challenger,
+    model_judge: employeeCase.judge,
     route_checked: routeSet
   });
 
@@ -33,6 +34,7 @@ async function main() {
     persona_or_role_id: consumerCase.persona_id,
     model_primary: consumerCase.primary,
     model_challenger: consumerCase.challenger,
+    model_judge: consumerCase.judge,
     route_checked: routeSet
   });
 
@@ -42,13 +44,16 @@ async function main() {
     persona_or_role_id: employeeCase.role_id,
     model_primary: employeeCase.primary,
     model_challenger: employeeCase.challenger,
+    model_judge: employeeCase.judge,
     route_checked: routeSet,
     actions_taken: [
       {
         page: '/quote',
         action: 'click',
         selector_or_label: '获取人工复核报价',
-        result: 'dry_run_not_executed'
+        expected_result: 'Quote page explains human review and does not imply immediate payment.',
+        actual_result: 'Dry-run skeleton only; real browser click evidence is required in acceptance runs.',
+        result: 'blocked'
       }
     ],
     primary_model_findings: employeeModelResult.primary_result.findings || [],
@@ -63,13 +68,16 @@ async function main() {
     persona_or_role_id: consumerCase.persona_id,
     model_primary: consumerCase.primary,
     model_challenger: consumerCase.challenger,
+    model_judge: consumerCase.judge,
     route_checked: routeSet,
     actions_taken: [
       {
         page: '/themes/castle-princess',
-        action: 'inspect_text',
+        action: 'scan',
         selector_or_label: 'package tier cards',
-        result: 'dry_run_not_executed'
+        expected_result: 'Chinese mode should show Chinese package tier names and descriptions with no raw i18n keys.',
+        actual_result: 'Dry-run skeleton only; DOM text evidence is required in acceptance runs.',
+        result: 'blocked'
       }
     ],
     primary_model_findings: consumerModelResult.primary_result.findings || [],
