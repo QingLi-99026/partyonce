@@ -302,13 +302,13 @@
       <div class="section-container">
         <h2 class="section-title" :style="titleStyle">{{ $t('quotePage.visualBasis') }}</h2>
         <div class="visual-context-card" :style="cardStyle">
-          <img v-if="isChineseLocale" :src="visualContext.restaurant.image_path" :alt="visualContext.restaurant.title">
+          <img v-if="isChineseLocale" :src="visualContext.restaurant.image_path" :alt="displayVisualTitle(visualContext.restaurant.title)">
           <div v-else class="visual-placeholder-card">
             <span>🍽️</span>
             <strong>{{ $t('ai.restaurantPlaceholderTitle') }}</strong>
           </div>
           <div class="visual-context-copy">
-            <span class="visual-kicker">{{ isChineseLocale ? visualContext.restaurant.title : $t('ai.restaurantPlaceholderTitle') }}</span>
+            <span class="visual-kicker">{{ isChineseLocale ? displayVisualTitle(visualContext.restaurant.title) : $t('ai.restaurantPlaceholderTitle') }}</span>
             <p>{{ isChineseLocale ? visualContext.packageVisual.scope : $t('ai.restaurantPlaceholderCopy') }}</p>
             <dl>
               <div>
@@ -1011,6 +1011,18 @@ export default {
         .replaceAll('Space Explorer', '星际探险')
         .replaceAll('Castle Princess', '梦幻城堡')
         .replaceAll('Forest Adventure', '森林奇境');
+    },
+
+    displayVisualTitle(text) {
+      if (!this.isChineseLocale) return text;
+      return this.displayPackageText(this.displayThemeText(this.displayVenueName(text)))
+        .replaceAll('RESTAURANT A', '餐厅 A')
+        .replaceAll('SPACE EXPLORER', '星际探险')
+        .replaceAll('CASTLE PRINCESS', '梦幻城堡')
+        .replaceAll('FOREST ADVENTURE', '森林奇境')
+        .replaceAll('STANDARD', '标准套餐')
+        .replaceAll('BASIC', '基础套餐')
+        .replaceAll('PREMIUM', '高级套餐');
     },
 
     displayPackageText(text) {

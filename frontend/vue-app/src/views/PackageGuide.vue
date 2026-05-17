@@ -136,7 +136,15 @@ import { packageTierExplanations, tierOrder } from '@/data/packageExplanation'
 
 const { t, locale } = useI18n()
 const router = useRouter()
-const trustChecklist = getTrustChecklist()
+const trustChecklist = computed(() => locale.value === 'zh'
+  ? [
+      '正式报价前必须人工复核',
+      '提交报价需求不会即时扣款',
+      '餐食与过敏说明需要人工确认',
+      '附加服务是可选项并清楚列出',
+      '预览数据会明确标注，不当作最终承诺'
+    ]
+  : getTrustChecklist())
 
 const zhFamilyChoices = [
   {
@@ -194,7 +202,7 @@ const tierSummaries = computed(() => ({
 
 const tiers = computed(() => tierOrder.map((id) => ({
   id,
-  label: id.toUpperCase(),
+  label: tierNames.value[id],
   localizedName: tierNames.value[id],
   priceHint: packageTierExplanations[id].priceHint,
   summary: tierSummaries.value[id],
