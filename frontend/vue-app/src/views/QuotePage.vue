@@ -41,42 +41,43 @@
         <div class="venue-prefill-card" :style="cardStyle">
           <div class="venue-prefill-media">
             <img :src="venueFinderVisual.image" :alt="venueFinderVisual.venueName" />
-            <span>Venue Finder sample</span>
+            <span>{{ isChineseLocale ? '场地筛选样板' : 'Venue Finder sample' }}</span>
           </div>
           <div class="venue-prefill-copy">
-            <span class="ai-prefill-kicker">Venue Finder prefill · local/staging</span>
-            <h2>{{ venueFinderVisual.venueName }} · {{ venueFinderVisual.guests }} guests</h2>
+            <span class="ai-prefill-kicker">{{ isChineseLocale ? '场地筛选预填 · 本地 / 预览' : 'Venue Finder prefill · local/staging' }}</span>
+            <h2>{{ displayVenueName(venueFinderVisual.venueName) }} · {{ venueFinderVisual.guests }} {{ isChineseLocale ? '位客人' : 'guests' }}</h2>
             <p>{{ venueFinderVisual.summary }}</p>
             <div class="venue-prefill-stats">
-              <div><small>Theme</small><strong>{{ venueFinderVisual.theme }}</strong></div>
-              <div><small>Package</small><strong>{{ venueFinderVisual.package }}</strong></div>
-              <div><small>Area</small><strong>{{ venueFinderVisual.area }}</strong></div>
-              <div><small>Budget</small><strong>{{ venueFinderVisual.budget }}</strong></div>
+              <div><small>{{ isChineseLocale ? '主题' : 'Theme' }}</small><strong>{{ displayThemeText(venueFinderVisual.theme) }}</strong></div>
+              <div><small>{{ isChineseLocale ? '套餐' : 'Package' }}</small><strong>{{ displayPackageText(venueFinderVisual.package) }}</strong></div>
+              <div><small>{{ isChineseLocale ? '区域' : 'Area' }}</small><strong>{{ venueFinderVisual.area }}</strong></div>
+              <div><small>{{ isChineseLocale ? '预算' : 'Budget' }}</small><strong>{{ displayPackageText(venueFinderVisual.budget) }}</strong></div>
             </div>
             <div class="venue-ops-notes">
-              <strong>Manual venue checks before formal quote</strong>
-              <span>Food: {{ venueFinderOps.foodOptions.join(' · ') }}</span>
-              <span>Allergy: {{ venueFinderOps.allergyNotes.join(' · ') }}</span>
-              <span v-if="venueFinderOps.dietaryTags.length">Cultural fit: {{ venueFinderOps.dietaryTags.join(' · ') }}</span>
-              <span>Cultural notes: {{ venueFinderOps.culturalFitNotes.join(' · ') }}</span>
-              <span>Room/minimum spend: {{ venueFinderOps.roomHireHint }} · {{ venueFinderOps.minimumSpendHint }}</span>
+              <strong>{{ isChineseLocale ? '正式报价前需要人工核对场地' : 'Manual venue checks before formal quote' }}</strong>
+              <span>{{ isChineseLocale ? '餐饮' : 'Food' }}: {{ venueFinderOps.foodOptions.join(' · ') }}</span>
+              <span>{{ isChineseLocale ? '过敏 / 饮食' : 'Allergy' }}: {{ venueFinderOps.allergyNotes.join(' · ') }}</span>
+              <span v-if="venueFinderOps.dietaryTags.length">{{ isChineseLocale ? '文化 / 宗教适配' : 'Cultural fit' }}: {{ venueFinderOps.dietaryTags.join(' · ') }}</span>
+              <span>{{ isChineseLocale ? '文化说明' : 'Cultural notes' }}: {{ venueFinderOps.culturalFitNotes.join(' · ') }}</span>
+              <span>{{ isChineseLocale ? '包间 / 最低消费' : 'Room/minimum spend' }}: {{ venueFinderOps.roomHireHint }} · {{ venueFinderOps.minimumSpendHint }}</span>
             </div>
             <div v-if="venueFinderVerification" class="venue-verification-panel">
               <div>
-                <span class="visual-kicker">Venue verification before formal quote</span>
+                <span class="visual-kicker">{{ isChineseLocale ? '正式报价前场地核验' : 'Venue verification before formal quote' }}</span>
                 <h3>
-                  {{ venueFinderVerification.researchSeed ? 'Public research seed · owner call required' : 'Local staging venue · manual check required' }}
+                  {{ venueFinderVerification.researchSeed ? (isChineseLocale ? '公开资料种子 · 需要 owner 电话确认' : 'Public research seed · owner call required') : (isChineseLocale ? '本地预览场地 · 需要人工确认' : 'Local staging venue · manual check required') }}
                 </h3>
                 <p>
-                  This venue can be used for planning, but the team must confirm availability,
-                  food/allergy rules, minimum spend, decoration limits and supplier access before issuing a formal quote.
+                  {{ isChineseLocale
+                    ? '这个场地可以先用于方案规划，但正式报价前团队必须确认档期、餐饮 / 过敏规则、最低消费、布置限制和供应商进场条件。'
+                    : 'This venue can be used for planning, but the team must confirm availability, food/allergy rules, minimum spend, decoration limits and supplier access before issuing a formal quote.' }}
                 </p>
               </div>
               <ul>
                 <li v-for="item in venueFinderVerification.checklist" :key="item">{{ item }}</li>
               </ul>
               <p v-if="venueFinderVerification.publicSourceUrl" class="venue-source-note">
-                Public source for owner verification:
+                {{ isChineseLocale ? '供 owner 核验的公开来源：' : 'Public source for owner verification:' }}
                 <a :href="venueFinderVerification.publicSourceUrl" target="_blank" rel="noopener noreferrer">
                   {{ venueFinderVerification.publicSourceLabel || venueFinderVerification.publicSourceUrl }}
                 </a>
@@ -189,11 +190,12 @@
 
         <div class="parent-faq-card" :style="cardStyle">
           <div class="pricing-explainer-header">
-            <span class="visual-kicker">Parent trust FAQ</span>
-            <h3>What parents should know before submitting</h3>
+            <span class="visual-kicker">{{ isChineseLocale ? '家长信任说明' : 'Parent trust FAQ' }}</span>
+            <h3>{{ isChineseLocale ? '提交前家长需要知道什么' : 'What parents should know before submitting' }}</h3>
             <p>
-              This keeps the quote request honest: no instant booking, no hidden payment, and no supplier promise
-              until the team completes human review.
+              {{ isChineseLocale
+                ? '这里会清楚说明报价申请的边界：不会立即预订、不会隐藏扣款，也不会在人工复核前承诺供应商。'
+                : 'This keeps the quote request honest: no instant booking, no hidden payment, and no supplier promise until the team completes human review.' }}
             </p>
           </div>
           <div class="parent-faq-grid">
@@ -206,11 +208,12 @@
 
         <div class="parent-proof-card" :style="cardStyle">
           <div class="pricing-explainer-header">
-            <span class="visual-kicker">Family decision patterns · staging samples</span>
-            <h3>How parents usually make this choice</h3>
+            <span class="visual-kicker">{{ isChineseLocale ? '家庭决策样板 · 预览数据' : 'Family decision patterns · staging samples' }}</span>
+            <h3>{{ isChineseLocale ? '家长通常如何做选择' : 'How parents usually make this choice' }}</h3>
             <p>
-              These are sample planning patterns, not real testimonials. They help check whether
-              the package and add-on story is easy for families to understand before formal launch.
+              {{ isChineseLocale
+                ? '这些是策划样板，不是真实评价。它们用于检查套餐和附加服务是否容易被家庭理解。'
+                : 'These are sample planning patterns, not real testimonials. They help check whether the package and add-on story is easy for families to understand before formal launch.' }}
             </p>
           </div>
           <div class="parent-proof-grid">
@@ -238,7 +241,7 @@
             </article>
           </div>
           <p class="pricing-explainer-note">
-            Deposit readiness placeholder: {{ formatPrice(lineItemSummary.deposit_placeholder) }} · {{ lineItemSummary.deposit_note }}
+            {{ isChineseLocale ? '订金准备占位' : 'Deposit readiness placeholder' }}: {{ formatPrice(lineItemSummary.deposit_placeholder) }} · {{ isChineseLocale ? '正式收取前仍需人工确认报价和支付条件。' : lineItemSummary.deposit_note }}
           </p>
         </div>
 
@@ -314,7 +317,7 @@
               </div>
               <div>
                 <dt>{{ $t('quotePage.recommendedVenue') }}</dt>
-                <dd>{{ isChineseLocale ? `${visualContext.primaryVenue.name} · ${visualContext.primaryVenue.capacity}` : $t('quotePage.sampleRoom') }}</dd>
+                <dd>{{ isChineseLocale ? `${displayVenueName(visualContext.primaryVenue.name)} · ${visualContext.primaryVenue.capacity}` : $t('quotePage.sampleRoom') }}</dd>
               </div>
               <div>
                 <dt>{{ $t('quotePage.supplierSuggestions') }}</dt>
@@ -332,26 +335,26 @@
           <h3>{{ $t('customerPages.sceneConfig') }}</h3>
           <dl>
             <div>
-              <dt>Layout</dt>
+              <dt>{{ isChineseLocale ? '空间布局' : 'Layout' }}</dt>
               <dd>{{ partySceneConfig.layout.tables }} tables · {{ partySceneConfig.layout.chairs }} chairs · dessert {{ partySceneConfig.layout.dessertTable }} · photo {{ partySceneConfig.layout.photoZone }}</dd>
             </div>
             <div>
-              <dt>Decor</dt>
+              <dt>{{ isChineseLocale ? '布置元素' : 'Decor' }}</dt>
               <dd>{{ partySceneConfig.decor.tablecloth }} / {{ partySceneConfig.decor.balloons }} / {{ partySceneConfig.decor.backdropStyle }} / {{ partySceneConfig.decor.lighting }}</dd>
             </div>
             <div>
-              <dt>Suppliers</dt>
+              <dt>{{ isChineseLocale ? '供应商' : 'Suppliers' }}</dt>
               <dd>{{ partySceneConfig.suppliers.map((item) => `${item.categoryLabel || item.category}: ${item.name}`).join(' / ') }}</dd>
             </div>
             <div v-if="featureFlags.threeDExperienceEnabled">
-              <dt>Future 3D</dt>
+              <dt>{{ isChineseLocale ? '未来 3D 数据' : 'Future 3D' }}</dt>
               <dd>{{ partySceneConfig.future3d.suggestedRoute }} · {{ partySceneConfig.future3d.layoutCoordinateSystem }}</dd>
             </div>
           </dl>
           <button v-if="featureFlags.threeDExperienceEnabled" class="scene-preview-btn" type="button" @click="openParty3DPreview">
             {{ $t('quotePage.view3dPreview') }}
           </button>
-          <p v-else class="scene-preview-note">3D / scene preview is temporarily hidden in this customer preview.</p>
+          <p v-else class="scene-preview-note">{{ isChineseLocale ? '当前消费者预览中暂时隐藏 3D / 场景预览入口。' : '3D / scene preview is temporarily hidden in this customer preview.' }}</p>
         </div>
       </div>
     </section>
@@ -363,11 +366,12 @@
         <p class="addons-lead">{{ $t('quotePage.addonsLead') }}</p>
         <div class="addon-value-story-panel">
           <div class="pricing-explainer-header">
-            <span class="visual-kicker">Add-on value guide · staging</span>
-            <h3>Why families add services after choosing a venue</h3>
+            <span class="visual-kicker">{{ isChineseLocale ? '附加服务价值说明 · 预览' : 'Add-on value guide · staging' }}</span>
+            <h3>{{ isChineseLocale ? '为什么家长会在选场地后增加服务' : 'Why families add services after choosing a venue' }}</h3>
             <p>
-              These cards explain the commercial value in parent language. They are planning examples,
-              not supplier commitments; final inclusion still needs human review.
+              {{ isChineseLocale
+                ? '这些卡片用家长能理解的语言解释附加服务价值。它们是策划样例，不是供应商承诺；最终是否加入仍需人工复核。'
+                : 'These cards explain the commercial value in parent language. They are planning examples, not supplier commitments; final inclusion still needs human review.' }}
             </p>
           </div>
           <div class="addon-value-story-grid">
@@ -383,11 +387,11 @@
                 <h4>{{ story.text.title }}</h4>
                 <dl>
                   <div>
-                    <dt>Before</dt>
+                    <dt>{{ isChineseLocale ? '加入前' : 'Before' }}</dt>
                     <dd>{{ story.text.before }}</dd>
                   </div>
                   <div>
-                    <dt>After</dt>
+                    <dt>{{ isChineseLocale ? '加入后' : 'After' }}</dt>
                     <dd>{{ story.text.after }}</dd>
                   </div>
                 </dl>
@@ -409,11 +413,12 @@
         </div>
         <div v-if="recommendedVenueAddons.length" class="recommended-addon-panel">
           <div>
-            <span class="visual-kicker">Venue Finder add-on suggestions</span>
-            <h3>High-value services that fit this venue</h3>
+            <span class="visual-kicker">{{ isChineseLocale ? '场地匹配附加服务建议' : 'Venue Finder add-on suggestions' }}</span>
+            <h3>{{ isChineseLocale ? '适合这个场地的高价值服务' : 'High-value services that fit this venue' }}</h3>
             <p>
-              These are not automatically added. They help parents understand where the
-              party can be upgraded after a human review confirms venue rules and supplier availability.
+              {{ isChineseLocale
+                ? '这些服务不会自动加入报价。它们帮助家长理解人工确认场地规则和供应商档期后，派对可以在哪些地方升级。'
+                : 'These are not automatically added. They help parents understand where the party can be upgraded after a human review confirms venue rules and supplier availability.' }}
             </p>
           </div>
           <div class="recommended-addon-list">
@@ -788,7 +793,9 @@ export default {
         package: packageName,
         area,
         budget,
-        summary: `${venueName} is selected from Venue Finder as a demo/staging venue for ${guests} guests. The quote request keeps the venue, theme, package, area, and budget context together without creating a real booking or payment.`
+        summary: this.isChineseLocale
+          ? `${this.displayVenueName(venueName)} 已作为 ${guests} 位客人的场地样板带入报价页。当前只保留场地、主题、套餐、区域和预算上下文，不会创建真实预订或支付。`
+          : `${venueName} is selected from Venue Finder as a demo/staging venue for ${guests} guests. The quote request keeps the venue, theme, package, area, and budget context together without creating a real booking or payment.`
       };
     },
 
@@ -814,13 +821,13 @@ export default {
 
     quoteFlowSummary() {
       const source = this.venueFinderPrefill
-        ? 'Venue Finder selected'
+        ? (this.isChineseLocale ? '场地筛选已带入' : 'Venue Finder selected')
         : this.aiPrefill && this.aiExperienceEnabled
           ? this.$t('quotePage.aiPrepared')
           : this.$t('quotePage.currentPlan');
-      const venueName = this.aiPrefill?.selection?.venueName || this.visualContext.primaryVenue.name;
+      const venueName = this.displayVenueName(this.aiPrefill?.selection?.venueName || this.visualContext.primaryVenue.name);
       return {
-        title: `${source}: ${this.themeConfig.name} · ${this.packageData.name} · ${venueName}`,
+        title: `${source}: ${this.displayThemeText(this.themeConfig.name)} · ${this.displayPackageText(this.packageData.name)} · ${venueName}`,
         body: this.$t('quotePage.flowBody')
       };
     },
@@ -913,6 +920,35 @@ export default {
     },
 
     parentTrustFaq() {
+      if (this.isChineseLocale) {
+        return [
+          {
+            id: 'manual-review',
+            question: '这是即时预订吗？',
+            answer: '不是。这个页面帮助家长比较场地、主题、套餐和附加服务。正式报价前，团队仍会人工核对场地规则、供应商档期、餐饮和过敏说明。'
+          },
+          {
+            id: 'payment-readiness',
+            question: '提交报价需求会被扣款吗？',
+            answer: '不会。提交咨询单不会触发支付。订金步骤只会在正式报价经过复核并被接受后才有意义。'
+          },
+          {
+            id: 'venue-data',
+            question: '这些场地信息是最终保证吗？',
+            answer: '当前场地数据用于本地 / 预览演示。容量、包间费、最低消费、切蛋糕费、餐饮选项和过敏处理都需要在正式报价前和场地方确认。'
+          },
+          {
+            id: 'addons',
+            question: '为什么附加服务要单独列出来？',
+            answer: '布置、搭建、主持、音响、娱乐、蛋糕、摄影和清洁等都是可选服务。单独展示可以让家长清楚知道钱花在哪里，而不是藏在一个模糊套餐里。'
+          },
+          {
+            id: 'share-rewards',
+            question: '分享奖励现在是真实优惠券吗？',
+            answer: '在当前预览中，奖励仍是占位说明。未来正式版本可在人工审核后提供固定金额券、免费气球升级或免费拍照角升级。'
+          }
+        ];
+      }
       return getParentTrustFaq();
     },
 
@@ -958,8 +994,27 @@ export default {
       return this.isChineseLocale ? group.labelZh : group.customerLabel;
     },
 
+    displayVenueName(name) {
+      if (!this.isChineseLocale) return name;
+      return String(name || '')
+        .replaceAll('Restaurant A Private Dining', '餐厅 A 私人包间')
+        .replaceAll('Restaurant A private dining', '餐厅 A 私人包间')
+        .replaceAll('Restaurant A', '餐厅 A')
+        .replaceAll('Private Dining', '私人包间')
+        .replaceAll('Selected suburb', '待确认区域')
+        .replaceAll('Staging estimate', '预览估算');
+    },
+
+    displayThemeText(text) {
+      if (!this.isChineseLocale) return text;
+      return String(text || '')
+        .replaceAll('Space Explorer', '星际探险')
+        .replaceAll('Castle Princess', '梦幻城堡')
+        .replaceAll('Forest Adventure', '森林奇境');
+    },
+
     displayPackageText(text) {
-      if (!this.isChineseLocale) return this.$t('quotePage.localizedPackageCopy');
+      if (!this.isChineseLocale) return String(text || '');
       return String(text || '')
         .replaceAll('Basic', '基础套餐')
         .replaceAll('Standard', '标准套餐')
@@ -975,7 +1030,28 @@ export default {
 
     displayAmountBasisList(items = []) {
       const text = items.map((item) => item.amount_basis).filter(Boolean).join(' / ');
-      return this.displayPackageText(text);
+      return this.displayTechnicalBasisText(text);
+    },
+
+    displayTechnicalBasisText(text) {
+      const normalized = this.displayPackageText(text);
+      if (!this.isChineseLocale) return normalized;
+      return String(normalized || '')
+        .replace(/Scene base\s*([\d,.]+)\s*x\s*10% staging venue placeholder\./gi, '场地基础价 $1 的 10% 作为预览场地占位。')
+        .replace(/基础套餐 x\s*([\d,.]+)% decor allocation\./gi, '基础套餐的 $1% 计入主题装饰预估。')
+        .replace(/标准套餐 x\s*([\d,.]+)% decor allocation\./gi, '标准套餐的 $1% 计入主题装饰预估。')
+        .replace(/高级套餐 x\s*([\d,.]+)% decor allocation\./gi, '高级套餐的 $1% 计入主题装饰预估。')
+        .replace(/基础套餐 x\s*([\d,.]+)% supplier allowance\./gi, '基础套餐的 $1% 计入供应商服务预估。')
+        .replace(/标准套餐 x\s*([\d,.]+)% supplier allowance\./gi, '标准套餐的 $1% 计入供应商服务预估。')
+        .replace(/高级套餐 x\s*([\d,.]+)% supplier allowance\./gi, '高级套餐的 $1% 计入供应商服务预估。')
+        .replace(/基础套餐 x\s*([\d,.]+)% labor allocation\./gi, '基础套餐的 $1% 计入现场人工预估。')
+        .replace(/标准套餐 x\s*([\d,.]+)% labor allocation\./gi, '标准套餐的 $1% 计入现场人工预估。')
+        .replace(/高级套餐 x\s*([\d,.]+)% labor allocation\./gi, '高级套餐的 $1% 计入现场人工预估。')
+        .replace('High package tier transport placeholder.', '高档套餐运输与搬运占位预估。')
+        .replace('标准套餐 package transport placeholder.', '标准套餐运输与搬运占位预估。')
+        .replace('基础套餐 package transport placeholder.', '基础套餐运输与搬运占位预估。')
+        .replace('Residual package amount after decor, supplier, labor, and transport allocations.', '扣除装饰、供应商、人工和运输后的剩余部分计入策划服务。')
+        .replace('Explicit customer-selected optional upgrade.', '客户主动选择的可选升级项。');
     },
 
     goBack() {
