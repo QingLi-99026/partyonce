@@ -59,6 +59,27 @@
               <span>Allergy: {{ venueFinderOps.allergyNotes.join(' · ') }}</span>
               <span>Room/minimum spend: {{ venueFinderOps.roomHireHint }} · {{ venueFinderOps.minimumSpendHint }}</span>
             </div>
+            <div v-if="venueFinderVerification" class="venue-verification-panel">
+              <div>
+                <span class="visual-kicker">Venue verification before formal quote</span>
+                <h3>
+                  {{ venueFinderVerification.researchSeed ? 'Public research seed · owner call required' : 'Local staging venue · manual check required' }}
+                </h3>
+                <p>
+                  This venue can be used for planning, but the team must confirm availability,
+                  food/allergy rules, minimum spend, decoration limits and supplier access before issuing a formal quote.
+                </p>
+              </div>
+              <ul>
+                <li v-for="item in venueFinderVerification.checklist" :key="item">{{ item }}</li>
+              </ul>
+              <p v-if="venueFinderVerification.publicSourceUrl" class="venue-source-note">
+                Public source for owner verification:
+                <a :href="venueFinderVerification.publicSourceUrl" target="_blank" rel="noopener noreferrer">
+                  {{ venueFinderVerification.publicSourceLabel || venueFinderVerification.publicSourceUrl }}
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -765,7 +786,21 @@ export default {
     },
 
     venueFinderOps() {
+      const verification = this.venueFinderPrefill?.venueFinder?.verification;
+      if (verification) {
+        return {
+          foodOptions: verification.foodOptions?.length ? verification.foodOptions : ['Food options require manual confirmation'],
+          allergyNotes: verification.allergyNotes?.length ? verification.allergyNotes : ['Allergy handling requires manual confirmation'],
+          roomHireHint: verification.roomHireHint || 'Room hire requires manual confirmation',
+          minimumSpendHint: verification.minimumSpendHint || 'Minimum spend requires manual confirmation',
+          verificationStatus: verification.status || 'manual_review_required'
+        };
+      }
       return getVenueOperationalReadiness(this.venueFinderPrefill?.venueFinder?.selectedVenue || {});
+    },
+
+    venueFinderVerification() {
+      return this.venueFinderPrefill?.venueFinder?.verification || null;
     },
 
     quoteFlowSummary() {
@@ -1505,6 +1540,42 @@ export default {
 
 .venue-ops-notes strong {
   color: #fed7aa;
+}
+
+.venue-verification-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  border-radius: 14px;
+  background: rgba(8, 47, 73, 0.32);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.venue-verification-panel h3 {
+  margin: 4px 0 6px;
+  color: #fff7ed;
+  font-size: 1rem;
+}
+
+.venue-verification-panel p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.55;
+}
+
+.venue-verification-panel ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.venue-source-note a {
+  color: #bfdbfe;
+  font-weight: 800;
+  word-break: break-word;
 }
 
 .ai-summary-grid {

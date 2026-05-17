@@ -138,13 +138,21 @@ export function buildVenueFinderQuotePrefill(venueOrId, filters = {}) {
   const themeId = chooseThemeForVenue(venue, normalized.childAgeRange);
   const packageId = budgetToPackageTier(normalized.budgetPerPerson);
   const recommendedAddons = recommendAddOnServicesForVenue(venue, normalized, 'en');
+  const verificationChecklist = [
+    'Confirm date and time availability with the venue.',
+    'Confirm capacity, seating layout, pram/access needs and kids supervision rules.',
+    'Confirm food menu, cake policy, allergy handling and any outside-food restrictions.',
+    'Confirm minimum spend, room hire, deposit policy and cancellation terms.',
+    'Confirm decoration setup time, pack-down time, balloon/backdrop rules and noise limits.'
+  ];
   const notes = [
     `Venue Finder selected ${venue.name} in ${venue.suburb}.`,
     `${normalized.adults} adults + ${normalized.kids} kids = ${normalized.totalGuests} guests.`,
     `Budget: ${budgetToLabel(normalized.budgetPerPerson)}.`,
     `Search area: ${normalized.area}, radius ${normalized.radiusKm}km.`,
     `Match score: ${match.score}/100. ${match.reasons.join('; ')}.`,
-    `Restrictions to confirm: ${venue.restrictions.join('; ')}.`
+    `Restrictions to confirm: ${venue.restrictions.join('; ')}.`,
+    `Venue verification: ${venue.verificationStatus || 'local_staging_fixture_needs_real_call'}.`
   ].join('\n');
 
   return {
@@ -189,7 +197,21 @@ export function buildVenueFinderQuotePrefill(venueOrId, filters = {}) {
       selectedVenue: venue,
       filters: normalized,
       match,
-      recommendedAddons
+      recommendedAddons,
+      verification: {
+        status: venue.verificationStatus || 'local_staging_fixture_needs_real_call',
+        manualReviewRequired: Boolean(venue.manualReviewRequired ?? true),
+        researchSeed: Boolean(venue.researchSeed),
+        publicSourceLabel: venue.publicSourceLabel || '',
+        publicSourceUrl: venue.publicSourceUrl || '',
+        publicSourceNotes: venue.publicSourceNotes || '',
+        foodOptions: venue.foodOptions || [],
+        allergyNotes: venue.allergyNotes || [],
+        roomHireHint: venue.roomHireHint || '',
+        minimumSpendHint: venue.minimumSpendHint || '',
+        restrictions: venue.restrictions || [],
+        checklist: verificationChecklist
+      }
     },
     saved_at: new Date().toISOString()
   };
