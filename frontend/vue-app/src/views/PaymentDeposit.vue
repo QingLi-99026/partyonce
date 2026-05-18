@@ -70,7 +70,7 @@
             <p>{{ copy.noLiveKey }}</p>
           </li>
         </ul>
-        <p class="key-line">{{ copy.configuredKey }}: {{ readiness.publishableKeyMasked || copy.notConfigured }}</p>
+        <p class="key-line">{{ copy.configuredKey }}: {{ copy.notConfigured }}</p>
       </article>
     </section>
 
@@ -92,9 +92,9 @@
         <el-button @click="router.push('/my/orders')">{{ copy.backOrders }}</el-button>
         <el-button @click="router.push('/payment/cancelled')">{{ copy.cancelledState }}</el-button>
       </div>
-      <div v-if="stripeMounted" class="test-card-shell">
+      <div v-if="paymentNoteVisible" class="test-card-shell">
         <p>{{ copy.cardMounted }}</p>
-        <div ref="cardMountRef" class="card-mount"></div>
+        <div ref="paymentNoteRef" class="card-mount"></div>
         <el-button disabled>{{ copy.confirmDisabled }}</el-button>
       </div>
     </section>
@@ -116,8 +116,8 @@ const route = useRoute()
 const router = useRouter()
 const { locale } = useI18n()
 const readiness = ref(getPaymentReadiness())
-const cardMountRef = ref(null)
-const stripeMounted = ref(false)
+const paymentNoteRef = ref(null)
+const paymentNoteVisible = ref(false)
 const trustChecklist = computed(() => copy.value.trustChecklist)
 const quoteProcessSteps = computed(() => copy.value.quoteProcessSteps)
 const snapshot = ref(buildPaymentReadinessSnapshot({
@@ -131,16 +131,16 @@ const formatMoney = (amount, currency = 'AUD') => {
   return new Intl.NumberFormat('en-AU', { style: 'currency', currency }).format(Number(amount || 0))
 }
 
-const canMountStripe = computed(() => readiness.value.ready && !stripeMounted.value)
+const canShowPaymentNote = computed(() => readiness.value.ready && !paymentNoteVisible.value)
 
 const copyByLocale = {
   zh: {
     kicker: '支付准备',
-    title: '测试模式订金准备',
-    subtitle: '这是本地 / staging 的支付准备门禁。当前预览不会启用订金扣款，也不会触发真实支付。',
-    ready: '测试模式已准备',
+    title: '订金准备说明',
+    subtitle: '当前不会扣款。只有正式报价确认后，才会进入真实支付步骤；本页仅说明未来支付流程。',
+    ready: '说明已准备',
     blocked: '已阻止',
-    alertTitle: '仅做准备检查：不触发真实支付、webhook/n8n 或外发消息。',
+    alertTitle: '当前不会扣款；如有疑问，请等待团队人工确认。',
     parentBoundaryKicker: '家长支付安全边界',
     parentBoundaryTitle: '当前预览不会扣卡',
     parentBoundaryBody: '家庭应先收到人工复核报价，确认场地和供应商档期后，才进入单独批准的订金步骤。',
@@ -152,26 +152,26 @@ const copyByLocale = {
     eventDate: '活动日期',
     venue: '场地',
     depositPlaceholder: '订金占位',
-    checksTitle: '测试模式支付检查',
+    checksTitle: '支付流程准备检查',
     ok: '通过',
     wait: '待定',
     block: '阻止',
-    testModeFlag: '测试模式标记已启用',
-    testKey: 'Publishable key 为 pk_test_*',
-    noLiveKey: '未检测到 live key',
-    configuredKey: '当前配置 key',
+    testModeFlag: '预览说明已启用',
+    testKey: '支付字段尚未开放给客户',
+    noLiveKey: '未进入真实支付步骤',
+    configuredKey: '当前配置状态',
     notConfigured: '未配置',
     blockersTitle: '阻断项',
-    noBlockers: '无本地准备阻断项',
-    nextStepTitle: '测试模式下一步',
-    prepareTestCard: '准备测试卡输入框',
+    noBlockers: '暂无准备阻断项',
+    nextStepTitle: '下一步说明',
+    prepareTestCard: '查看未来支付输入说明',
     backOrders: '返回我的订单',
     cancelledState: '查看取消状态',
-    cardMounted: '测试卡输入框已挂载。支付确认仍被禁用，直到单独批准的后端测试支付端点存在。',
-    confirmDisabled: '确认测试支付 · 后端未启用',
-    stripeError: '无法用测试 publishable key 初始化测试支付字段。',
-    stripeMounted: '测试卡输入框已挂载。支付确认仍处于阻止状态。',
-    boundaryFallback: '仅支付准备检查：当前预览不启用订金支付，也不会触发真实支付、webhook、n8n、外发消息或生产支付。',
+    cardMounted: '未来支付输入区域已显示。确认付款仍被禁用，直到团队单独批准真实支付流程。',
+    confirmDisabled: '确认付款 · 当前未开放',
+    paymentNoteError: '暂时无法显示支付输入说明。',
+    paymentNoteShown: '未来支付输入区域已显示。确认付款仍处于阻止状态。',
+    boundaryFallback: '仅支付流程说明：当前预览不启用订金支付，也不会扣款或外发消息。',
     trustChecklist: [
       '正式报价前必须人工复核',
       '提交报价需求不会即时扣款',
@@ -187,14 +187,14 @@ const copyByLocale = {
   },
   en: {
     kicker: 'Payment readiness',
-    title: 'Test-Mode Payment Preparation',
-    subtitle: 'Local/staging readiness gate. Deposit payment is not enabled in this preview and no real payment will be triggered.',
-    ready: 'test-mode ready',
+    title: 'Deposit preparation overview',
+    subtitle: 'No charge happens here. Real payment starts only after a formal quote is confirmed; this page explains the future payment flow.',
+    ready: 'overview ready',
     blocked: 'blocked',
-    alertTitle: 'Readiness only: no live payment, no webhook/n8n, and no outbound message.',
+    alertTitle: 'No charge happens here. If anything is unclear, wait for team confirmation.',
     parentBoundaryKicker: 'Parent-safe payment boundary',
     parentBoundaryTitle: 'No card charge happens in this preview',
-    parentBoundaryBody: 'This page is a staging readiness check only. Families should first receive a human-reviewed quote, confirm venue and supplier availability, then move to a separate approved deposit step.',
+    parentBoundaryBody: 'Families should first receive a human-reviewed quote, confirm venue and supplier availability, then move to a separate approved deposit step.',
     processKicker: 'Quote-to-deposit path',
     processTitle: 'Four steps before any future deposit',
     orderSnapshot: 'Order Snapshot',
@@ -202,27 +202,27 @@ const copyByLocale = {
     eventType: 'Event type',
     eventDate: 'Event date',
     venue: 'Venue',
-    depositPlaceholder: 'Deposit placeholder',
-    checksTitle: 'Test-Mode Payment Checks',
+    depositPlaceholder: 'Deposit preparation',
+    checksTitle: 'Payment flow readiness',
     ok: 'OK',
     wait: 'WAIT',
     block: 'BLOCK',
-    testModeFlag: 'Test mode flag enabled',
-    testKey: 'Publishable key is `pk_test_*`',
-    noLiveKey: 'No live key detected',
-    configuredKey: 'Configured key',
+    testModeFlag: 'Preview explanation enabled',
+    testKey: 'Payment entry is not open to customers yet',
+    noLiveKey: 'Real payment step has not started',
+    configuredKey: 'Current configuration status',
     notConfigured: 'not configured',
     blockersTitle: 'Blockers',
-    noBlockers: 'No local readiness blockers',
-    nextStepTitle: 'Test-Mode Next Step',
-    prepareTestCard: 'Prepare test card field',
+    noBlockers: 'No readiness blockers',
+    nextStepTitle: 'Next step overview',
+    prepareTestCard: 'Show future payment input note',
     backOrders: 'Back to My Orders',
     cancelledState: 'Open Cancelled State',
-    cardMounted: 'Test card field mounted. Payment confirmation remains disabled until a separate approved backend test-payment endpoint exists.',
-    confirmDisabled: 'Confirm test payment · backend not enabled',
-    stripeError: 'Test payment field could not be initialized with the test publishable key.',
-    stripeMounted: 'Test card field mounted. Payment confirmation is still blocked.',
-    boundaryFallback: 'Payment readiness check only: deposit payment is not enabled in this preview, and no real payment, webhook, n8n, outbound message, or production payment is triggered.',
+    cardMounted: 'Future payment input area is shown. Payment confirmation remains disabled until the team separately approves the real payment flow.',
+    confirmDisabled: 'Confirm payment · not open yet',
+    paymentNoteError: 'The payment input note could not be displayed.',
+    paymentNoteShown: 'Future payment input area is shown. Payment confirmation is still blocked.',
+    boundaryFallback: 'Payment flow overview only: deposit payment is not enabled in this preview, and no charge or outbound message is triggered.',
     trustChecklist: [
       'Human review before formal quote',
       'No instant payment from quote request',
@@ -238,11 +238,11 @@ const copyByLocale = {
   },
   ko: {
     kicker: '결제 준비',
-    title: '테스트 모드 결제 준비',
-    subtitle: '로컬 / staging 준비 화면입니다. 이 미리보기에서는 보증금 결제가 켜지지 않으며 실제 결제가 발생하지 않습니다.',
-    ready: '테스트 모드 준비됨',
+    title: '보증금 준비 안내',
+    subtitle: '여기서는 결제가 발생하지 않습니다. 정식 견적이 확인된 뒤에만 실제 결제 단계로 이동하며, 이 페이지는 향후 결제 흐름을 설명합니다.',
+    ready: '안내 준비됨',
     blocked: '차단됨',
-    alertTitle: '준비 확인 전용: 실제 결제, webhook/n8n, 외부 메시지를 실행하지 않습니다.',
+    alertTitle: '현재 결제되지 않습니다. 궁금한 점이 있으면 팀의 수동 확인을 기다려 주세요.',
     parentBoundaryKicker: '부모 안심 결제 경계',
     parentBoundaryTitle: '이 미리보기에서는 카드 청구가 없습니다',
     parentBoundaryBody: '가족은 먼저 사람이 검토한 견적을 받고 장소와 공급업체 가능 여부를 확인한 뒤 별도 승인된 보증금 단계로 이동합니다.',
@@ -253,27 +253,27 @@ const copyByLocale = {
     eventType: '행사 유형',
     eventDate: '행사 날짜',
     venue: '장소',
-    depositPlaceholder: '보증금 placeholder',
-    checksTitle: '테스트 모드 결제 확인',
+    depositPlaceholder: '보증금 준비',
+    checksTitle: '결제 흐름 준비 확인',
     ok: '통과',
     wait: '대기',
     block: '차단',
-    testModeFlag: '테스트 모드 플래그 활성화',
-    testKey: 'Publishable key가 pk_test_* 형식',
-    noLiveKey: 'live key 감지 없음',
-    configuredKey: '설정된 key',
+    testModeFlag: '미리보기 안내 활성화',
+    testKey: '결제 입력은 아직 고객에게 열려 있지 않습니다',
+    noLiveKey: '실제 결제 단계가 시작되지 않았습니다',
+    configuredKey: '현재 설정 상태',
     notConfigured: '미설정',
     blockersTitle: '차단 항목',
-    noBlockers: '로컬 준비 차단 항목 없음',
-    nextStepTitle: '테스트 모드 다음 단계',
-    prepareTestCard: '테스트 카드 입력 준비',
+    noBlockers: '준비 차단 항목 없음',
+    nextStepTitle: '다음 단계 안내',
+    prepareTestCard: '향후 결제 입력 안내 보기',
     backOrders: '내 주문으로 돌아가기',
     cancelledState: '취소 상태 열기',
-    cardMounted: '테스트 카드 입력이 표시되었습니다. 별도 승인된 백엔드 테스트 결제 endpoint가 생길 때까지 결제 확인은 비활성화됩니다.',
-    confirmDisabled: '테스트 결제 확인 · 백엔드 비활성',
-    stripeError: '테스트 publishable key로 테스트 결제 필드를 초기화할 수 없습니다.',
-    stripeMounted: '테스트 카드 입력이 표시되었습니다. 결제 확인은 계속 차단됩니다.',
-    boundaryFallback: '결제 준비 확인 전용: 이 미리보기에서는 보증금 결제가 켜지지 않으며 실제 결제, webhook, n8n, 외부 메시지 또는 production 결제를 실행하지 않습니다.',
+    cardMounted: '향후 결제 입력 영역이 표시되었습니다. 팀이 실제 결제 흐름을 별도 승인할 때까지 결제 확인은 비활성화됩니다.',
+    confirmDisabled: '결제 확인 · 현재 미오픈',
+    paymentNoteError: '결제 입력 안내를 표시할 수 없습니다.',
+    paymentNoteShown: '향후 결제 입력 영역이 표시되었습니다. 결제 확인은 계속 차단됩니다.',
+    boundaryFallback: '결제 흐름 안내 전용: 이 미리보기에서는 보증금 결제가 켜지지 않으며 결제나 외부 메시지를 실행하지 않습니다.',
     trustChecklist: [
       '공식 견적 전 사람 검토',
       '견적 요청만으로 즉시 결제 없음',
@@ -289,11 +289,11 @@ const copyByLocale = {
   },
   ar: {
     kicker: 'جاهزية الدفع',
-    title: 'إعداد دفع وضع الاختبار',
-    subtitle: 'بوابة جاهزية محلية / staging. دفع العربون غير مفعّل في هذه المعاينة ولن يتم تشغيل دفع حقيقي.',
-    ready: 'وضع الاختبار جاهز',
+    title: 'شرح تجهيز العربون',
+    subtitle: 'لا يتم الخصم هنا. يبدأ الدفع الحقيقي فقط بعد تأكيد عرض السعر الرسمي؛ هذه الصفحة تشرح مسار الدفع المستقبلي.',
+    ready: 'الشرح جاهز',
     blocked: 'محظور',
-    alertTitle: 'فحص جاهزية فقط: لا دفع حقيقي ولا webhook/n8n ولا رسالة خارجية.',
+    alertTitle: 'لا يتم الخصم هنا. إذا كان هناك أي غموض، انتظر تأكيد الفريق.',
     parentBoundaryKicker: 'حدود دفع آمنة للعائلة',
     parentBoundaryTitle: 'لا يتم خصم أي بطاقة في هذه المعاينة',
     parentBoundaryBody: 'يجب أن تستلم العائلة عرض سعر تمت مراجعته بشرياً، ثم تأكيد القاعة والموردين قبل الانتقال إلى خطوة عربون منفصلة ومعتمدة.',
@@ -304,27 +304,27 @@ const copyByLocale = {
     eventType: 'نوع المناسبة',
     eventDate: 'تاريخ المناسبة',
     venue: 'القاعة',
-    depositPlaceholder: 'عربون placeholder',
-    checksTitle: 'فحوص دفع وضع الاختبار',
+    depositPlaceholder: 'تجهيز العربون',
+    checksTitle: 'جاهزية مسار الدفع',
     ok: 'تم',
     wait: 'انتظار',
     block: 'حظر',
-    testModeFlag: 'تم تفعيل وضع الاختبار',
-    testKey: 'مفتاح النشر بصيغة pk_test_*',
-    noLiveKey: 'لم يتم اكتشاف live key',
-    configuredKey: 'المفتاح الحالي',
+    testModeFlag: 'تم تفعيل شرح المعاينة',
+    testKey: 'إدخال الدفع غير مفتوح للعملاء بعد',
+    noLiveKey: 'خطوة الدفع الحقيقي لم تبدأ',
+    configuredKey: 'حالة الإعداد الحالية',
     notConfigured: 'غير مهيأ',
     blockersTitle: 'العوائق',
-    noBlockers: 'لا توجد عوائق جاهزية محلية',
-    nextStepTitle: 'الخطوة التالية في وضع الاختبار',
-    prepareTestCard: 'تجهيز حقل بطاقة اختبار',
+    noBlockers: 'لا توجد عوائق جاهزية',
+    nextStepTitle: 'شرح الخطوة التالية',
+    prepareTestCard: 'عرض ملاحظة إدخال الدفع المستقبلي',
     backOrders: 'العودة إلى طلباتي',
     cancelledState: 'فتح حالة الإلغاء',
-    cardMounted: 'تم عرض حقل بطاقة الاختبار. تأكيد الدفع يبقى معطلاً حتى يوجد endpoint خلفي منفصل ومعتمد.',
-    confirmDisabled: 'تأكيد دفع اختباري · الخلفية غير مفعّلة',
-    stripeError: 'تعذر تهيئة حقل دفع الاختبار بمفتاح النشر التجريبي.',
-    stripeMounted: 'تم عرض حقل بطاقة الاختبار. تأكيد الدفع لا يزال محظوراً.',
-    boundaryFallback: 'فحص جاهزية دفع فقط: دفع العربون غير مفعّل في هذه المعاينة ولا يتم تشغيل دفع حقيقي أو webhook أو n8n أو رسالة خارجية أو دفع production.',
+    cardMounted: 'تم عرض منطقة إدخال الدفع المستقبلية. يبقى تأكيد الدفع معطلاً حتى يوافق الفريق على مسار الدفع الحقيقي.',
+    confirmDisabled: 'تأكيد الدفع · غير مفتوح حالياً',
+    paymentNoteError: 'تعذر عرض ملاحظة إدخال الدفع.',
+    paymentNoteShown: 'تم عرض منطقة إدخال الدفع المستقبلية. تأكيد الدفع لا يزال محظوراً.',
+    boundaryFallback: 'شرح مسار الدفع فقط: دفع العربون غير مفعّل في هذه المعاينة ولا يتم تشغيل دفع أو رسالة خارجية.',
     trustChecklist: [
       'مراجعة بشرية قبل عرض السعر الرسمي',
       'لا دفع فوري من طلب عرض السعر',
@@ -347,18 +347,9 @@ const boundaryText = computed(() => {
 })
 
 const prepareTestMode = async () => {
-  if (!canMountStripe.value) return
-  const { loadStripe } = await import('@stripe/stripe-js')
-  const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
-  if (!stripe) {
-    ElMessage.error(copy.value.stripeError)
-    return
-  }
-  const elements = stripe.elements()
-  const card = elements.create('card', { hidePostalCode: true })
-  card.mount(cardMountRef.value)
-  stripeMounted.value = true
-  ElMessage.success(copy.value.stripeMounted)
+  if (!canShowPaymentNote.value) return
+  paymentNoteVisible.value = true
+  ElMessage.success(copy.value.paymentNoteShown)
 }
 
 onMounted(() => {

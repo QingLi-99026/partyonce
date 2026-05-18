@@ -30,9 +30,9 @@
 
     <section class="trust-strip">
       <div>
-        <p class="eyebrow">Order readiness promise</p>
+        <p class="eyebrow">订单准备说明</p>
         <h2>订单状态仍需人工确认场地与供应商</h2>
-        <p>这里展示的是 staging/demo 订单上下文。订金准备只是流程说明，不会自动扣款、派单或外发消息。</p>
+        <p>这里展示的是预览订单上下文。订金准备只是流程说明，不会自动扣款、派单或外发消息。</p>
       </div>
       <ul>
         <li v-for="item in trustChecklist" :key="item">{{ item }}</li>
@@ -60,7 +60,7 @@
         <div class="card-head">
           <div>
             <strong>{{ order.order_number }}</strong>
-            <span>Quote {{ order.quote_number }}</span>
+            <span>关联报价 {{ order.quote_number }}</span>
           </div>
           <el-tag :type="orderTagType(order.status)" effect="plain">{{ order.status_text }}</el-tag>
         </div>
@@ -75,19 +75,19 @@
 
         <dl class="detail-list">
           <div>
-            <dt>Event date</dt>
+            <dt>活动日期</dt>
             <dd>{{ formatCustomerDate(order.event_date) }}</dd>
           </div>
           <div>
-            <dt>Event location</dt>
+            <dt>活动地点</dt>
             <dd>{{ order.event_location }}</dd>
           </div>
           <div>
-            <dt>Total amount</dt>
+            <dt>总金额</dt>
             <dd>{{ formatCustomerMoney(order.total_amount, order.currency) }}</dd>
           </div>
           <div>
-            <dt>Deposit placeholder</dt>
+            <dt>订金说明</dt>
             <dd>{{ formatCustomerMoney(order.deposit_amount, order.currency) }}</dd>
           </div>
         </dl>
@@ -105,20 +105,20 @@
         </div>
 
         <div class="next-step">
-          <span>Next step</span>
+          <span>下一步</span>
           <p>{{ order.next_step }}</p>
         </div>
 
         <div class="interaction-hint">
           <el-tag v-if="orderInteraction(order.id).supplement_saved_at" type="info" effect="plain">
-            Update note saved
+            更新说明已保存
           </el-tag>
-          <span v-else>Need to update event details? Open order detail to add a local/staging note.</span>
+          <span v-else>需要调整活动信息？打开订单详情填写补充说明，团队会人工复核。</span>
         </div>
 
         <div class="card-actions">
-          <el-button type="primary" @click="router.push(`/my/orders/${order.id}`)">View Order Detail</el-button>
-          <el-button @click="router.push(`/my/orders/${order.id}#supplement`)">Add Update Note</el-button>
+          <el-button type="primary" @click="router.push(`/my/orders/${order.id}`)">查看订单详情</el-button>
+          <el-button @click="router.push(`/my/orders/${order.id}#supplement`)">补充更新</el-button>
         </div>
       </article>
     </section>
@@ -159,9 +159,9 @@ const loading = ref(false)
 const orders = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
-const dataSource = ref('not loaded')
+const dataSource = ref('未加载')
 const apiNotice = ref('')
-const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
+const identity = ref({ id: '-', name: '预览用户', accessBoundary: '正在加载客户预览信息。' })
 const trustChecklist = getTrustChecklist()
 const quoteProcessSteps = getQuoteProcessSteps()
 
@@ -198,11 +198,11 @@ const orderPackageExplanation = (order) => getPackageExplanation(normalizeTierId
 const sceneConfigSummary = (order) => summarizePartySceneConfig(order.party_scene_config)
 
 const isChineseLocale = computed(() => locale.value === 'zh')
-const displayVisualTitle = (visual) => isChineseLocale.value ? visual.restaurant.title : t('ai.restaurantPlaceholderTitle')
+const displayVisualTitle = (visual) => isChineseLocale.value ? '餐厅 A 私人包间' : t('ai.restaurantPlaceholderTitle')
 const displayVisualSummary = (visual) => isChineseLocale.value
-  ? `${visual.primaryVenue.name} · ${visual.suppliers.map((item) => item.name).join(' / ')}`
+  ? '场地、主题布置和供应商信息需人工复核后确认'
   : t('ai.restaurantPlaceholderCopy')
-const displayPackageLabel = (explanation) => isChineseLocale.value ? explanation.label : t('quotePage.package')
+const displayPackageLabel = (explanation) => isChineseLocale.value ? explanation.labelZh : t('quotePage.package')
 const displayUpgradeAdds = (explanation) => (
   isChineseLocale.value
     ? explanation.upgradeAdds.slice(0, 2)

@@ -14,20 +14,20 @@ export const getPaymentReadiness = () => {
   const testModeEnabled = ['1', 'true', 'yes', 'test'].includes(testModeFlag)
   const blockers = []
 
-  if (!testModeEnabled) blockers.push('Test-mode payment preparation is not enabled for this local/staging preview.')
-  if (!publishableKey) blockers.push('Test payment key is not configured for this local/staging preview.')
-  if (hasLivePublishableKey) blockers.push('Live publishable key detected; payment readiness blocks live mode.')
-  if (publishableKey && !hasTestPublishableKey) blockers.push('Publishable key is not a test-mode payment key.')
+  if (!testModeEnabled) blockers.push('当前仅显示支付流程说明，订金支付尚未开放。')
+  if (!publishableKey) blockers.push('支付输入尚未配置给客户使用。')
+  if (hasLivePublishableKey) blockers.push('已阻止真实支付配置进入当前预览。')
+  if (publishableKey && !hasTestPublishableKey) blockers.push('当前支付配置不符合预览要求。')
 
   return {
-    mode: testModeEnabled ? 'test-mode' : 'blocked',
+    mode: testModeEnabled ? 'preview_overview' : 'blocked',
     ready: blockers.length === 0 && hasTestPublishableKey,
     testModeEnabled,
     hasTestPublishableKey,
     hasLivePublishableKey,
     publishableKeyMasked: maskKey(publishableKey),
     blockers,
-    boundary: 'Payment readiness check only: deposit payment is not enabled in this preview, and no real payment, webhook, n8n, outbound message, or production payment is triggered.'
+    boundary: '仅支付流程说明：当前预览不启用订金支付，也不会扣款或外发消息。'
   }
 }
 
@@ -36,10 +36,10 @@ export const buildPaymentReadinessSnapshot = (order = {}) => {
   return {
     readiness,
     order: {
-      order_number: order.order_number || 'PO-TEST-READINESS',
-      event_type: order.event_type || 'PartyOnce local/staging event',
+      order_number: order.order_number || 'PO-PREVIEW-READINESS',
+      event_type: order.event_type || 'Party Event 预览活动',
       event_date: order.event_date || '',
-      venue_name: order.venue_name || 'Local/staging venue',
+      venue_name: order.venue_name || '待确认场地',
       currency: order.currency || 'AUD',
       deposit_amount: Number(order.deposit_amount || order.amount || 0)
     },

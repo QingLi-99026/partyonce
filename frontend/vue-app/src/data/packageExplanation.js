@@ -4,7 +4,7 @@ export const packageTierExplanations = {
   basic: {
     id: 'basic',
     label: 'Basic',
-    labelZh: '基础',
+    labelZh: '基础套餐',
     priceHint: '$899-$1,299',
     positioning: '控制预算，先把主题感和基础拍照点做出来。',
     bestFor: '适合小型生日、预算敏感、已经有场地或只想先确认视觉方向的家庭。',
@@ -23,17 +23,17 @@ export const packageTierExplanations = {
       '简单运输和现场摆放'
     ],
     upgradeAdds: [
-      '升级到 Standard 后增加中型气球拱门',
+      '升级到标准套餐后增加中型气球拱门',
       '增加主题背景板和甜品台',
       '增加更完整的桌面花艺和供应商组合建议'
     ],
     customerFit: '如果你想控制预算，但仍希望孩子一进门就能感受到主题，这一档最稳。',
-    quoteExplanation: 'Basic 的价格主要来自基础装饰材料、轻量人工和主题识别物料；它不追求全场沉浸，而是保留最关键的视觉点。'
+    quoteExplanation: '基础套餐的价格主要来自基础装饰材料、轻量人工和主题识别物料；它不追求全场沉浸，而是保留最关键的视觉点。'
   },
   standard: {
     id: 'standard',
     label: 'Standard',
-    labelZh: '标准',
+    labelZh: '标准套餐',
     priceHint: '$1,499-$2,399',
     positioning: '完整体验，兼顾预算、视觉冲击和可交付性。',
     bestFor: '适合 15-30 人、希望照片好看、需要甜品台和主题背景的家庭。',
@@ -54,17 +54,17 @@ export const packageTierExplanations = {
       '供应商协调成本'
     ],
     upgradeAdds: [
-      '升级到 Premium 后增加大型沉浸式拱门',
+      '升级到尊享套餐后增加大型沉浸式拱门',
       '增加主题灯光层和完整拍照区',
       '增加定制 KT 板和更强的现场包装'
     ],
     customerFit: '如果你希望照片、入口、甜品台和主题背景都完整，但又不想直接进入高预算，这一档最适合。',
-    quoteExplanation: 'Standard 的价格差异主要来自拱门、背景板、甜品台和现场人工。它比 Basic 更像完整派对，而不是简单装饰。'
+    quoteExplanation: '标准套餐的价格差异主要来自拱门、背景板、甜品台和现场人工。它比基础套餐更像完整派对，而不是简单装饰。'
   },
   premium: {
     id: 'premium',
     label: 'Premium',
-    labelZh: '尊享',
+    labelZh: '尊享套餐',
     priceHint: '$2,800+',
     positioning: '沉浸式视觉，强调仪式感、拍照区和全场包装。',
     bestFor: '适合高预算客户、投资人演示、重要生日或希望现场有强记忆点的活动。',
@@ -85,12 +85,12 @@ export const packageTierExplanations = {
       '更长现场布置和协调时间'
     ],
     upgradeAdds: [
-      '相对 Standard，增加沉浸式全场包装',
+      '相对标准套餐，增加沉浸式全场包装',
       '增加灯光、拍照区和定制板',
       '更适合需要“第一眼打动客户”的展示'
     ],
-    customerFit: '如果你希望客人进场就被主题包围，照片也能明显看出高级感，Premium 更适合。',
-    quoteExplanation: 'Premium 的价格主要来自大型结构、定制物料、灯光、拍照区和更长的现场人工。它买的是全场氛围和更高完成度。'
+    customerFit: '如果你希望客人进场就被主题包围，照片也能明显看出高级感，尊享套餐更适合。',
+    quoteExplanation: '尊享套餐的价格主要来自大型结构、定制物料、灯光、拍照区和更长的现场人工。它买的是全场氛围和更高完成度。'
   }
 };
 
@@ -134,12 +134,12 @@ export function getUpgradeExplanation(tier = 'standard') {
   const current = normalizeTierId(tier);
   if (current === 'premium') {
     return {
-      title: 'Premium 已是当前最高演示档',
+      title: '尊享套餐已是当前最高演示档',
       items: packageTierExplanations.premium.upgradeAdds
     };
   }
   return {
-    title: current === 'basic' ? '从 Basic 升级到 Standard 会多什么' : '从 Standard 升级到 Premium 会多什么',
+    title: current === 'basic' ? '从基础套餐升级到标准套餐会多什么' : '从标准套餐升级到尊享套餐会多什么',
     items: packageTierExplanations[current].upgradeAdds
   };
 }

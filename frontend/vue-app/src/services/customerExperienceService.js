@@ -3,12 +3,12 @@ import apiClient from '@/api'
 import { useUserStore } from '@/store'
 import { normalizeQuoteLineItems } from '@/data/quoteLineItems'
 
-const SOURCE_LOCAL_DEMO = 'local/staging filtered fixture'
-const SOURCE_READONLY_API = 'customer read-only API'
+const SOURCE_LOCAL_DEMO = '预览用户数据'
+const SOURCE_READONLY_API = '客户只读数据'
 const CUSTOMER_INTERACTION_STORAGE_KEY = 'partyonce_customer_interactions_v1'
 const DEFAULT_CUSTOMER_FIXTURE = {
   id: 'customer-local-41',
-  name: 'Ava Thompson',
+  name: '预览用户',
   contact: 'ava.parent@example.test',
   apiCustomerId: null
 }
@@ -53,48 +53,48 @@ const quoteFixtures = [
     customer_id: 'customer-local-41',
     quote_number: 'PE-Q-0501',
     status: 'accepted',
-    customer_name: 'Ava Thompson',
+    customer_name: '预览用户',
     customer_contact: 'ava.parent@example.test',
-    theme: 'Castle Princess',
-    package: 'Premium',
+    theme: '梦幻城堡',
+    package: '高级套餐',
     selection_snapshot: {
-      theme: 'Castle Princess',
-      package: 'Premium',
-      venue: 'Sydney Kids Studio Room A',
+      theme: '梦幻城堡',
+      package: '高级套餐',
+      venue: '餐厅 A 私人包间',
       guest_count: 18,
       event_date: '2026-06-14'
     },
     customer_requirements: {
-      food_notes: 'Family sharing menu with simple kids options.',
-      allergy_notes: 'Confirm nut-free dessert options before final quote.',
-      cake_needs: 'Premium cake or cupcake tower options requested.',
-      parent_priorities: 'Beautiful photos, easy setup, and low parent workload.'
+      food_notes: '家庭分享餐和儿童简单餐食。',
+      allergy_notes: '正式报价前确认无坚果甜品选项。',
+      cake_needs: '希望了解高级蛋糕或纸杯蛋糕塔。',
+      parent_priorities: '照片好看、布置省心、家长负担低。'
     },
     currency: 'AUD',
     amount: 1680,
     valid_until: '2026-05-25',
     created_at: '2026-05-11T08:00:00.000Z',
     line_items: [
-      { type: 'venue_fee', name: 'Sydney Kids Studio Room A', amount: 420 },
-      { type: 'decor_fee', name: 'Premium castle room styling', amount: 760 },
-      { type: 'supplier_fee', name: 'Cake and activity supplier allowance', amount: 280 },
-      { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
-      { type: 'service_fee', name: 'Planning service', amount: 60 },
+      { type: 'venue_fee', name: '餐厅 A 私人包间', amount: 420 },
+      { type: 'decor_fee', name: '高级城堡主题布置', amount: 760 },
+      { type: 'supplier_fee', name: '蛋糕和活动供应商预留', amount: 280 },
+      { type: 'labor_fee', name: '布置和收场服务', amount: 160 },
+      { type: 'service_fee', name: '策划服务', amount: 60 },
       {
         type: 'optional_upgrade',
-        name: 'Photo zone / backdrop upgrade',
+        name: '拍照区 / 背景板升级',
         amount: 360,
-        amount_basis: 'Customer-selected visual upgrade for stronger family photos and social sharing.',
-        customer_explanation: 'Adds a styled photo corner with backdrop, balloons, and theme signage.',
-        admin_edit_hint: 'Confirm backdrop size, venue wall access, and setup time before formal quote.'
+        amount_basis: '客户选择的视觉升级，用于更好的家庭照片和分享素材。',
+        customer_explanation: '增加主题拍照角、背景板、气球和主题标识。',
+        admin_edit_hint: '正式报价前确认背景板尺寸、墙面权限和布置时间。'
       },
       {
         type: 'optional_upgrade',
-        name: 'Kids party host / MC',
+        name: '儿童派对主持人',
         amount: 320,
-        amount_basis: 'Customer-selected host support for games, cake moment, and activity flow.',
-        customer_explanation: 'Keeps the party lively and organised so parents are not running every moment.',
-        admin_edit_hint: 'Confirm host language, duration, run sheet, and talent availability.'
+        amount_basis: '客户选择的主持支持，用于游戏、切蛋糕和活动流程。',
+        customer_explanation: '帮助活动更有秩序，家长不用全程自己控场。',
+        admin_edit_hint: '确认主持语言、时长、流程表和人员档期。'
       }
     ]
   },
@@ -103,40 +103,40 @@ const quoteFixtures = [
     customer_id: 'customer-local-42',
     quote_number: 'PE-Q-0502',
     status: 'sent',
-    customer_name: 'Noah Chen',
+    customer_name: '预览用户',
     customer_contact: 'noah.family@example.test',
-    theme: 'Space Explorer',
-    package: 'Standard',
+    theme: '星际探险',
+    package: '标准套餐',
     selection_snapshot: {
-      theme: 'Space Explorer',
-      package: 'Standard',
-      venue: 'Harbour View Function Room',
+      theme: '星际探险',
+      package: '标准套餐',
+      venue: '海景活动包房',
       guest_count: 14,
       event_date: '2026-06-22'
     },
     customer_requirements: {
-      food_notes: 'Casual dining with kids-friendly snack table.',
-      allergy_notes: 'Check gluten-free snack options.',
-      cake_needs: 'Bring-own cake may be preferred.',
-      parent_priorities: 'Good activity flow and clear setup timing.'
+      food_notes: '轻松用餐，搭配儿童友好小食桌。',
+      allergy_notes: '确认无麸质小食选项。',
+      cake_needs: '可能希望自带蛋糕。',
+      parent_priorities: '活动流程顺畅，布置时间清楚。'
     },
     currency: 'AUD',
     amount: 1240,
     valid_until: '2026-05-28',
     created_at: '2026-05-11T08:20:00.000Z',
     line_items: [
-      { type: 'venue_fee', name: 'Harbour View Function Room', amount: 280 },
-      { type: 'decor_fee', name: 'Standard space room styling', amount: 520 },
-      { type: 'supplier_fee', name: 'Activity materials supplier allowance', amount: 220 },
-      { type: 'labor_fee', name: 'Setup and pack-down', amount: 160 },
-      { type: 'transport_fee', name: 'Transport and handling', amount: 60 },
+      { type: 'venue_fee', name: '海景活动包房', amount: 280 },
+      { type: 'decor_fee', name: '标准太空主题布置', amount: 520 },
+      { type: 'supplier_fee', name: '活动材料供应商预留', amount: 220 },
+      { type: 'labor_fee', name: '布置和收场服务', amount: 160 },
+      { type: 'transport_fee', name: '运输和搬运', amount: 60 },
       {
         type: 'optional_upgrade',
-        name: 'Sound / microphone starter pack',
+        name: '音响 / 麦克风基础包',
         amount: 180,
-        amount_basis: 'Customer-selected audio support for host, music, or activity announcements.',
-        customer_explanation: 'Adds basic sound and microphone support for a smoother party flow.',
-        admin_edit_hint: 'Confirm venue sound restrictions, access to power, and equipment pickup.'
+        amount_basis: '客户选择的音频支持，用于主持、音乐或活动提醒。',
+        customer_explanation: '增加基础音响和麦克风支持，让派对流程更顺。',
+        admin_edit_hint: '确认场地音量限制、电源和设备取还。'
       }
     ]
   },
@@ -145,14 +145,14 @@ const quoteFixtures = [
     customer_id: 'customer-local-43',
     quote_number: 'PE-Q-0503',
     status: 'draft',
-    customer_name: 'Mia Williams',
+    customer_name: '预览用户',
     customer_contact: 'mia.parent@example.test',
-    theme: 'Forest Adventure',
-    package: 'Basic',
+    theme: '森林奇境',
+    package: '基础套餐',
     selection_snapshot: {
-      theme: 'Forest Adventure',
-      package: 'Basic',
-      venue: 'Forest Play Cafe',
+      theme: '森林奇境',
+      package: '基础套餐',
+      venue: '森林主题亲子咖啡馆',
       guest_count: 10,
       event_date: '2026-07-03'
     },
@@ -161,11 +161,11 @@ const quoteFixtures = [
     valid_until: '2026-05-30',
     created_at: '2026-05-11T08:35:00.000Z',
     line_items: [
-      { type: 'venue_fee', name: 'Forest Play Cafe', amount: 180 },
-      { type: 'decor_fee', name: 'Basic forest theme styling', amount: 390 },
-      { type: 'labor_fee', name: 'Local setup support', amount: 120 },
-      { type: 'transport_fee', name: 'Transport and handling', amount: 50 },
-      { type: 'service_fee', name: 'Planning service', amount: 40 }
+      { type: 'venue_fee', name: '森林主题亲子咖啡馆', amount: 180 },
+      { type: 'decor_fee', name: '基础森林主题布置', amount: 390 },
+      { type: 'labor_fee', name: '现场布置支持', amount: 120 },
+      { type: 'transport_fee', name: '运输和搬运', amount: 50 },
+      { type: 'service_fee', name: '策划服务', amount: 40 }
     ]
   }
 ]
@@ -192,8 +192,8 @@ export const getCustomerReadOnlyIdentity = () => {
     apiCustomerId: apiCustomerId && String(apiCustomerId).match(/^\d+$/) ? String(apiCustomerId) : null,
     isFixture: !userStore.token || !apiCustomerId,
     accessBoundary: isAdminLike
-      ? 'Admin/manager token is not used as customer identity; local fixture fallback is shown instead.'
-      : 'Customer read-only identity is scoped to the current local/staging customer fixture.'
+      ? '当前以预览用户身份查看客户页面，不使用后台管理员身份。'
+      : '当前为预览用户视图，仅用于查看报价和订单说明。'
   }
 }
 
@@ -215,10 +215,10 @@ const readInquiryQuotes = () => {
       customer_id: DEFAULT_CUSTOMER_FIXTURE.id,
       quote_number: `LOCAL-INQ-Q-${String(index + 1).padStart(3, '0')}`,
       status: inquiry.status === 'contacted' ? 'sent' : 'draft',
-      customer_name: inquiry.customerInfo?.name || 'Local inquiry customer',
+      customer_name: inquiry.customerInfo?.name || '预览咨询用户',
       customer_contact: inquiry.customerInfo?.contact || '-',
-      theme: inquiry.selection?.themeName || 'Theme pending',
-      package: inquiry.selection?.packageName || 'Package pending',
+      theme: inquiry.selection?.themeName || '主题待确认',
+      package: inquiry.selection?.packageName || '套餐待确认',
       selection_snapshot: {
         theme: inquiry.selection?.themeName || inquiry.selection?.themeId || '-',
         package: inquiry.selection?.packageName || inquiry.selection?.packageId || '-',
@@ -247,9 +247,9 @@ const readInquiryQuotes = () => {
       valid_until: '-',
       created_at: inquiry.submitTime || null,
       line_items: normalizeQuoteLineItems(inquiry.pricing?.lineItems || [
-        { type: 'decor_fee', name: inquiry.selection?.packageName || 'Package decor layer', amount: Number(inquiry.pricing?.packagePrice || 0) },
+        { type: 'decor_fee', name: inquiry.selection?.packageName || '套餐布置项', amount: Number(inquiry.pricing?.packagePrice || 0) },
         { type: 'venue_fee', name: inquiry.selection?.sceneName || 'Scene fee', amount: Number(inquiry.pricing?.sceneFee || 0) },
-        { type: 'optional_upgrade', name: 'Add-ons', amount: Number(inquiry.pricing?.addonsTotal || 0) }
+        { type: 'optional_upgrade', name: '附加服务', amount: Number(inquiry.pricing?.addonsTotal || 0) }
       ]).filter((item) => item.amount > 0)
     }))
   } catch (error) {
@@ -307,7 +307,7 @@ const normalizeOrder = (order) => {
     currency: order.currency || 'AUD',
     total_amount: Number(order.total_amount || order.final_total || 0),
     deposit_amount: Number(order.deposit_amount || 0),
-    deposit_note: 'pending_deposit 只是业务状态；当前预览不会启用真实在线支付。',
+    deposit_note: '订金待确认只是业务状态；当前预览不会启用真实在线支付。',
     next_step: order.next_action || orderNextStep[status] || '请联系 PartyOnce 顾问确认下一步。',
     created_at: order.created_at || null,
     updated_at: order.updated_at || null,
@@ -371,7 +371,7 @@ export const saveQuoteConfirmationPlaceholder = (quoteId) => {
     id: String(quoteId),
     confirmation_placeholder: true,
     confirmation_placeholder_at: new Date().toISOString(),
-    confirmation_note: 'Local/staging-only customer quote confirmation placeholder. No payment, order creation, webhook, n8n, or outbound message was triggered.',
+    confirmation_note: '已记录客户意向，仍需人工复核；不会创建真实订单、扣款或外发消息。',
     local_only: true
   }
   store[key] = updated
@@ -381,8 +381,8 @@ export const saveQuoteConfirmationPlaceholder = (quoteId) => {
 
 export const customerInteractionBoundary = {
   contactTitle: 'Need help or changes?',
-  contactBody: 'Use the note below to capture requested changes for local/staging review. It does not send email, SMS, WhatsApp, webhook, n8n, or payment actions.',
-  quoteConfirmation: 'This records local customer intent only. It does not accept the quote in production, create an order, or start online payment.'
+  contactBody: '请在下方填写想调整的内容，团队会人工复核；不会发送外部消息或触发付款。',
+  quoteConfirmation: '这里只记录客户意向，不代表正式接受报价、创建订单或启动在线支付。'
 }
 
 export const bootstrapLocalCustomerFixture = () => {
@@ -452,7 +452,7 @@ export const fetchCustomerQuotes = async () => {
       return {
         source: SOURCE_LOCAL_DEMO,
         identity,
-        api_error: error?.response?.data?.detail || error?.message || 'Customer read-only API unavailable; using local fixture fallback.',
+        api_error: '当前暂无可用客户接口，已显示预览用户报价。',
         items,
         total: items.length
       }
@@ -463,7 +463,7 @@ export const fetchCustomerQuotes = async () => {
   return {
     source: SOURCE_LOCAL_DEMO,
     identity,
-    api_error: 'No customer auth token or numeric local customer API fixture; using filtered local/staging fixture.',
+    api_error: '当前为预览用户，暂无登录后的专属报价接口。',
     items,
     total: items.length
   }
@@ -520,7 +520,7 @@ export const fetchCustomerOrders = async () => {
       return {
         source: SOURCE_LOCAL_DEMO,
         identity,
-        api_error: error?.response?.data?.detail || error?.message || 'Customer read-only API unavailable; using local fixture fallback.',
+        api_error: '当前暂无可用客户接口，已显示预览用户订单。',
         items,
         total: items.length
       }
@@ -531,7 +531,7 @@ export const fetchCustomerOrders = async () => {
   return {
     source: SOURCE_LOCAL_DEMO,
     identity,
-    api_error: 'No customer auth token or numeric local customer API fixture; using filtered local/staging fixture.',
+    api_error: '当前为预览用户，暂无登录后的专属订单接口。',
     items,
     total: items.length
   }

@@ -2,45 +2,35 @@
   <main class="venue-finder-page">
     <section class="finder-hero">
       <div>
-        <p class="eyebrow">Venue / Restaurant Finder · local staging prototype</p>
-        <h1>Find a venue by guests, suburb, budget, and party fit</h1>
-        <p>
-          Start with the practical constraints first: 10 adults, 20 kids, medium budget,
-          Marrickville or Mascot nearby, and decoration-friendly venues. No Google Maps,
-          no real restaurant database, and no booking is triggered.
-        </p>
+        <p class="eyebrow">{{ vfCopy.heroEyebrow }}</p>
+        <h1>{{ vfCopy.heroTitle }}</h1>
+        <p>{{ vfCopy.heroCopy }}</p>
         <div class="hero-actions">
-          <button class="primary" type="button" @click="applyFamilySample">Use 30 guest family sample</button>
-          <button type="button" @click="resetFilters">Reset filters</button>
+          <button class="primary" type="button" @click="applyFamilySample">{{ vfCopy.familySample }}</button>
+          <button type="button" @click="resetFilters">{{ vfCopy.resetFilters }}</button>
         </div>
       </div>
       <div class="hero-card">
         <strong>{{ filteredVenues.length }}</strong>
-        <span>matching local/staging venues</span>
-        <small>{{ filters.adults }} adults + {{ filters.kids }} kids · {{ totalGuests }} guests</small>
+        <span>{{ vfCopy.matchingVenues }}</span>
+        <small>{{ vfCopy.guestSummary(filters.adults, filters.kids, totalGuests) }}</small>
       </div>
     </section>
 
     <section class="showcase-strip">
       <div class="showcase-copy">
-        <p class="eyebrow">Restaurant A visual planning pack</p>
-        <h2>Compare the same room before and after theme styling</h2>
-        <p>
-          This local/staging asset keeps the room structure stable while showing how
-          Castle, Space, and Forest decor layers change the customer-facing quote story.
-        </p>
+        <p class="eyebrow">{{ vfCopy.showcaseEyebrow }}</p>
+        <h2>{{ vfCopy.showcaseTitle }}</h2>
+        <p>{{ vfCopy.showcaseCopy }}</p>
       </div>
-      <img src="/party-assets/venues/restaurant-a/restaurant-a-showcase.png" alt="Restaurant A visual planning set" />
+      <img src="/party-assets/venues/restaurant-a/restaurant-a-showcase.png" :alt="vfCopy.showcaseAlt" />
     </section>
 
     <section class="trust-strip">
       <div>
-        <p class="eyebrow">For parents comparing venues</p>
-        <h2>Use this as a shortlist, then we confirm the real details</h2>
-        <p>
-          Venue Finder helps you narrow options by guests, budget, suburb, food needs,
-          room rules and party styling fit. It does not make a live booking or charge a deposit.
-        </p>
+        <p class="eyebrow">{{ vfCopy.parentEyebrow }}</p>
+        <h2>{{ vfCopy.parentTitle }}</h2>
+        <p>{{ vfCopy.parentCopy }}</p>
       </div>
       <ul>
         <li v-for="item in trustChecklist" :key="item">{{ item }}</li>
@@ -49,12 +39,9 @@
 
     <section class="choice-proof-strip">
       <div class="choice-proof-heading">
-        <p class="eyebrow">Common family choices · staging samples</p>
-        <h2>How most parents can start without overthinking</h2>
-        <p>
-          These are not real customer reviews. They are sample planning patterns for testing
-          whether Australian families can understand package and add-on choices quickly.
-        </p>
+        <p class="eyebrow">{{ vfCopy.choiceEyebrow }}</p>
+        <h2>{{ vfCopy.choiceTitle }}</h2>
+        <p>{{ vfCopy.choiceCopy }}</p>
       </div>
       <div class="choice-proof-grid">
         <article v-for="choice in popularFamilyChoices" :key="choice.id">
@@ -72,19 +59,19 @@
     <section class="finder-layout">
       <aside class="filter-panel">
         <div class="panel-heading">
-          <p class="eyebrow">Quick filters</p>
-          <h2>Start with real party constraints</h2>
+          <p class="eyebrow">{{ vfCopy.quickFilters }}</p>
+          <h2>{{ vfCopy.constraintsTitle }}</h2>
         </div>
 
         <label>
-          Area / Suburb
+          {{ vfCopy.area }}
           <select v-model="filters.area">
             <option v-for="area in areaOptions" :key="area" :value="area">{{ area }}</option>
           </select>
         </label>
 
         <label>
-          Distance radius
+          {{ vfCopy.distanceRadius }}
           <select v-model.number="filters.radiusKm">
             <option :value="1">1km</option>
             <option :value="3">3km</option>
@@ -95,18 +82,18 @@
 
         <div class="inline-fields">
           <label>
-            Adults
+            {{ vfCopy.adults }}
             <input v-model.number="filters.adults" min="0" type="number" />
           </label>
           <label>
-            Kids
+            {{ vfCopy.kids }}
             <input v-model.number="filters.kids" min="0" type="number" />
           </label>
         </div>
-        <p class="total-guests">Total guests: <strong>{{ totalGuests }}</strong></p>
+        <p class="total-guests">{{ vfCopy.totalGuests }}: <strong>{{ totalGuests }}</strong></p>
 
         <label>
-          Child age range
+          {{ vfCopy.childAgeRange }}
           <select v-model="filters.childAgeRange">
             <option value="3_5">3-5</option>
             <option value="6_8">6-8</option>
@@ -116,7 +103,7 @@
         </label>
 
         <label>
-          Budget per person
+          {{ vfCopy.budgetPerPerson }}
           <select v-model="filters.budgetPerPerson">
             <option value="under_25">Under $25</option>
             <option value="25_45">$25-$45</option>
@@ -127,39 +114,31 @@
 
         <div class="inline-fields">
           <label>
-            Date
+            {{ vfCopy.date }}
             <input v-model="filters.eventDate" type="date" />
           </label>
           <label>
-            Time
+            {{ vfCopy.time }}
             <input v-model="filters.eventTime" type="time" />
           </label>
         </div>
 
         <div class="panel-divider"></div>
-        <p class="eyebrow">Advanced filters</p>
+        <p class="eyebrow">{{ vfCopy.advancedFilters }}</p>
 
         <label>
-          Venue type
+          {{ vfCopy.venueType }}
           <select v-model="filters.venueType">
-            <option value="">Any venue type</option>
-            <option value="restaurant">Restaurant</option>
-            <option value="private_dining_room">Private dining room</option>
-            <option value="function_room">Function room</option>
-            <option value="cafe">Cafe</option>
-            <option value="indoor_play_venue">Indoor play venue</option>
-            <option value="community_hall">Community hall</option>
+            <option value="">{{ vfCopy.anyVenueType }}</option>
+            <option v-for="item in localizedVenueTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
           </select>
         </label>
 
         <label>
-          Space type
+          {{ vfCopy.spaceType }}
           <select v-model="filters.spaceType">
-            <option value="">Any space type</option>
-            <option value="private_room">Private room</option>
-            <option value="semi_private_area">Semi-private area</option>
-            <option value="open_dining_area">Open dining area</option>
-            <option value="outdoor_area">Outdoor area</option>
+            <option value="">{{ vfCopy.anySpaceType }}</option>
+            <option v-for="item in localizedSpaceTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
           </select>
         </label>
 
@@ -171,8 +150,8 @@
         </div>
 
         <div class="panel-divider"></div>
-        <p class="eyebrow">Dietary & cultural fit</p>
-        <p class="filter-helper">Use these as planning filters only. The team still confirms details with the venue or caterer.</p>
+        <p class="eyebrow">{{ vfCopy.culturalFit }}</p>
+        <p class="filter-helper">{{ vfCopy.filterHelper }}</p>
         <div class="check-grid">
           <label v-for="check in culturalFilters" :key="check.key" class="check-row">
             <input v-model="filters[check.key]" type="checkbox" />
@@ -181,7 +160,7 @@
         </div>
 
         <div class="panel-divider"></div>
-        <p class="eyebrow">Theme fit</p>
+        <p class="eyebrow">{{ vfCopy.themeFit }}</p>
         <div class="check-grid">
           <label v-for="theme in themeFilters" :key="theme.value" class="check-row">
             <input v-model="filters.themes" type="checkbox" :value="theme.value" />
@@ -193,21 +172,21 @@
       <section class="results-panel">
         <div class="results-toolbar">
           <div>
-            <p class="eyebrow">Results</p>
-            <h2>{{ filteredVenues.length }} venues for {{ totalGuests }} guests near {{ filters.area }}</h2>
+            <p class="eyebrow">{{ vfCopy.results }}</p>
+            <h2>{{ vfCopy.resultsTitle(filteredVenues.length, totalGuests, filters.area) }}</h2>
           </div>
-          <select v-model="sortBy" aria-label="Sort venues">
-            <option value="match">Best match</option>
-            <option value="distance">Distance</option>
-            <option value="price">Price</option>
-            <option value="capacity">Capacity</option>
+          <select v-model="sortBy" :aria-label="vfCopy.sortVenues">
+            <option value="match">{{ vfCopy.bestMatch }}</option>
+            <option value="distance">{{ vfCopy.distance }}</option>
+            <option value="price">{{ vfCopy.price }}</option>
+            <option value="capacity">{{ vfCopy.capacity }}</option>
           </select>
         </div>
 
         <div v-if="filteredVenues.length === 0" class="empty-state">
-          <h3>No exact venue match yet</h3>
-          <p>Try expanding distance, relaxing budget, or removing one theme/space restriction.</p>
-          <button class="primary" type="button" @click="resetFilters">Reset filters</button>
+          <h3>{{ vfCopy.noMatchTitle }}</h3>
+          <p>{{ vfCopy.noMatchCopy }}</p>
+          <button class="primary" type="button" @click="resetFilters">{{ vfCopy.resetFilters }}</button>
         </div>
 
         <div v-else class="venue-card-grid">
@@ -218,9 +197,9 @@
             :class="{ 'is-selected': selectedVenue?.id === venue.id }"
           >
             <div class="venue-card-media">
-              <img :src="venue.image" :alt="venue.name" />
+              <img :src="venue.image" :alt="localizedVenueName(venue)" />
               <span class="demo-badge" :class="{ 'is-research': venue.researchSeed }">
-                {{ venue.researchSeed ? 'Public research seed' : 'Demo venue' }}
+                {{ venue.researchSeed ? vfCopy.publicInfoSeed : vfCopy.planningVenue }}
               </span>
               <div class="media-thumbs" aria-label="Theme preview images">
                 <img
@@ -234,20 +213,20 @@
             <div class="venue-card-body">
               <div class="venue-card-title">
                 <div>
-                  <span class="match-score">{{ venue.match.score }}/100 match</span>
-                  <h3>{{ venue.name }}</h3>
+                  <span class="match-score">{{ vfCopy.matchScore(venue.match.score) }}</span>
+                  <h3>{{ localizedVenueName(venue) }}</h3>
                 </div>
                 <strong>{{ venue.distance }}km</strong>
               </div>
               <div class="match-bar" aria-hidden="true">
                 <span :style="{ width: `${venue.match.score}%` }"></span>
               </div>
-              <p>{{ venue.shortDescription }}</p>
+              <p>{{ localizedVenueDescription(venue) }}</p>
               <div class="tag-row">
                 <span>{{ venue.suburb }}</span>
                 <span>{{ venueTypeLabel(venue.venueType) }}</span>
-                <span>{{ venue.capacityMin }}-{{ venue.capacityMax }} guests</span>
-                <span>${{ venue.pricePerPersonMin }}-${{ venue.pricePerPersonMax }} pp</span>
+                <span>{{ vfCopy.capacityRange(venue.capacityMin, venue.capacityMax) }}</span>
+                <span>{{ vfCopy.priceRange(venue.pricePerPersonMin, venue.pricePerPersonMax) }}</span>
               </div>
               <div class="tag-row is-muted">
                 <span v-for="theme in venue.suitableThemes" :key="theme">{{ themeLabel(theme) }}</span>
@@ -256,26 +235,26 @@
                 <span v-for="label in culturalFitLabels(venue).slice(0, 4)" :key="label">{{ label }}</span>
               </div>
               <p v-if="venue.researchSeed" class="research-note">
-                Public source found · owner call required before customer quote.
+                {{ vfCopy.publicSourceNote }}
               </p>
               <div class="fit-grid">
                 <div>
-                  <small>Best for</small>
-                  <strong>{{ venue.packageFit.join(' / ') }}</strong>
+                  <small>{{ vfCopy.bestFor }}</small>
+                  <strong>{{ localizedPackageFit(venue).join(' / ') }}</strong>
                 </div>
                 <div>
-                  <small>Visual fit</small>
+                  <small>{{ vfCopy.visualFit }}</small>
                   <strong>{{ visualFitLabel(venue) }}</strong>
                 </div>
               </div>
               <div class="parent-checks">
-                <small>Parent checks before quote</small>
-                <span>{{ venueOps(venue).foodOptions[0] }}</span>
-                <span>{{ venueOps(venue).allergyNotes[0] }}</span>
-                <span>{{ venueOps(venue).minimumSpendHint }}</span>
+                <small>{{ vfCopy.parentChecks }}</small>
+                <span>{{ localizedOps(venue).foodOptions[0] }}</span>
+                <span>{{ localizedOps(venue).allergyNotes[0] }}</span>
+                <span>{{ localizedOps(venue).minimumSpendHint }}</span>
               </div>
               <div class="recommended-addons">
-                <small>Useful add-ons for this venue</small>
+                <small>{{ vfCopy.usefulAddons }}</small>
                 <div>
                   <span v-for="addon in recommendedAddOns(venue).slice(0, 3)" :key="addon.id">
                     {{ addon.icon }} {{ addon.name }}
@@ -284,11 +263,11 @@
               </div>
               <p class="why-match">{{ venue.match.reasons.join(' · ') || venue.whyMatch }}</p>
               <div class="card-actions">
-                <button type="button" @click="openVenue(venue)">View venue</button>
+                <button type="button" @click="openVenue(venue)">{{ vfCopy.viewVenue }}</button>
                 <button type="button" :class="{ selected: isCompared(venue) }" @click="compareVenue(venue)">
-                  {{ isCompared(venue) ? 'Compared' : 'Compare' }}
+                  {{ isCompared(venue) ? vfCopy.compared : vfCopy.compare }}
                 </button>
-                <button class="primary" type="button" @click="useVenueForQuote(venue)">Use this venue for quote</button>
+                <button class="primary" type="button" @click="useVenueForQuote(venue)">{{ vfCopy.useForQuote }}</button>
               </div>
             </div>
           </article>
@@ -299,69 +278,69 @@
     <section v-if="compareVenues.length" class="compare-panel">
       <div class="compare-heading">
         <div>
-          <p class="eyebrow">Venue comparison</p>
-          <h2>Compare up to 3 shortlisted venues</h2>
+          <p class="eyebrow">{{ vfCopy.comparison }}</p>
+          <h2>{{ vfCopy.compareTitle }}</h2>
         </div>
-        <button type="button" @click="clearCompare">Clear compare</button>
+        <button type="button" @click="clearCompare">{{ vfCopy.clearCompare }}</button>
       </div>
       <div class="compare-grid">
         <article v-for="venue in compareVenues" :key="venue.id" class="compare-card">
-          <img :src="venue.image" :alt="venue.name" />
-          <h3>{{ venue.name }}</h3>
+          <img :src="venue.image" :alt="localizedVenueName(venue)" />
+          <h3>{{ localizedVenueName(venue) }}</h3>
           <dl>
-            <div><dt>Distance</dt><dd>{{ venue.distance }}km from {{ filters.area }}</dd></div>
-            <div><dt>Capacity</dt><dd>{{ venue.capacityMin }}-{{ venue.capacityMax }} guests</dd></div>
-            <div><dt>Budget</dt><dd>${{ venue.pricePerPersonMin }}-${{ venue.pricePerPersonMax }} pp</dd></div>
-            <div><dt>Package fit</dt><dd>{{ venue.packageFit.join(' / ') }}</dd></div>
-            <div><dt>Theme fit</dt><dd>{{ venue.suitableThemes.map(themeLabel).join(' / ') }}</dd></div>
-            <div><dt>Add-on upside</dt><dd>{{ recommendedAddOns(venue).slice(0, 3).map((item) => item.name).join(' / ') }}</dd></div>
-            <div><dt>Food check</dt><dd>{{ venueOps(venue).foodOptions[0] }}</dd></div>
-            <div><dt>Allergy check</dt><dd>{{ venueOps(venue).allergyNotes[0] }}</dd></div>
-            <div><dt>Cultural fit</dt><dd>{{ culturalFitLabels(venue).join(' / ') || 'Manual family requirements review' }}</dd></div>
-            <div><dt>Min spend</dt><dd>{{ venueOps(venue).minimumSpendHint }}</dd></div>
-            <div><dt>Watch-outs</dt><dd>{{ venue.restrictions.join(' · ') }}</dd></div>
+            <div><dt>{{ vfCopy.distance }}</dt><dd>{{ vfCopy.distanceFrom(venue.distance, filters.area) }}</dd></div>
+            <div><dt>{{ vfCopy.capacity }}</dt><dd>{{ vfCopy.capacityRange(venue.capacityMin, venue.capacityMax) }}</dd></div>
+            <div><dt>{{ vfCopy.budget }}</dt><dd>{{ vfCopy.priceRange(venue.pricePerPersonMin, venue.pricePerPersonMax) }}</dd></div>
+            <div><dt>{{ vfCopy.packageFit }}</dt><dd>{{ localizedPackageFit(venue).join(' / ') }}</dd></div>
+            <div><dt>{{ vfCopy.themeFit }}</dt><dd>{{ venue.suitableThemes.map(themeLabel).join(' / ') }}</dd></div>
+            <div><dt>{{ vfCopy.addonUpside }}</dt><dd>{{ recommendedAddOns(venue).slice(0, 3).map((item) => localizedAddonName(item)).join(' / ') }}</dd></div>
+            <div><dt>{{ vfCopy.foodCheck }}</dt><dd>{{ localizedOps(venue).foodOptions[0] }}</dd></div>
+            <div><dt>{{ vfCopy.allergyCheck }}</dt><dd>{{ localizedOps(venue).allergyNotes[0] }}</dd></div>
+            <div><dt>{{ vfCopy.culturalFit }}</dt><dd>{{ culturalFitLabels(venue).join(' / ') || vfCopy.manualFamilyReview }}</dd></div>
+            <div><dt>{{ vfCopy.minSpend }}</dt><dd>{{ localizedOps(venue).minimumSpendHint }}</dd></div>
+            <div><dt>{{ vfCopy.watchOuts }}</dt><dd>{{ localizedRestrictions(venue).join(' · ') }}</dd></div>
           </dl>
-          <button class="primary" type="button" @click="useVenueForQuote(venue)">Use for quote</button>
-          <button type="button" @click="compareVenue(venue)">Remove</button>
+          <button class="primary" type="button" @click="useVenueForQuote(venue)">{{ vfCopy.useForQuoteShort }}</button>
+          <button type="button" @click="compareVenue(venue)">{{ vfCopy.remove }}</button>
         </article>
       </div>
     </section>
 
     <section v-if="selectedVenue" class="detail-panel" :id="selectedVenue.id">
       <div class="detail-media">
-        <img :src="selectedVenue.image" :alt="selectedVenue.name" />
+        <img :src="selectedVenue.image" :alt="localizedVenueName(selectedVenue)" />
         <div v-if="selectedVenue.beforeImage && selectedVenue.afterImage" class="before-after-strip">
           <figure>
-            <img :src="selectedVenue.beforeImage" :alt="`${selectedVenue.name} before styling`" />
-            <figcaption>Before venue reference</figcaption>
+            <img :src="selectedVenue.beforeImage" :alt="`${localizedVenueName(selectedVenue)} before styling`" />
+            <figcaption>{{ vfCopy.beforeReference }}</figcaption>
           </figure>
           <figure>
-            <img :src="selectedVenue.afterImage" :alt="`${selectedVenue.name} after styling concept`" />
-            <figcaption>After styling concept</figcaption>
+            <img :src="selectedVenue.afterImage" :alt="`${localizedVenueName(selectedVenue)} after styling concept`" />
+            <figcaption>{{ vfCopy.afterConcept }}</figcaption>
           </figure>
         </div>
       </div>
       <article>
-        <p class="eyebrow">{{ selectedVenue.researchSeed ? 'Venue detail · public research seed' : 'Venue detail · staging fixture' }}</p>
-        <h2>{{ selectedVenue.name }}</h2>
-        <p>{{ selectedVenue.shortDescription }}</p>
+        <p class="eyebrow">{{ selectedVenue.researchSeed ? vfCopy.detailPublicSeed : vfCopy.detailPlanningVenue }}</p>
+        <h2>{{ localizedVenueName(selectedVenue) }}</h2>
+        <p>{{ localizedVenueDescription(selectedVenue) }}</p>
         <dl class="detail-list">
-          <div><dt>Suburb</dt><dd>{{ selectedVenue.suburb }}</dd></div>
-          <div><dt>Capacity</dt><dd>{{ selectedVenue.capacityMin }}-{{ selectedVenue.capacityMax }} guests</dd></div>
-          <div><dt>Budget</dt><dd>${{ selectedVenue.pricePerPersonMin }}-${{ selectedVenue.pricePerPersonMax }} per person</dd></div>
-          <div><dt>Space</dt><dd>{{ spaceTypeLabel(selectedVenue.spaceType) }}</dd></div>
-          <div><dt>Package fit</dt><dd>{{ selectedVenue.packageFit.join(' / ') }}</dd></div>
-          <div><dt>Theme fit</dt><dd>{{ selectedVenue.suitableThemes.map(themeLabel).join(' / ') }}</dd></div>
+          <div><dt>{{ vfCopy.suburb }}</dt><dd>{{ selectedVenue.suburb }}</dd></div>
+          <div><dt>{{ vfCopy.capacity }}</dt><dd>{{ vfCopy.capacityRange(selectedVenue.capacityMin, selectedVenue.capacityMax) }}</dd></div>
+          <div><dt>{{ vfCopy.budget }}</dt><dd>{{ vfCopy.priceRangeFull(selectedVenue.pricePerPersonMin, selectedVenue.pricePerPersonMax) }}</dd></div>
+          <div><dt>{{ vfCopy.space }}</dt><dd>{{ spaceTypeLabel(selectedVenue.spaceType) }}</dd></div>
+          <div><dt>{{ vfCopy.packageFit }}</dt><dd>{{ localizedPackageFit(selectedVenue).join(' / ') }}</dd></div>
+          <div><dt>{{ vfCopy.themeFit }}</dt><dd>{{ selectedVenue.suitableThemes.map(themeLabel).join(' / ') }}</dd></div>
         </dl>
         <div class="capability-list">
-          <span v-if="selectedVenue.kidFriendly">Kid friendly</span>
-          <span v-if="selectedVenue.allowsDecorations">Decorations allowed</span>
-          <span v-if="selectedVenue.allowsCake">Cake allowed</span>
-          <span v-if="selectedVenue.allowsPhotographer">Photographer allowed</span>
-          <span v-if="selectedVenue.allowsEntertainment">Entertainment allowed</span>
-          <span v-if="selectedVenue.hasDessertTableSpace">Dessert table space</span>
-          <span v-if="selectedVenue.hasPhotoZoneSpace">Photo zone space</span>
-          <span v-if="selectedVenue.balloonSetupPossible">Balloon setup possible</span>
+          <span v-if="selectedVenue.kidFriendly">{{ vfCopy.kidFriendly }}</span>
+          <span v-if="selectedVenue.allowsDecorations">{{ vfCopy.allowsDecorations }}</span>
+          <span v-if="selectedVenue.allowsCake">{{ vfCopy.allowsCake }}</span>
+          <span v-if="selectedVenue.allowsPhotographer">{{ vfCopy.allowsPhotographer }}</span>
+          <span v-if="selectedVenue.allowsEntertainment">{{ vfCopy.allowsEntertainment }}</span>
+          <span v-if="selectedVenue.hasDessertTableSpace">{{ vfCopy.hasDessertTableSpace }}</span>
+          <span v-if="selectedVenue.hasPhotoZoneSpace">{{ vfCopy.hasPhotoZoneSpace }}</span>
+          <span v-if="selectedVenue.balloonSetupPossible">{{ vfCopy.balloonSetupPossible }}</span>
           <span v-for="label in culturalFitLabels(selectedVenue)" :key="label">{{ label }}</span>
         </div>
         <div class="detail-render-strip">
@@ -369,48 +348,45 @@
             v-for="preview in themePreviewImages(selectedVenue)"
             :key="preview"
             :src="preview"
-            alt="Restaurant A theme preview"
+            :alt="vfCopy.themePreviewAlt"
           />
         </div>
         <div class="recommended-addons is-detail">
-          <small>Recommended high-value add-ons</small>
+          <small>{{ vfCopy.recommendedHighValueAddons }}</small>
           <div>
             <span v-for="addon in recommendedAddOns(selectedVenue)" :key="addon.id">
-              {{ addon.icon }} {{ addon.name }} · +${{ addon.price }}
+              {{ addon.icon }} {{ localizedAddonName(addon) }} · +${{ addon.price }}
             </span>
           </div>
-          <p>
-            These are staging suggestions only. A human planner still confirms availability,
-            supplier fit, and final quote details before any deposit readiness step.
-          </p>
+          <p>{{ vfCopy.addonReviewNote }}</p>
         </div>
         <div class="restriction-box">
-          <strong>Still needs manual confirmation</strong>
+          <strong>{{ vfCopy.manualConfirmation }}</strong>
           <ul>
-            <li v-for="item in selectedVenue.restrictions" :key="item">{{ item }}</li>
+            <li v-for="item in localizedRestrictions(selectedVenue)" :key="item">{{ item }}</li>
           </ul>
         </div>
         <div class="restriction-box ops-readiness-box">
-          <strong>Food, allergy and venue commercial checks</strong>
+          <strong>{{ vfCopy.opsChecks }}</strong>
           <dl>
-            <div><dt>Food options</dt><dd>{{ venueOps(selectedVenue).foodOptions.join(' · ') }}</dd></div>
-            <div><dt>Allergy notes</dt><dd>{{ venueOps(selectedVenue).allergyNotes.join(' · ') }}</dd></div>
-            <div><dt>Dietary / cultural fit</dt><dd>{{ culturalFitLabels(selectedVenue).join(' · ') || 'Manual review required' }}</dd></div>
-            <div v-if="selectedVenue.culturalFitNotes?.length"><dt>Cultural planning notes</dt><dd>{{ selectedVenue.culturalFitNotes.join(' · ') }}</dd></div>
-            <div><dt>Room hire</dt><dd>{{ venueOps(selectedVenue).roomHireHint }}</dd></div>
-            <div><dt>Minimum spend</dt><dd>{{ venueOps(selectedVenue).minimumSpendHint }}</dd></div>
-            <div><dt>Verification</dt><dd>{{ venueOps(selectedVenue).verificationStatus }}</dd></div>
-            <div v-if="selectedVenue.publicSourceLabel"><dt>Public source</dt><dd>{{ selectedVenue.publicSourceLabel }}</dd></div>
+            <div><dt>{{ vfCopy.foodOptions }}</dt><dd>{{ localizedOps(selectedVenue).foodOptions.join(' · ') }}</dd></div>
+            <div><dt>{{ vfCopy.allergyNotes }}</dt><dd>{{ localizedOps(selectedVenue).allergyNotes.join(' · ') }}</dd></div>
+            <div><dt>{{ vfCopy.dietaryCulturalFit }}</dt><dd>{{ culturalFitLabels(selectedVenue).join(' · ') || vfCopy.manualReviewRequired }}</dd></div>
+            <div v-if="selectedVenue.culturalFitNotes?.length"><dt>{{ vfCopy.culturalPlanningNotes }}</dt><dd>{{ localizedCulturalNotes(selectedVenue).join(' · ') }}</dd></div>
+            <div><dt>{{ vfCopy.roomHire }}</dt><dd>{{ localizedOps(selectedVenue).roomHireHint }}</dd></div>
+            <div><dt>{{ vfCopy.minimumSpend }}</dt><dd>{{ localizedOps(selectedVenue).minimumSpendHint }}</dd></div>
+            <div><dt>{{ vfCopy.verification }}</dt><dd>{{ localizedOps(selectedVenue).verificationStatus }}</dd></div>
+            <div v-if="selectedVenue.publicSourceLabel"><dt>{{ vfCopy.publicSource }}</dt><dd>{{ selectedVenue.publicSourceLabel }}</dd></div>
           </dl>
-          <p>These values are local/staging planning fields. Formal quotes require direct venue confirmation.</p>
+          <p>{{ vfCopy.formalQuoteNote }}</p>
           <p v-if="selectedVenue.publicSourceUrl" class="source-link">
-            Source URL for owner verification:
+            {{ vfCopy.sourceUrlLabel }}:
             <a :href="selectedVenue.publicSourceUrl" target="_blank" rel="noopener noreferrer">{{ selectedVenue.publicSourceUrl }}</a>
           </p>
         </div>
         <div class="hero-actions">
-          <button class="primary" type="button" @click="useVenueForQuote(selectedVenue)">Use this venue for quote</button>
-          <button type="button" @click="selectedVenue = null">Close detail</button>
+          <button class="primary" type="button" @click="useVenueForQuote(selectedVenue)">{{ vfCopy.useForQuote }}</button>
+          <button type="button" @click="selectedVenue = null">{{ vfCopy.closeDetail }}</button>
         </div>
       </article>
     </section>
@@ -420,6 +396,7 @@
 <script setup>
 import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   getVenueFinderById,
   spaceTypeLabels,
@@ -436,6 +413,7 @@ import { normalizeVenueFinderFilters, saveVenueFinderQuotePrefill, scoreVenueMat
 
 const route = useRoute();
 const router = useRouter();
+const { locale } = useI18n();
 
 const filters = reactive({
   area: 'Marrickville',
@@ -475,36 +453,272 @@ const trustChecklist = getTrustChecklist();
 const popularFamilyChoices = getPopularFamilyChoices();
 
 const areaOptions = venueFinderAreaOptions;
+const isZh = computed(() => locale.value === 'zh');
 
-const checkFilters = [
-  { key: 'kidFriendly', label: 'Kid friendly' },
-  { key: 'allowsDecorations', label: 'Allows decorations' },
-  { key: 'allowsCake', label: 'Allows cake' },
-  { key: 'allowsPhotographer', label: 'Allows photographer' },
-  { key: 'allowsEntertainment', label: 'Allows entertainment' },
-  { key: 'parkingNearby', label: 'Parking nearby' },
-  { key: 'publicTransportNearby', label: 'Public transport nearby' },
-  { key: 'hasDessertTableSpace', label: 'Dessert table space' },
-  { key: 'hasPhotoZoneSpace', label: 'Photo zone space' },
-  { key: 'balloonSetupPossible', label: 'Balloon setup possible' }
-];
+const venueFinderCopy = {
+  zh: {
+    heroEyebrow: '派对场地筛选',
+    heroTitle: '查找适合的派对场地',
+    heroCopy: '先根据人数、预算、区域、餐饮和家庭需求筛选候选场地。当前场地信息用于报价前规划，不代表即时预订成功，正式可用性仍需人工复核。',
+    familySample: '使用 30 人家庭样例',
+    resetFilters: '重置筛选',
+    matchingVenues: '个候选场地',
+    guestSummary: (adults, kids, total) => `${adults} 位成人 + ${kids} 位孩子 · 共 ${total} 人`,
+    showcaseEyebrow: '餐厅 A 视觉规划资料',
+    showcaseTitle: '对比同一空间在主题布置前后的效果',
+    showcaseCopy: '这组资料帮助家长理解房间结构、城堡、太空和森林主题布置如何影响报价前的方案沟通。',
+    showcaseAlt: '餐厅 A 场地规划展示',
+    parentEyebrow: '给正在比较场地的家长',
+    parentTitle: '先做候选清单，再由团队确认真实细节',
+    parentCopy: '你可以按人数、预算、区域、饮食需求、房间规则和主题适配度缩小范围。本页不会即时预订场地，也不会收取订金。',
+    choiceEyebrow: '常见家庭选择参考',
+    choiceTitle: '不确定从哪里开始时，可以先这样筛选',
+    choiceCopy: '这些是派对规划参考，不是真实客户评价。它们帮助家长快速理解套餐和附加服务的取舍。',
+    quickFilters: '快速筛选',
+    constraintsTitle: '从真实派对条件开始',
+    area: '区域 / 近郊',
+    distanceRadius: '距离范围',
+    adults: '成人',
+    kids: '孩子',
+    totalGuests: '总人数',
+    childAgeRange: '孩子年龄段',
+    budgetPerPerson: '人均预算',
+    date: '日期',
+    time: '时间',
+    advancedFilters: '更多筛选',
+    venueType: '场地类型',
+    anyVenueType: '不限场地类型',
+    spaceType: '空间类型',
+    anySpaceType: '不限空间类型',
+    culturalFit: '饮食与文化需求',
+    filterHelper: '这些只作为前期规划筛选，团队仍会与场地或餐饮方人工确认。',
+    themeFit: '主题适配',
+    results: '筛选结果',
+    resultsTitle: (count, guests, area) => `${count} 个适合 ${guests} 人、靠近 ${area} 的候选场地`,
+    sortVenues: '排序场地',
+    bestMatch: '最佳匹配',
+    distance: '距离',
+    price: '价格',
+    capacity: '容量',
+    noMatchTitle: '暂时没有完全匹配的场地',
+    noMatchCopy: '可以扩大距离、放宽预算，或减少一个主题/空间限制。',
+    publicInfoSeed: '公开资料待确认',
+    planningVenue: '候选场地',
+    matchScore: (score) => `${score}/100 匹配`,
+    capacityRange: (min, max) => `${min}-${max} 人`,
+    priceRange: (min, max) => `$${min}-$${max} / 人`,
+    priceRangeFull: (min, max) => `$${min}-$${max} / 每人`,
+    publicSourceNote: '已找到公开资料 · 报价前需要人工电话确认',
+    bestFor: '适合',
+    visualFit: '视觉适配',
+    parentChecks: '报价前家长需关注',
+    usefulAddons: '适合这个场地的附加服务',
+    viewVenue: '查看场地',
+    compared: '已加入对比',
+    compare: '加入对比',
+    useForQuote: '用这个场地获取报价',
+    comparison: '场地对比',
+    compareTitle: '最多对比 3 个候选场地',
+    clearCompare: '清空对比',
+    distanceFrom: (distance, area) => `距离 ${area} ${distance}km`,
+    budget: '预算',
+    packageFit: '套餐适配',
+    addonUpside: '附加服务机会',
+    foodCheck: '餐饮确认',
+    allergyCheck: '过敏确认',
+    manualFamilyReview: '需要人工复核家庭需求',
+    minSpend: '最低消费',
+    watchOuts: '注意事项',
+    useForQuoteShort: '用于报价',
+    remove: '移除',
+    beforeReference: '原始场地参考',
+    afterConcept: '主题布置概念',
+    detailPublicSeed: '场地详情 · 公开资料待确认',
+    detailPlanningVenue: '场地详情 · 报价前规划',
+    suburb: '区域',
+    space: '空间',
+    kidFriendly: '适合儿童',
+    allowsDecorations: '可布置装饰',
+    allowsCake: '可带蛋糕',
+    allowsPhotographer: '可安排摄影',
+    allowsEntertainment: '可安排儿童娱乐',
+    hasDessertTableSpace: '有甜品桌空间',
+    hasPhotoZoneSpace: '有拍照区空间',
+    balloonSetupPossible: '可做气球布置',
+    themePreviewAlt: '主题效果预览',
+    recommendedHighValueAddons: '推荐高价值附加服务',
+    addonReviewNote: '这些是规划建议。正式报价前，策划师仍会确认场地档期、供应商适配和最终细节。',
+    manualConfirmation: '仍需人工确认',
+    opsChecks: '餐饮、过敏与场地商业条件确认',
+    foodOptions: '餐饮选项',
+    allergyNotes: '过敏说明',
+    dietaryCulturalFit: '饮食 / 文化适配',
+    culturalPlanningNotes: '文化需求规划说明',
+    roomHire: '包间费',
+    minimumSpend: '最低消费',
+    verification: '确认状态',
+    publicSource: '公开来源',
+    formalQuoteNote: '以上信息只用于报价前规划。正式报价需要团队直接向场地方确认。',
+    sourceUrlLabel: '供团队核验的来源链接',
+    closeDetail: '关闭详情',
+    manualReviewRequired: '需要人工复核'
+  },
+  en: {
+    heroEyebrow: 'Venue finder',
+    heroTitle: 'Find a party-ready venue',
+    heroCopy: 'Filter candidate venues by guest count, budget, suburb, food needs and family requirements. Venue details are for pre-quote planning and do not mean instant booking success.',
+    familySample: 'Use 30 guest family sample',
+    resetFilters: 'Reset filters',
+    matchingVenues: 'candidate venues',
+    guestSummary: (adults, kids, total) => `${adults} adults + ${kids} kids · ${total} guests`,
+    showcaseEyebrow: 'Restaurant A visual planning pack',
+    showcaseTitle: 'Compare the same room before and after theme styling',
+    showcaseCopy: 'This planning pack helps families understand the room structure and how Castle, Space, and Forest styling affect the pre-quote story.',
+    showcaseAlt: 'Restaurant A visual planning set',
+    parentEyebrow: 'For parents comparing venues',
+    parentTitle: 'Use this as a shortlist, then we confirm the real details',
+    parentCopy: 'Narrow options by guests, budget, suburb, food needs, room rules and theme fit. This page does not make a live booking or charge a deposit.',
+    choiceEyebrow: 'Common family choices',
+    choiceTitle: 'How most parents can start without overthinking',
+    choiceCopy: 'These are planning examples, not real customer reviews. They help families understand package and add-on choices quickly.',
+    quickFilters: 'Quick filters',
+    constraintsTitle: 'Start with real party constraints',
+    area: 'Area / Suburb',
+    distanceRadius: 'Distance radius',
+    adults: 'Adults',
+    kids: 'Kids',
+    totalGuests: 'Total guests',
+    childAgeRange: 'Child age range',
+    budgetPerPerson: 'Budget per person',
+    date: 'Date',
+    time: 'Time',
+    advancedFilters: 'Advanced filters',
+    venueType: 'Venue type',
+    anyVenueType: 'Any venue type',
+    spaceType: 'Space type',
+    anySpaceType: 'Any space type',
+    culturalFit: 'Dietary and cultural fit',
+    filterHelper: 'Use these as planning filters only. The team still confirms details with the venue or caterer.',
+    themeFit: 'Theme fit',
+    results: 'Results',
+    resultsTitle: (count, guests, area) => `${count} venues for ${guests} guests near ${area}`,
+    sortVenues: 'Sort venues',
+    bestMatch: 'Best match',
+    distance: 'Distance',
+    price: 'Price',
+    capacity: 'Capacity',
+    noMatchTitle: 'No exact venue match yet',
+    noMatchCopy: 'Try expanding distance, relaxing budget, or removing one theme/space restriction.',
+    publicInfoSeed: 'Public info to confirm',
+    planningVenue: 'Planning venue',
+    matchScore: (score) => `${score}/100 match`,
+    capacityRange: (min, max) => `${min}-${max} guests`,
+    priceRange: (min, max) => `$${min}-$${max} pp`,
+    priceRangeFull: (min, max) => `$${min}-$${max} per person`,
+    publicSourceNote: 'Public source found · human confirmation required before customer quote',
+    bestFor: 'Best for',
+    visualFit: 'Visual fit',
+    parentChecks: 'Parent checks before quote',
+    usefulAddons: 'Useful add-ons for this venue',
+    viewVenue: 'View venue',
+    compared: 'Compared',
+    compare: 'Compare',
+    useForQuote: 'Use this venue for quote',
+    comparison: 'Venue comparison',
+    compareTitle: 'Compare up to 3 shortlisted venues',
+    clearCompare: 'Clear compare',
+    distanceFrom: (distance, area) => `${distance}km from ${area}`,
+    budget: 'Budget',
+    packageFit: 'Package fit',
+    addonUpside: 'Add-on upside',
+    foodCheck: 'Food check',
+    allergyCheck: 'Allergy check',
+    manualFamilyReview: 'Manual family requirements review',
+    minSpend: 'Minimum spend',
+    watchOuts: 'Watch-outs',
+    useForQuoteShort: 'Use for quote',
+    remove: 'Remove',
+    beforeReference: 'Before venue reference',
+    afterConcept: 'After styling concept',
+    detailPublicSeed: 'Venue detail · public info to confirm',
+    detailPlanningVenue: 'Venue detail · planning venue',
+    suburb: 'Suburb',
+    space: 'Space',
+    kidFriendly: 'Kid friendly',
+    allowsDecorations: 'Decorations allowed',
+    allowsCake: 'Cake allowed',
+    allowsPhotographer: 'Photographer allowed',
+    allowsEntertainment: 'Entertainment allowed',
+    hasDessertTableSpace: 'Dessert table space',
+    hasPhotoZoneSpace: 'Photo zone space',
+    balloonSetupPossible: 'Balloon setup possible',
+    themePreviewAlt: 'Theme preview',
+    recommendedHighValueAddons: 'Recommended high-value add-ons',
+    addonReviewNote: 'These are planning suggestions. A human planner still confirms availability, supplier fit, and final quote details.',
+    manualConfirmation: 'Still needs manual confirmation',
+    opsChecks: 'Food, allergy and venue commercial checks',
+    foodOptions: 'Food options',
+    allergyNotes: 'Allergy notes',
+    dietaryCulturalFit: 'Dietary / cultural fit',
+    culturalPlanningNotes: 'Cultural planning notes',
+    roomHire: 'Room hire',
+    minimumSpend: 'Minimum spend',
+    verification: 'Verification',
+    publicSource: 'Public source',
+    formalQuoteNote: 'These values are planning fields. Formal quotes require direct venue confirmation.',
+    sourceUrlLabel: 'Source URL for team verification',
+    closeDetail: 'Close detail',
+    manualReviewRequired: 'Manual review required'
+  }
+};
 
-const culturalFilters = [
-  { key: 'halalFriendly', label: 'Halal-friendly planning' },
-  { key: 'noPorkFriendly', label: 'No pork menu planning' },
-  { key: 'noAlcoholFriendly', label: 'No alcohol family setting' },
-  { key: 'vegetarianFriendly', label: 'Vegetarian-friendly options' },
-  { key: 'egglessCakeFriendly', label: 'Eggless cake possible' },
-  { key: 'allergyAware', label: 'Allergy-aware review' },
-  { key: 'privateFamilyArea', label: 'Private / family area' }
-];
+const vfCopy = computed(() => venueFinderCopy[isZh.value ? 'zh' : 'en']);
 
-const themeFilters = [
-  { value: 'castle', label: 'Castle suitable' },
-  { value: 'space', label: 'Space suitable' },
-  { value: 'forest', label: 'Forest suitable' },
-  { value: 'neutral', label: 'Neutral / flexible' }
-];
+const checkFilters = computed(() => [
+  { key: 'kidFriendly', label: isZh.value ? '适合儿童' : 'Kid friendly' },
+  { key: 'allowsDecorations', label: isZh.value ? '可布置装饰' : 'Allows decorations' },
+  { key: 'allowsCake', label: isZh.value ? '可带蛋糕' : 'Allows cake' },
+  { key: 'allowsPhotographer', label: isZh.value ? '可安排摄影' : 'Allows photographer' },
+  { key: 'allowsEntertainment', label: isZh.value ? '可安排儿童娱乐' : 'Allows entertainment' },
+  { key: 'parkingNearby', label: isZh.value ? '附近有停车' : 'Parking nearby' },
+  { key: 'publicTransportNearby', label: isZh.value ? '公共交通方便' : 'Public transport nearby' },
+  { key: 'hasDessertTableSpace', label: isZh.value ? '有甜品桌空间' : 'Dessert table space' },
+  { key: 'hasPhotoZoneSpace', label: isZh.value ? '有拍照区空间' : 'Photo zone space' },
+  { key: 'balloonSetupPossible', label: isZh.value ? '可做气球布置' : 'Balloon setup possible' }
+]);
+
+const culturalFilters = computed(() => [
+  { key: 'halalFriendly', label: isZh.value ? '清真友好规划' : 'Halal-friendly planning' },
+  { key: 'noPorkFriendly', label: isZh.value ? '无猪肉菜单规划' : 'No pork menu planning' },
+  { key: 'noAlcoholFriendly', label: isZh.value ? '无酒精家庭环境' : 'No alcohol family setting' },
+  { key: 'vegetarianFriendly', label: isZh.value ? '素食友好选项' : 'Vegetarian-friendly options' },
+  { key: 'egglessCakeFriendly', label: isZh.value ? '可安排无蛋蛋糕' : 'Eggless cake possible' },
+  { key: 'allergyAware', label: isZh.value ? '过敏需求复核' : 'Allergy-aware review' },
+  { key: 'privateFamilyArea', label: isZh.value ? '独立 / 家庭空间' : 'Private / family area' }
+]);
+
+const themeFilters = computed(() => [
+  { value: 'castle', label: isZh.value ? '适合城堡主题' : 'Castle suitable' },
+  { value: 'space', label: isZh.value ? '适合太空主题' : 'Space suitable' },
+  { value: 'forest', label: isZh.value ? '适合森林主题' : 'Forest suitable' },
+  { value: 'neutral', label: isZh.value ? '中性 / 灵活场景' : 'Neutral / flexible' }
+]);
+
+const localizedVenueTypeOptions = computed(() => [
+  { value: 'restaurant', label: isZh.value ? '餐厅' : 'Restaurant' },
+  { value: 'private_dining_room', label: isZh.value ? '私人包间' : 'Private dining room' },
+  { value: 'function_room', label: isZh.value ? '活动包房' : 'Function room' },
+  { value: 'cafe', label: isZh.value ? '咖啡馆' : 'Cafe' },
+  { value: 'indoor_play_venue', label: isZh.value ? '室内儿童活动场地' : 'Indoor play venue' },
+  { value: 'community_hall', label: isZh.value ? '社区活动厅' : 'Community hall' }
+]);
+
+const localizedSpaceTypeOptions = computed(() => [
+  { value: 'private_room', label: isZh.value ? '独立房间' : 'Private room' },
+  { value: 'semi_private_area', label: isZh.value ? '半独立区域' : 'Semi-private area' },
+  { value: 'open_dining_area', label: isZh.value ? '开放用餐区' : 'Open dining area' },
+  { value: 'outdoor_area', label: isZh.value ? '户外区域' : 'Outdoor area' }
+]);
 
 const totalGuests = computed(() => Number(filters.adults || 0) + Number(filters.kids || 0));
 
@@ -526,7 +740,7 @@ const filteredVenues = computed(() => scoredVenues.value.filter((venue) => {
   if (filters.venueType && venue.venueType !== filters.venueType) return false;
   if (filters.spaceType && venue.spaceType !== filters.spaceType) return false;
 
-  const boolKeys = [...checkFilters, ...culturalFilters].map((item) => item.key);
+  const boolKeys = [...checkFilters.value, ...culturalFilters.value].map((item) => item.key);
   if (boolKeys.some((key) => filters[key] && !venue[key])) return false;
 
   if (filters.themes.length && !filters.themes.some((theme) => venue.suitableThemes.includes(theme))) return false;
@@ -552,14 +766,25 @@ const compareVenues = computed(() => compareSelectedIds.value
   }));
 
 function venueTypeLabel(type) {
+  if (isZh.value) return localizedVenueTypeOptions.value.find((item) => item.value === type)?.label || venueTypeLabels[type] || type;
   return venueTypeLabels[type] || type;
 }
 
 function spaceTypeLabel(type) {
+  if (isZh.value) return localizedSpaceTypeOptions.value.find((item) => item.value === type)?.label || spaceTypeLabels[type] || type;
   return spaceTypeLabels[type] || type;
 }
 
 function themeLabel(theme) {
+  if (isZh.value) {
+    const zh = {
+      castle: '城堡主题',
+      space: '太空主题',
+      forest: '森林主题',
+      neutral: '灵活主题'
+    };
+    return zh[theme] || themeLabels[theme] || theme;
+  }
   return themeLabels[theme] || theme;
 }
 
@@ -576,31 +801,114 @@ function themePreviewImages(venue) {
 
 function visualFitLabel(venue) {
   const strengths = [];
-  if (venue.hasDessertTableSpace) strengths.push('dessert table');
-  if (venue.hasPhotoZoneSpace) strengths.push('photo zone');
-  if (venue.balloonSetupPossible) strengths.push('balloon setup');
-  return strengths.slice(0, 2).join(' + ') || 'light styling';
+  if (venue.hasDessertTableSpace) strengths.push(isZh.value ? '甜品桌' : 'dessert table');
+  if (venue.hasPhotoZoneSpace) strengths.push(isZh.value ? '拍照区' : 'photo zone');
+  if (venue.balloonSetupPossible) strengths.push(isZh.value ? '气球布置' : 'balloon setup');
+  return strengths.slice(0, 2).join(' + ') || (isZh.value ? '轻量布置' : 'light styling');
 }
 
 function culturalFitLabels(venue) {
   const checks = [
-    ['halalFriendly', 'Halal-friendly'],
-    ['noPorkFriendly', 'No pork'],
-    ['noAlcoholFriendly', 'No alcohol'],
-    ['vegetarianFriendly', 'Vegetarian'],
-    ['egglessCakeFriendly', 'Eggless cake'],
-    ['allergyAware', 'Allergy-aware'],
-    ['privateFamilyArea', 'Private family area']
+    ['halalFriendly', isZh.value ? '清真友好' : 'Halal-friendly'],
+    ['noPorkFriendly', isZh.value ? '无猪肉' : 'No pork'],
+    ['noAlcoholFriendly', isZh.value ? '无酒精' : 'No alcohol'],
+    ['vegetarianFriendly', isZh.value ? '素食选项' : 'Vegetarian'],
+    ['egglessCakeFriendly', isZh.value ? '无蛋蛋糕' : 'Eggless cake'],
+    ['allergyAware', isZh.value ? '过敏友好' : 'Allergy-aware'],
+    ['privateFamilyArea', isZh.value ? '家庭独立区' : 'Private family area']
   ];
   return checks.filter(([key]) => venue?.[key]).map(([, label]) => label);
 }
 
 function recommendedAddOns(venue) {
-  return recommendAddOnServicesForVenue(venue, normalizeVenueFinderFilters(filters), 'en');
+  return recommendAddOnServicesForVenue(venue, normalizeVenueFinderFilters(filters), isZh.value ? 'zh' : 'en');
 }
 
 function venueOps(venue) {
   return getVenueOperationalReadiness(venue);
+}
+
+function localizedAddonName(addon) {
+  return isZh.value ? (addon.zhName || addon.name_zh || addon.name) : addon.name;
+}
+
+function localizedPackageFit(venue) {
+  if (!isZh.value) return venue.packageFit || [];
+  const map = { Basic: '基础套餐', Standard: '标准套餐', Premium: '尊享套餐', basic: '基础套餐', standard: '标准套餐', premium: '尊享套餐' };
+  return (venue.packageFit || []).map((item) => map[item] || item);
+}
+
+function localizedVenueName(venue) {
+  const name = String(venue?.name || '');
+  if (!isZh.value) return name;
+  return name
+    .replace(' · public research seed', '')
+    .replace(' · local planning candidate', '')
+    .replace('Restaurant A Private Dining', '餐厅 A 私人包间');
+}
+
+function localizedVenueDescription(venue) {
+  const text = String(venue?.shortDescription || '');
+  if (!isZh.value) return text;
+  if (text.includes('blank-canvas community/function')) return '适合灵活布置的 Marrickville 社区活动空间，正式可用性需人工确认。';
+  if (text.includes('private dining room')) return 'Marrickville 私人包间场地，适合家庭生日派对，正式容量和最低消费需人工确认。';
+  if (text.includes('space-themed kids cafe')) return 'Marrickville 太空主题儿童咖啡和活动空间，适合亲子生日派对，细节需人工确认。';
+  if (text.includes('active Mascot birthday-party')) return 'Mascot 动感生日派对场地，适合希望孩子有活动体验的家庭，细节需人工确认。';
+  return localizeOperationalText(text);
+}
+
+function localizeOperationalText(text) {
+  if (!isZh.value) return text;
+  return String(text || '')
+    .replaceAll('Room hire', '包间费')
+    .replaceAll('Minimum spend', '最低消费')
+    .replaceAll('Manual confirmation required', '需要人工确认')
+    .replaceAll('Venue confirmation required', '需要向场地方确认')
+    .replaceAll('owner call required', '需要团队电话确认')
+    .replaceAll('Public source', '公开资料')
+    .replaceAll('Local/staging', '预览')
+    .replaceAll('local/staging', '预览')
+    .replaceAll('staging', '预览')
+    .replaceAll('fixture', '样例')
+    .replaceAll('demo', '演示')
+    .replaceAll('Food provider must be confirmed', '需确认餐饮供应安排')
+    .replaceAll('Allergy handling is not verified in this sample; human review required.', '过敏处理需团队人工复核。')
+    .replaceAll('Allergy handling is not verified in this fixture; human review required.', '过敏处理需团队人工复核。')
+    .replaceAll('Allergy handling', '过敏处理')
+    .replaceAll('not verified', '尚未确认')
+    .replaceAll('human review required', '需要人工复核')
+    .replaceAll('venue confirmation', '场地确认')
+    .replaceAll('venue', '场地')
+    .replaceAll('Venue', '场地')
+    .replaceAll('basic / standard / premium', '基础套餐 / 标准套餐 / 尊享套餐')
+    .replaceAll('standard / premium', '标准套餐 / 尊享套餐')
+    .replaceAll('basic / standard', '基础套餐 / 标准套餐')
+    .replaceAll('Parking limited', '停车位有限')
+    .replaceAll('Bring-own cake rules must be confirmed', '需确认自带蛋糕规则')
+    .replaceAll('Decoration setup time must be confirmed', '需确认布置进场时间')
+    .replaceAll('External entertainment requires approval', '外部儿童娱乐需场地方同意')
+    .replaceAll('Confirm', '确认')
+    .replaceAll('confirmed', '已确认');
+}
+
+function localizedOps(venue) {
+  const ops = venueOps(venue);
+  return {
+    ...ops,
+    foodOptions: (ops.foodOptions || []).map(localizeOperationalText),
+    allergyNotes: (ops.allergyNotes || []).map(localizeOperationalText),
+    minimumSpendHint: localizeOperationalText(ops.minimumSpendHint),
+    roomHireHint: localizeOperationalText(ops.roomHireHint),
+    verificationStatus: isZh.value ? '报价前需人工复核' : localizeOperationalText(ops.verificationStatus)
+  };
+}
+
+function localizedRestrictions(venue) {
+  return (venue.restrictions || []).map(localizeOperationalText);
+}
+
+function localizedCulturalNotes(venue) {
+  return (venue.culturalFitNotes || []).map(localizeOperationalText);
 }
 
 function isCompared(venue) {

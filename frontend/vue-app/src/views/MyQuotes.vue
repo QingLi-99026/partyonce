@@ -30,7 +30,7 @@
 
     <section class="trust-strip">
       <div>
-        <p class="eyebrow">Quote review promise</p>
+        <p class="eyebrow">报价复核承诺</p>
         <h2>人工复核后才会形成正式报价</h2>
         <p>这些报价卡片用于理解预算、场地、套餐和附加服务，不会自动预订场地，也不会触发订金支付。</p>
       </div>
@@ -75,19 +75,19 @@
 
         <dl class="detail-list">
           <div>
-            <dt>Theme / package</dt>
+            <dt>主题 / 套餐</dt>
             <dd>{{ quote.theme }} · {{ quote.package }}</dd>
           </div>
           <div>
-            <dt>Selection snapshot</dt>
-            <dd>{{ quote.selection_snapshot.venue }} · {{ quote.selection_snapshot.guest_count }} guests</dd>
+            <dt>选择摘要</dt>
+            <dd>{{ quote.selection_snapshot.venue }} · {{ quote.selection_snapshot.guest_count }} 人</dd>
           </div>
           <div>
-            <dt>Amount</dt>
+            <dt>金额</dt>
             <dd>{{ formatCustomerMoney(quote.amount, quote.currency) }}</dd>
           </div>
           <div>
-            <dt>Valid until</dt>
+            <dt>有效期至</dt>
             <dd>{{ formatCustomerDate(quote.valid_until) }}</dd>
           </div>
         </dl>
@@ -105,25 +105,25 @@
         </div>
 
         <div class="next-step">
-          <span>Next step</span>
+          <span>下一步</span>
           <p>{{ quote.next_step }}</p>
         </div>
 
         <div class="interaction-hint">
           <el-tag v-if="quoteInteraction(quote.id).confirmation_placeholder_at" type="success" effect="plain">
-            Confirmation placeholder saved
+            已记录确认意向
           </el-tag>
           <el-tag v-if="quoteInteraction(quote.id).supplement_saved_at" type="info" effect="plain">
-            Supplement note saved
+            补充说明已保存
           </el-tag>
           <span v-if="!quoteInteraction(quote.id).confirmation_placeholder_at && !quoteInteraction(quote.id).supplement_saved_at">
-            Need changes? Open detail to add a local/staging note.
+            需要调整？打开详情填写补充要求，团队会人工复核。
           </span>
         </div>
 
         <div class="card-actions">
-          <el-button type="primary" @click="router.push(`/my/quotes/${quote.id}`)">View Quote Detail</el-button>
-          <el-button @click="router.push(`/my/quotes/${quote.id}#supplement`)">Add Requirements</el-button>
+          <el-button type="primary" @click="router.push(`/my/quotes/${quote.id}`)">查看报价详情</el-button>
+          <el-button @click="router.push(`/my/quotes/${quote.id}#supplement`)">补充需求</el-button>
         </div>
       </article>
     </section>
@@ -165,9 +165,9 @@ const loading = ref(false)
 const quotes = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
-const dataSource = ref('not loaded')
+const dataSource = ref('未加载')
 const apiNotice = ref('')
-const identity = ref({ id: '-', name: 'Local customer', accessBoundary: 'Loading customer read-only fixture.' })
+const identity = ref({ id: '-', name: '预览用户', accessBoundary: '正在加载客户预览信息。' })
 const trustChecklist = getTrustChecklist()
 const quoteProcessSteps = getQuoteProcessSteps()
 
@@ -203,11 +203,11 @@ const quotePackageExplanation = (quote) => getPackageExplanation(normalizeTierId
 const sceneConfigSummary = (quote) => summarizePartySceneConfig(quote.party_scene_config || quote.selection_snapshot?.party_scene_config)
 
 const isChineseLocale = computed(() => locale.value === 'zh')
-const displayVisualTitle = (visual) => isChineseLocale.value ? visual.restaurant.title : t('ai.restaurantPlaceholderTitle')
+const displayVisualTitle = (visual) => isChineseLocale.value ? '餐厅 A 私人包间' : t('ai.restaurantPlaceholderTitle')
 const displayVisualSummary = (visual) => isChineseLocale.value
-  ? `${visual.primaryVenue.name} · ${visual.suppliers.map((item) => item.name).join(' / ')}`
+  ? '场地、主题布置和供应商信息需人工复核后确认'
   : t('ai.restaurantPlaceholderCopy')
-const displayPackageLabel = (explanation) => isChineseLocale.value ? explanation.label : t('quotePage.package')
+const displayPackageLabel = (explanation) => isChineseLocale.value ? explanation.labelZh : t('quotePage.package')
 const displayPriceDrivers = (explanation) => (
   isChineseLocale.value
     ? explanation.priceDrivers.slice(0, 3)

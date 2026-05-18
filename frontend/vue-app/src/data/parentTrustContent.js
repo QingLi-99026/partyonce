@@ -27,37 +27,37 @@ export const parentTrustFaq = [
 ]
 
 export const trustChecklist = [
-  'Human review before formal quote',
-  'No instant payment from quote request',
-  'Food and allergy notes must be confirmed',
-  'Add-ons are optional and visible',
-  'Staging demo data is clearly marked'
+  '正式报价前必须人工复核',
+  '提交报价需求不会即时扣款',
+  '餐饮和过敏需求必须确认',
+  '附加服务可选且价格清楚',
+  '场地信息用于报价前规划'
 ]
 
 export const quoteProcessSteps = [
   {
     id: 'choose',
-    title: 'Choose venue, theme and package',
+    title: '选择场地、主题和套餐',
     customerTitle: '选择场地、主题和套餐',
-    body: 'Parents compare Venue Finder results, package tiers and optional add-ons before submitting a request.'
+    body: '家长先比较候选场地、套餐档位和可选附加服务，再提交报价需求。'
   },
   {
     id: 'submit',
-    title: 'Submit party requirements',
+    title: '提交派对需求',
     customerTitle: '提交派对需求',
-    body: 'The inquiry captures date, guests, budget, food, allergy, cake and parent priority notes for review.'
+    body: '需求会记录日期、人数、预算、餐饮、过敏、蛋糕和家长关注点，供团队复核。'
   },
   {
     id: 'review',
-    title: 'Planner reviews availability',
+    title: '人工复核档期和限制',
     customerTitle: '人工复核档期和限制',
-    body: 'A human planner checks venue rules, minimum spend, supplier availability and execution details before a formal quote.'
+    body: '策划师会在正式报价前复核场地规则、最低消费、供应商档期和执行细节。'
   },
   {
     id: 'deposit',
-    title: 'Deposit readiness after approval',
+    title: '确认后才进入订金准备',
     customerTitle: '确认后才进入订金准备',
-    body: 'Payment remains disabled in this preview. A deposit step only makes sense after the formal quote is accepted.'
+    body: '当前不会扣款。只有正式报价被接受后，订金步骤才有意义。'
   }
 ]
 
